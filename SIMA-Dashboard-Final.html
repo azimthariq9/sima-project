@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIMA — Sistem Informasi Mahasiswa Asing | Gunadarma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ═══════════════════════════════════════════════════════
+   SIMA DESIGN SYSTEM — CORPORATE ELITE INTERNATIONAL
+   Gunadarma University · International Student Portal
+═══════════════════════════════════════════════════════ */
+
+:root {
+  --navy:        #080F1E;
+  --navy-mid:    #0D1B2A;
+  --navy-light:  #132236;
+  --slate:       #1B3256;
+  --gold:        #C4973A;
+  --gold-light:  #E0B86A;
+  --gold-pale:   #F5E6C8;
+
+  --blue:        #2563EB;
+  --blue-soft:   #EFF6FF;
+  --teal:        #0D9488;
+  --teal-soft:   #F0FDFA;
+  --red:         #DC2626;
+  --red-soft:    #FEF2F2;
+  --amber:       #D97706;
+  --amber-soft:  #FFFBEB;
+  --emerald:     #059669;
+  --emerald-soft:#ECFDF5;
+  --purple:      #7C3AED;
+  --purple-soft: #F5F3FF;
+
+  --bg:          #EEF2F7;
+  --surface:     #FFFFFF;
+  --surface-2:   #F8FAFC;
+  --border:      #E2E8F0;
+  --border-soft: #F1F5F9;
+
+  --text-1: #0B1628;
+  --text-2: #475569;
+  --text-3: #94A3B8;
+
+  --font-d: 'Fraunces', Georgia, serif;
+  --font-b: 'DM Sans', system-ui, sans-serif;
+  --font-m: 'DM Mono', monospace;
+
+  --sh-sm: 0 2px 8px rgba(8,15,30,0.06),0 1px 3px rgba(8,15,30,0.04);
+  --sh-md: 0 8px 24px rgba(8,15,30,0.09),0 2px 8px rgba(8,15,30,0.05);
+  --sh-lg: 0 20px 48px rgba(8,15,30,0.13),0 8px 16px rgba(8,15,30,0.07);
+
+  --sidebar-w: 248px;
+  --topbar-h:  60px;
+  --ease: cubic-bezier(0.16,1,0.3,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;font-size:14px}
+body{
+  font-family:var(--font-b);
+  background:var(--bg);
+  color:var(--text-1);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  display:flex;
+  overflow-x:hidden;
+}
+
+/* ─── SCROLLBAR ──────── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:var(--text-3)}
+
+/* ═══════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════ */
+.sidebar{
+  width:var(--sidebar-w);
+  min-height:100vh;
+  background:var(--navy);
+  position:fixed;
+  top:0;left:0;
+  display:flex;flex-direction:column;
+  z-index:100;
+  border-right:1px solid rgba(255,255,255,0.04);
+  box-shadow:4px 0 32px rgba(0,0,0,0.25);
+  overflow:hidden;
+}
+
+.sidebar::before{
+  content:'';
+  position:absolute;
+  top:0;right:0;
+  width:1px;height:100%;
+  background:linear-gradient(180deg,var(--gold) 0%,transparent 55%);
+  opacity:.35;
+}
+
+/* Logo */
+.sidebar-brand{
+  display:flex;align-items:center;
+  padding:18px 20px;
+  border-bottom:1px solid rgba(196,151,58,.15);
+  text-decoration:none;
+  gap:0;
+  flex-direction:column;
+  align-items:flex-start;
+}
+
+.sidebar-brand-row{
+  display:flex;align-items:center;gap:10px;width:100%;
+}
+
+.sidebar-brand-icon{
+  width:34px;height:34px;
+  border-radius:10px;
+  background:linear-gradient(135deg,var(--gold),#A67C30);
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;color:white;
+  box-shadow:0 4px 14px rgba(196,151,58,.35);
+  flex-shrink:0;
+}
+
+.sidebar-brand-name{
+  font-family:var(--font-d);
+  font-size:21px;
+  font-weight:700;
+  color:white;
+  letter-spacing:0.04em;
+}
+
+.sidebar-brand-name span{color:var(--gold)}
+
+.sidebar-brand-sub{
+  font-size:8.5px;
+  font-weight:600;
+  letter-spacing:.20em;
+  color:var(--gold);
+  opacity:.65;
+  text-transform:uppercase;
+  margin-top:5px;
+  padding-left:1px;
+}
+
+/* User Panel */
+.sidebar-user{
+  padding:14px 20px;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  display:flex;align-items:center;gap:12px;
+}
+
+.sidebar-user-avatar{
+  width:36px;height:36px;
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;
+  flex-shrink:0;
+}
+
+.sidebar-user-name{
+  font-size:12px;font-weight:600;
+  color:rgba(255,255,255,.80);
+  line-height:1.3;
+}
+
+.sidebar-user-role{
+  font-size:10px;
+  color:var(--gold);
+  opacity:.80;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+/* Nav */
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 0 20px}
+
+.nav-header{
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--gold);
+  opacity:.70;
+  padding:18px 20px 6px;
+}
+
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 14px;
+  margin:1px 10px;
+  border-radius:9px;
+  cursor:pointer;
+  transition:all .18s var(--ease);
+  color:rgba(255,255,255,.55);
+  font-size:12.5px;
+  font-weight:400;
+  position:relative;
+  text-decoration:none;
+}
+
+.nav-item:hover{
+  background:rgba(255,255,255,.07);
+  color:rgba(255,255,255,.88);
+}
+
+.nav-item.active{
+  background:linear-gradient(135deg,var(--gold),#A67C30) !important;
+  color:white !important;
+  font-weight:600;
+  box-shadow:0 4px 14px rgba(196,151,58,.30);
+}
+
+.nav-item i{
+  width:16px;text-align:center;
+  font-size:13px;opacity:.7;
+}
+
+.nav-item.active i{opacity:1}
+
+.sidebar-footer{
+  padding:14px 20px;
+  border-top:1px solid rgba(255,255,255,.05);
+}
+
+.sidebar-footer-text{
+  font-size:10px;
+  color:rgba(255,255,255,.25);
+  line-height:1.6;
+}
+
+/* ═══════════════════════════════════════════════
+   MAIN WRAPPER
+═══════════════════════════════════════════════ */
+.main-wrap{
+  margin-left:var(--sidebar-w);
+  flex:1;
+  display:flex;flex-direction:column;
+  min-height:100vh;
+}
+
+/* ─── TOPBAR ──────── */
+.topbar{
+  position:sticky;top:0;
+  height:var(--topbar-h);
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  box-shadow:var(--sh-sm);
+  display:flex;align-items:center;
+  padding:0 28px;
+  z-index:50;
+  gap:16px;
+}
+
+.topbar-toggle{
+  width:32px;height:32px;
+  border-radius:8px;
+  border:none;background:none;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-3);
+  font-size:16px;
+  transition:all .15s;
+}
+
+.topbar-toggle:hover{background:var(--surface-2);color:var(--text-1)}
+
+.topbar-search{
+  flex:1;max-width:380px;
+  display:flex;align-items:center;gap:10px;
+  background:var(--surface-2);
+  border:1px solid var(--border-soft);
+  border-radius:10px;
+  padding:8px 14px;
+}
+
+.topbar-search input{
+  border:none;background:none;
+  font-family:var(--font-b);font-size:12.5px;
+  color:var(--text-1);outline:none;flex:1;
+}
+
+.topbar-search input::placeholder{color:var(--text-3)}
+.topbar-search i{color:var(--text-3);font-size:13px}
+
+.topbar-right{
+  margin-left:auto;
+  display:flex;align-items:center;gap:10px;
+}
+
+.topbar-btn{
+  width:36px;height:36px;
+  border-radius:9px;
+  border:1px solid var(--border-soft);
+  background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text-2);
+  font-size:14px;
+  transition:all .15s;
+  position:relative;
+}
+
+.topbar-btn:hover{background:var(--surface-2);color:var(--text-1)}
+
+.topbar-btn .badge{
+  position:absolute;top:-3px;right:-3px;
+  width:16px;height:16px;
+  border-radius:50%;
+  background:var(--red);color:white;
+  font-size:9px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--surface);
+}
+
+.topbar-user{
+  display:flex;align-items:center;gap:9px;
+  padding:6px 12px;
+  border-radius:10px;
+  border:1px solid var(--border-soft);
+  cursor:pointer;
+  transition:all .15s;
+}
+
+.topbar-user:hover{background:var(--surface-2)}
+
+.topbar-user-av{
+  width:28px;height:28px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;
+  background:linear-gradient(135deg,var(--navy),var(--slate));
+  color:white;
+}
+
+.topbar-user-name{
+  font-size:12.5px;font-weight:600;
+  color:var(--text-1);
+  max-width:120px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+.topbar-clock{
+  font-family:var(--font-m);
+  font-size:11px;
+  color:var(--text-3);
+  text-align:right;
+  line-height:1.5;
+  padding-left:8px;
+  border-left:1px solid var(--border);
+}
+
+/* ─── ROLE SWITCHER ──────── */
+.role-switcher{
+  background:var(--surface);
+  border-bottom:1px solid var(--border-soft);
+  padding:0 28px;
+  display:flex;gap:0;
+  overflow-x:auto;
+}
+
+.role-tab{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 18px;
+  border-bottom:2.5px solid transparent;
+  cursor:pointer;
+  color:var(--text-3);
+  font-size:12.5px;font-weight:500;
+  white-space:nowrap;
+  transition:all .18s;
+}
+
+.role-tab:hover{color:var(--text-2)}
+
+.role-tab.active{
+  border-bottom-color:var(--gold);
+  color:var(--text-1);
+  font-weight:600;
+}
+
+.role-tab .dot{
+  width:7px;height:7px;border-radius:50%;
+}
+
+/* ─── PAGE HEADER ──────── */
+.page-header{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  padding:22px 28px 0;
+}
+
+.page-header-left{}
+
+.page-breadcrumb{
+  display:flex;align-items:center;gap:6px;
+  margin-bottom:5px;
+}
+
+.page-breadcrumb span:first-child{
+  font-size:10.5px;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gold);
+}
+
+.page-breadcrumb i{font-size:8px;color:var(--text-3)}
+
+.page-breadcrumb span:last-child{
+  font-size:10.5px;color:var(--text-3);
+}
+
+.page-title{
+  font-family:var(--font-d);
+  font-size:27px;font-weight:700;
+  color:var(--text-1);
+  letter-spacing:-0.02em;
+  line-height:1.2;
+}
+
+.page-sub{
+  font-size:12.5px;color:var(--text-3);
+  margin-top:3px;
+}
+
+.page-header-right{
+  display:flex;align-items:center;gap:12px;
+}
+
+.role-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:7px 14px;border-radius:9px;
+  font-size:10.5px;font-weight:700;
+  letter-spacing:.10em;text-transform:uppercase;
+}
+
+/* ─── CONTENT ──────── */
+.content{
+  padding:20px 28px 40px;
+}
+
+/* ═══════════════════════════════════════════════
+   COMPONENT LIBRARY
+═══════════════════════════════════════════════ */
+
+/* ── STAT CARD ── */
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:16px;
+  margin-bottom:20px;
+}
+
+.stat{
+  background:var(--surface);
+  border-radius:16px;
+  padding:22px;
+  border:1px solid var(--border-soft);
+  box-shadow:var(--sh-sm);
+  position:relative;
+  overflow:hidden;
+  transition:transform .25s var(--ease),box-shadow .25s var(--ease);
+}
+
+.stat:hover{transform:translateY(-3px);box-shadow:var(--sh-md)}
+
+.stat-accent{
+  position:absolute;top:0;left:0;
+  width:100%;height:3px;
+  border-radius:16px 16px 0 0;
+}
+
+.stat-icon{
+  width:42px;height:42px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;margin-bottom:14px;
+}
+
+.stat-label{
+  font-size:10.5px;font-weight:600;
+  letter-spacing:.07em;text-transform:uppercase;
+  color:var(--text-3);margin-bottom:4px;
+}
+
+.stat-value{
+  font-family:var(--font-d);
+  font-size:34px;font-weight:700;
+  color:var(--text-1);
+  letter-spacing:-0.03em;line-height:1;
+  margin-bottom:6px;
+}
+
+.stat-delta{
+  font-size:11.5px;font-weight:500;
+  display:flex;align-items:center;gap:4px;
+}
+
+.delta-up{color:var(--emerald)}
+.delta-dn{color:var(--red)}
+.delta-nt{color:var(--text-3)}
+
+/* ── CARD ── */
+.card{
+  background:var(--surface);
+  border-radius:16px;
+  border:1px solid var(--border-soft);
+  box-shadow:var(--sh-sm);
+  overflow:hidden;
+  margin-bottom:20px;
+}
+
+.card-header{
+  padding:18px 22px;
+  border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;justify-content:space-between;
+}
+
+.card-title{
+  font-family:var(--font-d);
+  font-size:16px;font-weight:600;
+  color:var(--text-1);
+  letter-spacing:-0.01em;
+}
+
+.card-sub{font-size:11.5px;color:var(--text-3);margin-top:2px}
+
+.card-action{
+  font-size:11.5px;font-weight:500;
+  color:var(--blue);text-decoration:none;
+  padding:6px 12px;border-radius:8px;
+  background:var(--blue-soft);
+  transition:all .15s;
+  display:inline-flex;align-items:center;gap:6px;
+}
+
+.card-action:hover{background:var(--blue);color:white}
+
+.card-body{padding:22px}
+.card-body-flush{padding:0}
+
+/* ── TABLE ── */
+table.t{width:100%;border-collapse:collapse;font-size:12.5px}
+
+table.t thead th{
+  font-size:9.5px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text-3);
+  padding:11px 16px;
+  background:var(--surface-2);
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+  text-align:left;
+}
+
+table.t tbody td{
+  padding:13px 16px;
+  border-bottom:1px solid var(--border-soft);
+  color:var(--text-1);
+  vertical-align:middle;
+}
+
+table.t tbody tr:last-child td{border-bottom:none}
+table.t tbody tr{transition:background .13s}
+table.t tbody tr:hover td{background:var(--surface-2)}
+
+/* ── BADGE ── */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3.5px 9px;border-radius:20px;
+  font-size:10.5px;font-weight:700;
+  white-space:nowrap;
+}
+
+.b-blue   {background:var(--blue-soft);   color:var(--blue)}
+.b-teal   {background:var(--teal-soft);   color:var(--teal)}
+.b-red    {background:var(--red-soft);    color:var(--red)}
+.b-amber  {background:var(--amber-soft);  color:var(--amber)}
+.b-green  {background:var(--emerald-soft);color:var(--emerald)}
+.b-purple {background:var(--purple-soft); color:var(--purple)}
+.b-grey   {background:#F1F5F9;            color:var(--text-2)}
+.b-gold   {background:#FEF9EC;            color:var(--gold);border:1px solid rgba(196,151,58,.2)}
+
+/* ── PROGRESS ── */
+.prog{height:5px;border-radius:99px;background:var(--border);overflow:hidden}
+.prog-bar{height:100%;border-radius:99px;transition:width 1.2s var(--ease)}
+
+/* ── TIMELINE ── */
+.timeline{list-style:none}
+
+.tl-item{
+  display:flex;gap:14px;padding-bottom:18px;
+  position:relative;
+}
+
+.tl-item:not(:last-child)::after{
+  content:'';position:absolute;
+  left:16px;top:34px;bottom:0;
+  width:1px;background:var(--border);
+}
+
+.tl-dot{
+  width:34px;height:34px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;flex-shrink:0;z-index:1;position:relative;
+}
+
+.tl-content{flex:1;padding-top:4px}
+
+.tl-title{font-size:12.5px;font-weight:500;color:var(--text-1);margin-bottom:2px}
+
+.tl-time{font-family:var(--font-m);font-size:10.5px;color:var(--text-3)}
+
+/* ── ALERT STRIPE ── */
+.alert{
+  display:flex;align-items:center;gap:13px;
+  padding:13px 17px;border-radius:12px;
+  margin-bottom:18px;font-size:12.5px;
+  border:1px solid transparent;
+}
+
+.alert-amber{background:var(--amber-soft);color:var(--amber);border-color:#FDE68A}
+.alert-red  {background:var(--red-soft);  color:var(--red);  border-color:#FED7D7}
+.alert-teal {background:var(--teal-soft); color:var(--teal); border-color:#99F6E4}
+.alert-blue {background:var(--blue-soft); color:var(--blue); border-color:#BFDBFE}
+.alert-green{background:var(--emerald-soft);color:var(--emerald);border-color:#A7F3D0}
+
+/* ── ANNOUNCE ── */
+.ann{
+  padding:15px;border-radius:12px;
+  background:var(--surface-2);
+  border:1px solid var(--border-soft);
+  margin-bottom:10px;
+}
+
+.ann:last-child{margin-bottom:0}
+
+.ann-title{font-size:12.5px;font-weight:600;color:var(--text-1);margin-bottom:4px}
+
+.ann-body{font-size:11.5px;color:var(--text-2);line-height:1.65;margin-bottom:7px}
+
+.ann-meta{display:flex;align-items:center;gap:9px;font-size:10.5px;color:var(--text-3)}
+
+/* ── SCHEDULE ── */
+.sch{
+  display:flex;gap:14px;align-items:flex-start;
+  padding:13px 0;border-bottom:1px solid var(--border-soft);
+}
+
+.sch:last-child{border-bottom:none;padding-bottom:0}
+
+.sch-time{
+  font-family:var(--font-m);font-size:11px;
+  color:var(--text-3);min-width:80px;padding-top:2px;
+}
+
+.sch-dot{
+  width:10px;height:10px;border-radius:50%;
+  border:2px solid;margin-top:5px;flex-shrink:0;
+}
+
+.sch-title{font-size:12.5px;font-weight:500;color:var(--text-1);margin-bottom:2px}
+
+.sch-meta{font-size:11.5px;color:var(--text-3)}
+
+/* ── QUICK ACTION ── */
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.qa{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:18px 10px;border-radius:13px;
+  background:var(--surface-2);
+  border:1px solid var(--border-soft);
+  cursor:pointer;text-decoration:none;
+  transition:all .2s var(--ease);text-align:center;
+}
+
+.qa:hover{background:var(--surface);border-color:var(--border);transform:translateY(-2px);box-shadow:var(--sh-sm)}
+
+.qa-icon{
+  width:42px;height:42px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;margin-bottom:9px;
+}
+
+.qa-label{font-size:11px;font-weight:500;color:var(--text-2)}
+
+/* ── AVATAR ── */
+.av{
+  border-radius:10px;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-weight:700;flex-shrink:0;
+}
+
+/* ── FORM INPUT ── */
+.f-label{
+  font-size:10.5px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--text-3);
+  display:block;margin-bottom:6px;
+}
+
+.f-input, .f-select, .f-textarea{
+  width:100%;padding:10px 13px;
+  border:1px solid var(--border);border-radius:10px;
+  font-family:var(--font-b);font-size:12.5px;
+  color:var(--text-1);background:white;
+  outline:none;transition:border-color .15s;
+}
+
+.f-input:focus,.f-select:focus,.f-textarea:focus{border-color:var(--blue)}
+.f-textarea{resize:vertical}
+
+.btn-primary{
+  padding:10px 20px;
+  background:linear-gradient(135deg,var(--gold),#A67C30);
+  color:white;border:none;border-radius:10px;
+  font-family:var(--font-b);font-size:12.5px;font-weight:700;
+  cursor:pointer;letter-spacing:.02em;
+  display:inline-flex;align-items:center;gap:7px;
+  transition:all .18s;
+  white-space:nowrap;
+}
+
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(196,151,58,.35)}
+
+.btn-navy{
+  padding:8px 15px;
+  background:var(--navy);color:white;
+  border:none;border-radius:9px;
+  font-family:var(--font-b);font-size:12px;font-weight:600;
+  cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+  transition:all .15s;
+}
+
+.btn-soft{
+  padding:7px 13px;
+  border:1px solid var(--border);
+  border-radius:8px;background:var(--surface-2);
+  font-size:11.5px;font-weight:500;
+  color:var(--text-2);cursor:pointer;
+  transition:all .15s;display:inline-flex;align-items:center;gap:5px;
+}
+
+.btn-soft:hover{background:var(--surface);border-color:var(--border)}
+
+/* ── PROFILE SUMMARY ── */
+.prof-card{
+  padding:16px;
+  background:var(--surface-2);
+  border:1px solid var(--border-soft);
+  border-radius:12px;margin-top:16px;
+}
+
+/* ── LEVEL CARD ── */
+.level-card{
+  background:var(--surface);
+  border-radius:15px;
+  border:1px solid var(--border-soft);
+  border-top-width:3px;
+  box-shadow:var(--sh-sm);
+  padding:20px;
+  transition:transform .25s var(--ease),box-shadow .25s var(--ease);
+}
+
+.level-card:hover{transform:translateY(-3px);box-shadow:var(--sh-md)}
+
+/* ── MODULE STATUS ── */
+.mod-card{
+  display:flex;gap:13px;
+  padding:13px;border-radius:12px;
+  border:1px solid;margin-bottom:10px;
+}
+
+.mod-card:last-child{margin-bottom:0}
+
+/* ── COUNTRY BAR ── */
+.cbar{margin-bottom:13px}
+.cbar-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.cbar-label{font-size:12px;font-weight:500;color:var(--text-1)}
+.cbar-val{font-family:var(--font-m);font-size:11.5px;color:var(--text-3)}
+
+/* ── SYSTEM INFO ROW ── */
+.sinfo-row{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--border-soft);
+}
+
+.sinfo-row:last-child{border-bottom:none}
+
+/* ── GRID HELPERS ── */
+.row{display:flex;flex-wrap:wrap;gap:20px;margin-bottom:0}
+.col-3{flex:1;min-width:180px;max-width:calc(25% - 15px)}
+.col-4{flex:1;min-width:200px;max-width:calc(33.3% - 14px)}
+.col-5{flex:2;min-width:280px;max-width:calc(41.6% - 10px)}
+.col-6{flex:2;min-width:280px;max-width:calc(50% - 10px)}
+.col-7{flex:3;min-width:320px;max-width:calc(58.3% - 8px)}
+.col-8{flex:4;min-width:360px;max-width:calc(66.6% - 8px)}
+.col-12{flex:1;min-width:100%}
+.gap-row{margin-bottom:20px}
+
+.divider{height:1px;background:var(--border-soft);margin:16px 0}
+
+/* ═══════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════ */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(14px)}
+  to  {opacity:1;transform:translateY(0)}
+}
+
+@keyframes pulse-dot{
+  0%,100%{opacity:1}50%{opacity:.4}
+}
+
+.fa { animation: fadeUp .5s cubic-bezier(0.16,1,0.3,1) both; }
+.fa-1{animation-delay:.04s}.fa-2{animation-delay:.09s}
+.fa-3{animation-delay:.14s}.fa-4{animation-delay:.19s}
+.fa-5{animation-delay:.24s}.fa-6{animation-delay:.29s}
+.fa-7{animation-delay:.34s}.fa-8{animation-delay:.39s}
+
+/* ═══════════════════════════════════════════════
+   DASHBOARD PANELS  (hidden/visible)
+═══════════════════════════════════════════════ */
+.dashboard{display:none}
+.dashboard.active{display:block}
+
+/* ─── COLOR HELPERS ── */
+.bg-blue  {background:var(--blue-soft); color:var(--blue)}
+.bg-teal  {background:var(--teal-soft); color:var(--teal)}
+.bg-red   {background:var(--red-soft);  color:var(--red)}
+.bg-amber {background:var(--amber-soft);color:var(--amber)}
+.bg-green {background:var(--emerald-soft);color:var(--emerald)}
+.bg-purple{background:var(--purple-soft);color:var(--purple)}
+.bg-gold  {background:#FEF9EC;color:var(--gold)}
+.bg-navy  {background:#EFF6FF;color:var(--slate)}
+
+.ac-blue  {background:linear-gradient(90deg,var(--blue),#60A5FA)}
+.ac-teal  {background:linear-gradient(90deg,var(--teal),#2DD4BF)}
+.ac-red   {background:linear-gradient(90deg,var(--red),#F87171)}
+.ac-amber {background:linear-gradient(90deg,var(--amber),#FCD34D)}
+.ac-green {background:linear-gradient(90deg,var(--emerald),#34D399)}
+.ac-purple{background:linear-gradient(90deg,var(--purple),#A78BFA)}
+.ac-gold  {background:linear-gradient(90deg,var(--gold),var(--gold-light))}
+.ac-navy  {background:linear-gradient(90deg,var(--slate),var(--blue))}
+
+.c-blue  {color:var(--blue)}
+.c-teal  {color:var(--teal)}
+.c-red   {color:var(--red)}
+.c-amber {color:var(--amber)}
+.c-green {color:var(--emerald)}
+.c-purple{color:var(--purple)}
+.c-gold  {color:var(--gold)}
+.c-muted {color:var(--text-3)}
+.c-sub   {color:var(--text-2)}
+.fw6{font-weight:600}
+.fw5{font-weight:500}
+.mono{font-family:var(--font-m)}
+.disp{font-family:var(--font-d)}
+.f10{font-size:10px}.f11{font-size:11px}.f12{font-size:12px}.f13{font-size:12.5px}
+.f14{font-size:13.5px}.f16{font-size:15px}.f18{font-size:17px}.f24{font-size:23px}
+.mb4{margin-bottom:4px}.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}
+.mb20{margin-bottom:20px}
+.flex{display:flex}.ai-c{align-items:center}.jc-sb{justify-content:space-between}
+.gap6{gap:6px}.gap8{gap:8px}.gap10{gap:10px}.gap12{gap:12px}.gap16{gap:16px}
+
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+
+  <!-- Brand -->
+  <a class="sidebar-brand" href="#">
+    <div class="sidebar-brand-row">
+      <div class="sidebar-brand-icon"><i class="fas fa-globe-asia"></i></div>
+      <span class="sidebar-brand-name"><span>S</span>IMA</span>
+    </div>
+    <div class="sidebar-brand-sub">Gunadarma University</div>
+  </a>
+
+  <!-- User -->
+  <div class="sidebar-user" id="sidebarUser">
+    <div class="sidebar-user-avatar" id="sidebarAvatar"
+         style="background:linear-gradient(135deg,#2563EB,#7C3AED);color:white">M</div>
+    <div>
+      <div class="sidebar-user-name" id="sidebarName">Ahmad Rahimov</div>
+      <div class="sidebar-user-role" id="sidebarRoleText">Mahasiswa</div>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <nav class="sidebar-nav" id="sidebarNav">
+    <!-- populated by JS -->
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-footer-text">SIMA v2.4.1 &copy; 2026<br>Gunadarma University</div>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════
+     MAIN WRAP
+══════════════════════════════════════ -->
+<div class="main-wrap">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="topbar-toggle"><i class="fas fa-bars"></i></button>
+
+    <div class="topbar-search">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Cari mahasiswa, dokumen, jadwal…">
+    </div>
+
+    <div class="topbar-right">
+      <div class="topbar-btn"><i class="fas fa-bell"></i><div class="badge">4</div></div>
+      <div class="topbar-btn"><i class="fas fa-envelope"></i><div class="badge" style="background:var(--blue)">2</div></div>
+      <div class="topbar-btn"><i class="fas fa-question-circle"></i></div>
+
+      <div class="topbar-user">
+        <div class="topbar-user-av" id="topbarAvatar">M</div>
+        <div class="topbar-user-name" id="topbarName">Ahmad Rahimov</div>
+        <i class="fas fa-chevron-down" style="font-size:10px;color:var(--text-3)"></i>
+      </div>
+
+      <div class="topbar-clock" id="topbarClock">
+        <span style="display:block">Thu, 19 Feb 2026</span>
+        <span style="display:block;text-align:right">09:14:00 WIB</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ROLE SWITCHER -->
+  <div class="role-switcher" id="roleSwitcher">
+    <div class="role-tab active" onclick="switchRole('mahasiswa')" id="tab-mahasiswa">
+      <div class="dot" style="background:#2563EB"></div> Mahasiswa
+    </div>
+    <div class="role-tab" onclick="switchRole('kln')" id="tab-kln">
+      <div class="dot" style="background:#0D9488"></div> KLN
+    </div>
+    <div class="role-tab" onclick="switchRole('jurusan')" id="tab-jurusan">
+      <div class="dot" style="background:#7C3AED"></div> Jurusan
+    </div>
+    <div class="role-tab" onclick="switchRole('bipa')" id="tab-bipa">
+      <div class="dot" style="background:#D97706"></div> BIPA
+    </div>
+    <div class="role-tab" onclick="switchRole('admin')" id="tab-admin">
+      <div class="dot" style="background:#C4973A"></div> Admin
+    </div>
+  </div>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-breadcrumb">
+        <span>SIMA</span>
+        <i class="fas fa-chevron-right"></i>
+        <span id="phBreadcrumb">Dashboard Mahasiswa</span>
+      </div>
+      <h1 class="page-title" id="phTitle">Dashboard Mahasiswa</h1>
+      <p class="page-sub" id="phSub">Selamat datang kembali, Ahmad Rahimov 👋</p>
+    </div>
+    <div class="page-header-right">
+      <div class="role-badge" id="phBadge" style="background:var(--blue-soft);color:var(--blue)">
+        <i class="fas fa-shield-alt"></i> MAHASISWA
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       DASHBOARD: MAHASISWA
+  ════════════════════════════════════ -->
+  <div class="content dashboard active" id="dash-mahasiswa">
+
+    <div class="alert alert-amber fa fa-1">
+      <i class="fas fa-exclamation-triangle" style="font-size:15px;flex-shrink:0"></i>
+      <div><strong>Dokumen KITAS akan expired dalam 12 hari.</strong>
+      Segera perpanjang ke KLN untuk menghindari masalah izin tinggal.
+      <a href="#" style="color:var(--amber);margin-left:6px;text-decoration:underline">Lihat detail →</a></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-grid fa fa-1">
+      <div class="stat">
+        <div class="stat-accent ac-blue"></div>
+        <div class="stat-icon bg-blue"><i class="fas fa-file-alt"></i></div>
+        <div class="stat-label">Dokumen Pending</div>
+        <div class="stat-value" data-count="3">3</div>
+        <div class="stat-delta delta-up"><i class="fas fa-arrow-up"></i> +1 dari minggu lalu</div>
+      </div>
+      <div class="stat">
+        <div class="stat-accent ac-red"></div>
+        <div class="stat-icon bg-red"><i class="fas fa-exclamation-circle"></i></div>
+        <div class="stat-label">Dokumen Expired</div>
+        <div class="stat-value" data-count="1">1</div>
+        <div class="stat-delta delta-nt"><i class="fas fa-exclamation"></i> Perlu perhatian segera</div>
+      </div>
+      <div class="stat">
+        <div class="stat-accent ac-green"></div>
+        <div class="stat-icon bg-green"><i class="fas fa-calendar-check"></i></div>
+        <div class="stat-label">Jadwal Hari Ini</div>
+        <div class="stat-value" data-count="2">2</div>
+        <div class="stat-delta delta-nt"><i class="fas fa-clock"></i> 08:00 &amp; 13:00 WIB</div>
+      </div>
+      <div class="stat">
+        <div class="stat-accent ac-amber"></div>
+        <div class="stat-icon bg-amber"><i class="fas fa-bell"></i></div>
+        <div class="stat-label">Notifikasi Baru</div>
+        <div class="stat-value" data-count="4">4</div>
+        <div class="stat-delta delta-nt"><i class="fas fa-circle" style="font-size:6px"></i> Belum dibaca</div>
+      </div>
+    </div>
+
+    <!-- Row 2 -->
+    <div class="row gap-row fa fa-3">
+      <!-- Jadwal -->
+      <div style="flex:5;min-width:280px">
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Jadwal Hari Ini</div><div class="card-sub">Kamis, 19 Februari 2026</div></div>
+            <a href="#" class="card-action">Lihat Semua</a>
+          </div>
+          <div class="card-body">
+            <div class="sch">
+              <div class="sch-time">08:00–10:00</div>
+              <div class="sch-dot" style="border-color:var(--blue);background:var(--blue-soft)"></div>
+              <div>
+                <div class="sch-title">Matematika Lanjut</div>
+                <div class="sch-meta"><i class="fas fa-map-marker-alt"></i> Gd. 4, R.201 · Dr. Hendro S.</div>
+              </div>
+            </div>
+            <div class="sch">
+              <div class="sch-time">13:00–15:00</div>
+              <div class="sch-dot" style="border-color:var(--teal);background:var(--teal-soft)"></div>
+              <div>
+                <div class="sch-title">Pemrograman Web</div>
+                <div class="sch-meta"><i class="fas fa-map-marker-alt"></i> Lab Komputer 3 · Budi S., M.T.</div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div class="flex ai-c jc-sb mb8">
+              <span class="f12 fw5 c-sub">Kehadiran Semester Ini</span>
+              <span class="mono f13 fw6 c-green">87%</span>
+            </div>
+            <div class="prog mb8"><div class="prog-bar" style="width:87%;background:var(--emerald)"></div></div>
+            <div class="flex jc-sb"><span class="f11 c-muted">Min. 80%</span><span class="f11 c-muted">26/30 pertemuan</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div style="flex:4;min-width:240px">
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Aktivitas Terbaru</div><div class="card-sub">7 hari terakhir</div></div>
+          </div>
+          <div class="card-body">
+            <ul class="timeline">
+              <li class="tl-item">
+                <div class="tl-dot bg-blue"><i class="fas fa-file-upload"></i></div>
+                <div class="tl-content">
+                  <div class="tl-title">Request Dokumen dikirim</div>
+                  <div class="tl-time">Surat Keterangan Aktif · Hari ini, 09:14</div>
+                </div>
+              </li>
+              <li class="tl-item">
+                <div class="tl-dot bg-green"><i class="fas fa-check-circle"></i></div>
+                <div class="tl-content">
+                  <div class="tl-title">Dokumen Disetujui</div>
+                  <div class="tl-time">Surat Izin Tinggal · Kemarin, 14:30</div>
+                </div>
+              </li>
+              <li class="tl-item">
+                <div class="tl-dot bg-purple"><i class="fas fa-user-edit"></i></div>
+                <div class="tl-content">
+                  <div class="tl-title">Profil diperbarui</div>
+                  <div class="tl-time">Foto & Nomor HP · 3 hari lalu</div>
+                </div>
+              </li>
+              <li class="tl-item">
+                <div class="tl-dot bg-amber"><i class="fas fa-bullhorn"></i></div>
+                <div class="tl-content">
+                  <div class="tl-title">Announcement baru diterima</div>
+                  <div class="tl-time">Orientasi Kampus · 5 hari lalu</div>
+                </div>
+              </li>
+              <li class="tl-item">
+                <div class="tl-dot bg-teal"><i class="fas fa-calendar-plus"></i></div>
+                <div class="tl-content">
+                  <div class="tl-title">Jadwal baru ditambahkan</div>
+                  <div class="tl-time">Semester Genap 2025/2026 · 1 minggu lalu</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions + Profile -->
+      <div style="flex:3;min-width:200px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Aksi Cepat</div></div>
+          <div class="card-body">
+            <div class="qa-grid mb16">
+              <a href="#" class="qa"><div class="qa-icon bg-blue"><i class="fas fa-file-alt"></i></div><div class="qa-label">Request Dokumen</div></a>
+              <a href="#" class="qa"><div class="qa-icon bg-green"><i class="fas fa-calendar"></i></div><div class="qa-label">Lihat Jadwal</div></a>
+              <a href="#" class="qa"><div class="qa-icon bg-purple"><i class="fas fa-user"></i></div><div class="qa-label">Edit Profil</div></a>
+              <a href="#" class="qa"><div class="qa-icon bg-amber"><i class="fas fa-bell"></i></div><div class="qa-label">Notifikasi</div></a>
+            </div>
+            <div class="prof-card">
+              <div class="flex ai-c gap12 mb12">
+                <div class="av" style="width:42px;height:42px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:white;font-size:15px;font-weight:700">AR</div>
+                <div>
+                  <div class="f13 fw6">Ahmad Rahimov</div>
+                  <div class="f11 c-muted">50421001 · Uzbekistan 🇺🇿</div>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div style="text-align:center;padding:9px;background:white;border-radius:9px;border:1px solid var(--border-soft)">
+                  <div class="disp f24 fw6">6</div>
+                  <div class="f10 c-muted" style="text-transform:uppercase;letter-spacing:.07em">Semester</div>
+                </div>
+                <div style="text-align:center;padding:9px;background:white;border-radius:9px;border:1px solid var(--border-soft)">
+                  <div class="disp f24 fw6">3.72</div>
+                  <div class="f10 c-muted" style="text-transform:uppercase;letter-spacing:.07em">IPK</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3 -->
+    <div class="row fa fa-5">
+      <!-- Announcements -->
+      <div style="flex:7;min-width:300px">
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Pengumuman Terbaru</div><div class="card-sub">Dari KLN &amp; Jurusan</div></div>
+            <a href="#" class="card-action">Semua Pengumuman</a>
+          </div>
+          <div class="card-body">
+            <div class="ann">
+              <div class="flex jc-sb ai-c mb4">
+                <div class="ann-title">📋 Orientasi Mahasiswa Baru Semester Genap</div>
+                <span class="badge b-blue">KLN</span>
+              </div>
+              <div class="ann-body">Orientasi dilaksanakan Senin, 24 Februari 2026 pukul 08.00 WIB di Aula Utama. Seluruh mahasiswa asing wajib hadir membawa dokumen identitas.</div>
+              <div class="ann-meta"><i class="fas fa-clock"></i> 2 jam lalu <span class="badge b-amber">Penting</span></div>
+            </div>
+            <div class="ann">
+              <div class="flex jc-sb ai-c mb4">
+                <div class="ann-title">🎓 Jadwal UTS Semester Genap 2025/2026</div>
+                <span class="badge b-purple">Jurusan</span>
+              </div>
+              <div class="ann-body">UTS dilaksanakan 10–21 Maret 2026. Pastikan kartu ujian sudah diambil di bagian akademik.</div>
+              <div class="ann-meta"><i class="fas fa-clock"></i> 1 hari lalu <span class="badge b-grey">Informasi</span></div>
+            </div>
+            <div class="ann">
+              <div class="flex jc-sb ai-c mb4">
+                <div class="ann-title">🌐 Kelas BIPA Tingkat Lanjut Dibuka</div>
+                <span class="badge b-teal">BIPA</span>
+              </div>
+              <div class="ann-body">Pendaftaran kelas BIPA B2 dibuka mulai 20 Februari 2026. Kuota terbatas 20 mahasiswa.</div>
+              <div class="ann-meta"><i class="fas fa-clock"></i> 3 hari lalu <span class="badge b-grey">Informasi</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doc Status -->
+      <div style="flex:5;min-width:260px">
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Status Dokumen</div><div class="card-sub">Kelengkapan dokumen kamu</div></div>
+          </div>
+          <div class="card-body-flush">
+            <table class="t">
+              <thead><tr><th>Dokumen</th><th>Berlaku</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td class="fw5">Paspor</td><td class="mono f12 c-muted">12 Jan 2028</td><td><span class="badge b-green"><i class="fas fa-check-circle"></i> Valid</span></td></tr>
+                <tr><td class="fw5">KITAS</td><td class="mono f12 c-muted">03 Mar 2026</td><td><span class="badge b-amber"><i class="fas fa-exclamation-circle"></i> Expiring</span></td></tr>
+                <tr><td class="fw5">Surat Aktif</td><td class="mono f12 c-muted">Menunggu</td><td><span class="badge b-blue"><i class="fas fa-clock"></i> Pending</span></td></tr>
+                <tr><td class="fw5">Asuransi</td><td class="mono f12 c-muted">30 Jun 2026</td><td><span class="badge b-green"><i class="fas fa-check-circle"></i> Valid</span></td></tr>
+                <tr><td class="fw5">SKCK</td><td class="mono f12 c-muted">15 Jan 2026</td><td><span class="badge b-red"><i class="fas fa-times-circle"></i> Expired</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /dash-mahasiswa -->
+
+
+  <!-- ════════════════════════════════════
+       DASHBOARD: KLN
+  ════════════════════════════════════ -->
+  <div class="content dashboard" id="dash-kln">
+
+    <div class="stat-grid fa fa-1">
+      <div class="stat">
+        <div class="stat-accent ac-navy"></div>
+        <div class="stat-icon bg-navy"><i class="fas fa-users"></i></div>
+        <div class="stat-label">Total Mahasiswa Asing</div>
+        <div class="stat-value" data-count="120">120</div>
+        <div class="stat-delta delta-up"><i class="fas fa-arrow-up"></i> +8 dari semester lalu</div>
+      </div>
+      <div class="stat">
+        <div class="stat-accent ac-amber"></div>
+        <div class="stat-icon bg-amber"><i class="fas fa-file-alt"></i></div>
+        <div class="stat-label">Dokumen Pending</div>
+        <div class="stat-value" data-count="8">8</div>
+        <div class="stat-delta delta-up"><i class="fas fa-arrow-down"></i> -2 dari kemarin</div>
+      </div>
+      <div class="stat">
+        <div class="stat-accent ac-red"></div>
+        <div class="stat-icon bg-red"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="stat-label">Dokumen Expired</div>
+        <div class="stat-value" data-count="5">5</div>
+        <div class="stat-delta delta-nt"><i class="fas fa-exclamation"></i> Tindakan segera</div>
+      </div>
+      <div class="stat">
+        <div class="stat-accent ac-green"></div>
+        <div class="stat-icon bg-green"><i class="fas fa-clipboard-check"></i></div>
+        <div class="stat-label">Absensi Hari Ini</div>
+        <div class="stat-value" data-count="14">14</div>
+        <div class="stat-delta delta-nt"><i class="fas fa-circle" style="font-size:6px"></i> dari 18 terjadwal</div>
+      </div>
+    </div>
+
+    <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+      <div class="stat">
+        <div class="stat-accent ac-teal"></div>
+        <div class="stat-icon bg-teal"><i class="fas fa-globe"></i></div>
+        <div class="stat-label">Negara Asal</div>
+        <div class="stat-value" data-count="14">14</div>
+        <div class="stat-delta delta-nt">Negara berbeda</div>
+      </div>
+      <div class="stat">
+        <div class="stat-accent ac-purple"></div>
+        <div class="stat-icon bg-purple"><i class="fas fa-check-double"></i></div>
+        <div class="stat-label">Divalidasi Hari Ini</div>
+        <div class="stat-value" data-count="3">3</div>
+        <div class="stat-delta delta-up"><i class="fas fa-arrow-up"></i> Selesai</div>
+      </div>
+      <div class="stat">
+        <div class="stat-accent ac-gold"></div>
+        <div class="stat-icon bg-gold"><i class="fas fa-star"></i></div>
+        <div class="stat-label">Mhs. Beasiswa</div>
+        <div class="stat-value" data-count="32">32</div>
+        <div class="stat-delta delta-nt">26.7% dari total</div>
+      </div>
+      <div class="stat">
+        <div class="stat-accent ac-blue"></div>
+        <div class="stat-icon bg-blue"><i class="fas fa-calendar-alt"></i></div>
+        <div class="stat-label">Jadwal Minggu Ini</div>
+        <div class="stat-value" data-count="24">24</div>
+        <div class="stat-delta delta-nt">Sesi terjadwal</div>
+      </div>
+    </div>
+
+    <div class="row gap-row fa fa-3">
+      <!-- Expired Table -->
+      <div style="flex:8;min-width:320px">
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Dokumen Kritis — Perlu Tindakan</div><div class="card-sub">Expired &amp; akan expired dalam 30 hari</div></div>
+            <a href="#" class="card-action"><i class="fas fa-clipboard-check"></i> Validasi Semua</a>
+          </div>
+          <div class="card-body-flush">
+            <table class="t">
+              <thead><tr><th>Mahasiswa</th><th>Negara</th><th>Dokumen</th><th>Berlaku</th><th>Status</th><th>Aksi</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="flex ai-c gap10"><div class="av" style="width:32px;height:32px;background:linear-gradient(135deg,#0D1B2A,#1B3256);color:white;font-size:10px">JD</div><div><div class="fw5">John Doe</div><div class="f11 c-muted">UZ · Uzbekistan</div></div></div></td>
+                  <td style="font-size:20px">🇺🇿</td><td class="fw5">KITAS</td>
+                  <td class="mono f12 c-muted">03/03/2026</td>
+                  <td><span class="badge b-amber"><i class="fas fa-exclamation-circle"></i> Expiring</span></td>
+                  <td><a href="#" class="f12 c-blue fw5"><i class="fas fa-external-link-alt"></i> Detail</a></td>
+                </tr>
+                <tr>
+                  <td><div class="flex ai-c gap10"><div class="av" style="width:32px;height:32px;background:linear-gradient(135deg,#0D1B2A,#1B3256);color:white;font-size:10px">AR</div><div><div class="fw5">Ahmad Rahimov</div><div class="f11 c-muted">TJ · Tajikistan</div></div></div></td>
+                  <td style="font-size:20px">🇹🇯</td><td class="fw5">Paspor</td>
+                  <td class="mono f12 c-muted">15/01/2026</td>
+                  <td><span class="badge b-red"><i class="fas fa-times-circle"></i> Expired</span></td>
+                  <td><a href="#" class="f12 c-blue fw5"><i class="fas fa-external-link-alt"></i> Detail</a></td>
+                </tr>
+                <tr>
+                  <td><div class="flex ai-c gap10"><div class="av" style="width:32px;height:32px;background:linear-gradient(135deg,#0D1B2A,#1B3256);color:white;font-size:10px">BL</div><div><div class="fw5">Bui Thi Lan</div><div class="f11 c-muted">VN · Vietnam</div></div></div></td>
+                  <td style="font-size:20px">🇻🇳</td><td class="fw5">KITAS</td>
+                  <td class="mono f12 c-muted">20/03/2026</td>
+                  <td><span class="badge b-amber"><i class="fas fa-exclamation-circle"></i> Expiring</span></td>
+                  <td><a href="#" class="f12 c-blue fw5"><i class="fas fa-external-link-alt"></i> Detail</a></td>
+                </tr>
+                <tr>
+                  <td><div class="flex ai-c gap10"><div class="av" style="width:32px;height:32px;background:linear-gradient(135deg,#0D1B2A,#1B3256);color:white;font-size:10px">PJ</div><div><div class="fw5">Park Jisoo</div><div class="f11 c-muted">KR · Korea</div></div></div></td>
+                  <td style="font-size:20px">🇰🇷</td><td class="fw5">Asuransi</td>
+                  <td class="mono f12 c-muted">28/02/2026</td>
+                  <td><span class="badge b-amber"><i class="fas fa-exclamation-circle"></i> Expiring</span></td>
+                  <td><a href="#" class="f12 c-blue fw5"><i class="fas fa-external-link-alt"></i> Detail</a></td>
+                </tr>
+                <tr>
+                  <td><div class="flex ai-c gap10"><div class="av" style="width:32px;height:32px;background:linear-gradient(135deg,#0D1B2A,#1B3256);color:white;font-size:10px">AD</div><div><div class="fw5">Amara Diallo</div><div class="f11 c-muted">SN · Senegal</div></div></div></td>
+                  <td style="font-size:20px">🇸🇳</td><td class="fw5">SKCK</td>
+                  <td class="mono f12 c-muted">10/01/2026</td>
+                  <td><span class="badge b-red"><i class="fas fa-times-circle"></i> Expired</span></td>
+                  <td><a href="#" class="f12 c-blue fw5"><i class="fas fa-external-link-alt"></i> Detail</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Country dist -->
+      <div style="flex:4;min-width:200px">
+        <div class="card" style="height:100%">
+          <div class="card-header"><div><div class="card-title">Sebaran Negara</div><div class="card-sub">Top 7 negara asal</div></div></div>
+          <div class="card-body">
+            <div class="cbar"><div class="cbar-row"><span class="cbar-label">🇺🇿 Uzbekistan</span><span class="cbar-val">38 (32%)</span></div><div class="prog"><div class="prog-bar" style="width:32%;background:var(--blue)"></div></div></div>
+            <div class="cbar"><div class="cbar-row"><span class="cbar-label">🇻🇳 Vietnam</span><span class="cbar-val">22 (18%)</span></div><div class="prog"><div class="prog-bar" style="width:18%;background:var(--teal)"></div></div></div>
+            <div class="cbar"><div class="cbar-row"><span class="cbar-label">🇰🇷 Korea</span><span class="cbar-val">18 (15%)</span></div><div class="prog"><div class="prog-bar" style="width:15%;background:var(--purple)"></div></div></div>
+            <div class="cbar"><div class="cbar-row"><span class="cbar-label">🇹🇯 Tajikistan</span><span class="cbar-val">15 (12%)</span></div><div class="prog"><div class="prog-bar" style="width:12%;background:var(--amber)"></div></div></div>
+            <div class="cbar"><div class="cbar-row"><span class="cbar-label">🇸🇳 Senegal</span><span class="cbar-val">12 (10%)</span></div><div class="prog"><div class="prog-bar" style="width:10%;background:var(--red)"></div></div></div>
+            <div class="cbar"><div class="cbar-row"><span class="cbar-label">🇲🇾 Malaysia</span><span class="cbar-val">9 (7%)</span></div><div class="prog"><div class="prog-bar" style="width:7%;background:var(--emerald)"></div></div></div>
+            <div class="cbar"><div class="cbar-row"><span class="cbar-label">🌍 Lainnya</span><span class="cbar-val">6 (5%)</span></div><div class="prog"><div class="prog-bar" style="width:5%;background:var(--text-3)"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Queue + Post -->
+    <div class="row fa fa-5">
+      <div style="flex:1;min-width:260px">
+        <div class="card">
+          <div class="card-header"><div><div class="card-title">Antrian Validasi</div><div class="card-sub">8 dokumen menunggu review</div></div><a href="#" class="card-action">Validasi Sekarang</a></div>
+          <div class="card-body">
+            <div style="display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid var(--border-soft)"><div class="mono f18 fw6 c-muted" style="min-width:28px">01</div><div style="flex:1"><div class="f13 fw5">Sung Ji-Ho</div><div class="f12 c-muted">Surat Aktif</div></div><div class="mono f11 c-muted">08:24</div><a href="#" class="btn-soft" style="margin-left:8px">Review</a></div>
+            <div style="display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid var(--border-soft)"><div class="mono f18 fw6 c-muted" style="min-width:28px">02</div><div style="flex:1"><div class="f13 fw5">Pham Duc Anh</div><div class="f12 c-muted">Perpanjangan KITAS</div></div><div class="mono f11 c-muted">09:11</div><a href="#" class="btn-soft" style="margin-left:8px">Review</a></div>
+            <div style="display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid var(--border-soft)"><div class="mono f18 fw6 c-muted" style="min-width:28px">03</div><div style="flex:1"><div class="f13 fw5">Diallo Mamadou</div><div class="f12 c-muted">SKCK Baru</div></div><div class="mono f11 c-muted">10:03</div><a href="#" class="btn-soft" style="margin-left:8px">Review</a></div>
+            <div style="display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid var(--border-soft)"><div class="mono f18 fw6 c-muted" style="min-width:28px">04</div><div style="flex:1"><div class="f13 fw5">Li Xiao Ming</div><div class="f12 c-muted">Asuransi Kesehatan</div></div><div class="mono f11 c-muted">11:30</div><a href="#" class="btn-soft" style="margin-left:8px">Review</a></div>
+            <div style="display:flex;align-items:center;gap:13px;padding:11px 0"><div class="mono f18 fw6 c-muted" style="min-width:28px">05</div><div style="flex:1"><div class="f13 fw5">Yuki Tanaka</div><div class="f12 c-muted">Surat Domisili</div></div><div class="mono f11 c-muted">13:00</div><a href="#" class="btn-soft" style="margin-left:8px">Review</a></div>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:260px">
+        <div class="card" style="height:100%">
+          <div class="card-header"><div><div class="card-title">Post Pengumuman Cepat</div><div class="card-sub">Broadcast ke seluruh mahasiswa asing</div></div></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:14px">
+            <div><label class="f-label">Judul Pengumuman</label><input class="f-input" type="text" placeholder="e.g. Perpanjangan Izin Tinggal…"></div>
+            <div><label class="f-label">Pesan</label><textarea class="f-textarea" rows="4" placeholder="Tulis isi pengumuman di sini…"></textarea></div>
+            <div style="display:flex;gap:10px">
+              <select class="f-select" style="flex:1"><option>Semua Mahasiswa Asing</option><option>Uzbekistan</option><option>Vietnam</option><option>Korea</option></select>
+              <button class="btn-primary"><i class="fas fa-paper-plane"></i> Kirim</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /dash-kln -->
+
+
+  <!-- ════════════════════════════════════
+       DASHBOARD: JURUSAN
+  ════════════════════════════════════ -->
+  <div class="content dashboard" id="dash-jurusan">
+
+    <div class="stat-grid fa fa-1">
+      <div class="stat"><div class="stat-accent ac-blue"></div><div class="stat-icon bg-blue"><i class="fas fa-user-graduate"></i></div><div class="stat-label">Mahasiswa Aktif</div><div class="stat-value" data-count="40">40</div><div class="stat-delta delta-up"><i class="fas fa-arrow-up"></i> +5 mahasiswa baru</div></div>
+      <div class="stat"><div class="stat-accent ac-green"></div><div class="stat-icon bg-green"><i class="fas fa-calendar-check"></i></div><div class="stat-label">Jadwal Aktif</div><div class="stat-value" data-count="6">6</div><div class="stat-delta delta-nt"><i class="fas fa-circle" style="font-size:6px"></i> Minggu ini</div></div>
+      <div class="stat"><div class="stat-accent ac-amber"></div><div class="stat-icon bg-amber"><i class="fas fa-bullhorn"></i></div><div class="stat-label">Pengumuman Baru</div><div class="stat-value" data-count="2">2</div><div class="stat-delta delta-nt">Belum dipublish</div></div>
+      <div class="stat"><div class="stat-accent ac-purple"></div><div class="stat-icon bg-purple"><i class="fas fa-chart-line"></i></div><div class="stat-label">Rata-rata Kehadiran</div><div class="stat-value" data-count="84">84<span style="font-size:18px">%</span></div><div class="stat-delta delta-up"><i class="fas fa-arrow-up"></i> +3% bulan ini</div></div>
+    </div>
+
+    <div class="row gap-row fa fa-3">
+      <!-- Absensi today -->
+      <div style="flex:7;min-width:300px">
+        <div class="card">
+          <div class="card-header"><div><div class="card-title">Absensi Hari Ini</div><div class="card-sub">Kamis, 19 Februari 2026</div></div><a href="#" class="card-action"><i class="fas fa-plus"></i> Input Absensi</a></div>
+          <div class="card-body-flush">
+            <table class="t">
+              <thead><tr><th>Mata Kuliah</th><th>Jam</th><th>Ruang</th><th>Hadir</th><th>Status</th><th>Aksi</th></tr></thead>
+              <tbody>
+                <tr><td class="fw5">Matematika Lanjut</td><td class="mono f12 c-muted">08:00–10:00</td><td class="f12 c-sub">Gd.4 R.201</td><td class="mono fw6">18/20</td><td><span class="badge b-green"><i class="fas fa-check-circle"></i> Selesai</span></td><td><a href="#" class="f12 c-blue fw5">Detail</a></td></tr>
+                <tr><td class="fw5">Struktur Data</td><td class="mono f12 c-muted">10:00–12:00</td><td class="f12 c-sub">Gd.4 R.201</td><td class="mono fw6">16/20</td><td><span class="badge b-green"><i class="fas fa-check-circle"></i> Selesai</span></td><td><a href="#" class="f12 c-blue fw5">Detail</a></td></tr>
+                <tr><td class="fw5">Pemrograman Web</td><td class="mono f12 c-muted">13:00–15:00</td><td class="f12 c-sub">Lab 3</td><td class="mono fw6 c-muted">—</td><td><span class="badge b-blue" style="animation:pulse-dot 2s infinite"><i class="fas fa-circle" style="font-size:6px"></i> Live</span></td><td><a href="#" class="f12 c-blue fw5">Detail</a></td></tr>
+                <tr><td class="fw5">Basis Data</td><td class="mono f12 c-muted">15:00–17:00</td><td class="f12 c-sub">Gd.2 R.105</td><td class="mono fw6 c-muted">—</td><td><span class="badge b-grey"><i class="fas fa-clock"></i> Terjadwal</span></td><td><span class="f12 c-muted">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monitoring kehadiran -->
+      <div style="flex:5;min-width:220px">
+        <div class="card" style="height:100%">
+          <div class="card-header"><div><div class="card-title">Monitoring Kehadiran</div><div class="card-sub">Mahasiswa kritis &lt;85%</div></div><a href="#" class="card-action">Semua</a></div>
+          <div class="card-body">
+            <div id="jStudents"></div>
+            <div class="alert alert-red" style="margin-top:10px;margin-bottom:0;padding:11px 14px">
+              <i class="fas fa-exclamation-triangle" style="font-size:14px;flex-shrink:0"></i>
+              <div class="f12">2 mahasiswa di bawah batas minimum (80%)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row fa fa-5">
+      <!-- Jadwal minggu ini -->
+      <div style="flex:1;min-width:260px">
+        <div class="card">
+          <div class="card-header"><div><div class="card-title">Jadwal Minggu Ini</div><div class="card-sub">18–22 Februari 2026</div></div><a href="#" class="card-action"><i class="fas fa-plus"></i> Tambah Jadwal</a></div>
+          <div class="card-body" id="jSchedule"></div>
+        </div>
+      </div>
+      <!-- Pengumuman -->
+      <div style="flex:1;min-width:260px">
+        <div class="card" style="height:100%">
+          <div class="card-header"><div><div class="card-title">Pengumuman Jurusan</div><div class="card-sub">Draft &amp; terkirim</div></div><a href="#" class="card-action"><i class="fas fa-plus"></i> Buat Baru</a></div>
+          <div class="card-body">
+            <div class="ann"><div class="flex jc-sb ai-c mb4"><div class="ann-title">📅 Jadwal UTS Semester Genap</div><span class="badge b-green">Published</span></div><div class="ann-body">UTS dilaksanakan 10–21 Maret 2026. Kartu ujian diambil mulai 3 Maret.</div><div class="ann-meta"><i class="fas fa-users"></i> 40 mahasiswa · 1 hari lalu</div></div>
+            <div class="ann" style="background:#FFFBEB;border-color:var(--border)"><div class="flex jc-sb ai-c mb4"><div class="ann-title">📋 Bimbingan Skripsi Gelombang 2</div><span class="badge b-amber">Draft</span></div><div class="ann-body">Pendaftaran bimbingan skripsi gelombang 2 akan dibuka...</div><div class="ann-meta"><i class="fas fa-edit"></i> Draft · Belum dipublish <a href="#" class="c-blue" style="margin-left:auto">Edit →</a></div></div>
+            <div class="ann" style="background:#FFFBEB;border-color:var(--border)"><div class="flex jc-sb ai-c mb4"><div class="ann-title">🎓 Wisuda April 2026</div><span class="badge b-amber">Draft</span></div><div class="ann-body">Informasi pendaftaran wisuda untuk lulusan semester ini...</div><div class="ann-meta"><i class="fas fa-edit"></i> Draft · Belum dipublish <a href="#" class="c-blue" style="margin-left:auto">Edit →</a></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /dash-jurusan -->
+
+
+  <!-- ════════════════════════════════════
+       DASHBOARD: BIPA
+  ════════════════════════════════════ -->
+  <div class="content dashboard" id="dash-bipa">
+
+    <div class="stat-grid fa fa-1">
+      <div class="stat"><div class="stat-accent ac-teal"></div><div class="stat-icon bg-teal"><i class="fas fa-language"></i></div><div class="stat-label">Peserta BIPA Aktif</div><div class="stat-value" data-count="56">56</div><div class="stat-delta delta-up"><i class="fas fa-arrow-up"></i> +12 semester ini</div></div>
+      <div class="stat"><div class="stat-accent ac-blue"></div><div class="stat-icon bg-blue"><i class="fas fa-book-open"></i></div><div class="stat-label">Kelas Aktif</div><div class="stat-value" data-count="4">4</div><div class="stat-delta delta-nt">A1 · A2 · B1 · B2</div></div>
+      <div class="stat"><div class="stat-accent ac-green"></div><div class="stat-icon bg-green"><i class="fas fa-clipboard-check"></i></div><div class="stat-label">Absensi Hari Ini</div><div class="stat-value" data-count="42">42</div><div class="stat-delta delta-up"><i class="fas fa-arrow-up"></i> 75% kehadiran</div></div>
+      <div class="stat"><div class="stat-accent ac-amber"></div><div class="stat-icon bg-amber"><i class="fas fa-chart-bar"></i></div><div class="stat-label">Rata-rata Skor Ujian</div><div class="stat-value" data-count="78">78</div><div class="stat-delta delta-up"><i class="fas fa-arrow-up"></i> +4 poin bulan ini</div></div>
+    </div>
+
+    <!-- Level Cards -->
+    <div id="bipaLevels" class="fa fa-2" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px"></div>
+
+    <div class="row gap-row fa fa-5">
+      <!-- Schedule BIPA -->
+      <div style="flex:1;min-width:260px">
+        <div class="card">
+          <div class="card-header"><div><div class="card-title">Jadwal BIPA Hari Ini</div><div class="card-sub">Kamis, 19 Februari 2026</div></div><a href="#" class="card-action"><i class="fas fa-plus"></i> Input Jadwal</a></div>
+          <div class="card-body" id="bipaSchedule"></div>
+        </div>
+      </div>
+      <!-- Leaderboard -->
+      <div style="flex:1;min-width:260px">
+        <div class="card" style="height:100%">
+          <div class="card-header"><div><div class="card-title">Peserta Unggulan</div><div class="card-sub">Semester Genap 2025/2026</div></div></div>
+          <div class="card-body" id="bipaTop"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row fa fa-7">
+      <div style="flex:8;min-width:300px">
+        <div class="card">
+          <div class="card-header"><div><div class="card-title">Pengumuman BIPA</div><div class="card-sub">Informasi untuk peserta</div></div><a href="#" class="card-action"><i class="fas fa-plus"></i> Post Baru</a></div>
+          <div class="card-body">
+            <div class="ann"><div class="flex jc-sb ai-c mb4"><div class="ann-title">🎉 Pembukaan Kelas BIPA B2 Semester Genap</div><span class="badge b-green">Published</span></div><div class="ann-body">Kelas BIPA B2 resmi dibuka. Peserta yang lolos seleksi harap konfirmasi sebelum 25 Februari 2026.</div><div class="ann-meta"><i class="fas fa-users"></i> 11 peserta · 2 hari lalu</div></div>
+            <div class="ann"><div class="flex jc-sb ai-c mb4"><div class="ann-title">📝 Ujian Akhir BIPA A1 — 28 Februari</div><span class="badge b-green">Published</span></div><div class="ann-body">Ujian akhir A1 dijadwalkan 28 Feb 2026 pukul 09.00–11.00 di Ruang BIPA B.01. Materi: percakapan, menulis, membaca.</div><div class="ann-meta"><i class="fas fa-users"></i> 16 peserta · 4 hari lalu <span class="badge b-amber">Penting</span></div></div>
+            <div class="ann" style="background:#FFFBEB;border-color:var(--border)"><div class="flex jc-sb ai-c mb4"><div class="ann-title">🗣️ Kegiatan Percakapan — Cultural Night</div><span class="badge b-amber">Draft</span></div><div class="ann-body">Kegiatan Cultural Night akan diadakan...</div><div class="ann-meta"><i class="fas fa-edit"></i> Draft <a href="#" class="c-blue" style="margin-left:auto">Edit →</a></div></div>
+          </div>
+        </div>
+      </div>
+      <div style="flex:4;min-width:200px">
+        <div class="card" style="height:100%">
+          <div class="card-header"><div class="card-title">Ringkasan Bulan Ini</div></div>
+          <div class="card-body">
+            <div class="sinfo-row"><div style="width:30px;height:30px;border-radius:8px;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px"><i class="fas fa-book"></i></div><div style="flex:1;font-size:12px;color:var(--text-2);padding:0 10px">Total Sesi Kelas</div><div class="mono fw6">48</div></div>
+            <div class="sinfo-row"><div style="width:30px;height:30px;border-radius:8px;background:var(--emerald-soft);color:var(--emerald);display:flex;align-items:center;justify-content:center;font-size:12px"><i class="fas fa-check-circle"></i></div><div style="flex:1;font-size:12px;color:var(--text-2);padding:0 10px">Sesi Selesai</div><div class="mono fw6">36</div></div>
+            <div class="sinfo-row"><div style="width:30px;height:30px;border-radius:8px;background:#FEF9EC;color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px"><i class="fas fa-graduation-cap"></i></div><div style="flex:1;font-size:12px;color:var(--text-2);padding:0 10px">Peserta Lulus</div><div class="mono fw6">8</div></div>
+            <div class="sinfo-row"><div style="width:30px;height:30px;border-radius:8px;background:var(--teal-soft);color:var(--teal);display:flex;align-items:center;justify-content:center;font-size:12px"><i class="fas fa-chart-pie"></i></div><div style="flex:1;font-size:12px;color:var(--text-2);padding:0 10px">Absensi Rata-rata</div><div class="mono fw6">78%</div></div>
+            <div class="sinfo-row"><div style="width:30px;height:30px;border-radius:8px;background:var(--purple-soft);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:12px"><i class="fas fa-file-pdf"></i></div><div style="flex:1;font-size:12px;color:var(--text-2);padding:0 10px">Materi Upload</div><div class="mono fw6">12</div></div>
+            <div class="sinfo-row"><div style="width:30px;height:30px;border-radius:8px;background:var(--amber-soft);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:12px"><i class="fas fa-paper-plane"></i></div><div style="flex:1;font-size:12px;color:var(--text-2);padding:0 10px">Tugas Dikumpulkan</div><div class="mono fw6">145</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /dash-bipa -->
+
+
+  <!-- ════════════════════════════════════
+       DASHBOARD: ADMIN
+  ════════════════════════════════════ -->
+  <div class="content dashboard" id="dash-admin">
+
+    <div class="alert alert-teal fa fa-1">
+      <i class="fas fa-server" style="font-size:15px;flex-shrink:0"></i>
+      <div style="flex:1"><strong>System Status: Operational</strong> — Semua layanan berjalan normal. Database · API · Storage ✓</div>
+      <div class="mono f11 c-teal" style="white-space:nowrap">Uptime: 99.98%</div>
+    </div>
+
+    <div class="stat-grid fa fa-1">
+      <div class="stat"><div class="stat-accent ac-gold"></div><div class="stat-icon bg-gold"><i class="fas fa-users"></i></div><div class="stat-label">Total Mahasiswa Asing</div><div class="stat-value" data-count="120">120</div><div class="stat-delta delta-up"><i class="fas fa-arrow-up"></i> +8 semester lalu</div></div>
+      <div class="stat"><div class="stat-accent ac-blue"></div><div class="stat-icon bg-blue"><i class="fas fa-user-cog"></i></div><div class="stat-label">Total Pengguna Sistem</div><div class="stat-value" data-count="148">148</div><div class="stat-delta delta-nt">Semua role aktif</div></div>
+      <div class="stat"><div class="stat-accent ac-teal"></div><div class="stat-icon bg-teal"><i class="fas fa-globe"></i></div><div class="stat-label">Negara Terdaftar</div><div class="stat-value" data-count="14">14</div><div class="stat-delta delta-up"><i class="fas fa-arrow-up"></i> +2 negara baru</div></div>
+      <div class="stat"><div class="stat-accent ac-red"></div><div class="stat-icon bg-red"><i class="fas fa-exclamation-triangle"></i></div><div class="stat-label">Dokumen Kritis</div><div class="stat-value" data-count="13">13</div><div class="stat-delta delta-nt"><i class="fas fa-exclamation"></i> 5 expired · 8 expiring</div></div>
+    </div>
+
+    <div class="stat-grid" style="grid-template-columns:repeat(6,1fr);margin-bottom:20px" id="adminMiniStats"></div>
+
+    <div class="row gap-row fa fa-3">
+      <!-- User Management -->
+      <div style="flex:8;min-width:320px">
+        <div class="card">
+          <div class="card-header"><div><div class="card-title">Manajemen Pengguna</div><div class="card-sub">Semua akun aktif dalam sistem</div></div><a href="#" class="card-action"><i class="fas fa-plus"></i> Tambah User</a></div>
+          <div class="card-body-flush">
+            <table class="t">
+              <thead><tr><th>Pengguna</th><th>Role</th><th>Unit</th><th>Status</th><th>Login Terakhir</th><th>Aksi</th></tr></thead>
+              <tbody>
+                <tr><td><div class="flex ai-c gap10"><div class="av" style="width:30px;height:30px;background:linear-gradient(135deg,#0D1B2A,#2563EB);color:white;font-size:10px">HS</div><div class="fw5 f13">Dr. Hendro Susanto</div></div></td><td><span class="badge b-purple" style="font-size:10px">JURUSAN</span></td><td class="f12 c-sub">Teknik Informatika</td><td><span class="badge b-green" style="font-size:10px"><i class="fas fa-circle" style="font-size:5px"></i> Aktif</span></td><td class="mono f11 c-muted">19 Feb 2026</td><td><div class="flex gap6"><a href="#" style="padding:4px 9px;background:var(--blue-soft);color:var(--blue);border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">Edit</a><a href="#" style="padding:4px 9px;background:var(--red-soft);color:var(--red);border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">Hapus</a></div></td></tr>
+                <tr><td><div class="flex ai-c gap10"><div class="av" style="width:30px;height:30px;background:linear-gradient(135deg,#0D1B2A,#0D9488);color:white;font-size:10px">SR</div><div class="fw5 f13">Siti Rahayu, S.E.</div></div></td><td><span class="badge b-teal" style="font-size:10px">KLN</span></td><td class="f12 c-sub">KLN Pusat</td><td><span class="badge b-green" style="font-size:10px"><i class="fas fa-circle" style="font-size:5px"></i> Aktif</span></td><td class="mono f11 c-muted">19 Feb 2026</td><td><div class="flex gap6"><a href="#" style="padding:4px 9px;background:var(--blue-soft);color:var(--blue);border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">Edit</a><a href="#" style="padding:4px 9px;background:var(--red-soft);color:var(--red);border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">Hapus</a></div></td></tr>
+                <tr><td><div class="flex ai-c gap10"><div class="av" style="width:30px;height:30px;background:linear-gradient(135deg,#0D1B2A,#D97706);color:white;font-size:10px">AF</div><div class="fw5 f13">Ahmad Fauzi</div></div></td><td><span class="badge b-amber" style="font-size:10px">BIPA</span></td><td class="f12 c-sub">Pusat Bahasa</td><td><span class="badge b-green" style="font-size:10px"><i class="fas fa-circle" style="font-size:5px"></i> Aktif</span></td><td class="mono f11 c-muted">18 Feb 2026</td><td><div class="flex gap6"><a href="#" style="padding:4px 9px;background:var(--blue-soft);color:var(--blue);border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">Edit</a><a href="#" style="padding:4px 9px;background:var(--red-soft);color:var(--red);border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">Hapus</a></div></td></tr>
+                <tr><td><div class="flex ai-c gap10"><div class="av" style="width:30px;height:30px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:white;font-size:10px">PJ</div><div class="fw5 f13">Park Jisoo</div></div></td><td><span class="badge b-blue" style="font-size:10px">MAHASISWA</span></td><td class="f12 c-sub">Korea Selatan 🇰🇷</td><td><span class="badge b-green" style="font-size:10px"><i class="fas fa-circle" style="font-size:5px"></i> Aktif</span></td><td class="mono f11 c-muted">19 Feb 2026</td><td><div class="flex gap6"><a href="#" style="padding:4px 9px;background:var(--blue-soft);color:var(--blue);border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">Edit</a><a href="#" style="padding:4px 9px;background:var(--red-soft);color:var(--red);border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">Hapus</a></div></td></tr>
+                <tr><td><div class="flex ai-c gap10"><div class="av" style="width:30px;height:30px;background:linear-gradient(135deg,#94A3B8,#64748B);color:white;font-size:10px">JD</div><div class="fw5 f13">John Doe</div></div></td><td><span class="badge b-blue" style="font-size:10px">MAHASISWA</span></td><td class="f12 c-sub">Uzbekistan 🇺🇿</td><td><span class="badge b-grey" style="font-size:10px"><i class="fas fa-circle" style="font-size:5px"></i> Nonaktif</span></td><td class="mono f11 c-muted">12 Feb 2026</td><td><div class="flex gap6"><a href="#" style="padding:4px 9px;background:var(--blue-soft);color:var(--blue);border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">Edit</a><a href="#" style="padding:4px 9px;background:var(--red-soft);color:var(--red);border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">Hapus</a></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Role dist + Sys Info -->
+      <div style="flex:4;min-width:200px;display:flex;flex-direction:column;gap:16px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Distribusi Role</div></div>
+          <div class="card-body">
+            <div class="cbar"><div class="cbar-row"><span class="cbar-label">Mahasiswa</span><span class="cbar-val">120 (81%)</span></div><div class="prog"><div class="prog-bar" style="width:81%;background:var(--blue)"></div></div></div>
+            <div class="cbar"><div class="cbar-row"><span class="cbar-label">Jurusan</span><span class="cbar-val">16 (11%)</span></div><div class="prog"><div class="prog-bar" style="width:11%;background:var(--purple)"></div></div></div>
+            <div class="cbar"><div class="cbar-row"><span class="cbar-label">KLN Staff</span><span class="cbar-val">5 (3%)</span></div><div class="prog"><div class="prog-bar" style="width:3%;background:var(--teal)"></div></div></div>
+            <div class="cbar"><div class="cbar-row"><span class="cbar-label">BIPA</span><span class="cbar-val">4 (3%)</span></div><div class="prog"><div class="prog-bar" style="width:3%;background:var(--amber)"></div></div></div>
+            <div class="cbar"><div class="cbar-row"><span class="cbar-label">Admin</span><span class="cbar-val">3 (2%)</span></div><div class="prog"><div class="prog-bar" style="width:2%;background:var(--gold)"></div></div></div>
+          </div>
+        </div>
+        <div class="card" style="flex:1">
+          <div class="card-header"><div class="card-title">Info Sistem</div></div>
+          <div class="card-body">
+            <div class="sinfo-row"><div style="width:28px;height:28px;border-radius:7px;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px"><i class="fas fa-code-branch"></i></div><div style="flex:1;font-size:12px;color:var(--text-2);padding:0 9px">Versi SIMA</div><div class="mono fw6 f12">v2.4.1</div></div>
+            <div class="sinfo-row"><div style="width:28px;height:28px;border-radius:7px;background:var(--emerald-soft);color:var(--emerald);display:flex;align-items:center;justify-content:center;font-size:11px"><i class="fas fa-server"></i></div><div style="flex:1;font-size:12px;color:var(--text-2);padding:0 9px">Laravel</div><div class="mono fw6 f12">v11.x</div></div>
+            <div class="sinfo-row"><div style="width:28px;height:28px;border-radius:7px;background:var(--purple-soft);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:11px"><i class="fas fa-code"></i></div><div style="flex:1;font-size:12px;color:var(--text-2);padding:0 9px">PHP</div><div class="mono fw6 f12">8.3</div></div>
+            <div class="sinfo-row"><div style="width:28px;height:28px;border-radius:7px;background:var(--teal-soft);color:var(--teal);display:flex;align-items:center;justify-content:center;font-size:11px"><i class="fas fa-database"></i></div><div style="flex:1;font-size:12px;color:var(--text-2);padding:0 9px">Database</div><div class="mono fw6 f12">MySQL 8.0</div></div>
+            <div class="sinfo-row"><div style="width:28px;height:28px;border-radius:7px;background:var(--amber-soft);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:11px"><i class="fas fa-hdd"></i></div><div style="flex:1;font-size:12px;color:var(--text-2);padding:0 9px">Storage</div><div class="mono fw6 f12">2.4/50 GB</div></div>
+            <div class="sinfo-row"><div style="width:28px;height:28px;border-radius:7px;background:#FEF9EC;color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px"><i class="fas fa-save"></i></div><div style="flex:1;font-size:12px;color:var(--text-2);padding:0 9px">Last Backup</div><div class="mono fw6 f12">03:00 WIB</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Row -->
+    <div class="row fa fa-6">
+      <div style="flex:6;min-width:260px">
+        <div class="card">
+          <div class="card-header"><div><div class="card-title">Manajemen Jurusan</div><div class="card-sub">8 program studi terdaftar</div></div><a href="#" class="card-action"><i class="fas fa-plus"></i> Tambah</a></div>
+          <div class="card-body-flush" id="adminJurusan"></div>
+        </div>
+      </div>
+      <div style="flex:6;min-width:260px">
+        <div class="card" style="height:100%">
+          <div class="card-header"><div><div class="card-title">Monitoring Global</div><div class="card-sub">Rekapitulasi seluruh unit</div></div></div>
+          <div class="card-body">
+            <div class="mod-card" style="background:#F0FDFA18;border-color:#99F6E430"><div style="width:38px;height:38px;border-radius:10px;background:var(--teal-soft);color:var(--teal);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0"><i class="fas fa-check-circle"></i></div><div style="flex:1"><div class="flex jc-sb ai-c mb4"><span class="fw6 f13">KLN</span><span class="badge b-green" style="font-size:9px"><i class="fas fa-circle" style="font-size:5px"></i> Online</span></div><div class="f12 c-sub">Monitoring & Validasi</div><div class="f11 c-muted">120 mahasiswa aktif</div></div></div>
+            <div class="mod-card" style="background:#F5F3FF18;border-color:#A78BFA30"><div style="width:38px;height:38px;border-radius:10px;background:var(--purple-soft);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0"><i class="fas fa-check-circle"></i></div><div style="flex:1"><div class="flex jc-sb ai-c mb4"><span class="fw6 f13">Jurusan</span><span class="badge b-green" style="font-size:9px"><i class="fas fa-circle" style="font-size:5px"></i> Online</span></div><div class="f12 c-sub">Absensi & Jadwal</div><div class="f11 c-muted">40 mahasiswa, 6 kelas</div></div></div>
+            <div class="mod-card" style="background:#FFFBEB18;border-color:#FDE68A30"><div style="width:38px;height:38px;border-radius:10px;background:var(--amber-soft);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0"><i class="fas fa-check-circle"></i></div><div style="flex:1"><div class="flex jc-sb ai-c mb4"><span class="fw6 f13">BIPA</span><span class="badge b-green" style="font-size:9px"><i class="fas fa-circle" style="font-size:5px"></i> Online</span></div><div class="f12 c-sub">Kelas Bahasa Indonesia</div><div class="f11 c-muted">56 peserta, 4 kelas</div></div></div>
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border-soft)">
+              <div class="f10 fw6 c-muted" style="text-transform:uppercase;letter-spacing:.10em;margin-bottom:12px">Aksi Cepat Admin</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn-navy"><i class="fas fa-download"></i> Export Data</button>
+                <button class="btn-soft"><i class="fas fa-sync"></i> Backup DB</button>
+                <button class="btn-soft" style="background:#FEF9EC;border-color:rgba(196,151,58,.25);color:var(--gold)"><i class="fas fa-cogs"></i> Settings</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /dash-admin -->
+
+  <!-- Footer -->
+  <footer style="background:var(--surface);border-top:1px solid var(--border);padding:13px 28px;font-size:11px;color:var(--text-3);display:flex;justify-content:space-between">
+    <span>SIMA &copy; 2026 Universitas Gunadarma — Sistem Informasi Mahasiswa Asing</span>
+    <span class="mono">v2.4.1 · Build 20260219</span>
+  </footer>
+
+</div><!-- /main-wrap -->
+
+<script>
+/* ═══════════════════════════════════
+   DATA & ROLE CONFIG
+═══════════════════════════════════ */
+const roles = {
+  mahasiswa: {
+    name: 'Ahmad Rahimov', initials: 'AR',
+    avatarGrad: 'linear-gradient(135deg,#2563EB,#7C3AED)',
+    roleText: 'Mahasiswa',
+    badgeStyle: 'background:var(--blue-soft);color:var(--blue)',
+    title: 'Dashboard Mahasiswa',
+    sub: 'Selamat datang kembali, Ahmad Rahimov 👋',
+    badgeLabel: '<i class="fas fa-shield-alt"></i> MAHASISWA',
+    nav: [
+      {header:'MAHASISWA'},
+      {icon:'fa-tachometer-alt',label:'Dashboard',active:true},
+      {icon:'fa-calendar',label:'Jadwal Saya'},
+      {icon:'fa-file-alt',label:'Request Dokumen'},
+      {icon:'fa-user',label:'Profil & Dokumen'},
+      {icon:'fa-bullhorn',label:'Announcement'},
+      {icon:'fa-bell',label:'Notifikasi'},
+    ]
+  },
+  kln: {
+    name: 'Siti Rahayu, S.E.', initials: 'SR',
+    avatarGrad: 'linear-gradient(135deg,#0D9488,#0F766E)',
+    roleText: 'KLN Staff',
+    badgeStyle: 'background:var(--teal-soft);color:var(--teal)',
+    title: 'Dashboard KLN',
+    sub: 'Monitoring mahasiswa asing — Kantor Layanan Internasional',
+    badgeLabel: '<i class="fas fa-shield-alt"></i> KLN',
+    nav: [
+      {header:'KLN MANAGEMENT'},
+      {icon:'fa-tachometer-alt',label:'Dashboard',active:true},
+      {icon:'fa-users',label:'Monitoring Mahasiswa'},
+      {icon:'fa-clipboard-check',label:'Validasi Dokumen'},
+      {icon:'fa-calendar-plus',label:'Input Schedule'},
+      {icon:'fa-bullhorn',label:'Post Announcement'},
+      {icon:'fa-bell',label:'Notifikasi Sistem'},
+    ]
+  },
+  jurusan: {
+    name: 'Dr. Hendro Susanto', initials: 'HS',
+    avatarGrad: 'linear-gradient(135deg,#7C3AED,#6D28D9)',
+    roleText: 'Jurusan',
+    badgeStyle: 'background:var(--purple-soft);color:var(--purple)',
+    title: 'Dashboard Jurusan',
+    sub: 'Pengelolaan akademik mahasiswa asing — Program Studi',
+    badgeLabel: '<i class="fas fa-shield-alt"></i> JURUSAN',
+    nav: [
+      {header:'JURUSAN'},
+      {icon:'fa-tachometer-alt',label:'Dashboard',active:true},
+      {icon:'fa-calendar-plus',label:'Input Schedule'},
+      {icon:'fa-clipboard',label:'Absensi'},
+      {icon:'fa-chart-line',label:'Monitoring Kehadiran'},
+      {icon:'fa-bullhorn',label:'Post Announcement'},
+    ]
+  },
+  bipa: {
+    name: 'Ahmad Fauzi', initials: 'AF',
+    avatarGrad: 'linear-gradient(135deg,#D97706,#B45309)',
+    roleText: 'BIPA Staff',
+    badgeStyle: 'background:var(--amber-soft);color:var(--amber)',
+    title: 'Dashboard BIPA',
+    sub: 'Bahasa Indonesia bagi Penutur Asing — Pusat Bahasa Gunadarma',
+    badgeLabel: '<i class="fas fa-shield-alt"></i> BIPA',
+    nav: [
+      {header:'BIPA'},
+      {icon:'fa-tachometer-alt',label:'Dashboard',active:true},
+      {icon:'fa-calendar-plus',label:'Input Schedule BIPA'},
+      {icon:'fa-clipboard',label:'Absensi BIPA'},
+      {icon:'fa-chart-bar',label:'Monitoring BIPA'},
+      {icon:'fa-bullhorn',label:'Post Announcement'},
+    ]
+  },
+  admin: {
+    name: 'Super Admin', initials: 'SA',
+    avatarGrad: 'linear-gradient(135deg,#C4973A,#A67C30)',
+    roleText: 'System Admin',
+    badgeStyle: 'background:#FEF9EC;color:var(--gold);border:1px solid rgba(196,151,58,.25)',
+    title: 'Dashboard Admin',
+    sub: 'Sistem Informasi Mahasiswa Asing — Universitas Gunadarma',
+    badgeLabel: '<i class="fas fa-shield-alt"></i> ADMIN',
+    nav: [
+      {header:'SYSTEM ADMIN'},
+      {icon:'fa-tachometer-alt',label:'Dashboard',active:true},
+      {icon:'fa-user-cog',label:'Manajemen User'},
+      {icon:'fa-university',label:'Manajemen Jurusan'},
+      {icon:'fa-globe',label:'Manajemen Negara'},
+      {icon:'fa-chart-pie',label:'Monitoring Global'},
+      {icon:'fa-cogs',label:'System Settings'},
+    ]
+  }
+};
+
+/* ─── Role switch ─── */
+function switchRole(role) {
+  const r = roles[role];
+  // Tabs
+  document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+role).classList.add('active');
+  // Dashboards
+  document.querySelectorAll('.dashboard').forEach(d => d.classList.remove('active'));
+  document.getElementById('dash-'+role).classList.add('active');
+  // Header
+  document.getElementById('phBreadcrumb').textContent = r.title;
+  document.getElementById('phTitle').textContent = r.title;
+  document.getElementById('phSub').textContent = r.sub;
+  document.getElementById('phBadge').innerHTML = r.badgeLabel;
+  document.getElementById('phBadge').setAttribute('style', r.badgeStyle);
+  // Sidebar
+  document.getElementById('sidebarName').textContent = r.name;
+  document.getElementById('sidebarRoleText').textContent = r.roleText;
+  const sa = document.getElementById('sidebarAvatar');
+  sa.textContent = r.initials;
+  sa.style.background = r.avatarGrad;
+  const ta = document.getElementById('topbarAvatar');
+  ta.textContent = r.initials;
+  ta.style.background = r.avatarGrad;
+  document.getElementById('topbarName').textContent = r.name;
+  // Nav
+  buildNav(r.nav);
+  // Counter
+  animateCounters(document.getElementById('dash-'+role));
+}
+
+/* ─── Build nav ─── */
+function buildNav(items) {
+  const nav = document.getElementById('sidebarNav');
+  nav.innerHTML = '';
+  items.forEach(item => {
+    if (item.header) {
+      const h = document.createElement('div');
+      h.className = 'nav-header';
+      h.textContent = item.header;
+      nav.appendChild(h);
+    } else {
+      const a = document.createElement('div');
+      a.className = 'nav-item' + (item.active ? ' active' : '');
+      a.innerHTML = `<i class="fas ${item.icon}"></i> ${item.label}`;
+      a.onclick = function() {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        a.classList.add('active');
+      };
+      nav.appendChild(a);
+    }
+  });
+}
+
+/* ─── Counter animation ─── */
+function animateCounters(container) {
+  container.querySelectorAll('[data-count]').forEach(el => {
+    const target = parseInt(el.getAttribute('data-count'));
+    const duration = 900;
+    const step = Math.ceil(target / (duration / 16));
+    let cur = 0;
+    const t = setInterval(() => {
+      cur = Math.min(cur + step, target);
+      // Keep suffix if any
+      const suffix = el.innerHTML.replace(/[\d,]+/, '');
+      el.innerHTML = cur.toLocaleString() + suffix;
+      if (cur >= target) clearInterval(t);
+    }, 16);
+  });
+}
+
+/* ─── Clock ─── */
+function updateClock() {
+  const el = document.getElementById('topbarClock');
+  if (!el) return;
+  const now = new Date();
+  const d = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const p = n => String(n).padStart(2,'0');
+  el.innerHTML = `<span style="display:block">${d[now.getDay()]}, ${now.getDate()} ${m[now.getMonth()]} ${now.getFullYear()}</span><span style="display:block;text-align:right">${p(now.getHours())}:${p(now.getMinutes())}:${p(now.getSeconds())} WIB</span>`;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+/* ─── Build Jurusan schedule ─── */
+function buildJSchedule() {
+  const el = document.getElementById('jSchedule');
+  const colors = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669'];
+  const w = [['Senin','Matematika Lanjut','08:00','Gd.4 R.201'],['Selasa','Struktur Data','10:00','Gd.4 R.201'],['Rabu','Pemrograman Web','13:00','Lab 3'],['Kamis','Basis Data','08:00','Gd.2 R.105'],['Jumat','Algoritma','09:00','Gd.3 R.302'],['Sabtu','Seminar','10:00','Aula Utama']];
+  el.innerHTML = w.map((s,i)=>`
+    <div style="display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border-soft)">
+      <div style="min-width:56px;padding:4px 0;text-align:center;background:${colors[i]}18;border-radius:7px;border:1px solid ${colors[i]}30">
+        <div style="font-size:8.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${colors[i]}">${s[0]}</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:12.5px;font-weight:500;color:var(--text-1)">${s[1]}</div>
+        <div style="font-size:11px;color:var(--text-3)"><i class="fas fa-map-marker-alt"></i> ${s[3]}</div>
+      </div>
+      <div class="mono f11 c-muted">${s[2]}</div>
+    </div>
+  `).join('');
+}
+
+/* ─── Build Jurusan students ─── */
+function buildJStudents() {
+  const el = document.getElementById('jStudents');
+  const s = [['Ahmad R.',75,'#DC2626'],['Bui Thi L.',78,'#DC2626'],['Park J.',82,'#D97706'],['John D.',85,'#D97706'],['Yuki T.',90,'#059669'],['Li X.M.',94,'#059669']];
+  el.innerHTML = s.map(x=>`
+    <div style="display:flex;align-items:center;gap:11px;margin-bottom:13px">
+      <div class="av" style="width:32px;height:32px;background:${x[2]}18;color:${x[2]};font-size:10px;font-weight:700">${x[0].split(' ').map(w=>w[0]).join('').toUpperCase()}</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span class="f13 fw5">${x[0]}</span>
+          <span class="mono fw6" style="font-size:12.5px;color:${x[2]}">${x[1]}%</span>
+        </div>
+        <div class="prog"><div class="prog-bar" style="width:${x[1]}%;background:${x[2]}"></div></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ─── Build BIPA levels ─── */
+function buildBipaLevels() {
+  const el = document.getElementById('bipaLevels');
+  const levels = [
+    ['A1','Pemula',16,18,'#0D9488','#F0FDFA','Dasar percakapan'],
+    ['A2','Dasar',14,15,'#2563EB','#EFF6FF','Komunikasi harian'],
+    ['B1','Menengah',15,16,'#7C3AED','#F5F3FF','Topik akademis'],
+    ['B2','Atas-Menengah',11,12,'#D97706','#FFFBEB','Menulis ilmiah'],
+  ];
+  el.innerHTML = levels.map(l=>`
+    <div class="level-card" style="border-top-color:${l[4]}">
+      <div style="width:42px;height:42px;border-radius:11px;background:${l[5]};display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:17px;font-weight:700;color:${l[4]};margin-bottom:12px">${l[0]}</div>
+      <div class="fw6 f13" style="margin-bottom:2px">${l[0]} — ${l[1]}</div>
+      <div class="f11 c-muted" style="margin-bottom:12px">${l[6]}</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span class="f12 c-sub">Peserta</span>
+        <span class="mono fw6" style="color:${l[4]}">${l[2]}/${l[3]}</span>
+      </div>
+      <div class="prog" style="margin-bottom:13px"><div class="prog-bar" style="width:${Math.round(l[2]/l[3]*100)}%;background:${l[4]}"></div></div>
+      <div style="display:flex;gap:7px">
+        <a href="#" style="flex:1;text-align:center;padding:7px;background:${l[5]};color:${l[4]};border-radius:8px;font-size:11px;font-weight:600;text-decoration:none"><i class="fas fa-clipboard"></i> Absensi</a>
+        <a href="#" style="flex:1;text-align:center;padding:7px;background:var(--surface-2);color:var(--text-2);border-radius:8px;font-size:11px;font-weight:600;text-decoration:none;border:1px solid var(--border-soft)"><i class="fas fa-chart-bar"></i> Laporan</a>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ─── Build BIPA schedule ─── */
+function buildBipaSchedule() {
+  const el = document.getElementById('bipaSchedule');
+  const s = [
+    ['A1','Pemula','08:00–10:00','Ruang B.01',16,'#0D9488','selesai'],
+    ['B1','Menengah','10:00–12:00','Ruang B.02',15,'#7C3AED','selesai'],
+    ['A2','Dasar','13:00–15:00','Ruang B.01',14,'#2563EB','live'],
+    ['B2','Atas-Menengah','15:00–17:00','Ruang B.03',11,'#D97706','terjadwal'],
+  ];
+  el.innerHTML = s.map(x=>{
+    const badge = x[6]==='selesai'
+      ? `<span class="badge b-green" style="font-size:10px"><i class="fas fa-check"></i> Selesai</span>`
+      : x[6]==='live'
+      ? `<span class="badge b-blue" style="font-size:10px"><i class="fas fa-circle" style="font-size:5px"></i> Live</span>`
+      : `<span class="badge b-grey" style="font-size:10px"><i class="fas fa-clock"></i> Terjadwal</span>`;
+    return `
+    <div style="display:flex;gap:13px;align-items:center;padding:13px 0;border-bottom:1px solid var(--border-soft)">
+      <div style="width:38px;height:38px;border-radius:10px;background:${x[5]}18;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:14px;font-weight:700;color:${x[5]};flex-shrink:0">${x[0]}</div>
+      <div style="flex:1">
+        <div class="fw5 f13">BIPA ${x[0]} — ${x[1]}</div>
+        <div class="f11 c-muted"><i class="fas fa-clock"></i> ${x[2]} · <i class="fas fa-map-marker-alt"></i> ${x[3]}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="mono fw6 f12" style="margin-bottom:3px">${x[4]} peserta</div>
+        ${badge}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ─── Build BIPA top students ─── */
+function buildBipaTop() {
+  const el = document.getElementById('bipaTop');
+  const t = [
+    ['Park Jisoo','KR','B2',96,'#D97706','🇰🇷'],
+    ['Nguyen Thi Huong','VN','B1',92,'#7C3AED','🇻🇳'],
+    ['Yuki Tanaka','JP','B1',89,'#7C3AED','🇯🇵'],
+    ['Ahmad Rahimov','TJ','A2',85,'#2563EB','🇹🇯'],
+    ['Amara Diallo','SN','A1',81,'#0D9488','🇸🇳'],
+    ['Li Xiao Ming','CN','A2',79,'#2563EB','🇨🇳'],
+  ];
+  const medals = ['#C4973A','#94A3B8','#CD7F32'];
+  el.innerHTML = t.map((s,i)=>`
+    <div style="display:flex;align-items:center;gap:11px;margin-bottom:13px">
+      <div class="disp" style="font-size:17px;font-weight:700;color:${i<3?medals[i]:'var(--border)'};min-width:22px;text-align:center">${i+1}</div>
+      <div style="font-size:18px">${s[5]}</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <div>
+            <span class="fw5 f13">${s[0]}</span>
+            <span class="badge" style="margin-left:6px;background:${s[4]}18;color:${s[4]};font-size:9px;padding:2px 7px">${s[2]}</span>
+          </div>
+          <span class="mono fw6" style="color:${s[4]}">${s[3]}%</span>
+        </div>
+        <div class="prog"><div class="prog-bar" style="width:${s[3]}%;background:${s[4]}"></div></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ─── Build Admin mini stats ─── */
+function buildAdminMiniStats() {
+  const el = document.getElementById('adminMiniStats');
+  const s = [
+    ['Jurusan','8','fas fa-university','#2563EB','#EFF6FF'],
+    ['Peserta BIPA','56','fas fa-language','#0D9488','#F0FDFA'],
+    ['Dokumen Hari Ini','11','fas fa-file-alt','#7C3AED','#F5F3FF'],
+    ['Divalidasi','3','fas fa-check-double','#059669','#ECFDF5'],
+    ['Notif Terkirim','47','fas fa-bell','#D97706','#FFFBEB'],
+    ['Mahasiswa Beasiswa','32','fas fa-star','#C4973A','#FEF9EC'],
+  ];
+  el.innerHTML = s.map(x=>`
+    <div class="stat" style="padding:17px">
+      <div class="stat-icon" style="background:${x[4]};color:${x[3]};width:36px;height:36px;border-radius:9px;font-size:14px;margin-bottom:10px"><i class="${x[2]}"></i></div>
+      <div class="stat-label" style="font-size:9px">${x[0]}</div>
+      <div class="stat-value" style="font-size:27px">${x[1]}</div>
+    </div>
+  `).join('');
+}
+
+/* ─── Build Admin jurusan table ─── */
+function buildAdminJurusan() {
+  const el = document.getElementById('adminJurusan');
+  const p = [
+    ['Teknik Informatika',28,86],
+    ['Sistem Informasi',22,82],
+    ['Manajemen',18,79],
+    ['Akuntansi',16,88],
+    ['Teknik Industri',14,84],
+    ['Psikologi',8,91],
+    ['Ilmu Komputer',8,83],
+    ['Komunikasi',6,77],
+  ];
+  el.innerHTML = `
+    <table class="t">
+      <thead><tr><th>Program Studi</th><th>Mahasiswa</th><th>Kehadiran</th></tr></thead>
+      <tbody>
+        ${p.map(x=>{
+          const c = x[2]>=85?'var(--emerald)':x[2]>=80?'var(--amber)':'var(--red)';
+          return `<tr>
+            <td class="fw5">${x[0]}</td>
+            <td class="mono fw6 c-blue">${x[1]}</td>
+            <td><div style="display:flex;align-items:center;gap:8px"><div class="prog" style="width:72px"><div class="prog-bar" style="width:${x[2]}%;background:${c}"></div></div><span class="mono f11 c-muted">${x[2]}%</span></div></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+/* ─── INIT ─── */
+document.addEventListener('DOMContentLoaded', () => {
+  buildNav(roles.mahasiswa.nav);
+  buildJSchedule();
+  buildJStudents();
+  buildBipaLevels();
+  buildBipaSchedule();
+  buildBipaTop();
+  buildAdminMiniStats();
+  buildAdminJurusan();
+
+  // Initial counter for mahasiswa
+  setTimeout(() => animateCounters(document.getElementById('dash-mahasiswa')), 200);
+});
+</script>
+</body>
+</html>
