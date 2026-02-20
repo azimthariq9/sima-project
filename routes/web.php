@@ -69,13 +69,46 @@ Route::middleware(['auth'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->group(function () {
+use App\Http\Controllers\MahasiswaController;
+use App\Http\Controllers\MahasiswaRequestController;
 
-    Route::get('/mahasiswa/dashboard', function () {
-        return view('mahasiswa.dashboard');
-    })->name('mahasiswa.dashboard');
+Route::middleware(['auth'])
+    ->prefix('mahasiswa')
+    ->name('mahasiswa.')
+    ->group(function () {
 
-});
+        Route::get('/dashboard', [MahasiswaController::class, 'dashboard'])
+            ->name('dashboard');
+
+        Route::get('/request', [MahasiswaRequestController::class, 'index'])
+            ->name('request.index');
+
+        Route::get('/request/create', [MahasiswaRequestController::class, 'create'])
+            ->name('request.create');
+
+        Route::get('/profil', [MahasiswaController::class, 'profil'])
+            ->name('profil');
+
+        Route::get('/profil/dokumen', [MahasiswaController::class, 'dokumen'])
+            ->name('profil.dokumen');
+
+        Route::get('/jadwal', [MahasiswaController::class, 'jadwal'])
+            ->name('jadwal');
+
+        Route::get('/notifikasi', [MahasiswaController::class, 'notifikasi'])
+            ->name('notifikasi');
+
+        Route::get('/announcement', [MahasiswaController::class, 'announcement'])
+            ->name('announcement');
+
+        Route::get('/announcement/{id}', [MahasiswaController::class, 'announcementShow'])
+            ->name('announcement.show');
+
+        Route::get('/analytics', [MahasiswaController::class, 'analytics'])
+            ->name('analytics');
+
+    });
+
 
 /*
 |--------------------------------------------------------------------------
