@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('jadwal_mahasiswa', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('mahasiswa_id')->constrained()->onDelete('cascade');
-            $table->foreignId('jadwal_id')->constrained()->onDelete('cascade');
+            $table->foreignId('mahasiswa_id')->constrained('mahasiswa')->onDelete('cascade');
+            $table->foreignId('jadwal_id')->constrained('jadwal')->onDelete('cascade');
             $table->integer('sesi');
             $table->string('status')->default('belum hadir');
             $table->date('tglSesi')->nullable();

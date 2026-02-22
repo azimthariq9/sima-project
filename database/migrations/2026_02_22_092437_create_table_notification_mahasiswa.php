@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('notification_mahasiswa', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('notification_id')->constrained()->onDelete('cascade');
-            $table->foreignId('mahasiswa_id')->constrained()->onDelete('cascade');
+            $table->foreignId('notification_id')->constrained('notification')->onDelete('cascade');
+            $table->foreignId('mahasiswa_id')->constrained('mahasiswa')->onDelete('cascade');
             $table->boolean('is_read')->default(false);
             $table->timestamps();
         });
