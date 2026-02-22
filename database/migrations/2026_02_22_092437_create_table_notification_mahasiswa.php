@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('notification_mahasiswa', function (Blueprint $table) {
             $table->id();
-            $table->string('role')->default('user');
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->string('status')->default('active');
+            $table->foreignId('notification_id')->constrained()->onDelete('cascade');
+            $table->foreignId('mahasiswa_id')->constrained()->onDelete('cascade');
+            $table->boolean('is_read')->default(false);
             $table->timestamps();
         });
     }
@@ -26,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('role');
-        });
+        Schema::dropIfExists('notification_mahasiswa');
     }
 };
