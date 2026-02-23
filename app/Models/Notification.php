@@ -14,13 +14,13 @@ class Notification extends Model
         'status' => status::class,
     ];
 
-    public function NotifUsers()
+    public function users()
     {
-        return $this->hasMany(NotifUsers::class, 'notification_id');
+        return $this->belongsToMany(User::class, 'notification_users', 'notification_id', 'users_id')->withPivot('is_read')->withTimestamps();;
     }
-    public function notifMhs()
+    public function mahasiswa()
     {
-        return $this->hasMany(NotifMhs::class, 'notification_id');
+        return $this->belongsToMany(Mahasiswa::class, 'notification_mahasiswa', 'notification_id', 'mahasiswa_id')->withPivot('is_read')->withTimestamps();;
     }
     
 }

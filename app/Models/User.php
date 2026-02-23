@@ -62,8 +62,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(HistoryDokumen::class, 'users_id');
     }
-    public function notifUsers()
+    public function notification()
     {
-        return $this->hasMany(NotifUsers::class, 'user_id');
+        return $this->belongsToMany(Notification::class, 'notification_users', 'user_id', 'notification_id')->withPivot('is_read')->withTimestamps();
     }
 }

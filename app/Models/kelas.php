@@ -16,6 +16,6 @@ class kelas extends Model
     }
     public function mahasiswa()
     {
-        return $this->belongsToMany(Mahasiswa::class, 'mahasiswa_kelas', 'kelas_id', 'mahasiswa_id');
+        return $this->belongsToMany(Mahasiswa::class, 'mahasiswa_kelas', 'kelas_id', 'mahasiswa_id')->withTimestamps();
     }
 }
