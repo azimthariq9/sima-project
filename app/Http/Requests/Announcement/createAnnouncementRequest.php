@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Announcement;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
+use App\Enums\status;
 
 class createAnnouncementRequest extends FormRequest
 {
@@ -22,7 +24,13 @@ class createAnnouncementRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'users_id' => 'required|exists:users,id',
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string',
+            'status' => ['required', new Enum(status::class)],
+            'mahasiswa_ids' => 'required|array',
+            'mahasiswa_ids.*' => 'exists:mahasiswa,id',
+
         ];
     }
 }

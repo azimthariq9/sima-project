@@ -3,7 +3,8 @@
 namespace App\Http\Requests\Announcement;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Validation\Rules\Enum;
+use App\Enums\status;
 class updateAnnouncementRequest extends FormRequest
 {
     /**
@@ -22,7 +23,12 @@ class updateAnnouncementRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'users_id' => 'sometimes|required|exists:users,id',
+            'subject' => 'sometimes|required|string|max:255',
+            'message' => 'sometimes|required|string',
+            'status' => ['sometimes', new Enum(status::class)],
+            'mahasiswa_ids' => 'sometimes|required|array',
+            'mahasiswa_ids.*' => 'exists:mahasiswa,id',
         ];
     }
 }
