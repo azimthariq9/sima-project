@@ -3,15 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use App\Enums\status;
 class Notification extends Model
 {
     protected $table = 'notification';
 
     protected $guarded = [];
 
-    protected $cast =[
-        'status' => 'string',
+    protected $casts = [
+        'status' => status::class,
     ];
 
     public function NotifUsers()

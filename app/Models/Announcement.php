@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\status;
 
 class Announcement extends Model
 {
@@ -11,7 +12,7 @@ class Announcement extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'status' => 'string',
+        'status' => status::class,
     ];
 
     public function mahasiswa()

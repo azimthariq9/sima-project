@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
-use App\status;
+
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\penerbit;
+use App\Enums\tipeDok;
+use App\Enums\status;
 
 class Dokumen extends Model
 {
@@ -12,9 +15,9 @@ class Dokumen extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'tipeDkmn' => 'string',
-        'penerbit'=> 'string',
-        'status' => 'string',
+        'tipeDkmn' => tipeDok::class,
+        'penerbit'=> penerbit::class,
+        'status' => status::class,
         'tglTerbit' => 'date',
         'tglkdlwrs' => 'date',
     ];
