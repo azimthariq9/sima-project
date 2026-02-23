@@ -23,5 +23,6 @@ class Dokumen extends Model
     {
         return $this->belongsTo(Mahasiswa::class, 'mahasiswa_id');
     }
+    
 
 }

@@ -18,4 +18,8 @@ class Announcement extends Model
     {
         return $this->belongsToMany(Mahasiswa::class, 'announcement_mahasiswa', 'announcement_id', 'mahasiswa_id');
     }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }
