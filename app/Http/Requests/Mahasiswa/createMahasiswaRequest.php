@@ -30,7 +30,6 @@ class formMahasiswa extends FormRequest
             'alamatAsal' => ['required', 'string', 'max:255'],
             'alamatIndo' => ['required', 'string', 'max:255'],
             'user_id' => ['required', 'exists:users,id'],
-            'jurusan_id' => ['required', 'exists:jurusan,id'],
             
             
         ];

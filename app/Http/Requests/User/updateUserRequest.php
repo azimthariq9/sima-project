@@ -15,7 +15,7 @@ class updateUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return auth()->check() && (auth()->user()->role === Role::KLN || auth()->user()->role === Role::adminJurusan);
     }
 
     /**
@@ -30,6 +30,7 @@ class updateUserRequest extends FormRequest
             'password' => ['sometimes', 'string', 'min:8'],
             'role' => ['sometimes', new Enum(role::class)],
             'status' => ['sometimes', new Enum(status::class)],
+            'jurusan_id' => ['sometimes', 'exists:jurusan,id'],
         ];
     }
 }

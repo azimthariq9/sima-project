@@ -14,7 +14,7 @@ class createUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return auth()->check() && (auth()->user()->role === Role::KLN || auth()->user()->role === Role::adminJurusan);
     }
 
     /**
@@ -29,6 +29,7 @@ class createUserRequest extends FormRequest
             'password' => ['required', 'string', 'min:8'],
             'role' => ['required', new Enum(role::class)],
             'status' => ['required', new Enum(status::class)],
+            'jurusan_id' => ['required', 'exists:jurusan,id'],
         ];
     }
 }

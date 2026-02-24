@@ -31,7 +31,6 @@ class updateMahasiswaRequest extends FormRequest
             'alamatAsal' => ['sometimes', 'required', 'string', 'max:255'],
             'alamatIndo' => ['sometimes', 'required', 'string', 'max:255'],
             'user_id' => ['sometimes', 'required', 'exists:users,id'],
-            'jurusan_id' => ['sometimes', 'required', 'exists:jurusan,id'],
         ];
     }
 }
