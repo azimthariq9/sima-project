@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Kehadiran;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
+use App\Enums\status;
 
 class createKehadiranRequest extends FormRequest
 {
@@ -22,7 +24,11 @@ class createKehadiranRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'mahasiswa_id' => ['required', 'exists:mahasiswa,id'],
+            'jadwal_id' => ['required', 'exists:jadwal,id'],
+            'sesi' => ['required', 'integer', 'min:1'],
+            'status' => ['required', new Enum(status::class)],
+            'tglSesi' => ['required', 'date', 'nullable'],
         ];
     }
 }

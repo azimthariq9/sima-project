@@ -22,7 +22,14 @@ class createJadwalRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'kelas_id' => ['required', 'exists:kelas,id'],
+            'matakuliah_id' => ['required', 'exists:matakuliah,id'],
+            'dosen_id' => ['required', 'exists:dosen,id'],
+            'hari' => ['required', 'string', 'max:10'],
+            'jam' => ['required', 'string', 'max:20'],
+            'ruangan' => ['required', 'string', 'max:50'],
+            'totalSesi' => ['required', 'integer', 'min:1'],
+
         ];
     }
 }

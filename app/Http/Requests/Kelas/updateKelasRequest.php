@@ -3,7 +3,8 @@
 namespace App\Http\Requests\Kelas;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Validation\Rule;
+use App\Models\kelas;
 class updateKelasRequest extends FormRequest
 {
     /**
@@ -22,7 +23,7 @@ class updateKelasRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'kodeKelas' => ['sometimes', 'required', 'string', 'max:255', 'unique:kelas,kodeKelas', Rule::unique(kelas::class)->ignore($this->route('kelas')->id)],
         ];
     }
 }

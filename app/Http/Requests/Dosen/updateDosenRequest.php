@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Dosen;
 
+use App\Models\dosen;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class updateDosenRequest extends FormRequest
 {
@@ -22,7 +24,11 @@ class updateDosenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'nama' => ['sometimes', 'required', 'string', 'max:255'],
+            'nidn' => ['sometimes', 'required', 'string', 'max:255', 'unique:dosen,nidn', Rule::unique(Dosen::class)->ignore($this->route('dosen')->id)],
+            'kodeDos'=> ['sometimes', 'required', 'string', 'max:255', 'unique:dosen,kodeDos', Rule::unique(Dosen::class)->ignore($this->route('dosen')->id)],
+            'users_id' => ['sometimes', 'required', 'exists:users,id'],
+            'jurusan_id' => ['sometimes', 'required', 'exists:jurusan,id'],
         ];
     }
 }

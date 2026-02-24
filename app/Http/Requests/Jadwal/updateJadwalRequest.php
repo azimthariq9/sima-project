@@ -22,7 +22,13 @@ class updateJadwalRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'kelas_id' => ['sometimes', 'required', 'exists:kelas,id'],
+            'matakuliah_id' => ['sometimes', 'required', 'exists:matakuliah,id'],
+            'dosen_id' => ['sometimes', 'required', 'exists:dosen,id'],
+            'hari' => ['sometimes', 'required', 'string', 'max:10'],
+            'jam' => ['sometimes', 'required', 'string', 'max:20'],
+            'ruangan' => ['sometimes', 'required', 'string', 'max:50'],
+            'totalSesi' => ['sometimes', 'required', 'integer', 'min:1'],
         ];
     }
 }

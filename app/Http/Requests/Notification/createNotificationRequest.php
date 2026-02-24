@@ -3,6 +3,9 @@
 namespace App\Http\Requests\Notification;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
+use App\Enums\status;
 
 class createNotificationRequest extends FormRequest
 {
@@ -22,7 +25,11 @@ class createNotificationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'subject' => ['required', 'string', 'max:255'],
+            'message' => ['required', 'string', 'max:255'],
+            'status' => ['required', new Enum(status::class)],
+            'users' => ['required', 'array'],
+            'users.*' => ['exists:users,id'],
         ];
     }
 }

@@ -3,6 +3,10 @@
 namespace App\Http\Requests\Dokumen;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
+use App\Enums\tipeDok;
+use App\Enums\status;
+use App\Enums\penerbit;
 
 class createDokumenRequest extends FormRequest
 {
@@ -22,7 +26,17 @@ class createDokumenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'mahasiswa_id' => ['required', 'exists:mahasiswa,id'],
+            'tipeDkmn' => ['required', new Enum(tipeDok::class)],
+            'namaDkmn' => ['required', 'string', 'max:255'],
+            'penerbit' => ['required', new Enum(penerbit::class)],
+            'noDkmn' => ['required', 'string', 'max:255'],
+            'tglTerbit' => ['required', 'date'],
+            'tglkdlwrs' => ['required', 'date', 'after_or_equal:tglTerbit'],
+            'status' => ['required', new Enum(status::class)],
+            'path' => ['required', 'string', 'max:255'],
+            'mimeType' => ['required', 'string', 'max:50'],
+            'size' => ['required', 'integer'],
         ];
     }
 }

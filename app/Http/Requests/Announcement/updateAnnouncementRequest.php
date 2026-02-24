@@ -23,12 +23,11 @@ class updateAnnouncementRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'users_id' => 'sometimes|required|exists:users,id',
-            'subject' => 'sometimes|required|string|max:255',
-            'message' => 'sometimes|required|string',
+            'subject' => ['sometimes', 'required', 'string', 'max:255'],
+            'message' => ['sometimes', 'required', 'string'],
             'status' => ['sometimes', new Enum(status::class)],
-            'mahasiswa_ids' => 'sometimes|required|array',
-            'mahasiswa_ids.*' => 'exists:mahasiswa,id',
+            'mahasiswa_ids' => ['sometimes', 'required', 'array'],
+            'mahasiswa_ids.*' => ['exists:mahasiswa,id'],
         ];
     }
 }

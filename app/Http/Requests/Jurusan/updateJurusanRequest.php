@@ -3,7 +3,8 @@
 namespace App\Http\Requests\Jurusan;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Validation\Rule;
+use App\Models\jurusan;
 class updateJurusanRequest extends FormRequest
 {
     /**
@@ -22,7 +23,7 @@ class updateJurusanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'namaJurusan' => ['sometimes', 'required', 'string', 'max:255', 'unique:jurusan,namaJurusan', Rule::unique(jurusan::class)->ignore($this->route('jurusan')->id)],
         ];
     }
 }

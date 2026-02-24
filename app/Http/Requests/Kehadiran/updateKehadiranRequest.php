@@ -3,7 +3,8 @@
 namespace App\Http\Requests\Kehadiran;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Validation\Rules\Enum;
+use App\Enums\status;
 class updateKehadiranRequest extends FormRequest
 {
     /**
@@ -22,7 +23,8 @@ class updateKehadiranRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'status' => ['sometimes', 'required', new Enum(status::class)],
+            'tglSesi' => ['sometimes', 'required', 'date'],            
         ];
     }
 }

@@ -22,7 +22,7 @@ class createKelasRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'kodeKelas' => ['required', 'string', 'max:255', 'unique:kelas,kodeKelas'],
         ];
     }
 }
