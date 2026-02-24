@@ -1,851 +1,1120 @@
-@extends('adminlte::page')
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>@yield('page_title', 'SIMA') — SIMA</title>
 
-@section('title', config('adminlte.title', 'SIMA') . ' | ' . trim($__env->yieldContent('page_title')))
-
-
-@section('content_header')
-<div class="sima-page-header">
-    <div class="sima-page-header__left">
-        <div class="sima-breadcrumb">
-            <span class="sima-breadcrumb__root">SIMA</span>
-            <i class="fas fa-chevron-right sima-breadcrumb__sep"></i>
-            <span class="sima-breadcrumb__current">@yield('page_title')</span>
-        </div>
-        <h1 class="sima-page-header__title">@yield('page_title')</h1>
-        <p class="sima-page-header__sub">@yield('page_subtitle')</p>
-    </div>
-    <div class="sima-page-header__right">
-        @php $role = strtoupper(auth()->user()->role ?? 'USER'); @endphp
-        <div class="sima-role-badge sima-role-badge--{{ strtolower(auth()->user()->role ?? 'user') }}">
-            <i class="fas fa-shield-alt"></i>
-            <span>{{ $role }}</span>
-        </div>
-        <div class="sima-datetime" id="simaDatetime"></div>
-    </div>
-</div>
-@endsection
-
-@section('content')
-<div class="sima-content">
-    @yield('main_content')
-</div>
-@endsection
-
-@section('css')
-{{-- Google Fonts --}}
+<!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<!-- Bootstrap grid only -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 
 <style>
-/* =============================================
-   SIMA DESIGN SYSTEM — PREMIUM CORPORATE ELITE
-   ============================================= */
+/* ═══════════════════════════════════════════════════════
+   SIMA DESIGN SYSTEM — v2.0
+   ═══════════════════════════════════════════════════════ */
 
 :root {
-    /* Core Palette */
-    --sima-navy:        #080F1E;
-    --sima-navy-mid:    #0D1B2A;
-    --sima-navy-light:  #132236;
-    --sima-slate:       #1B3256;
-    --sima-gold:        #C4973A;
-    --sima-gold-light:  #E0B86A;
-    --sima-gold-pale:   #F5E6C8;
-
-    /* Semantic */
-    --sima-blue:        #2563EB;
-    --sima-blue-soft:   #EFF6FF;
-    --sima-teal:        #0D9488;
-    --sima-teal-soft:   #F0FDFA;
-    --sima-red:         #DC2626;
-    --sima-red-soft:    #FEF2F2;
-    --sima-amber:       #D97706;
-    --sima-amber-soft:  #FFFBEB;
-    --sima-emerald:     #059669;
-    --sima-emerald-soft:#ECFDF5;
-    --sima-purple:      #7C3AED;
-    --sima-purple-soft: #F5F3FF;
-
-    /* Surface */
-    --sima-bg:          #EEF2F7;
-    --sima-surface:     #FFFFFF;
-    --sima-surface-2:   #F8FAFC;
-    --sima-border:      #E2E8F0;
-    --sima-border-soft: #F1F5F9;
+    /* Colors */
+    --c-bg:          #f4f5f9;
+    --c-surface:     #ffffff;
+    --c-surface-2:   #f8f9fc;
+    --c-border:      #e5e7ef;
+    --c-border-soft: #eef0f6;
 
     /* Text */
-    --sima-text-primary:   #0B1628;
-    --sima-text-secondary: #475569;
-    --sima-text-muted:     #94A3B8;
-    --sima-text-inverse:   #FFFFFF;
+    --c-text-1:  #111827;
+    --c-text-2:  #374151;
+    --c-text-3:  #9ca3af;
+    --c-text-4:  #d1d5db;
+
+    /* Brand / Accent */
+    --c-accent:      #6c8fff;
+    --c-accent-2:    #a78bfa;
+    --c-accent-light:#eff3ff;
+
+    /* Semantic */
+    --c-blue:    #2563EB;
+    --c-blue-lt: #EFF6FF;
+    --c-green:   #059669;
+    --c-green-lt:#ECFDF5;
+    --c-red:     #DC2626;
+    --c-red-lt:  #FEF2F2;
+    --c-amber:   #D97706;
+    --c-amber-lt:#FFFBEB;
+    --c-purple:  #7C3AED;
+    --c-purple-lt:#F5F3FF;
+    --c-teal:    #0D9488;
+    --c-teal-lt: #F0FDFA;
+
+    /* Sidebar */
+    --sidebar-w:    240px;
+    --sidebar-bg:   #ffffff;
+    --sidebar-border:#eef0f6;
 
     /* Typography */
-    --font-display: 'Fraunces', Georgia, serif;
-    --font-body:    'DM Sans', system-ui, sans-serif;
-    --font-mono:    'DM Mono', monospace;
+    --f-body:    'Plus Jakarta Sans', sans-serif;
+    --f-display: 'Sora', sans-serif;
+    --f-mono:    'JetBrains Mono', monospace;
 
-    /* Shadows */
-    --shadow-xs:  0 1px 2px rgba(8,15,30,0.04);
-    --shadow-sm:  0 2px 8px rgba(8,15,30,0.06), 0 1px 3px rgba(8,15,30,0.04);
-    --shadow-md:  0 8px 24px rgba(8,15,30,0.08), 0 2px 8px rgba(8,15,30,0.04);
-    --shadow-lg:  0 20px 48px rgba(8,15,30,0.12), 0 8px 16px rgba(8,15,30,0.06);
-    --shadow-gold:0 8px 32px rgba(196,151,58,0.20);
-
-    /* Transitions */
-    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-    --ease-in-out:   cubic-bezier(0.4, 0, 0.2, 1);
+    /* Misc */
+    --radius:    12px;
+    --radius-sm: 8px;
+    --radius-lg: 16px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow:    0 4px 16px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.04);
+    --shadow-md: 0 8px 32px rgba(0,0,0,.09), 0 2px 8px rgba(0,0,0,.04);
+    --transition: .18s ease;
 }
 
-/* ─── GLOBAL RESET ─────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; }
+/* ── RESET & BASE ─────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-    font-family: var(--font-body);
-    background: var(--sima-bg);
-    color: var(--sima-text-primary);
+html, body {
+    height: 100%;
+    font-family: var(--f-body);
+    font-size: 14px;
+    color: var(--c-text-1);
+    background: var(--c-bg);
     -webkit-font-smoothing: antialiased;
-}
-
-/* ─── SIDEBAR ─────────────────────────────────── */
-.main-sidebar {
-    background: var(--sima-navy) !important;
-    border-right: none !important;
-    box-shadow: 4px 0 32px rgba(0,0,0,0.20);
-}
-
-.main-sidebar::before {
-    content: '';
-    position: absolute;
-    top: 0; right: 0;
-    width: 1px; height: 100%;
-    background: linear-gradient(180deg, var(--sima-gold) 0%, transparent 60%);
-    opacity: 0.4;
-}
-
-/* Brand/Logo */
-.brand-link {
-    background: var(--sima-navy) !important;
-    border-bottom: 1px solid rgba(196,151,58,0.20) !important;
-    padding: 18px 20px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-    text-decoration: none !important;
-}
-
-.brand-link .brand-text {
-    font-family: var(--font-display) !important;
-    font-size: 22px !important;
-    font-weight: 600 !important;
-    color: white !important;
-    letter-spacing: 0.02em;
-}
-
-.brand-link .brand-text b { color: var(--sima-gold) !important; }
-
-.brand-link::after {
-    content: 'GUNADARMA';
-    font-family: var(--font-body);
-    font-size: 9px;
-    font-weight: 500;
-    letter-spacing: 0.18em;
-    color: var(--sima-gold);
-    opacity: 0.7;
-    margin-left: auto;
-}
-
-/* Sidebar User Panel */
-.user-panel {
-    background: rgba(255,255,255,0.03) !important;
-    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
-    padding: 16px 20px !important;
-}
-
-.user-panel .info a {
-    font-family: var(--font-body) !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    color: rgba(255,255,255,0.85) !important;
-}
-
-/* Sidebar Nav Headers */
-.nav-sidebar .nav-header {
-    font-family: var(--font-body) !important;
-    font-size: 9px !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.20em !important;
-    color: var(--sima-gold) !important;
-    opacity: 0.8 !important;
-    padding: 18px 20px 6px !important;
-    text-transform: uppercase;
-}
-
-/* Sidebar Nav Items */
-.nav-sidebar .nav-item .nav-link {
-    font-family: var(--font-body) !important;
-    font-size: 13px !important;
-    font-weight: 400 !important;
-    color: rgba(255,255,255,0.60) !important;
-    border-radius: 8px !important;
-    margin: 1px 10px !important;
-    padding: 10px 14px !important;
-    transition: all 0.20s var(--ease-in-out) !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 10px;
-    position: relative;
-    overflow: hidden;
-}
-
-.nav-sidebar .nav-item .nav-link .nav-icon {
-    width: 16px;
-    text-align: center;
-    font-size: 13px !important;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-}
-
-.nav-sidebar .nav-item .nav-link:hover {
-    background: rgba(255,255,255,0.07) !important;
-    color: rgba(255,255,255,0.90) !important;
-}
-
-.nav-sidebar .nav-item .nav-link:hover .nav-icon { opacity: 1; }
-
-.nav-sidebar .nav-item .nav-link.active {
-    background: linear-gradient(135deg, var(--sima-gold), #A67C30) !important;
-    color: white !important;
-    font-weight: 500 !important;
-    box-shadow: 0 4px 14px rgba(196,151,58,0.30) !important;
-}
-
-.nav-sidebar .nav-item .nav-link.active .nav-icon { opacity: 1; }
-
-/* ─── TOPBAR / NAVBAR ─────────────────────────── */
-.main-header.navbar {
-    background: var(--sima-surface) !important;
-    border-bottom: 1px solid var(--sima-border) !important;
-    box-shadow: var(--shadow-sm) !important;
-    padding: 0 24px !important;
-    height: 60px;
-}
-
-.navbar-nav .nav-link {
-    color: var(--sima-text-secondary) !important;
-    font-family: var(--font-body);
-    font-size: 13px;
-    transition: color 0.15s;
-}
-
-.navbar-nav .nav-link:hover { color: var(--sima-text-primary) !important; }
-
-/* Sidebar Toggle */
-[data-widget="pushmenu"] {
-    color: var(--sima-text-muted) !important;
-    font-size: 16px !important;
-}
-
-/* ─── CONTENT WRAPPER ──────────────────────────── */
-.content-wrapper {
-    background: var(--sima-bg) !important;
-    padding-top: 0 !important;
-}
-
-/* ─── PAGE HEADER ─────────────────────────────── */
-.content-header {
-    padding: 20px 28px 0 !important;
-    background: transparent !important;
-}
-
-.sima-page-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    padding-bottom: 4px;
-}
-
-.sima-breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 6px;
-}
-
-.sima-breadcrumb__root {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.10em;
-    color: var(--sima-gold);
-    text-transform: uppercase;
-}
-
-.sima-breadcrumb__sep {
-    font-size: 8px;
-    color: var(--sima-text-muted);
-}
-
-.sima-breadcrumb__current {
-    font-size: 11px;
-    color: var(--sima-text-muted);
-}
-
-.sima-page-header__title {
-    font-family: var(--font-display);
-    font-size: 28px;
-    font-weight: 600;
-    color: var(--sima-text-primary);
-    margin: 0 0 4px;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-}
-
-.sima-page-header__sub {
-    font-size: 13px;
-    color: var(--sima-text-muted);
-    margin: 0;
-    font-weight: 400;
-}
-
-.sima-page-header__right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.sima-role-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 7px 14px;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.10em;
-    text-transform: uppercase;
-}
-
-.sima-role-badge--mahasiswa { background: var(--sima-blue-soft); color: var(--sima-blue); }
-.sima-role-badge--kln       { background: var(--sima-teal-soft); color: var(--sima-teal); }
-.sima-role-badge--jurusan   { background: var(--sima-purple-soft); color: var(--sima-purple); }
-.sima-role-badge--bipa      { background: var(--sima-amber-soft); color: var(--sima-amber); }
-.sima-role-badge--admin     { background: linear-gradient(135deg,#FEF9EC,#FEF3CD); color: var(--sima-gold); border: 1px solid rgba(196,151,58,0.25); }
-.sima-role-badge--user      { background: var(--sima-surface-2); color: var(--sima-text-muted); }
-
-.sima-datetime {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--sima-text-muted);
-    text-align: right;
     line-height: 1.5;
 }
 
-/* ─── CONTENT AREA ────────────────────────────── */
-.content, .sima-content {
-    padding: 20px 28px 32px !important;
+/* ── LAYOUT SHELL ─────────────────────────────────── */
+.sima-shell {
+    display: flex;
+    min-height: 100vh;
 }
 
-/* ─── STAT CARDS ─────────────────────────────── */
-.sima-stat {
-    background: var(--sima-surface);
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--sima-border-soft);
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.25s var(--ease-out-expo), box-shadow 0.25s var(--ease-out-expo);
+/* ═══════════════════════════════════════════════════
+   SIDEBAR
+   ═══════════════════════════════════════════════════ */
+.sima-sidebar {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--sidebar-border);
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 200;
+    transition: transform var(--transition);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
-.sima-stat:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
+/* Brand */
+.sima-brand {
+    padding: 22px 20px 18px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    border-bottom: 1px solid var(--c-border-soft);
+    text-decoration: none;
+    flex-shrink: 0;
+}
+.sima-brand__logo {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--c-accent), var(--c-accent-2));
+    border-radius: 10px;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(108,143,255,.3);
+}
+.sima-brand__logo svg { color: white; }
+.sima-brand__text {}
+.sima-brand__name {
+    font-family: var(--f-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--c-text-1);
+    letter-spacing: -.02em;
+    line-height: 1.1;
+}
+.sima-brand__sub {
+    font-size: 10.5px;
+    color: var(--c-text-3);
+    font-weight: 400;
+    letter-spacing: .01em;
 }
 
-.sima-stat__accent {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 3px;
-    border-radius: 16px 16px 0 0;
+/* Nav */
+.sima-nav {
+    flex: 1;
+    padding: 12px 10px;
 }
+.sima-nav__label {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--c-text-4);
+    padding: 10px 10px 6px;
+    margin-top: 6px;
+}
+.sima-nav__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    color: var(--c-text-2);
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: background var(--transition), color var(--transition);
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    margin-bottom: 2px;
+}
+.sima-nav__item:hover {
+    background: var(--c-bg);
+    color: var(--c-text-1);
+}
+.sima-nav__item.active {
+    background: var(--c-accent-light);
+    color: var(--c-accent);
+    font-weight: 600;
+}
+.sima-nav__item.active .sima-nav__icon { color: var(--c-accent); }
+.sima-nav__icon {
+    width: 18px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--c-text-3);
+    flex-shrink: 0;
+    transition: color var(--transition);
+}
+.sima-nav__chevron {
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--c-text-4);
+    transition: transform var(--transition);
+}
+.sima-nav__item.open .sima-nav__chevron { transform: rotate(90deg); }
 
-.sima-stat__accent--blue     { background: linear-gradient(90deg, var(--sima-blue), #60A5FA); }
-.sima-stat__accent--teal     { background: linear-gradient(90deg, var(--sima-teal), #2DD4BF); }
-.sima-stat__accent--red      { background: linear-gradient(90deg, var(--sima-red), #F87171); }
-.sima-stat__accent--amber    { background: linear-gradient(90deg, var(--sima-amber), #FCD34D); }
-.sima-stat__accent--emerald  { background: linear-gradient(90deg, var(--sima-emerald), #34D399); }
-.sima-stat__accent--purple   { background: linear-gradient(90deg, var(--sima-purple), #A78BFA); }
-.sima-stat__accent--gold     { background: linear-gradient(90deg, var(--sima-gold), var(--sima-gold-light)); }
-.sima-stat__accent--navy     { background: linear-gradient(90deg, var(--sima-slate), #2563EB); }
+/* Submenu */
+.sima-nav__sub {
+    display: none;
+    padding: 2px 0 4px 30px;
+}
+.sima-nav__sub.open { display: block; }
+.sima-nav__sub-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    color: var(--c-text-3);
+    font-size: 12.5px;
+    font-weight: 400;
+    transition: color var(--transition), background var(--transition);
+    margin-bottom: 1px;
+}
+.sima-nav__sub-item::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--c-border);
+    flex-shrink: 0;
+    transition: background var(--transition);
+}
+.sima-nav__sub-item:hover { color: var(--c-text-1); background: var(--c-bg); }
+.sima-nav__sub-item:hover::before { background: var(--c-accent); }
+.sima-nav__sub-item.active { color: var(--c-accent); font-weight: 500; }
+.sima-nav__sub-item.active::before { background: var(--c-accent); }
 
-.sima-stat__icon {
-    width: 44px; height: 44px;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-    margin-bottom: 12px;
+/* Sidebar footer */
+.sima-sidebar__foot {
+    padding: 12px 10px;
+    border-top: 1px solid var(--c-border-soft);
     flex-shrink: 0;
 }
 
-.sima-stat__icon--blue    { background: var(--sima-blue-soft);   color: var(--sima-blue); }
-.sima-stat__icon--teal    { background: var(--sima-teal-soft);   color: var(--sima-teal); }
-.sima-stat__icon--red     { background: var(--sima-red-soft);    color: var(--sima-red); }
-.sima-stat__icon--amber   { background: var(--sima-amber-soft);  color: var(--sima-amber); }
-.sima-stat__icon--emerald { background: var(--sima-emerald-soft);color: var(--sima-emerald); }
-.sima-stat__icon--purple  { background: var(--sima-purple-soft); color: var(--sima-purple); }
-.sima-stat__icon--gold    { background: #FEF9EC;                 color: var(--sima-gold); }
-.sima-stat__icon--navy    { background: #EFF6FF;                 color: var(--sima-slate); }
-
-.sima-stat__label {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--sima-text-muted);
+/* ═══════════════════════════════════════════════════
+   MAIN CONTENT
+   ═══════════════════════════════════════════════════ */
+.sima-main {
+    flex: 1;
+    margin-left: var(--sidebar-w);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-.sima-stat__value {
-    font-family: var(--font-display);
-    font-size: 36px;
-    font-weight: 600;
-    color: var(--sima-text-primary);
-    line-height: 1;
-    letter-spacing: -0.03em;
-    margin: 4px 0;
-}
-
-.sima-stat__delta {
-    font-size: 12px;
-    font-weight: 500;
+/* Topbar */
+.sima-topbar {
+    height: 60px;
+    background: var(--c-surface);
+    border-bottom: 1px solid var(--c-border-soft);
     display: flex;
     align-items: center;
-    gap: 4px;
+    padding: 0 28px;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+}
+.sima-topbar__hamburger {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--c-text-2);
+    font-size: 18px;
+    padding: 4px;
+}
+.sima-topbar__breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--c-text-3);
+    font-weight: 400;
+}
+.sima-topbar__breadcrumb span { color: var(--c-text-2); font-weight: 500; }
+.sima-topbar__section {
+    font-size: 13px;
+    color: var(--c-text-3);
+}
+.sima-topbar__right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.sima-topbar__icon-btn {
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    background: none;
+    border: 1px solid var(--c-border);
+    display: grid; place-items: center;
+    cursor: pointer;
+    color: var(--c-text-2);
+    font-size: 14px;
+    transition: background var(--transition), color var(--transition);
+    position: relative;
+    text-decoration: none;
+}
+.sima-topbar__icon-btn:hover { background: var(--c-bg); color: var(--c-text-1); }
+.sima-notif-badge {
+    position: absolute;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--c-red);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    display: grid; place-items: center;
+    border: 2px solid var(--c-surface);
+}
+.sima-user-btn {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 5px 10px 5px 5px;
+    border-radius: 10px;
+    border: 1px solid var(--c-border);
+    background: none;
+    cursor: pointer;
+    transition: background var(--transition);
+    text-decoration: none;
+    color: var(--c-text-1);
+}
+.sima-user-btn:hover { background: var(--c-bg); }
+
+/* Page content */
+.sima-content {
+    flex: 1;
+    padding: 28px;
+}
+
+/* Page header */
+.sima-page-header {
+    margin-bottom: 24px;
+}
+.sima-page-title {
+    font-family: var(--f-display);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--c-text-1);
+    letter-spacing: -.025em;
+    line-height: 1.15;
+}
+.sima-page-subtitle {
+    font-size: 14px;
+    color: var(--c-text-3);
     margin-top: 4px;
 }
 
-.sima-stat__delta--up   { color: var(--sima-emerald); }
-.sima-stat__delta--down { color: var(--sima-red); }
-.sima-stat__delta--flat { color: var(--sima-text-muted); }
-
-/* ─── CARDS ─────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════
+   CARD COMPONENT
+   ═══════════════════════════════════════════════════ */
 .sima-card {
-    background: var(--sima-surface);
-    border-radius: 16px;
-    border: 1px solid var(--sima-border-soft);
+    background: var(--c-surface);
+    border: 1px solid var(--c-border-soft);
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
 }
-
 .sima-card__header {
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--sima-border-soft);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 18px 20px 0;
+    gap: 12px;
 }
-
 .sima-card__title {
-    font-family: var(--font-display);
-    font-size: 17px;
-    font-weight: 600;
-    color: var(--sima-text-primary);
+    font-family: var(--f-display);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--c-text-1);
+    letter-spacing: -.02em;
     margin: 0;
-    letter-spacing: -0.01em;
 }
-
 .sima-card__subtitle {
     font-size: 12px;
-    color: var(--sima-text-muted);
+    color: var(--c-text-3);
     margin-top: 2px;
+    font-weight: 400;
 }
-
 .sima-card__action {
-    font-size: 12px;
+    font-size: 12.5px;
+    color: var(--c-accent);
+    text-decoration: none;
+    font-weight: 600;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: opacity var(--transition);
+    flex-shrink: 0;
+}
+.sima-card__action:hover { opacity: .75; }
+.sima-card__body {
+    padding: 18px 20px;
+}
+
+/* ═══════════════════════════════════════════════════
+   STAT CARD
+   ═══════════════════════════════════════════════════ */
+.sima-stat {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border-soft);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition), transform var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+.sima-stat:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+.sima-stat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+}
+.sima-stat--blue::before  { background: linear-gradient(90deg, var(--c-blue), #60a5fa); }
+.sima-stat--red::before   { background: linear-gradient(90deg, var(--c-red), #f87171); }
+.sima-stat--green::before { background: linear-gradient(90deg, var(--c-green), #34d399); }
+.sima-stat--amber::before { background: linear-gradient(90deg, var(--c-amber), #fbbf24); }
+
+.sima-stat__icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: grid; place-items: center;
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+.sima-stat__icon--blue   { background: var(--c-blue-lt);   color: var(--c-blue); }
+.sima-stat__icon--red    { background: var(--c-red-lt);    color: var(--c-red); }
+.sima-stat__icon--green  { background: var(--c-green-lt);  color: var(--c-green); }
+.sima-stat__icon--amber  { background: var(--c-amber-lt);  color: var(--c-amber); }
+
+.sima-stat__label {
+    font-size: 11.5px;
+    color: var(--c-text-3);
     font-weight: 500;
-    color: var(--sima-blue);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 4px;
+}
+.sima-stat__value {
+    display: block;
+    font-family: var(--f-display);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--c-text-1);
+    letter-spacing: -.03em;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+.sima-stat__delta {
+    font-size: 11.5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+}
+.sima-stat__delta--flat  { color: var(--c-text-3); }
+.sima-stat__delta--up    { color: var(--c-green); }
+.sima-stat__delta--down  { color: var(--c-red); }
+
+/* ═══════════════════════════════════════════════════
+   BADGES
+   ═══════════════════════════════════════════════════ */
+.sima-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    white-space: nowrap;
+}
+.sima-badge--blue   { background: var(--c-blue-lt);   color: var(--c-blue); }
+.sima-badge--green  { background: var(--c-green-lt);  color: var(--c-green); }
+.sima-badge--red    { background: var(--c-red-lt);    color: var(--c-red); }
+.sima-badge--amber  { background: var(--c-amber-lt);  color: var(--c-amber); }
+.sima-badge--purple { background: var(--c-purple-lt); color: var(--c-purple); }
+.sima-badge--teal   { background: var(--c-teal-lt);   color: var(--c-teal); }
+.sima-badge--grey   { background: var(--c-bg);        color: var(--c-text-3); border: 1px solid var(--c-border); }
+
+/* ═══════════════════════════════════════════════════
+   ALERT
+   ═══════════════════════════════════════════════════ */
+.sima-alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    font-size: 13.5px;
+    font-weight: 400;
+    line-height: 1.5;
+    border: 1px solid transparent;
+}
+.sima-alert--blue   { background: var(--c-blue-lt);   color: #1e40af; border-color: rgba(37,99,235,.15); }
+.sima-alert--green  { background: var(--c-green-lt);  color: #065f46; border-color: rgba(5,150,105,.15); }
+.sima-alert--amber  { background: var(--c-amber-lt);  color: #92400e; border-color: rgba(217,119,6,.2); }
+.sima-alert--red    { background: var(--c-red-lt);    color: #991b1b; border-color: rgba(220,38,38,.15); }
+.sima-alert__icon   { flex-shrink: 0; font-size: 15px; }
+.sima-alert__text   { flex: 1; }
+.sima-alert__action {
+    font-weight: 600;
+    font-size: 12.5px;
     text-decoration: none;
-    padding: 6px 12px;
-    border-radius: 8px;
-    background: var(--sima-blue-soft);
-    transition: all 0.15s;
+    color: inherit;
+    opacity: .85;
+    border: 1px solid currentColor;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: opacity var(--transition);
+    flex-shrink: 0;
+}
+.sima-alert__action:hover { opacity: 1; }
+
+/* ═══════════════════════════════════════════════════
+   SCHEDULE ITEM
+   ═══════════════════════════════════════════════════ */
+.sima-sch {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: background var(--transition);
+    border: 1px solid transparent;
+}
+.sima-sch:hover { background: var(--c-bg); border-color: var(--c-border-soft); }
+.sima-sch__time {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    color: var(--c-text-3);
+    font-weight: 500;
+    flex-shrink: 0;
+    width: 86px;
+}
+.sima-sch__dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px solid;
+    flex-shrink: 0;
+}
+.sima-sch__info { flex: 1; min-width: 0; }
+.sima-sch__title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--c-text-1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sima-sch__meta {
+    font-size: 11.5px;
+    color: var(--c-text-3);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.sima-card__action:hover {
-    background: var(--sima-blue);
+/* ═══════════════════════════════════════════════════
+   PROGRESS BAR
+   ═══════════════════════════════════════════════════ */
+.sima-prog {
+    height: 6px;
+    background: var(--c-bg);
+    border-radius: 100px;
+    overflow: hidden;
+    border: 1px solid var(--c-border-soft);
+}
+.sima-prog__bar {
+    height: 100%;
+    border-radius: 100px;
+    transition: width .6s cubic-bezier(.22,1,.36,1);
+    width: 0;
+}
+
+/* ═══════════════════════════════════════════════════
+   TIMELINE
+   ═══════════════════════════════════════════════════ */
+.sima-timeline {
+    list-style: none;
+    padding: 0; margin: 0;
+}
+.sima-tl-item {
+    display: flex;
+    gap: 12px;
+    padding-bottom: 16px;
+    position: relative;
+}
+.sima-tl-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 30px;
+    bottom: 0;
+    width: 1px;
+    background: var(--c-border-soft);
+}
+.sima-tl-dot {
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    display: grid; place-items: center;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+.sima-tl-content { flex: 1; padding-top: 4px; }
+.sima-tl-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--c-text-1);
+    line-height: 1.4;
+}
+.sima-tl-time {
+    font-size: 11.5px;
+    color: var(--c-text-3);
+    margin-top: 3px;
+}
+
+/* ═══════════════════════════════════════════════════
+   QUICK ACTIONS
+   ═══════════════════════════════════════════════════ */
+.sima-quick {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 8px;
+    border-radius: var(--radius);
+    background: var(--c-bg);
+    border: 1px solid var(--c-border-soft);
+    text-decoration: none;
+    transition: all var(--transition);
+    text-align: center;
+    cursor: pointer;
+}
+.sima-quick:hover {
+    background: var(--c-surface);
+    box-shadow: var(--shadow);
+    border-color: var(--c-border);
+    transform: translateY(-1px);
+}
+.sima-quick__icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: grid; place-items: center;
+    font-size: 15px;
+}
+.sima-quick__label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--c-text-2);
+    line-height: 1.3;
+}
+
+/* ═══════════════════════════════════════════════════
+   AVATAR
+   ═══════════════════════════════════════════════════ */
+.sima-avatar {
+    display: grid;
+    place-items: center;
+    font-family: var(--f-display);
+    font-weight: 700;
     color: white;
-    text-decoration: none;
+    flex-shrink: 0;
+    user-select: none;
 }
 
-.sima-card__body { padding: 24px; }
+/* ═══════════════════════════════════════════════════
+   ANNOUNCE ITEM
+   ═══════════════════════════════════════════════════ */
+.sima-announce {
+    padding: 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--c-border-soft);
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all var(--transition);
+    background: var(--c-surface);
+}
+.sima-announce:hover { border-color: var(--c-border); box-shadow: var(--shadow-sm); }
+.sima-announce__title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--c-text-1);
+    line-height: 1.4;
+}
+.sima-announce__body {
+    font-size: 12.5px;
+    color: var(--c-text-3);
+    line-height: 1.55;
+    margin-top: 5px;
+}
+.sima-announce__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 9px;
+    font-size: 11.5px;
+    color: var(--c-text-3);
+    flex-wrap: wrap;
+}
 
-/* ─── TABLE ─────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════
+   TABLE
+   ═══════════════════════════════════════════════════ */
 .sima-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
 }
-
+.sima-table thead tr {
+    border-bottom: 1px solid var(--c-border-soft);
+}
 .sima-table thead th {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.10em;
+    padding: 10px 20px;
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
-    color: var(--sima-text-muted);
-    padding: 12px 16px;
-    background: var(--sima-surface-2);
-    border-bottom: 1px solid var(--sima-border);
+    letter-spacing: .06em;
+    color: var(--c-text-3);
+    text-align: left;
     white-space: nowrap;
 }
-
-.sima-table thead th:first-child { border-radius: 10px 0 0 0; }
-.sima-table thead th:last-child  { border-radius: 0 10px 0 0; }
-
 .sima-table tbody td {
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--sima-border-soft);
-    color: var(--sima-text-primary);
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--c-border-soft);
+    color: var(--c-text-2);
     vertical-align: middle;
 }
-
 .sima-table tbody tr:last-child td { border-bottom: none; }
+.sima-table tbody tr:hover td { background: var(--c-bg); }
 
-.sima-table tbody tr {
-    transition: background 0.15s;
-}
-
-.sima-table tbody tr:hover td {
-    background: var(--sima-surface-2);
-}
-
-/* ─── BADGES & PILLS ─────────────────────────── */
-.sima-badge {
+/* ═══════════════════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════════════════ */
+.sima-btn {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
+    gap: 7px;
+    padding: 9px 16px;
+    border-radius: var(--radius-sm);
+    font-family: var(--f-body);
+    font-size: 13.5px;
     font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+    transition: all var(--transition);
+    white-space: nowrap;
+    background: linear-gradient(135deg, var(--c-accent), var(--c-accent-2));
+    color: white;
+    box-shadow: 0 2px 10px rgba(108,143,255,.25);
+}
+.sima-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(108,143,255,.35); color: white; }
+.sima-btn:active { transform: scale(.98); }
+
+.sima-btn--outline {
+    background: transparent;
+    color: var(--c-text-2);
+    box-shadow: none;
+    border: 1px solid var(--c-border);
+}
+.sima-btn--outline:hover { background: var(--c-bg); color: var(--c-text-1); box-shadow: none; transform: none; }
+
+.sima-btn--gold {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    box-shadow: 0 2px 10px rgba(217,119,6,.25);
+}
+.sima-btn--gold:hover { box-shadow: 0 4px 16px rgba(217,119,6,.35); color: white; }
+
+.sima-btn--danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    box-shadow: 0 2px 10px rgba(220,38,38,.2);
 }
 
-.sima-badge--blue    { background: var(--sima-blue-soft);   color: var(--sima-blue); }
-.sima-badge--teal    { background: var(--sima-teal-soft);   color: var(--sima-teal); }
-.sima-badge--red     { background: var(--sima-red-soft);    color: var(--sima-red); }
-.sima-badge--amber   { background: var(--sima-amber-soft);  color: var(--sima-amber); }
-.sima-badge--emerald { background: var(--sima-emerald-soft);color: var(--sima-emerald); }
-.sima-badge--purple  { background: var(--sima-purple-soft); color: var(--sima-purple); }
-.sima-badge--grey    { background: #F1F5F9; color: var(--sima-text-secondary); }
-
-/* ─── TIMELINE ───────────────────────────────── */
-.sima-timeline { list-style: none; padding: 0; margin: 0; }
-
-.sima-timeline__item {
-    display: flex;
-    gap: 16px;
-    padding: 0 0 20px;
-    position: relative;
-}
-
-.sima-timeline__item:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    left: 17px;
-    top: 36px;
-    bottom: 0;
-    width: 1px;
-    background: var(--sima-border);
-}
-
-.sima-timeline__dot {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 1;
-}
-
-.sima-timeline__content { flex: 1; padding-top: 4px; }
-
-.sima-timeline__title {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--sima-text-primary);
-    margin-bottom: 2px;
-}
-
-.sima-timeline__time {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--sima-text-muted);
-}
-
-/* ─── AVATAR ─────────────────────────────────── */
-.sima-avatar {
-    width: 34px; height: 34px;
-    border-radius: 10px;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 700;
-    flex-shrink: 0;
-}
-
-/* ─── PROGRESS ───────────────────────────────── */
-.sima-progress {
-    height: 6px;
-    border-radius: 99px;
-    background: var(--sima-border);
-    overflow: hidden;
-}
-
-.sima-progress__bar {
-    height: 100%;
-    border-radius: 99px;
-    transition: width 1.2s var(--ease-out-expo);
-}
-
-/* ─── DIVIDER ────────────────────────────────── */
-.sima-divider {
-    height: 1px;
-    background: var(--sima-border-soft);
-    margin: 20px 0;
-}
-
-/* ─── ANNOUNCEMENT CARD ──────────────────────── */
-.sima-announce {
-    padding: 16px;
-    border-radius: 12px;
-    background: var(--sima-surface-2);
-    border: 1px solid var(--sima-border-soft);
-    margin-bottom: 10px;
-    transition: border-color 0.15s;
-}
-
-.sima-announce:hover { border-color: var(--sima-border); }
-.sima-announce:last-child { margin-bottom: 0; }
-
-.sima-announce__title {
-    font-size: 13px; font-weight: 600;
-    color: var(--sima-text-primary);
-    margin-bottom: 4px;
-}
-
-.sima-announce__body {
+.sima-btn--sm {
+    padding: 6px 12px;
     font-size: 12px;
-    color: var(--sima-text-secondary);
-    line-height: 1.6;
-    margin-bottom: 8px;
+    border-radius: 7px;
 }
+.sima-btn--full { width: 100%; justify-content: center; }
 
-.sima-announce__meta {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 11px; color: var(--sima-text-muted);
-}
-
-/* ─── SCHEDULE ITEM ─────────────────────────── */
-.sima-schedule {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--sima-border-soft);
-}
-
-.sima-schedule:last-child { border-bottom: none; padding-bottom: 0; }
-
-.sima-schedule__time {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--sima-text-muted);
-    min-width: 70px;
-    padding-top: 2px;
-}
-
-.sima-schedule__dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    border: 2px solid;
-    margin-top: 5px;
-    flex-shrink: 0;
-}
-
-.sima-schedule__info { flex: 1; }
-
-.sima-schedule__title {
-    font-size: 13px; font-weight: 500;
-    color: var(--sima-text-primary);
-    margin-bottom: 2px;
-}
-
-.sima-schedule__meta {
-    font-size: 12px; color: var(--sima-text-muted);
-}
-
-/* ─── CHART PLACEHOLDER ─────────────────────── */
-.sima-chart-wrap {
-    position: relative;
+/* ═══════════════════════════════════════════════════
+   FORM INPUTS
+   ═══════════════════════════════════════════════════ */
+.sima-input {
     width: 100%;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    color: var(--c-text-1);
+    font-family: var(--f-body);
+    font-size: 14px;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+.sima-input:hover { border-color: var(--c-text-4); }
+.sima-input:focus { border-color: var(--c-accent); box-shadow: 0 0 0 3px rgba(108,143,255,.1); }
+.sima-input::placeholder { color: var(--c-text-4); }
+
+.sima-label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--c-text-2);
+    margin-bottom: 6px;
 }
 
-/* ─── DONUT STAT ─────────────────────────────── */
-.sima-donut-wrap {
-    display: flex;
-    align-items: center;
-    gap: 24px;
+/* ═══════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════ */
+.sima-fade { opacity: 0; animation: fadeUp .45s ease forwards; }
+.sima-fade--1 { animation-delay: .05s; }
+.sima-fade--2 { animation-delay: .10s; }
+.sima-fade--3 { animation-delay: .15s; }
+.sima-fade--4 { animation-delay: .20s; }
+.sima-fade--5 { animation-delay: .25s; }
+.sima-fade--6 { animation-delay: .30s; }
+.sima-fade--7 { animation-delay: .35s; }
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
 }
 
-/* ─── QUICK ACTIONS ──────────────────────────── */
-.sima-quick {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px 12px;
-    border-radius: 14px;
-    background: var(--sima-surface-2);
-    border: 1px solid var(--sima-border-soft);
-    text-decoration: none;
-    transition: all 0.20s var(--ease-out-expo);
-    text-align: center;
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: .4; }
 }
 
-.sima-quick:hover {
-    background: var(--sima-surface);
-    border-color: var(--sima-border);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-    text-decoration: none;
-}
-
-.sima-quick__icon {
-    width: 44px; height: 44px;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-.sima-quick__label {
-    font-size: 12px; font-weight: 500;
-    color: var(--sima-text-secondary);
-}
-
-/* ─── ALERT STRIPE ───────────────────────────── */
-.sima-alert {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 18px;
-    border-radius: 12px;
-    margin-bottom: 10px;
-    font-size: 13px;
-    border: 1px solid transparent;
-}
-
-.sima-alert--red    { background: var(--sima-red-soft);    color: var(--sima-red);    border-color: #FED7D7; }
-.sima-alert--amber  { background: var(--sima-amber-soft);  color: var(--sima-amber);  border-color: #FDE68A; }
-.sima-alert--blue   { background: var(--sima-blue-soft);   color: var(--sima-blue);   border-color: #BFDBFE; }
-.sima-alert--teal   { background: var(--sima-teal-soft);   color: var(--sima-teal);   border-color: #99F6E4; }
-.sima-alert--emerald{ background: var(--sima-emerald-soft);color: var(--sima-emerald);border-color: #A7F3D0; }
-
-/* ─── COUNTER ANIMATION ──────────────────────── */
-.sima-stat__value[data-count] { display: block; }
-
-/* ─── FOOTER ─────────────────────────────────── */
-.main-footer {
-    background: var(--sima-surface) !important;
-    border-top: 1px solid var(--sima-border) !important;
-    font-family: var(--font-body);
-    font-size: 12px;
-    color: var(--sima-text-muted) !important;
-    padding: 14px 28px !important;
-}
-
-/* ─── RESPONSIVE ─────────────────────────────── */
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-    .sima-page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .sima-page-header__right { align-self: flex-start; }
-    .content, .sima-content { padding: 16px !important; }
-    .content-header { padding: 16px 16px 0 !important; }
-}
-
-/* ─── SCROLLBAR ──────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--sima-border); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: var(--sima-text-muted); }
-
-/* ─── LOAD ANIMATION ────────────────────────── */
-@keyframes simaFadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-.sima-fade { animation: simaFadeUp 0.5s var(--ease-out-expo) both; }
-.sima-fade--1 { animation-delay: 0.05s; }
-.sima-fade--2 { animation-delay: 0.10s; }
-.sima-fade--3 { animation-delay: 0.15s; }
-.sima-fade--4 { animation-delay: 0.20s; }
-.sima-fade--5 { animation-delay: 0.25s; }
-.sima-fade--6 { animation-delay: 0.30s; }
-.sima-fade--7 { animation-delay: 0.35s; }
-.sima-fade--8 { animation-delay: 0.40s; }
-
-/* ─── OVERRIDE ADMINLTE DEFAULTS ─────────────── */
-.small-box { border-radius: 16px !important; box-shadow: var(--shadow-sm) !important; }
-.card { border-radius: 16px !important; border: 1px solid var(--sima-border-soft) !important; box-shadow: var(--shadow-sm) !important; }
-.card-header { background: var(--sima-surface) !important; border-bottom-color: var(--sima-border-soft) !important; }
-a { color: var(--sima-blue); }
-a:hover { color: var(--sima-text-primary); }
-</style>
-@endsection
-
-@section('js')
-<script>
-/* ─── DATETIME CLOCK ─────────────────────────── */
-(function() {
-    const el = document.getElementById('simaDatetime');
-    if (!el) return;
-
-    function pad(n) { return String(n).padStart(2, '0'); }
-
-    function tick() {
-        const now = new Date();
-        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        el.innerHTML =
-            `<span style="display:block">${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}</span>` +
-            `<span style="display:block;text-align:right">${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} WIB</span>`;
+    .sima-sidebar {
+        transform: translateX(-100%);
     }
-    tick();
-    setInterval(tick, 1000);
-})();
+    .sima-sidebar.open {
+        transform: translateX(0);
+        box-shadow: var(--shadow-md);
+    }
+    .sima-main {
+        margin-left: 0;
+    }
+    .sima-topbar__hamburger { display: block; }
+    .sima-content { padding: 16px; }
+    .sima-overlay {
+        display: none;
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,.35);
+        z-index: 150;
+    }
+    .sima-overlay.open { display: block; }
+}
 
-/* ─── COUNTER ANIMATION ─────────────────────── */
-document.addEventListener('DOMContentLoaded', function() {
-    const counters = document.querySelectorAll('[data-count]');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const el = entry.target;
-                const target = parseInt(el.getAttribute('data-count'));
-                const duration = 1000;
-                const step = Math.ceil(target / (duration / 16));
-                let current = 0;
-                const timer = setInterval(() => {
-                    current = Math.min(current + step, target);
-                    el.textContent = current.toLocaleString();
-                    if (current >= target) clearInterval(timer);
-                }, 16);
-                observer.unobserve(el);
-            }
-        });
-    }, { threshold: 0.3 });
+/* ═══════════════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--c-text-4); }
+</style>
+@stack('head_styles')
+</head>
 
-    counters.forEach(c => observer.observe(c));
+<body>
+<div class="sima-shell">
+
+    <!-- ── SIDEBAR ─────────────────────────────── -->
+    <aside class="sima-sidebar" id="sidebar">
+
+        <a href="{{ route('mahasiswa.dashboard') }}" class="sima-brand">
+            <div class="sima-brand__logo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                </svg>
+            </div>
+            <div class="sima-brand__text">
+                <div class="sima-brand__name">SIMA</div>
+                <div class="sima-brand__sub">{{ config('app.name', 'Universitas') }}</div>
+            </div>
+        </a>
+
+        <nav class="sima-nav">
+            <div class="sima-nav__label">Menu Utama</div>
+
+            <a href="{{ route('mahasiswa.dashboard') }}"
+               class="sima-nav__item {{ request()->routeIs('mahasiswa.dashboard') ? 'active' : '' }}">
+                <span class="sima-nav__icon"><i class="fas fa-house"></i></span>
+                Dashboard
+            </a>
+
+            <a href="{{ route('mahasiswa.profil') }}"
+               class="sima-nav__item {{ request()->routeIs('mahasiswa.profil*') ? 'active' : '' }}">
+                <span class="sima-nav__icon"><i class="fas fa-circle-user"></i></span>
+                Biodata / Profil
+            </a>
+
+            <a href="{{ route('mahasiswa.profil.dokumen') }}"
+               class="sima-nav__item {{ request()->routeIs('mahasiswa.profil.dokumen*') ? 'active' : '' }}">
+                <span class="sima-nav__icon"><i class="fas fa-folder-open"></i></span>
+                Dokumen Saya
+            </a>
+
+            <!-- Schedules dropdown -->
+            <button class="sima-nav__item {{ request()->routeIs('mahasiswa.jadwal*') ? 'active open' : '' }}"
+                    onclick="toggleNav(this)">
+                <span class="sima-nav__icon"><i class="fas fa-calendar-days"></i></span>
+                Jadwal
+                <i class="fas fa-chevron-right sima-nav__chevron"></i>
+            </button>
+            <div class="sima-nav__sub {{ request()->routeIs('mahasiswa.jadwal*') ? 'open' : '' }}">
+                <a href="{{ route('mahasiswa.jadwal') }}" class="sima-nav__sub-item {{ request()->routeIs('mahasiswa.jadwal') ? 'active' : '' }}">
+                    Semua Jadwal
+                </a>
+                <a href="{{ route('mahasiswa.jadwal', ['type' => 'bipa']) }}" class="sima-nav__sub-item">BIPA</a>
+                <a href="{{ route('mahasiswa.jadwal', ['type' => 'kuliah']) }}" class="sima-nav__sub-item">Perkuliahan</a>
+                <a href="{{ route('mahasiswa.jadwal', ['type' => 'kln']) }}" class="sima-nav__sub-item">KLN</a>
+            </div>
+
+            <a href="{{ route('mahasiswa.request.index') }}"
+               class="sima-nav__item {{ request()->routeIs('mahasiswa.request*') ? 'active' : '' }}">
+                <span class="sima-nav__icon"><i class="fas fa-file-signature"></i></span>
+                Request Dokumen
+            </a>
+
+            <a href="{{ route('mahasiswa.announcement') }}"
+               class="sima-nav__item {{ request()->routeIs('mahasiswa.announcement*') ? 'active' : '' }}">
+                <span class="sima-nav__icon"><i class="fas fa-bullhorn"></i></span>
+                Pengumuman
+            </a>
+
+            <a href="{{ route('mahasiswa.notifikasi') }}"
+               class="sima-nav__item {{ request()->routeIs('mahasiswa.notifikasi*') ? 'active' : '' }}">
+                <span class="sima-nav__icon"><i class="fas fa-bell"></i></span>
+                Notifikasi
+                @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
+                    <span class="sima-badge sima-badge--red" style="margin-left:auto;font-size:10px;padding:1px 7px;">
+                        {{ $unreadNotifCount }}
+                    </span>
+                @endif
+            </a>
+
+            <a href="{{ route('mahasiswa.analytics') }}"
+               class="sima-nav__item {{ request()->routeIs('mahasiswa.analytics*') ? 'active' : '' }}">
+                <span class="sima-nav__icon"><i class="fas fa-chart-bar"></i></span>
+                Kehadiran & Nilai
+            </a>
+
+            <div class="sima-nav__label">Akun</div>
+
+            <a href="{{ route('profile.edit') }}"
+               class="sima-nav__item {{ request()->routeIs('profile*') ? 'active' : '' }}">
+                <span class="sima-nav__icon"><i class="fas fa-key"></i></span>
+                Ubah Password
+            </a>
+
+        </nav>
+
+        <!-- Sidebar footer — logout -->
+        <div class="sima-sidebar__foot">
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="sima-nav__item" style="color:var(--c-red)">
+                    <span class="sima-nav__icon" style="color:var(--c-red)">
+                        <i class="fas fa-right-from-bracket"></i>
+                    </span>
+                    Keluar
+                </button>
+            </form>
+        </div>
+
+    </aside>
+
+    <!-- Mobile overlay -->
+    <div class="sima-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- ── MAIN ───────────────────────────────── -->
+    <div class="sima-main">
+
+        <!-- Topbar -->
+        <header class="sima-topbar">
+            <button class="sima-topbar__hamburger" onclick="openSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="sima-topbar__breadcrumb">
+                SIMA <i class="fas fa-slash" style="font-size:9px;opacity:.3;margin:0 2px"></i>
+                <span>@yield('page_section', 'Mahasiswa')</span>
+            </div>
+
+            <div class="sima-topbar__right">
+                <!-- Notif -->
+                <a href="{{ route('mahasiswa.notifikasi') }}" class="sima-topbar__icon-btn" title="Notifikasi">
+                    <i class="fas fa-bell"></i>
+                    @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
+                        <span class="sima-notif-badge">{{ $unreadNotifCount }}</span>
+                    @endif
+                </a>
+
+                <!-- User -->
+                <div class="sima-user-btn" onclick="window.location='{{ route('mahasiswa.profil') }}'">
+                    <div class="sima-avatar"
+                         style="width:28px;height:28px;border-radius:8px;font-size:11px;background:linear-gradient(135deg,var(--c-accent),var(--c-accent-2))">
+                        {{ strtoupper(substr(auth()->user()->name ?? 'M', 0, 2)) }}
+                    </div>
+                    <span style="font-size:13px;font-weight:600;color:var(--c-text-1)">
+                        {{ auth()->user()->nim ?? '—' }}
+                    </span>
+                    <i class="fas fa-chevron-down" style="font-size:10px;color:var(--c-text-3)"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="sima-content">
+
+            <!-- Page Header -->
+            <div class="sima-page-header">
+                <div class="sima-page-title">@yield('page_title', 'Dashboard')</div>
+                <div class="sima-page-subtitle">@yield('page_subtitle', '')</div>
+            </div>
+
+            <!-- Flash messages -->
+            @if(session('success'))
+            <div class="sima-alert sima-alert--green sima-fade" style="margin-bottom:20px">
+                <i class="fas fa-circle-check sima-alert__icon"></i>
+                <div class="sima-alert__text">{{ session('success') }}</div>
+            </div>
+            @endif
+            @if(session('error'))
+            <div class="sima-alert sima-alert--red sima-fade" style="margin-bottom:20px">
+                <i class="fas fa-circle-xmark sima-alert__icon"></i>
+                <div class="sima-alert__text">{{ session('error') }}</div>
+            </div>
+            @endif
+
+            @yield('main_content')
+        </main>
+
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/* ── Sidebar toggle ─────────────────────────── */
+function openSidebar() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+/* ── Nav dropdown ───────────────────────────── */
+function toggleNav(btn) {
+    const isOpen = btn.classList.contains('open');
+    btn.classList.toggle('open', !isOpen);
+    const sub = btn.nextElementSibling;
+    if (sub && sub.classList.contains('sima-nav__sub')) {
+        sub.classList.toggle('open', !isOpen);
+    }
+}
+
+/* ── Progress bar animation ─────────────────── */
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.sima-prog__bar[data-w]').forEach(function (bar) {
+        const pct = bar.getAttribute('data-w');
+        setTimeout(() => { bar.style.width = pct + '%'; }, 200);
+    });
+
+    /* ── Count-up animation ─────────────────── */
+    document.querySelectorAll('[data-count]').forEach(function (el) {
+        const target = parseInt(el.getAttribute('data-count'), 10);
+        if (isNaN(target)) return;
+        let cur = 0;
+        const step = Math.ceil(target / 30);
+        const timer = setInterval(() => {
+            cur = Math.min(cur + step, target);
+            el.textContent = cur;
+            if (cur >= target) clearInterval(timer);
+        }, 30);
+    });
 });
 </script>
+
+@stack('page_js')
 @yield('page_js')
-@endsection
+</body>
+</html>
