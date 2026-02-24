@@ -60,7 +60,7 @@ class User extends Authenticatable
     }
     public function historyDokumen()
     {
-        return $this->hasMany(HistoryDokumen::class, 'users_id');
+        return $this->hasMany(HistoryDokumen::class, 'user_id');
     }
     public function notification()
     {
