@@ -19,10 +19,10 @@ class Mahasiswa extends Model
     {
         return $this->belongsToMany(Kelas::class, 'mahasiswa_kelas', 'mahasiswa_id', 'kelas_id')->withTimestamps();
     }
-    public function jurusan()
-    {
-        return $this->belongsTo(jurusan::class, 'jurusan_id');
-    }
+    // public function jurusan()
+    // {
+    //     return $this->belongsTo(jurusan::class, 'jurusan_id');
+    // }
     public function kehadiran()
     {
         return $this->hasMany(Kehadiran::class, 'mahasiswa_id');

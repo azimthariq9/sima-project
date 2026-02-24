@@ -10,10 +10,10 @@ class dosen extends Model
 
     protected $guarded = [];
 
-    public function jurusan()
-    {
-        return $this->belongsTo(jurusan::class, 'jurusan_id');
-    }
+    // public function jurusan()
+    // {
+    //     return $this->belongsTo(jurusan::class, 'jurusan_id');
+    // }
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

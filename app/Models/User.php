@@ -66,4 +66,8 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Notification::class, 'notification_users', 'user_id', 'notification_id')->withPivot('is_read')->withTimestamps();
     }
+    public function jurusan()
+    {
+        return $this->belongsTo(jurusan::class, 'jurusan_id');
+    }
 }
