@@ -11,13 +11,13 @@ class DashboardController extends Controller
         $user = auth()->user();
 
         switch ($user->role) {
-            case 'admin':
+            case 'kln':
                 return view('kln.dashboard');
 
             case 'mahasiswa':
                 return view('mahasiswa.dashboard');
 
-            case 'jurusan':
+            case 'adminJurusan':
                 return view('jurusan.dashboard');
 
             case 'bipa':
