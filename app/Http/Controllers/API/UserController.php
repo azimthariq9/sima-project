@@ -8,7 +8,7 @@ use App\Services\UserService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\createUserRequest;
 use App\Http\Requests\User\updateUserRequest;
-use Illuminate\Auth\Middleware;
+use Illuminate\Auth\Middleware\Authenticate;
 
 
 class UserController extends Controller
@@ -17,9 +17,20 @@ class UserController extends Controller
 
     public function __construct(UserService $userService)
     {
-        $this->middleware('auth');
+        // $this->middleware('auth');
         $this->userService = $userService;
     }
+
+        public function index()
+        {
+            $users = $this->userService->getAll();
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Users retrieved successfully',
+                'data' => $users
+            ], 200);
+        }
 
     public function store(createUserRequest $request)
     {

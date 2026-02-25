@@ -8,6 +8,12 @@ use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
+
+    public function getAll()
+    {
+        return User::all();
+    }
+
     public function create(array $data): User
     {
         return DB::transaction(function () use ($data) {
