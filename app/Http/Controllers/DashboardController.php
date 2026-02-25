@@ -4,19 +4,17 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use App\Enums\Role;
 use Illuminate\Http\Request;
+use App\Services\RoleServices;
 
 class DashboardController extends Controller
 {
     public function index()
     {
         $userRole = Auth::user()->role;
-        if ($userRole instanceof Role) {
-                $userRole = $userRole->value; // Ambil string value-nya
-        }
+        $roleServices = new RoleServices($userRole);
         
-            // Sekarang $userRole pasti string
-        $userRole = trim($userRole);
-
+        $userRole = $roleServices->trimRole($userRole);
+        print_r($userRole);
         switch ($userRole) {
             case 'kln':
                 return view('kln.dashboard');
@@ -27,7 +25,7 @@ class DashboardController extends Controller
             case 'Jurusan':
                 return view('jurusan.dashboard');
 
-            case 'bipa':
+            case 'Bipa':
                 return view('bipa.dashboard');
 
             default:
