@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('role')->default('user');
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->string('status')->default('active');
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreignId('jurusan_id')->nullable()->constrained('jurusan')->onDelete('set null');
         });
     }
 
@@ -27,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('role');
+            
         });
     }
 };

@@ -6,6 +6,8 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Validation\Rules\Enum;
+use App\Enums\role;
 
 class RoleMiddleware
 {
@@ -15,7 +17,7 @@ class RoleMiddleware
             return redirect('/login');
         }
 
-        if (Auth::user()->role !== $role) {
+        if (Auth::user()->role !== role::fromValue($role)) {
             abort(403, 'Akses ditolak');
         }
 
