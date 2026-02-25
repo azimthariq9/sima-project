@@ -22,10 +22,10 @@ class createDosenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nama' => ['required', 'string', 'max:255'],
-            'nidn' => ['required', 'string', 'max:255', 'unique:dosen,nidn'],
-            'kodeDos'=> ['required', 'string', 'max:255', 'unique:dosen,kodeDos'],
-            'users_id' => ['required', 'exists:users,id'],
+            'nama' => ['sometimes', 'required', 'string', 'max:255'],
+            'nidn' => ['sometimes', 'required', 'string', 'max:255', 'unique:dosen,nidn'],
+            'kodeDos'=> ['sometimes', 'required', 'string', 'max:255', 'unique:dosen,kodeDos'],
+            'users_id' => ['sometimes', 'required', 'exists:users,id'],
         ];
     }
 }

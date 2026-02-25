@@ -22,7 +22,7 @@ class createLogRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'users_id' => ['required', 'exists:users,id'],
+            'user_id' => ['required', 'exists:users,id'],
             'mahasiswa_id' => ['nullable', 'exists:mahasiswa,id'],
             'jadwal_id' => ['nullable', 'exists:jadwal,id'],
             'dosen_id' => ['nullable', 'exists:dosen,id'],

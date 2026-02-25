@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\MahasiswaRequestController;
+use App\Http\Controllers\API\KlnController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +26,7 @@ Route::get('/', function () {
 
 Route::post('login1', [AuthenticatedSessionController::class, 'store'])->name('login1');
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+Route::get('users', [UserController::class, 'index'])->name('users.index');
 
 /*
 |--------------------------------------------------------------------------
@@ -55,7 +57,7 @@ Route::middleware(['auth'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'check.role:admin'])->group(function () {
+Route::middleware(['auth', 'check.role:KLN'])->group(function () {
 
     Route::apiResource('users', UserController::class);
 
@@ -116,4 +118,37 @@ Route::middleware(['auth', 'check.role:mahasiswa'])
 |--------------------------------------------------------------------------
 */
 
+
+/*
+|--------------------------------------------------------------------------
+| KLN Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'check.role:KLN'])->prefix('kln')->name('kln.')->group(function () {
+    
+    // ===== HALAMAN (return view) =====
+    Route::get('dashboard', [KlnController::class, 'index'])->name('dashboard');
+    Route::get('users', [KlnController::class, 'usersPage'])->name('users.page');
+    Route::get('dokumen', [KlnController::class, 'dokumenPage'])->name('dokumen.page');
+    
+    // ===== API INTERNAL (return JSON) =====
+    Route::prefix('api')->name('api.')->group(function () {
+        // Dashboard
+        Route::get('dashboard/stats', [KlnController::class, 'getDashboardStats'])->name('dashboard.stats');
+        
+        // Users
+        Route::get('users', [KlnController::class, 'getUsers'])->name('users.index');
+        Route::post('users', [KlnController::class, 'storeUser'])->name('users.store');
+        Route::get('users/{id}', [KlnController::class, 'showUser'])->name('users.show');
+        Route::put('users/{id}', [KlnController::class, 'updateUser'])->name('users.update');
+        Route::delete('users/{id}', [KlnController::class, 'destroyUser'])->name('users.destroy');
+        Route::put('users/{id}/status', [KlnController::class, 'updateStatusMahasiswa'])->name('users.status');
+        // Dokumen
+        Route::get('dokumen', [KlnController::class, 'getDokumen'])->name('dokumen.index');
+        Route::put('dokumen/{id}/status', [KlnController::class, 'updateDokumenStatus'])->name('dokumen.status');
+        
+        // Jadwal
+        Route::apiResource('jadwal', KlnController::class)->only(['index', 'store', 'update', 'destroy']);
+    });
+});
 require __DIR__.'/auth.php';

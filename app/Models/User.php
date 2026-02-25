@@ -43,7 +43,40 @@ class User extends Authenticatable
         'status' => Status::class,
         ];
     
-
+    // Accessor untuk mendapatkan role sebagai string
+    public function getRoleStringAttribute(): string
+    {
+        return $this->role instanceof Role ? $this->role->value : $this->role;
+    }
+    
+    // Accessor untuk mendapatkan status_profile sebagai string
+    public function getStatusProfileStringAttribute(): string
+    {
+        return $this->status_profile instanceof Status 
+            ? $this->status_profile->value 
+            : $this->status_profile;
+    }
+    
+    // Mutator untuk role - terima string atau enum
+    public function setRoleAttribute($value)
+    {
+        if ($value instanceof Role) {
+            $this->attributes['role'] = $value->value;
+        } else {
+            $this->attributes['role'] = $value;
+        }
+    }
+    
+    // Mutator untuk status_profile
+    public function setStatusProfileAttribute($value)
+    {
+        if ($value instanceof Status) {
+            $this->attributes['status_profile'] = $value->value;
+        } else {
+            $this->attributes['status_profile'] = $value;
+        }
+    }
+ 
     public function dosen()
     {
         return $this->hasOne(dosen::class, 'user_id');

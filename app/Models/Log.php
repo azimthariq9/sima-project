@@ -8,7 +8,33 @@ class Log extends Model
 {
     protected $table = 'log';
 
-    protected $gated = [];
+    protected $fillable = [
+        'user_id',
+        'mahasiswa_id',
+        'dosen_id',
+        'kelas_id',
+        'jadwal_id',
+        'matakuliah_id',
+        'jurusan_id',
+        'notification_id',
+        'announcement_id',
+        'aksi',
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+     public function getActionAttribute($value)
+    {
+        return strtoupper($value);
+    }
+
+     public function setActionAttribute($value)
+    {
+        $this->attributes['action'] = strtoupper($value);
+    }
 
     public function user()
     {

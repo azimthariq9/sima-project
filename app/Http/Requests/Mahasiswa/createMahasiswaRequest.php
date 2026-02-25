@@ -22,14 +22,14 @@ class formMahasiswa extends FormRequest
     public function rules(): array
     {
         return [
-            'nama' => ['required', 'string', 'max:255'],
-            'npm' => ['required', 'string', 'max:20', 'unique:mahasiswa,npm'],
-            'noWa' => ['required', 'string', 'max:20', 'unique:mahasiswa,noWa'],
-            'tglLahir' => ['required', 'date'],
-            'warNeg' => ['required', 'string', 'max:50'],
-            'alamatAsal' => ['required', 'string', 'max:255'],
-            'alamatIndo' => ['required', 'string', 'max:255'],
-            'user_id' => ['required', 'exists:users,id'],
+            'nama' => ['sometimes', 'required', 'string', 'max:255'],
+            'npm' => ['sometimes', 'required', 'string', 'max:20', 'unique:mahasiswa,npm'],
+            'noWa' => ['sometimes', 'required', 'string', 'max:20', 'unique:mahasiswa,noWa'],
+            'tglLahir' => ['sometimes', 'required', 'date'],
+            'warNeg' => ['sometimes', 'required', 'string', 'max:50'],
+            'alamatAsal' => ['sometimes', 'required', 'string', 'max:255'],
+            'alamatIndo' => ['sometimes', 'required', 'string', 'max:255'],
+            'user_id' => ['sometimes', 'required', 'exists:users,id'],
             
             
         ];

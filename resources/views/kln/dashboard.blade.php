@@ -16,7 +16,7 @@
         <strong>{{ $criticalCount ?? 5 }} mahasiswa memiliki dokumen expired atau expiring dalam 7 hari.</strong>
         Tindakan validasi segera diperlukan untuk menghindari masalah izin tinggal.
     </div>
-    <a href="{{ route('kln.validasi') }}" class="sima-alert__action" style="white-space:nowrap">
+    <a href="{{ route('kln.api.users.index') }}" class="sima-alert__action" style="white-space:nowrap">
         Proses Sekarang →
     </a>
 </div>

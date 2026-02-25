@@ -46,8 +46,8 @@ class RoleMiddleware
         }
 
         if (!$isValidRole) {
-            print_r($roles);
-            print_r($userRole);
+            print_r('role has to be: ' . implode(', ', $roles));
+            print_r(', but user role is: ' . $userRole);
             abort(403, 'Unauthorized');
             sleep(1);
             return redirect('/logout');

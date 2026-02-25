@@ -25,6 +25,7 @@ class updateStatusRequest extends FormRequest
     {
         return [
             'status' => ['required', new Enum(status::class)],
+            'notification_id' => ['sometimes', 'required', 'exists:notification,id'],
         ];
     }
 }

@@ -31,6 +31,17 @@ class createUserRequest extends FormRequest
             'role' => ['required', new Enum(Role::class)],
             'status' => ['required', new Enum(Status::class)],
             'jurusan_id' => ['required', 'exists:jurusan,id'],
+
+            //mahasiswa
+            'mahasiswa' => ['required_if:role,mahasiswa', 'array'],
+            'mahasiswa.npm' => ['required_if:role,mahasiswa', 'string', 'max:20', 'unique:mahasiswa,npm'],
+            'mahasiswa.nama' => ['required_if:role,mahasiswa', 'string', 'max:255'],
+
+            //dosen
+            'dosen' => ['required_if:role,dosen', 'array'],
+            'dosen.nama' => ['required_if:role,dosen', 'string', 'max:255'],
+            'dosen.nidn' => ['required_if:role,dosen', 'string', 'max:255', 'unique:dosen,nidn'],
+            'dosen.kodeDos' => ['required_if:role,dosen', 'string', 'max:255', 'unique:dosen,kodeDos'],
         ];
     }
 }
