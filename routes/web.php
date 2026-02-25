@@ -17,7 +17,7 @@ Route::post('logout', [AuthenticatedSessionController::class, 'destroy']);
 
 use App\Http\Controllers\DashboardController;
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'check.role'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 });

@@ -17,6 +17,12 @@ class RoleMiddleware
             return redirect('/login');
         }
 
+         // Jika tidak ada parameter roles yang diberikan, ambil semua role dari enum
+        if (empty($roles)) {
+            $roles = array_map(function($case) {
+                return $case->name;
+            }, Role::cases());
+        }
         // Ambil role user - bisa berupa string atau objek enum
         $userRole = Auth::user()->role;
     
