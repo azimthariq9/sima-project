@@ -11,10 +11,17 @@ Route::get('/', function () {
 Route::post('login1',[AuthenticatedSessionController::class, 'store'])->name('login1');
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy']);
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified', 'check.role:KLN,adminBipa'])->name('dashboard');
+// Route::get('/dashboard', function () {
+//     return view('dashboard');
+// })->middleware(['auth', 'verified', 'check.role:KLN,adminBipa'])->name('dashboard');
 
+use App\Http\Controllers\DashboardController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
+});
+    
 Route::middleware('auth')->group(function () {
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
