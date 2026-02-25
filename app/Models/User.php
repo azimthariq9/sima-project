@@ -6,8 +6,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Enums\status;
-use App\Enums\role;
+use App\Enums\Status;
+use App\Enums\Role;
 
 class User extends Authenticatable
 {
@@ -36,15 +36,13 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'role' => role::class,
-            'status' => status::class,
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'role' => Role::class,
+        'status' => Status::class,
         ];
-    }
+    
 
     public function dosen()
     {

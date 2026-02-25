@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum penerbit:string
+enum Penerbit:string
 {
     case KLN = 'KLN';
     case IMIGRASI = 'IMIGRASI';

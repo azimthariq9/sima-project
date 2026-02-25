@@ -5,8 +5,9 @@ namespace App\Http\Requests\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
-use App\Enums\status;
-use App\Enums\role;
+use Illuminate\Support\Facades\Auth;
+use App\Enums\Status;
+use App\Enums\Role;
 use App\Models\User;
 class updateUserRequest extends FormRequest
 {
@@ -28,8 +29,8 @@ class updateUserRequest extends FormRequest
         return [
             'email' => ['sometimes', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($this->route('user')->id)],
             'password' => ['sometimes', 'string', 'min:8'],
-            'role' => ['sometimes', new Enum(role::class)],
-            'status' => ['sometimes', new Enum(status::class)],
+            'role' => ['sometimes', new Enum(Role::class)],
+            'status' => ['sometimes', new Enum(Status::class)],
             'jurusan_id' => ['sometimes', 'exists:jurusan,id'],
         ];
     }

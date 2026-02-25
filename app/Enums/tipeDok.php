@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum tipeDok:string
+enum TipeDok:string
 {
     case suratKeterangan = 'Surat Keterangan';
     case suratIzin = 'Surat Izin';
