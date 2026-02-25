@@ -1,16 +1,23 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Auth;
+use App\Enums\Role;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
+        $userRole = Auth::user()->role;
+        if ($userRole instanceof Role) {
+                $userRole = $userRole->value; // Ambil string value-nya
+        }
+        
+            // Sekarang $userRole pasti string
+        $userRole = trim($userRole);
 
-        switch ($user->role) {
+        switch ($userRole) {
             case 'kln':
                 return view('kln.dashboard');
 
