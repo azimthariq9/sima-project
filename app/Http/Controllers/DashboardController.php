@@ -14,7 +14,7 @@ class DashboardController extends Controller
         $roleServices = new RoleServices($userRole);
         
         $userRole = $roleServices->trimRole($userRole);
-        print_r($userRole);
+        // print_r($userRole);
         switch ($userRole) {
             case 'kln':
                 return view('kln.dashboard');
