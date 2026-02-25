@@ -21,16 +21,16 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
-        public function index()
-        {
-            $users = $this->userService->getAll();
+    public function index()
+    {
+        $users = $this->userService->getAll();
     
-            return response()->json([
+        return response()->json([
                 'success' => true,
                 'message' => 'Users retrieved successfully',
                 'data' => $users
-            ], 200);
-        }
+        ], 200);
+    }
 
     public function store(createUserRequest $request)
     {

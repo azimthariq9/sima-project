@@ -1,0 +1,139 @@
+<?php
+namespace App\Http\Controllers\API;
+
+use App\Http\Controllers\Controller;
+use App\Traits\ApiResponseTrait;
+use App\Services\DashboardService;
+use App\Services\UserService;
+use App\Services\DokumenService;
+use App\Services\NotificationService;
+use App\Http\Requests\User\createUserRequest;
+use App\Http\Requests\User\updateUserRequest;
+use App\Http\Requests\dokumen\updateDokumenRequest;
+use App\Http\Requests\updateStatusRequest;
+
+use Illuminate\Http\Request;
+
+class KlnController extends Controller
+{
+    use ApiResponseTrait; // ← TETAP DIPAKAI
+
+    protected $dashboardService;
+    protected $UserService;
+    protected $dokumenService;
+    protected $NotificationService;
+
+    public function __construct(
+        DashboardService $dashboardService,
+        UserService $userService,
+        DokumenService $dokumenService,
+        NotificationService $NotificationService
+    ) {
+        $this->dashboardService = $dashboardService;
+        $this->UserService = $userService;
+        $this->dokumenService = $dokumenService;
+        $this->NotificationService = $NotificationService;
+    }
+
+    /**
+     * ========== HALAMAN (return VIEW) ==========
+     */
+    public function index()
+    {
+        return view('kln.dashboard');
+    }
+
+    public function usersPage()
+    {
+        return view('kln.users.index');
+    }
+
+    public function dokumenPage()
+    {
+        return view('kln.dokumen.index');
+    }
+
+    /**
+     * ========== API ENDPOINTS (return JSON) ==========
+     * METHOD INI SAMA PERSIS DENGAN YANG SEBELUMNYA
+     */
+    public function getDashboardStats()
+    {
+        try {
+            $data = [
+                'statistics' => [
+                    'total_mahasiswa' => $this->UserService->countByRole('mahasiswa'),
+                    'pending_docs' => $this->dokumenService->countPending(),
+                    'critical_docs' => $this->dokumenService->countCritical(),
+                    'validated_today' => $this->dokumenService->countValidatedToday(),
+                ],
+                'critical_documents' => $this->dokumenService->getCriticalDocuments(5),
+                'validation_queue' => $this->dokumenService->getValidationQueue(6),
+                'negara_distribution' => $this->UserService->getCountryDistribution(),
+                'monthly_chart' => $this->UserService->getMonthlyStats(),
+            ];
+
+            return $this->successResponse($data, 'Dashboard stats retrieved');
+            
+        } catch (\Exception $e) {
+            return $this->errorResponse('Gagal ambil data', 500, $e->getMessage());
+        }
+    }
+
+    public function getUsers(Request $request)
+    {
+        try {
+            $filters = $request->only(['role', 'email', 'status_profile']);
+            $users = $this->UserService->getAll($filters, $request->get('per_page', 15));
+            
+            return $this->paginatedResponse($users, 'Users retrieved');
+            
+        } catch (\Exception $e) {
+            return $this->errorResponse('Gagal ambil users', 500, $e->getMessage());
+        }
+    }
+
+    public function storeUser(createUserRequest $request)
+    {
+        try {
+            $maker = $request->user();
+            $user = $this->UserService->create($maker,$request->validated());
+            return $this->successResponse($user, 'User created', 201);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Gagal create user'. $maker->email, 500, $e->getMessage());
+        }
+    }
+
+    public function updateDokumenStatus(updateDokumenRequest $request, $id)
+    {
+        try {
+            $dokumen = $this->dokumenService->updateStatus(
+                $id, 
+                $request->status, 
+                $request->catatan_revisi
+            );
+            return $this->successResponse($dokumen, 'Status updated');
+        } catch (\Exception $e) {
+            return $this->errorResponse('Gagal update status', 500, $e->getMessage());
+        }
+    }
+    
+    public function updateStatusMahasiswa(updateStatusRequest $request, $id)
+    {
+        try {
+            $maker = $request->user();
+            $mahasiswa = $this->UserService->updateProfileStatus(
+                $maker, 
+                $id,
+                $request->status,
+                $request->notification_id
+            );
+
+            return $this->successResponse($mahasiswa, 'Status updated');
+        } catch (\Exception $e) {
+            return $this->errorResponse('Gagal update status', 500, $e->getMessage());
+        }
+    }
+
+    // ... method lainnya SAMA PERSIS dengan sebelumnya
+}
