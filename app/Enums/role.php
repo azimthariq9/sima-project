@@ -7,6 +7,6 @@ enum Role:string
     case KLN = 'kln';
     case adminJurusan = 'Jurusan';
     case adminBipa = 'Bipa';
-    case dosen = 'dosen';
-    case mahasiswa = 'mahasiswa';
+    case DOSEN = 'dosen';
+    case MAHASISWA = 'mahasiswa';
 }

@@ -4,14 +4,14 @@ namespace App\Enums;
 
 enum Status:string
 {
-    case active = 'active';
-    case inactive = 'inactive';
-    case pending = 'pending approval';
-    case deleted = 'deleted';
-    case rejected = 'rejected';
-    case approved = 'approved';
-    case absent = 'absent';
-    case present = 'present';
-    case excused = 'excused';
+    case ACTIVE = 'active';
+    case INACTIVE = 'inactive';
+    case PENDING = 'pending approval';
+    case DELETED = 'deleted';
+    case REJECTED = 'rejected';
+    case APPROVED = 'approved';
+    case ABSENT = 'absent';
+    case PRESENT = 'present';
+    case EXCUSED = 'excused';
 
 }
