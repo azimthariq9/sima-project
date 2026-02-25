@@ -17,7 +17,7 @@ class DashboardController extends Controller
             case 'mahasiswa':
                 return view('mahasiswa.dashboard');
 
-            case 'adminJurusan':
+            case 'Jurusan':
                 return view('jurusan.dashboard');
 
             case 'bipa':
