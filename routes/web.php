@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\MahasiswaRequestController;
 use App\Http\Controllers\API\KlnController;
@@ -13,9 +12,7 @@ use App\Http\Controllers\API\KlnController;
 | Redirect Root
 |--------------------------------------------------------------------------
 */
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+Route::get('/', fn() => redirect()->route('login'));
 
 /*
 |--------------------------------------------------------------------------
@@ -30,7 +27,7 @@ Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name(
 | Dashboard (Redirect Logic)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->group(function () {
+Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
@@ -39,7 +36,7 @@ Route::middleware(['auth'])->group(function () {
 | Profile
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->group(function () {
+Route::middleware('auth')->group(function () {
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -50,7 +47,7 @@ Route::middleware(['auth'])->group(function () {
 | MAHASISWA ROUTES
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'check.role:mahasiswa'])
+Route::middleware(['auth', 'check.role:MAHASISWA'])
     ->prefix('mahasiswa')
     ->name('mahasiswa.')
     ->group(function () {
@@ -67,9 +64,10 @@ Route::middleware(['auth', 'check.role:mahasiswa'])
         Route::get('/request/create', [MahasiswaRequestController::class, 'create'])->name('request.create');
         Route::post('/request', [MahasiswaRequestController::class, 'store'])->name('request.store');
 });
+
 /*
 |--------------------------------------------------------------------------
-| KLN ROUTES (FULL FIX - NO ERROR)
+| KLN ROUTES
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'check.role:KLN'])
@@ -77,24 +75,20 @@ Route::middleware(['auth', 'check.role:KLN'])
     ->name('kln.')
     ->group(function () {
 
-        // ===== DASHBOARD =====
         Route::get('/dashboard', [KlnController::class, 'index'])->name('dashboard');
 
-        // ===== HALAMAN VIEW (SEMUA YANG DIPAKAI DI DASHBOARD) =====
         Route::get('/monitoring', fn() => view('kln.monitoring'))->name('monitoring');
         Route::get('/validasi', fn() => view('kln.validasi'))->name('validasi');
         Route::get('/analytics', fn() => view('kln.analytics'))->name('analytics');
         Route::get('/schedule', fn() => view('kln.schedule'))->name('schedule');
         Route::get('/announcement', fn() => view('kln.announcement'))->name('announcement');
 
-        Route::post('/announcement/store', function () {
-            return back()->with('success', 'Pengumuman berhasil dikirim');
-        })->name('announcement.store');
+        Route::post('/announcement/store', fn() => back()->with('success', 'Pengumuman berhasil dikirim'))
+            ->name('announcement.store');
 
         Route::get('/users', [KlnController::class, 'usersPage'])->name('users.page');
         Route::get('/dokumen', [KlnController::class, 'dokumenPage'])->name('dokumen.page');
 
-        // ===== API INTERNAL =====
         Route::prefix('api')->name('api.')->group(function () {
 
             Route::get('dashboard/stats', [KlnController::class, 'getDashboardStats'])->name('dashboard.stats');
@@ -111,9 +105,4 @@ Route::middleware(['auth', 'check.role:KLN'])
         });
 });
 
-/*
-|--------------------------------------------------------------------------
-| Breeze Auth
-|--------------------------------------------------------------------------
-*/
 require __DIR__.'/auth.php';
