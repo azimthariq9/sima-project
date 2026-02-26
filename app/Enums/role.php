@@ -2,11 +2,11 @@
 
 namespace App\Enums;
 
-enum Role:string
+enum Role: string
 {
-    case KLN = 'Kln';
-    case adminJurusan = 'Jurusan';
-    case adminBipa = 'Bipa';
-    case DOSEN = 'Dosen';
-    case MAHASISWA = 'Mahasiswa';
+    case MAHASISWA = 'mahasiswa';
+    case DOSEN = 'dosen';
+    case KLN = 'kln';
+    case BIPA = 'bipa';
+    case JURUSAN = 'jurusan';
 }
