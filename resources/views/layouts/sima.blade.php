@@ -51,6 +51,9 @@
     --c-purple-lt:#F5F3FF;
     --c-teal:    #0D9488;
     --c-teal-lt: #F0FDFA;
+    --c-navy:    #0D1B2A;
+    --c-navy-lt: #EFF4FF;
+    --c-gold:    #D97706;
 
     /* Sidebar */
     --sidebar-w:    240px;
@@ -431,7 +434,10 @@ html, body {
 .sima-stat--blue::before  { background: linear-gradient(90deg, var(--c-blue), #60a5fa); }
 .sima-stat--red::before   { background: linear-gradient(90deg, var(--c-red), #f87171); }
 .sima-stat--green::before { background: linear-gradient(90deg, var(--c-green), #34d399); }
-.sima-stat--amber::before { background: linear-gradient(90deg, var(--c-amber), #fbbf24); }
+.sima-stat--amber::before  { background: linear-gradient(90deg, var(--c-amber), #fbbf24); }
+.sima-stat--navy::before   { background: linear-gradient(90deg, #0D1B2A, #1B3256); }
+.sima-stat--teal::before   { background: linear-gradient(90deg, var(--c-teal), #2dd4bf); }
+.sima-stat--purple::before { background: linear-gradient(90deg, var(--c-purple), #a78bfa); }
 
 .sima-stat__icon {
     width: 38px; height: 38px;
@@ -444,6 +450,9 @@ html, body {
 .sima-stat__icon--red    { background: var(--c-red-lt);    color: var(--c-red); }
 .sima-stat__icon--green  { background: var(--c-green-lt);  color: var(--c-green); }
 .sima-stat__icon--amber  { background: var(--c-amber-lt);  color: var(--c-amber); }
+.sima-stat__icon--navy   { background: #EFF4FF;             color: #0D1B2A; }
+.sima-stat__icon--teal   { background: var(--c-teal-lt);   color: var(--c-teal); }
+.sima-stat__icon--purple { background: var(--c-purple-lt);  color: var(--c-purple); }
 
 .sima-stat__label {
     font-size: 11.5px;
@@ -790,6 +799,13 @@ html, body {
 }
 .sima-btn--gold:hover { box-shadow: 0 4px 16px rgba(217,119,6,.35); color: white; }
 
+.sima-btn--blue {
+    background: linear-gradient(135deg, #2563EB, #3b82f6);
+    color: white;
+    box-shadow: 0 2px 10px rgba(37,99,235,.25);
+}
+.sima-btn--blue:hover { box-shadow: 0 4px 16px rgba(37,99,235,.35); color: white; }
+
 .sima-btn--danger {
     background: linear-gradient(135deg, #ef4444, #dc2626);
     color: white;
@@ -907,6 +923,10 @@ html, body {
         </a>
 
         <nav class="sima-nav">
+
+            {{-- ─── MAHASISWA MENU ─────────────────────── --}}
+            @if(auth()->user()?->role !== 'kln')
+
             <div class="sima-nav__label">Menu Utama</div>
 
             <a href="{{ route('mahasiswa.dashboard') }}"
@@ -927,7 +947,6 @@ html, body {
                 Dokumen Saya
             </a>
 
-            <!-- Schedules dropdown -->
             <button class="sima-nav__item {{ request()->routeIs('mahasiswa.jadwal*') ? 'active open' : '' }}"
                     onclick="toggleNav(this)">
                 <span class="sima-nav__icon"><i class="fas fa-calendar-days"></i></span>
@@ -935,9 +954,7 @@ html, body {
                 <i class="fas fa-chevron-right sima-nav__chevron"></i>
             </button>
             <div class="sima-nav__sub {{ request()->routeIs('mahasiswa.jadwal*') ? 'open' : '' }}">
-                <a href="{{ route('mahasiswa.jadwal') }}" class="sima-nav__sub-item {{ request()->routeIs('mahasiswa.jadwal') ? 'active' : '' }}">
-                    Semua Jadwal
-                </a>
+                <a href="{{ route('mahasiswa.jadwal') }}" class="sima-nav__sub-item {{ request()->routeIs('mahasiswa.jadwal') ? 'active' : '' }}">Semua Jadwal</a>
                 <a href="{{ route('mahasiswa.jadwal', ['type' => 'bipa']) }}" class="sima-nav__sub-item">BIPA</a>
                 <a href="{{ route('mahasiswa.jadwal', ['type' => 'kuliah']) }}" class="sima-nav__sub-item">Perkuliahan</a>
                 <a href="{{ route('mahasiswa.jadwal', ['type' => 'kln']) }}" class="sima-nav__sub-item">KLN</a>
@@ -960,9 +977,7 @@ html, body {
                 <span class="sima-nav__icon"><i class="fas fa-bell"></i></span>
                 Notifikasi
                 @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
-                    <span class="sima-badge sima-badge--red" style="margin-left:auto;font-size:10px;padding:1px 7px;">
-                        {{ $unreadNotifCount }}
-                    </span>
+                    <span class="sima-badge sima-badge--red" style="margin-left:auto;font-size:10px;padding:1px 7px;">{{ $unreadNotifCount }}</span>
                 @endif
             </a>
 
@@ -971,6 +986,52 @@ html, body {
                 <span class="sima-nav__icon"><i class="fas fa-chart-bar"></i></span>
                 Kehadiran & Nilai
             </a>
+
+            @else
+
+            {{-- ─── KLN STAFF MENU ─────────────────────── --}}
+            <div class="sima-nav__label">KLN Dashboard</div>
+
+            <a href="{{ route('kln.dashboard') }}"
+               class="sima-nav__item {{ request()->routeIs('kln.dashboard') ? 'active' : '' }}">
+                <span class="sima-nav__icon"><i class="fas fa-gauge-high"></i></span>
+                Dashboard
+            </a>
+
+            <a href="{{ route('kln.monitoring') }}"
+               class="sima-nav__item {{ request()->routeIs('kln.monitoring*') ? 'active' : '' }}">
+                <span class="sima-nav__icon"><i class="fas fa-users"></i></span>
+                Monitoring Mahasiswa
+            </a>
+
+            <a href="{{ route('kln.validasi') }}"
+               class="sima-nav__item {{ request()->routeIs('kln.validasi*') ? 'active' : '' }}">
+                <span class="sima-nav__icon"><i class="fas fa-clipboard-check"></i></span>
+                Validasi Dokumen
+                @if(($pendingDocs ?? 0) > 0)
+                    <span class="sima-badge sima-badge--amber" style="margin-left:auto;font-size:10px;padding:1px 7px;">{{ $pendingDocs ?? 0 }}</span>
+                @endif
+            </a>
+
+            <a href="{{ route('kln.announcement') }}"
+               class="sima-nav__item {{ request()->routeIs('kln.announcement*') ? 'active' : '' }}">
+                <span class="sima-nav__icon"><i class="fas fa-megaphone"></i></span>
+                Pengumuman
+            </a>
+
+            <a href="{{ route('kln.schedule') }}"
+               class="sima-nav__item {{ request()->routeIs('kln.schedule*') ? 'active' : '' }}">
+                <span class="sima-nav__icon"><i class="fas fa-calendar-week"></i></span>
+                Jadwal
+            </a>
+
+            <a href="{{ route('kln.analytics') }}"
+               class="sima-nav__item {{ request()->routeIs('kln.analytics*') ? 'active' : '' }}">
+                <span class="sima-nav__icon"><i class="fas fa-chart-line"></i></span>
+                Analitik & Laporan
+            </a>
+
+            @endif
 
             <div class="sima-nav__label">Akun</div>
 

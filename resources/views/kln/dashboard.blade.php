@@ -16,7 +16,7 @@
         <strong>{{ $criticalCount ?? 5 }} mahasiswa memiliki dokumen expired atau expiring dalam 7 hari.</strong>
         Tindakan validasi segera diperlukan untuk menghindari masalah izin tinggal.
     </div>
-    <a href="{{ route('kln.api.users.index') }}" class="sima-alert__action" style="white-space:nowrap">
+    <a href="{{ route('kln.validasi') }}" class="sima-alert__action" style="white-space:nowrap">
         Proses Sekarang →
     </a>
 </div>
@@ -285,7 +285,6 @@
                         {{ str_pad($i+1, 2, '0', STR_PAD_LEFT) }}
                     </div>
 
-                    {{-- Priority dot --}}
                     <div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;
                                 background:{{ $qr['priority'] === 'high' ? '#F87171' : ($qr['priority'] === 'medium' ? '#FCD34D' : '#34D399') }}">
                     </div>
@@ -361,7 +360,7 @@
                         <label class="sima-label">Isi Pengumuman</label>
                         <textarea name="isi" class="sima-input" rows="4"
                                   placeholder="Tulis isi pengumuman di sini..."
-                                  required></textarea>
+                                  required style="resize:vertical"></textarea>
                     </div>
 
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:13px">
@@ -547,7 +546,6 @@
             </div>
             <div class="sima-card__body">
 
-                {{-- Legend --}}
                 <div style="display:flex;gap:18px;margin-bottom:16px">
                     <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--c-text-2)">
                         <div style="width:10px;height:10px;border-radius:3px;background:rgba(37,99,235,.75)"></div>
@@ -577,11 +575,11 @@
                     <div style="flex:1;display:flex;align-items:flex-end;gap:2px">
                         <div class="sima-bar" data-h="{{ round(($d['a']/$maxVal)*100) }}" data-val="{{ $d['a'] }}"
                              style="flex:1;border-radius:4px 4px 0 0;min-height:3px;
-                                    background:rgba(37,99,235,.75);cursor:pointer;transition:height .8s var(--ease-expo)">
+                                    background:rgba(37,99,235,.75);cursor:pointer">
                         </div>
                         <div class="sima-bar" data-h="{{ round(($d['b']/$maxVal)*100) }}" data-val="{{ $d['b'] }}"
                              style="flex:1;border-radius:4px 4px 0 0;min-height:3px;
-                                    background:rgba(196,151,58,.75);cursor:pointer;transition:height .8s var(--ease-expo)">
+                                    background:rgba(196,151,58,.75);cursor:pointer">
                         </div>
                     </div>
                     @endforeach
@@ -596,12 +594,11 @@
                     @endforeach
                 </div>
 
-                {{-- Summary row --}}
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px">
                     @foreach([
                         ['label'=>'Rata-rata Aktif','val'=>($avgActive??114),'color'=>'var(--c-blue)'],
-                        ['label'=>'Dok. Valid Avg','val'=>($avgValid??80),'color'=>'var(--c-gold)'],
-                        ['label'=>'Negara Aktif','val'=>($totalNegara??14),'color'=>'var(--c-teal)'],
+                        ['label'=>'Dok. Valid Avg', 'val'=>($avgValid??80),  'color'=>'var(--c-gold)'],
+                        ['label'=>'Negara Aktif',   'val'=>($totalNegara??14),'color'=>'var(--c-teal)'],
                     ] as $s)
                     <div style="padding:11px;background:var(--c-surface-2);border-radius:10px;text-align:center;border:1px solid var(--c-border-soft)">
                         <div style="font-family:var(--f-display);font-size:22px;font-weight:700;color:{{ $s['color'] }}">{{ $s['val'] }}</div>
@@ -646,7 +643,6 @@
                             <div class="sima-tl-time">Siti Rahayu · Hari ini, 09:14</div>
                         </div>
                     </li>
-
                     <li class="sima-tl-item">
                         <div class="sima-tl-dot" style="background:#EFF6FF;color:#2563EB">
                             <i class="fas fa-file-circle-plus"></i>
@@ -656,7 +652,6 @@
                             <div class="sima-tl-time">Sistem · Hari ini, 09:11</div>
                         </div>
                     </li>
-
                     <li class="sima-tl-item">
                         <div class="sima-tl-dot" style="background:#FFFBEB;color:#D97706">
                             <i class="fas fa-triangle-exclamation"></i>
@@ -666,7 +661,6 @@
                             <div class="sima-tl-time">Sistem · Hari ini, 07:00</div>
                         </div>
                     </li>
-
                     <li class="sima-tl-item">
                         <div class="sima-tl-dot" style="background:#F5F3FF;color:#7C3AED">
                             <i class="fas fa-megaphone"></i>
@@ -676,7 +670,6 @@
                             <div class="sima-tl-time">Siti Rahayu · Kemarin, 15:30</div>
                         </div>
                     </li>
-
                     <li class="sima-tl-item">
                         <div class="sima-tl-dot" style="background:#F0FDFA;color:#0D9488">
                             <i class="fas fa-user-plus"></i>
@@ -699,7 +692,6 @@
 
 @section('page_js')
 <script>
-/* ── Chart bar height animation ──────────────────── */
 document.addEventListener('DOMContentLoaded', function () {
     const bars = document.querySelectorAll('.sima-bar[data-h]');
     if (!bars.length) return;
@@ -721,33 +713,10 @@ document.addEventListener('DOMContentLoaded', function () {
         io.observe(b);
     });
 
-    /* Tooltip on hover */
     bars.forEach(function (b) {
-        b.addEventListener('mouseenter', function () {
-            this.style.filter = 'brightness(1.18)';
-            this.title = this.getAttribute('data-val');
-        });
-        b.addEventListener('mouseleave', function () {
-            this.style.filter = '';
-        });
+        b.addEventListener('mouseenter', function () { this.style.filter = 'brightness(1.18)'; this.title = this.getAttribute('data-val'); });
+        b.addEventListener('mouseleave', function () { this.style.filter = ''; });
     });
 });
-
-/* ── Auto-refresh antrian setiap 2 menit ────────── */
-(function () {
-    var refreshInterval = 120000; // 2 menit
-    setTimeout(function () {
-        // Tandai ada update tersedia
-        var header = document.querySelector('.sima-card__subtitle');
-        if (header && header.textContent.includes('menunggu')) {
-            var badge = document.createElement('span');
-            badge.className = 'sima-badge sima-badge--blue';
-            badge.style.marginLeft = '8px';
-            badge.innerHTML = '<i class="fas fa-arrows-rotate fa-spin"></i> Sync';
-            // Uncomment jika ingin auto-reload:
-            // window.location.reload();
-        }
-    }, refreshInterval);
-})();
 </script>
 @endsection
