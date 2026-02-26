@@ -7,41 +7,18 @@ use App\Enums\Role;
 
 class DashboardController extends Controller
 {
-    public function index()
-    {
-        $user = Auth::user();
+public function index()
+{
+    $role = auth()->user()->role instanceof \App\Enums\Role
+        ? auth()->user()->role->value
+        : auth()->user()->role;
 
-        if (!$user) {
-            abort(403);
-        }
-
-        $role = $user->role;
-
-        if ($role instanceof Role) {
-            $role = $role->value;
-        }
-
-        $role = strtolower(trim($role)); // <-- MAGIC FIX
-
-        switch ($role) {
-
-            case 'kln':
-                return view('kln.dashboard');
-
-            case 'mahasiswa':
-                return view('mahasiswa.dashboard');
-
-            case 'jurusan':
-                return view('jurusan.dashboard');
-
-            case 'bipa':
-                return view('bipa.dashboard');
-
-            case 'dosen':
-                return view('dosen.dashboard');
-
-            default:
-                abort(403, 'Role tidak dikenali: ' . $role);
-        }
-    }
+    return match(strtolower($role)) {
+        'kln' => view('kln.dashboard'),
+        'dosen' => view('dosen.dashboard'),
+        'bipa' => view('bipa.dashboard'),
+        'jurusan' => view('jurusan.dashboard'),
+        default => view('mahasiswa.dashboard')
+    };    
+}
 }

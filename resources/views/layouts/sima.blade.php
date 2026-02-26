@@ -94,24 +94,159 @@ html, body {
     min-height: 100vh;
 }
 
-/* ═══════════════════════════════════════════════════
-   SIDEBAR
-   ═══════════════════════════════════════════════════ */
-.sima-sidebar {
-    width: var(--sidebar-w);
-    flex-shrink: 0;
-    background: var(--sidebar-bg);
-    border-right: 1px solid var(--sidebar-border);
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    z-index: 200;
-    transition: transform var(--transition);
-    overflow-y: auto;
-    overflow-x: hidden;
+/* COLLAPSE MODE */
+.sima-sidebar.collapsed {
+    width: 78px;
 }
 
+.sima-sidebar.collapsed 
+.sima-nav__item {
+    position: relative;
+    overflow: hidden;
+}
+
+.sima-nav__item::after {
+    content: '';
+    position: absolute;
+    left: -100%;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255,255,255,.2),
+        transparent
+    );
+    transition: .6s;
+}
+
+.sima-nav__item:hover::after {
+    left: 100%;
+}
+
+.sima-nav__item.active {
+    box-shadow: 0 6px 18px rgba(108,143,255,.25);
+}
+
+body.dark .sima-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+}
+
+body.dark .sima-topbar {
+    background: #0f172a;
+    border-bottom: 1px solid #334155;
+}
+.sima-sidebar.collapsed .sima-sidebar__subtitle {
+    display: none;
+}
+
+.sima-sidebar.collapsed .sima-sidebar__logo-wrapper {
+    margin: 0 auto;
+}
+
+.sima-sidebar.collapsed .sima-nav__item {
+    justify-content: center;
+}
+/* ═════════ SIDEBAR BASE ═════════ */
+/* ===============================
+   SIDEBAR — PREMIUM MODE
+================================ */
+
+.sima-sidebar {
+    width: var(--sidebar-w);
+    background: linear-gradient(180deg, #6c5ce7 0%, #5a4bd6 40%, #ffffff 100%);
+    border-right: 1px solid var(--sidebar-border);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: width .25s ease, transform .25s ease;
+    z-index: 200;
+}
+
+/* TEXT FIX */
+.sima-sidebar .sima-nav__item {
+    color: #1f2937;
+}
+
+body.dark .sima-sidebar {
+    background: linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%);
+}
+
+body.dark .sima-sidebar .sima-nav__item {
+    color: #e2e8f0;
+}
+
+body.dark .sima-sidebar .sima-nav__item:hover {
+    background: rgba(255,255,255,.08);
+}
+
+body.dark .sima-sidebar .sima-nav__item.active {
+    background: rgba(167,139,250,.25);
+    color: #fff;
+}
+/* Avatar fix */
+.sima-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #6c8fff, #a78bfa);
+    font-size: 13px;
+}
+.sima-sidebar__header {
+    padding: 22px 18px 18px;
+    border-bottom: 1px solid #e5e7ef;
+}
+
+.sima-sidebar__brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sima-sidebar__logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    object-fit: contain;
+    background: white;
+    padding: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.08);
+}
+
+.sima-sidebar__title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.2;
+}
+
+.sima-sidebar__subtitle {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.sima-sidebar__logo-wrapper {
+    background: #f3f4f6;
+    padding: 6px;
+    border-radius: 14px;
+}
+/* Dark Mode */
+body.dark {
+    --c-bg: #0f172a;
+    --c-surface: #1e293b;
+    --c-text-1: #f1f5f9;
+    --c-text-2: #cbd5e1;
+    --c-border-soft: #334155;
+}
+
+body.dark .sima-sidebar {
+    background: linear-gradient(180deg, #2d1b69 0%, #1e293b 60%, #0f172a 100%);
+}
 /* Brand */
 .sima-brand {
     padding: 22px 20px 18px;
@@ -149,91 +284,60 @@ html, body {
 
 /* Nav */
 .sima-nav {
-    flex: 1;
-    padding: 12px 10px;
+    padding: 18px 14px;
 }
-.sima-nav__label {
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--c-text-4);
-    padding: 10px 10px 6px;
-    margin-top: 6px;
-}
+
 .sima-nav__item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 9px 12px;
-    border-radius: var(--radius-sm);
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
     text-decoration: none;
-    color: var(--c-text-2);
-    font-size: 13.5px;
+    font-size: 14px;
     font-weight: 500;
-    transition: background var(--transition), color var(--transition);
-    cursor: pointer;
-    border: none;
-    background: none;
-    width: 100%;
-    text-align: left;
-    margin-bottom: 2px;
+    color: #1f2937;
+    margin-bottom: 6px;
+    transition: all .2s ease;
 }
+
 .sima-nav__item:hover {
-    background: var(--c-bg);
-    color: var(--c-text-1);
+    background: #ececf4;
 }
+
 .sima-nav__item.active {
-    background: var(--c-accent-light);
-    color: var(--c-accent);
+    background: #dcd3f5;
+    color: #4c3bbf;
     font-weight: 600;
 }
-.sima-nav__item.active .sima-nav__icon { color: var(--c-accent); }
+
 .sima-nav__icon {
-    width: 18px;
-    text-align: center;
-    font-size: 13px;
-    color: var(--c-text-3);
-    flex-shrink: 0;
-    transition: color var(--transition);
+    width: 20px;
+    font-size: 16px;
+    color: #111827;
 }
+
+.sima-nav__sub {
+    padding-left: 36px;
+    margin-top: 6px;
+}
+
+.sima-nav__sub-item {
+    display: block;
+    padding: 6px 0;
+    font-size: 13px;
+    color: #6b7280;
+    text-decoration: none;
+}
+
+.sima-nav__sub-item:hover {
+    color: #4c3bbf;
+}
+
 .sima-nav__chevron {
     margin-left: auto;
-    font-size: 10px;
-    color: var(--c-text-4);
-    transition: transform var(--transition);
+    font-size: 12px;
 }
-.sima-nav__item.open .sima-nav__chevron { transform: rotate(90deg); }
-
-/* Submenu */
-.sima-nav__sub {
-    display: none;
-    padding: 2px 0 4px 30px;
-}
-.sima-nav__sub.open { display: block; }
-.sima-nav__sub-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 10px;
-    border-radius: var(--radius-sm);
-    text-decoration: none;
-    color: var(--c-text-3);
-    font-size: 12.5px;
-    font-weight: 400;
-    transition: color var(--transition), background var(--transition);
-    margin-bottom: 1px;
-}
-.sima-nav__sub-item::before {
-    content: '';
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: var(--c-border);
-    flex-shrink: 0;
-    transition: background var(--transition);
-}
-.sima-nav__sub-item:hover { color: var(--c-text-1); background: var(--c-bg); }
-.sima-nav__sub-item:hover::before { background: var(--c-accent); }
 .sima-nav__sub-item.active { color: var(--c-accent); font-weight: 500; }
 .sima-nav__sub-item.active::before { background: var(--c-accent); }
 
@@ -695,6 +799,23 @@ html, body {
     user-select: none;
 }
 
+.sima-avatar-wrapper {
+    position: relative;
+}
+
+.sima-role-badge {
+    position: absolute;
+    bottom: -4px;
+    right: -6px;
+    background: linear-gradient(135deg,#6c8fff,#a78bfa);
+    color: white;
+    font-size: 8px;
+    padding: 2px 6px;
+    border-radius: 20px;
+    font-weight: 700;
+    letter-spacing: .5px;
+}
+
 /* ═══════════════════════════════════════════════════
    ANNOUNCE ITEM
    ═══════════════════════════════════════════════════ */
@@ -903,161 +1024,26 @@ html, body {
 </style>
 @stack('head_styles')
 </head>
+@php
+    $role = strtolower(auth()->user()->role instanceof \App\Enums\Role
+        ? auth()->user()->role->value
+        : auth()->user()->role);
 
+    $prefix = match($role) {
+        'kln' => 'kln',
+        'dosen' => 'dosen',
+        'bipa' => 'bipa',
+        'jurusan' => 'jurusan',
+        default => 'mahasiswa'
+    };
+@endphp
 <body>
 <div class="sima-shell">
 
     <!-- ── SIDEBAR ─────────────────────────────── -->
     <aside class="sima-sidebar" id="sidebar">
-
-        <a href="{{ route('mahasiswa.dashboard') }}" class="sima-brand">
-            <div class="sima-brand__logo">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
-                </svg>
-            </div>
-            <div class="sima-brand__text">
-                <div class="sima-brand__name">SIMA</div>
-                <div class="sima-brand__sub">{{ config('app.name', 'Universitas') }}</div>
-            </div>
-        </a>
-
-        <nav class="sima-nav">
-
-            {{-- ─── MAHASISWA MENU ─────────────────────── --}}
-            @if(auth()->user()?->role !== 'kln')
-
-            <div class="sima-nav__label">Menu Utama</div>
-
-            <a href="{{ route('mahasiswa.dashboard') }}"
-               class="sima-nav__item {{ request()->routeIs('mahasiswa.dashboard') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-house"></i></span>
-                Dashboard
-            </a>
-
-            <a href="{{ route('mahasiswa.profil') }}"
-               class="sima-nav__item {{ request()->routeIs('mahasiswa.profil*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-circle-user"></i></span>
-                Biodata / Profil
-            </a>
-
-            <a href="{{ route('mahasiswa.profil.dokumen') }}"
-               class="sima-nav__item {{ request()->routeIs('mahasiswa.profil.dokumen*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-folder-open"></i></span>
-                Dokumen Saya
-            </a>
-
-            <button class="sima-nav__item {{ request()->routeIs('mahasiswa.jadwal*') ? 'active open' : '' }}"
-                    onclick="toggleNav(this)">
-                <span class="sima-nav__icon"><i class="fas fa-calendar-days"></i></span>
-                Jadwal
-                <i class="fas fa-chevron-right sima-nav__chevron"></i>
-            </button>
-            <div class="sima-nav__sub {{ request()->routeIs('mahasiswa.jadwal*') ? 'open' : '' }}">
-                <a href="{{ route('mahasiswa.jadwal') }}" class="sima-nav__sub-item {{ request()->routeIs('mahasiswa.jadwal') ? 'active' : '' }}">Semua Jadwal</a>
-                <a href="{{ route('mahasiswa.jadwal', ['type' => 'bipa']) }}" class="sima-nav__sub-item">BIPA</a>
-                <a href="{{ route('mahasiswa.jadwal', ['type' => 'kuliah']) }}" class="sima-nav__sub-item">Perkuliahan</a>
-                <a href="{{ route('mahasiswa.jadwal', ['type' => 'kln']) }}" class="sima-nav__sub-item">KLN</a>
-            </div>
-
-            <a href="{{ route('mahasiswa.request.index') }}"
-               class="sima-nav__item {{ request()->routeIs('mahasiswa.request*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-file-signature"></i></span>
-                Request Dokumen
-            </a>
-
-            <a href="{{ route('mahasiswa.announcement') }}"
-               class="sima-nav__item {{ request()->routeIs('mahasiswa.announcement*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-bullhorn"></i></span>
-                Pengumuman
-            </a>
-
-            <a href="{{ route('mahasiswa.notifikasi') }}"
-               class="sima-nav__item {{ request()->routeIs('mahasiswa.notifikasi*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-bell"></i></span>
-                Notifikasi
-                @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
-                    <span class="sima-badge sima-badge--red" style="margin-left:auto;font-size:10px;padding:1px 7px;">{{ $unreadNotifCount }}</span>
-                @endif
-            </a>
-
-            <a href="{{ route('mahasiswa.analytics') }}"
-               class="sima-nav__item {{ request()->routeIs('mahasiswa.analytics*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-chart-bar"></i></span>
-                Kehadiran & Nilai
-            </a>
-
-            @else
-
-            {{-- ─── KLN STAFF MENU ─────────────────────── --}}
-            <div class="sima-nav__label">KLN Dashboard</div>
-
-            <a href="{{ route('kln.dashboard') }}"
-               class="sima-nav__item {{ request()->routeIs('kln.dashboard') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-gauge-high"></i></span>
-                Dashboard
-            </a>
-
-            <a href="{{ route('kln.monitoring') }}"
-               class="sima-nav__item {{ request()->routeIs('kln.monitoring*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-users"></i></span>
-                Monitoring Mahasiswa
-            </a>
-
-            <a href="{{ route('kln.validasi') }}"
-               class="sima-nav__item {{ request()->routeIs('kln.validasi*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-clipboard-check"></i></span>
-                Validasi Dokumen
-                @if(($pendingDocs ?? 0) > 0)
-                    <span class="sima-badge sima-badge--amber" style="margin-left:auto;font-size:10px;padding:1px 7px;">{{ $pendingDocs ?? 0 }}</span>
-                @endif
-            </a>
-
-            <a href="{{ route('kln.announcement') }}"
-               class="sima-nav__item {{ request()->routeIs('kln.announcement*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-megaphone"></i></span>
-                Pengumuman
-            </a>
-
-            <a href="{{ route('kln.schedule') }}"
-               class="sima-nav__item {{ request()->routeIs('kln.schedule*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-calendar-week"></i></span>
-                Jadwal
-            </a>
-
-            <a href="{{ route('kln.analytics') }}"
-               class="sima-nav__item {{ request()->routeIs('kln.analytics*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-chart-line"></i></span>
-                Analitik & Laporan
-            </a>
-
-            @endif
-
-            <div class="sima-nav__label">Akun</div>
-
-            <a href="{{ route('profile.edit') }}"
-               class="sima-nav__item {{ request()->routeIs('profile*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-key"></i></span>
-                Ubah Password
-            </a>
-
-        </nav>
-
-        <!-- Sidebar footer — logout -->
-        <div class="sima-sidebar__foot">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="sima-nav__item" style="color:var(--c-red)">
-                    <span class="sima-nav__icon" style="color:var(--c-red)">
-                        <i class="fas fa-right-from-bracket"></i>
-                    </span>
-                    Keluar
-                </button>
-            </form>
-        </div>
-
+        @include('partials.sidebar.'.$prefix)
     </aside>
-
     <!-- Mobile overlay -->
     <div class="sima-overlay" id="overlay" onclick="closeSidebar()"></div>
 
@@ -1072,30 +1058,70 @@ html, body {
 
             <div class="sima-topbar__breadcrumb">
                 SIMA <i class="fas fa-slash" style="font-size:9px;opacity:.3;margin:0 2px"></i>
-                <span>@yield('page_section', 'Mahasiswa')</span>
+                <span>@yield('page_section', ucfirst($prefix))</span>
+                <button onclick="toggleCollapse()" 
+                        style="background:none;border:none;margin-right:10px;cursor:pointer;">
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
             </div>
 
             <div class="sima-topbar__right">
                 <!-- Notif -->
-                <a href="{{ route('mahasiswa.notifikasi') }}" class="sima-topbar__icon-btn" title="Notifikasi">
+                <a href="{{ route($prefix.'.notifikasi') }}" 
+                class="sima-topbar__icon-btn" 
+                title="Notifikasi">
                     <i class="fas fa-bell"></i>
                     @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
                         <span class="sima-notif-badge">{{ $unreadNotifCount }}</span>
                     @endif
                 </a>
-
                 <!-- User -->
-                <div class="sima-user-btn" onclick="window.location='{{ route('mahasiswa.profil') }}'">
-                    <div class="sima-avatar"
-                         style="width:28px;height:28px;border-radius:8px;font-size:11px;background:linear-gradient(135deg,var(--c-accent),var(--c-accent-2))">
+            <div class="dropdown">
+                <button class="sima-user-btn" data-bs-toggle="dropdown">
+                <div class="sima-avatar-wrapper">
+                    <div class="sima-avatar">
                         {{ strtoupper(substr(auth()->user()->name ?? 'M', 0, 2)) }}
                     </div>
-                    <span style="font-size:13px;font-weight:600;color:var(--c-text-1)">
-                        {{ auth()->user()->nim ?? '—' }}
-                    </span>
-                    <i class="fas fa-chevron-down" style="font-size:10px;color:var(--c-text-3)"></i>
+                    <div class="sima-role-badge">
+                        {{ strtoupper($prefix) }}
+                    </div>
                 </div>
-            </div>
+                    <span>{{ auth()->user()->nim ?? auth()->user()->id }}</span>
+                    <i class="fas fa-chevron-down" style="font-size:11px;"></i>
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border-radius:12px;">
+                    <li>
+                        <a class="dropdown-item" href="{{ route($prefix.'.profil') }}">
+                            <i class="fas fa-user me-2"></i> Profile
+                        </a>
+                    </li>
+
+                    <li>
+                        <button class="dropdown-item" onclick="toggleTheme()">
+                            <i class="fas fa-moon me-2"></i> Dark / Light Mode
+                        </button>
+                    </li>
+
+                    <li>
+                        <button class="dropdown-item" onclick="toggleLang()">
+                            <i class="fas fa-language me-2"></i> ID / EN
+                        </button>
+                    </li>
+
+                    <li><hr class="dropdown-divider"></li>
+
+                    <li>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="dropdown-item text-danger">
+                                <i class="fas fa-power-off me-2"></i> Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>            
+        </div>
         </header>
 
         <!-- Content -->
@@ -1172,6 +1198,43 @@ document.addEventListener('DOMContentLoaded', function () {
             if (cur >= target) clearInterval(timer);
         }, 30);
     });
+});
+
+/* ── Dark Mode ───────────────────────── */
+function toggleTheme() {
+    const body = document.body;
+    body.classList.toggle('dark');
+
+    localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark');
+    }
+});
+
+function toggleLang() {
+    const current = localStorage.getItem('lang') || 'id';
+    const newLang = current === 'id' ? 'en' : 'id';
+    localStorage.setItem('lang', newLang);
+    alert('Language switched to: ' + newLang.toUpperCase());
+}
+
+function toggleCollapse() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('collapsed');
+
+    localStorage.setItem(
+        'sidebar',
+        sidebar.classList.contains('collapsed') ? 'mini' : 'full'
+    );
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (localStorage.getItem('sidebar') === 'mini') {
+        document.getElementById('sidebar').classList.add('collapsed');
+    }
 });
 </script>
 

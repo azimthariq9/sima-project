@@ -1,7 +1,7 @@
 @extends('layouts.sima')
 
 @section('page_title',    'Dashboard KLN')
-@section('page_section',  'Kantor Layanan Internasional')
+@section('page_section',  'KERJA SAMA LUAR NEGERI')
 @section('page_subtitle', 'Monitoring mahasiswa asing — Selamat datang, ' . (auth()->user()->name ?? 'Staff KLN'))
 
 @section('main_content')
