@@ -6,7 +6,7 @@ enum Status:string
 {
     case ACTIVE = 'active';
     case INACTIVE = 'inactive';
-    case PENDING = 'pending approval';
+    case PENDING = 'pending';
     case DELETED = 'deleted';
     case REJECTED = 'rejected';
     case APPROVED = 'approved';

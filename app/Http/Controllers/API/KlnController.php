@@ -16,6 +16,8 @@ use App\Http\Requests\User\updateUserRequest;
 use App\Http\Requests\dokumen\updateDokumenRequest;
 use App\Http\Requests\Jadwal\createJadwalRequest;
 use App\Http\Requests\Jadwal\updateJadwalRequest;
+use App\Http\Requests\ReqDokumen\createReqDokumenRequest;
+use App\Http\Requests\ReqDokumen\updateReqDokumenRequest;
 use App\Http\Requests\updateStatusRequest;
 
 use Illuminate\Http\Request;
@@ -82,27 +84,27 @@ class KlnController extends Controller
      * ========== API ENDPOINTS (return JSON) ==========
      * METHOD INI SAMA PERSIS DENGAN YANG SEBELUMNYA
      */
-    public function getDashboardStats()
-    {
-        try {
-            $data = [
-                'statistics' => [
-                    'total_mahasiswa' => $this->UserService->countByRole('mahasiswa'),
-                    'pending_docs' => $this->dokumenService->countPending(),
-                    'critical_docs' => $this->dokumenService->countCritical(),
-                    'validated_today' => $this->dokumenService->countValidatedToday(),
-                ],
-                'critical_documents' => $this->dokumenService->getCriticalDocuments(5),
-                'validation_queue' => $this->dokumenService->getValidationQueue(6),
-                'negara_distribution' => $this->UserService->getCountryDistribution(),
-                'monthly_chart' => $this->UserService->getMonthlyStats(),
-            ];
-            return $this->successResponse($data, 'Dashboard stats retrieved');
+    // public function getDashboardStats()
+    // {
+    //     try {
+    //         $data = [
+    //             'statistics' => [
+    //                 'total_mahasiswa' => $this->UserService->countByRole('mahasiswa'),
+    //                 'pending_docs' => $this->dokumenService->countPending(),
+    //                 'critical_docs' => $this->dokumenService->countCritical(),
+    //                 'validated_today' => $this->dokumenService->countValidatedToday(),
+    //             ],
+    //             'critical_documents' => $this->dokumenService->getCriticalDocuments(5),
+    //             'validation_queue' => $this->dokumenService->getValidationQueue(6),
+    //             'negara_distribution' => $this->UserService->getCountryDistribution(),
+    //             'monthly_chart' => $this->UserService->getMonthlyStats(),
+    //         ];
+    //         return $this->successResponse($data, 'Dashboard stats retrieved');
             
-        } catch (\Exception $e) {
-            return $this->errorResponse('Gagal ambil data', 500, $e->getMessage());
-        }
-    }
+    //     } catch (\Exception $e) {
+    //         return $this->errorResponse('Gagal ambil data', 500, $e->getMessage());
+    //     }
+    // }
 
     public function getUsers(Request $request)
     {
@@ -156,14 +158,7 @@ class KlnController extends Controller
     }
 
 //Dokumen
-    public function storeDokumen(createDokumenRequest $request)
-    {
-        try{
-            
-        } catch (\Exception $e){
-            return $this->errorResponse('Gagal update status', 500, $e->getMessage());
-        }
-    }
+
 
     public function updateDokumenStatus(updateDokumenRequest $request, $id)
     {
@@ -178,7 +173,25 @@ class KlnController extends Controller
             return $this->errorResponse('Gagal update status', 500, $e->getMessage());
         }
     }
-    
+
+// request Dokumen
+    public function storeReqDokumen(createReqDokumenRequest $request)
+    {
+        try{
+            
+        } catch (\Exception $e){
+            return $this->errorResponse('Gagal update status', 500, $e->getMessage());
+        }
+    }
+
+    public function updateReqDokumen(updateReqDokumenRequest $request)
+    {
+        try{
+            
+        } catch (\Exception $e){
+            return $this->errorResponse('Gagal update status', 500, $e->getMessage());
+        }
+    }
 // announcement
 
     public function storeAnnouncement(createAnnouncementRequest $request)
@@ -191,7 +204,7 @@ class KlnController extends Controller
             );
             return $this->successResponse($announcement, 'Announcement Created');
         } catch (\Exception $e){
-            return $this->errorResponse('Gagal update status', 500, $e->getMessage());
+            return $this->errorResponse('Gagal membuat announcement', 500, $e->getMessage());
         }
     }
 

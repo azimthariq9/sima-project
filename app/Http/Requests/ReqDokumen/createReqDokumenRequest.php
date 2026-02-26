@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests\Dokumen;
+namespace App\Http\Requests\ReqDokumen;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
+use App\Enums\tipeDok;
 use App\Enums\status;
 use App\Enums\penerbit;
-
-class updateDokumenRequest extends FormRequest
+class createReqDokumenRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,12 +25,12 @@ class updateDokumenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'namaDkmn' => ['sometimes', 'required', 'string', 'max:255'],
-            'penerbit' => ['sometimes', new Enum(penerbit::class)],
-            'noDkmn' => ['sometimes', 'required', 'string', 'max:255'],
-            'tglTerbit' => ['sometimes', 'required', 'date'],
-            'tglkdlwrs' => ['sometimes', 'required', 'date', 'after_or_equal:tglTerbit'],
-            'status' => ['sometimes', new Enum(status::class)]
+            'mahasiswa_id' => ['sometimes','required', 'exists:mahasiswa,id'],
+            'tipeDkmn' => ['sometimes','required', new Enum(tipeDok::class)],
+            'namaDkmn' => ['sometimes','required', 'string', 'max:255'],
+            'message'=>['required','string','max:255'],
+            'status' => ['sometimes','required', new Enum(status::class)],
+            'user_id' => ['sometimes','required', 'exists:users,id']
         ];
     }
 }

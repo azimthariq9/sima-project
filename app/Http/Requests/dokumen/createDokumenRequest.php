@@ -15,7 +15,7 @@ class createDokumenRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -34,9 +34,7 @@ class createDokumenRequest extends FormRequest
             'tglTerbit' => ['required', 'date'],
             'tglkdlwrs' => ['required', 'date', 'after_or_equal:tglTerbit'],
             'status' => ['required', new Enum(status::class)],
-            'path' => ['required', 'string', 'max:255'],
-            'mimeType' => ['required', 'string', 'max:50'],
-            'size' => ['required', 'integer'],
+
         ];
     }
 }

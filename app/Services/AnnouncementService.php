@@ -36,59 +36,43 @@ class AnnouncementService extends BaseService
         return $query->latest()->paginate($perPage);
     }
     
-    public function create($maker,array $data): Announcement
+    public function create($maker, array $data): Announcement
     {
         DB::beginTransaction();
         
         try {
-            // Set default values
+            // 1. Data announcement
             $announcementData = [
-                'users_id' => $maker->id, // created by
+                'user_id' => $maker->id,  // creator
                 'subject' => $data['subject'],
                 'message' => $data['message'],
-                'status' => $this->validateStatus($data['status'] ?? null),
+                'status' => $data['status'] ?? Status::PENDING->value,
             ];
             
-            // Create announcement
+            // 2. Create announcement
             $announcement = parent::create($maker, $announcementData);
             
-            // Sync mahasiswa relations (many-to-many)
+            // 3. Attach mahasiswa (penerima) - INI SATU-SATUNYA RELASI
             if (isset($data['mahasiswa_ids']) && is_array($data['mahasiswa_ids'])) {
-                $announcement->mahasiswa()->sync($data['mahasiswa_ids']);
+                $announcement->mahasiswa()->attach($data['mahasiswa_ids']);
+                
+                Log::info('Mahasiswa attached', [
+                    'announcement_id' => $announcement->id,
+                    'mahasiswa_ids' => $data['mahasiswa_ids']
+                ]);
             }
             
-            // // Sync user relations if needed (many-to-many)
-            // if (isset($data['user_ids']) && is_array($data['user_ids'])) {
-            //     $announcement->users()->sync($data['user_ids']);
-            // } elseif (isset($data['mahasiswa_ids'])) {
-            //     // Jika hanya ada mahasiswa_ids, bisa ambil user_id dari mahasiswa
-            //     $userIds = \App\Models\Mahasiswa::whereIn('id', $data['mahasiswa_ids'])
-            //         ->pluck('user_id')
-            //         ->toArray();
-            //     $announcement->users()->sync($userIds);
-            // }
-            
-            // Log activity
-            $this->logActivity('CREATE', $announcement, 
-                "Membuat pengumuman: {$announcement->subject}", 
-                $maker, 
-                $announcement
-            );
             
             DB::commit();
             
-            // Load relations untuk response
-            return $announcement->load(['mahasiswa', 'users']);
+            // Load relasi untuk response
+            return $announcement->load('mahasiswa', 'user');
             
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error creating announcement: ' . $e->getMessage(), [
-                'data' => $data,
-                'trace' => $e->getTraceAsString()
-            ]);
+            Log::error('Error creating announcement: ' . $e->getMessage());
             throw $e;
         }
-        
     }
     
     public function publish($maker, int $id): Announcement
