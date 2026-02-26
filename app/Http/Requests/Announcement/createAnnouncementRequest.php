@@ -24,12 +24,12 @@ class createAnnouncementRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'users_id' => ['required', 'exists:users,id'],
-            'subject' => ['required', 'string', 'max:255'],
-            'message' => ['required', 'string'],
-            'status' => ['required', new Enum(status::class)],
-            'mahasiswa_ids' => ['required', 'array'],
-            'mahasiswa_ids.*' => ['exists:mahasiswa,id'],
+            // 'user_id' => ['required', 'exists:users,id'],
+            // 'subject' => ['required', 'string', 'max:255'],
+            // 'message' => ['required', 'string'],
+            // 'status' => ['required', new Enum(status::class)],
+            // 'mahasiswa_ids' => ['required', 'array'],
+            // 'mahasiswa_ids.*' => ['exists:mahasiswa,id'],
 
         ];
     }

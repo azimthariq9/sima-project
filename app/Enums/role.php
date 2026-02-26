@@ -4,9 +4,9 @@ namespace App\Enums;
 
 enum Role:string
 {
-    case KLN = 'kln';
+    case KLN = 'Kln';
     case adminJurusan = 'Jurusan';
     case adminBipa = 'Bipa';
-    case DOSEN = 'dosen';
-    case MAHASISWA = 'mahasiswa';
+    case DOSEN = 'Dosen';
+    case MAHASISWA = 'Mahasiswa';
 }

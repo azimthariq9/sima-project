@@ -16,10 +16,10 @@ class DashboardController extends Controller
         $userRole = $roleServices->trimRole($userRole);
         // print_r($userRole);
         switch ($userRole) {
-            case 'kln':
+            case 'Kln':
                 return view('kln.dashboard');
 
-            case 'mahasiswa':
+            case 'Mahasiswa':
                 return view('mahasiswa.dashboard');
 
             case 'Jurusan':
@@ -27,6 +27,9 @@ class DashboardController extends Controller
 
             case 'Bipa':
                 return view('bipa.dashboard');
+            
+            case 'Dosen':
+                return view('dosen.dashboard');
 
             default:
                 abort(403);

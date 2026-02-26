@@ -57,11 +57,11 @@ Route::middleware(['auth'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'check.role:KLN'])->group(function () {
+// Route::middleware(['auth', 'check.role:KLN'])->group(function () {
 
-    Route::apiResource('users', UserController::class);
+//     Route::apiResource('users', UserController::class);
 
-});
+// });
 
 /*
 |--------------------------------------------------------------------------
@@ -135,20 +135,56 @@ Route::middleware(['auth', 'check.role:KLN'])->prefix('kln')->name('kln.')->grou
     Route::prefix('api')->name('api.')->group(function () {
         // Dashboard
         Route::get('dashboard/stats', [KlnController::class, 'getDashboardStats'])->name('dashboard.stats');
-        
+        //Announcement
+        Route::post('coba-announcement', [KlnController::class, 'storeAnnouncement'])->name('announcement.store');
         // Users
         Route::get('users', [KlnController::class, 'getUsers'])->name('users.index');
         Route::post('users', [KlnController::class, 'storeUser'])->name('users.store');
         Route::get('users/{id}', [KlnController::class, 'showUser'])->name('users.show');
         Route::put('users/{id}', [KlnController::class, 'updateUser'])->name('users.update');
         Route::delete('users/{id}', [KlnController::class, 'destroyUser'])->name('users.destroy');
-        Route::put('users/{id}/status', [KlnController::class, 'updateStatusMahasiswa'])->name('users.status');
+        Route::post('test-announcement', function() {
+            return response()->json([
+                'message' => 'Test route works',
+                'user' => auth()->user()
+            ]);
+        })->name('test.announcement');
         // Dokumen
         Route::get('dokumen', [KlnController::class, 'getDokumen'])->name('dokumen.index');
-        Route::put('dokumen/{id}/status', [KlnController::class, 'updateDokumenStatus'])->name('dokumen.status');
+        Route::patch('dokumen/{id}/status', [KlnController::class, 'updateDokumenStatus'])->name('dokumen.status');
         
         // Jadwal
         Route::apiResource('jadwal', KlnController::class)->only(['index', 'store', 'update', 'destroy']);
+
+        
     });
 });
+
+        Route::patch('users/status/{id}', [KlnController::class, 'updateStatusMahasiswa'])->name('users.status.update')->middleware(['auth','check.role:KLN']);
+
+
+// routes/web.php - TEMPORARY
+Route::get('debug-middleware', function() {
+    $routes = collect(Route::getRoutes())->map(function($route) {
+        return [
+            'uri' => $route->uri(),
+            'name' => $route->getName(),
+            'middleware' => $route->gatherMiddleware(),
+            'action' => $route->getActionName()
+        ];
+    })->filter(function($route) {
+        return str_contains($route['uri'], 'announcement') || 
+               str_contains($route['uri'], 'status');
+    })->values();
+    
+    return response()->json($routes);
+})->middleware('auth');
+
+Route::get('test-role/{role}', function($role) {
+    return response()->json([
+        'user_role' => auth()->user()->role,
+        'required_role' => $role,
+        'can_access' => true
+    ]);
+})->middleware(['auth', 'check.role:adminJurusan']);
 require __DIR__.'/auth.php';
