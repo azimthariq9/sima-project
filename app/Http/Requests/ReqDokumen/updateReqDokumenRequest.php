@@ -25,12 +25,12 @@ class updateReqDokumenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'mahasiswa_id' => ['sometimes','required', 'exists:mahasiswa,id'],
-            'tipeDkmn' => ['sometimes','required', new Enum(tipeDok::class)],
-            'namaDkmn' => ['sometimes','required', 'string', 'max:255'],
+            // 'mahasiswa_id' => ['sometimes','required', 'exists:mahasiswa,id'],
+            // 'tipeDkmn' => ['sometimes','required', new Enum(tipeDok::class)],
+            // 'namaDkmn' => ['sometimes','required', 'string', 'max:255'],
             'message'=>['required','string','max:255'],
             'status' => ['sometimes','required', new Enum(status::class)],
-            'user_id' => ['sometimes','required', 'exists:users,id']
+            // 'user_id' => ['sometimes','required', 'exists:users,id']
         ];
     }
 }

@@ -1,12 +1,15 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\MahasiswaRequestController;
 use App\Http\Controllers\API\KlnController;
 use App\Http\Controllers\API\DokumenController;
+use App\Http\Controllers\API\MahasiswaController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -117,13 +120,13 @@ Route::middleware(['auth', 'check.role:MAHASISWA'])
     ->name('mahasiswa.')
     ->group(function () {
 
-        Route::get('/request', [MahasiswaRequestController::class, 'index'])
+        Route::get('request', [MahasiswaRequestController::class, 'index'])
             ->name('request.index');
 
-        Route::get('/request/create', [MahasiswaRequestController::class, 'create'])
+        Route::get('request/create', [MahasiswaRequestController::class, 'create'])
             ->name('request.create');
 
-        Route::post('/request', [MahasiswaRequestController::class, 'store'])
+        Route::post('request', [MahasiswaRequestController::class, 'store'])
             ->name('request.store');
 
         
@@ -131,13 +134,25 @@ Route::middleware(['auth', 'check.role:MAHASISWA'])
 
     // Mahasiswa routes
 Route::middleware(['auth', 'check.role:MAHASISWA'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+    // Profile
+    Route::get('profile', [MahasiswaController::class, 'getProfile'])->name('profile');
+    Route::patch('profile', [MahasiswaController::class, 'updateProfile'])->name('profile.update');
     
+    // Dashboard
+    Route::get('dashboard', [MahasiswaController::class, 'dashboard'])->name('dashboard');
     // Dokumen routes
     Route::prefix('dokumen')->name('dokumen.')->group(function () {
         Route::get('/', [DokumenController::class, 'index'])->name('index');
         Route::post('/', [DokumenController::class, 'store'])->name('store');
         Route::get('{id}/download', [DokumenController::class, 'download'])->name('download');
+        
     });
+     // Request Dokumen
+    Route::prefix('requestDok')->name('request.')->group(function () {
+        Route::get('/', [MahasiswaController::class, 'getRequestDokumen'])->name('index');
+        Route::post('/', [MahasiswaController::class, 'requestDokumen'])->name('store');
+    });
+
 });
 
 /*
@@ -202,6 +217,15 @@ Route::middleware(['auth', 'check.role:KLN'])
 
             Route::put('dokumen/{id}/status', [KlnController::class, 'updateDokumenStatus'])
                 ->name('dokumen.status');
+
+            //Request Dokumen
+            Route::prefix('requestDok')->name('request.')->group(function () {
+                Route::get('/', [KlnController::class, 'indexReqDocument'])->name('index');
+                // Route::get('stats', [KlnController::class, 'getStats'])->name('stats');
+                Route::get('{id}', [KlnController::class, 'showReqDocument'])->name('show');
+                Route::patch('{id}/status', [KlnController::class, 'updateReqDokumen'])->name('status');
+                Route::post('{id}/upload', [KlnController::class, 'uploadReqDokumen'])->name('upload');
+        });
         });
     });
 
@@ -273,4 +297,17 @@ Route::get('test-role/{role}', function($role) {
         'can_access' => true
     ]);
 })->middleware(['auth', 'check.role:adminJurusan']);
+
+
+
+Route::get('test-update', function() {
+    $user = Auth::user();
+    $mahasiswa = \App\Models\Mahasiswa::where('user_id', $user->id)->first();
+    
+    return response()->json([
+        'before' => $mahasiswa,
+        'try_update' => $mahasiswa->update(['nama' => 'marcello']),
+        'after' => $mahasiswa->fresh(),
+    ]);
+})->middleware('auth');
 require __DIR__.'/auth.php';

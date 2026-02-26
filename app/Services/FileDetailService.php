@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
+
 class FileDetailService extends BaseService
 {
     use FileValidationTrait;
@@ -110,5 +111,50 @@ class FileDetailService extends BaseService
         }
         
         return null; // untuk local disk, tidak ada URL public
+    }
+
+    /**
+     * Upload file untuk reqDokumen
+     */
+    public function uploadForReqDokumen(UploadedFile $file, int $reqDokumenId, array $data = []): FileDetail
+    {
+        $maker = null;
+        // 1. Validasi file PDF
+        $this->validatePdfFile($file, 2);
+        
+        // 2. Generate nama file unik
+        $filename = $this->generateFileName($file, "req_{$reqDokumenId}");
+        
+        // 3. Tentukan path
+        $path = $this->getFolderPathForReq($reqDokumenId) . '/' . $filename;
+        
+        // 4. Simpan file ke storage
+        Storage::disk($this->disk)->put($path, file_get_contents($file));
+        
+        // 5. Simpan record ke database
+        $fileDetailData = [
+            'path' => $path,
+            'mimeType' => $file->getMimeType(),
+            'fileSize' => $file->getSize(),
+            'reqDokumen_id' => $reqDokumenId,
+        ];
+        
+        return $this->create($maker, $fileDetailData);
+    }
+
+    /**
+     * Get folder path untuk reqDokumen
+     */
+    protected function getFolderPathForReq(int $reqDokumenId): string
+    {
+        $date = now();
+        
+        return sprintf(
+                    'req_dokumen/%s/%s/%s/%d',
+            $date->format('Y'),
+            $date->format('m'),
+            $date->format('d'),
+            $reqDokumenId
+        );
     }
 }

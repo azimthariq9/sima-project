@@ -21,7 +21,7 @@ trait LogsActivityTrait
             'matakuliah_id' => $model->matakuliah_id ?? null,
             'jurusan_id' => $model->jurusan_id ?? null,
             'notification_id' => $model->notification_id ?? null,
-            'announcement_id' => $model->id ?? null,
+            'announcement_id' => $model->announcement_id ?? null,
             'aksi' => $description,
         ];
         return Log::create($logData);

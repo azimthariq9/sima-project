@@ -9,6 +9,7 @@ use App\Traits\LogsActivityTrait;
 use App\Traits\FileValidationTrait;
 use App\Services\FileDetailService;
 use App\Enums\Status;
+use App\Models\ReqDokumen;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -75,6 +76,47 @@ class DokumenService extends BaseService
             return $dokumen->fresh();
         } catch (\Exception $e) {
             DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+ * Upload dokumen baru dari request (ALWAYS CREATE NEW, NO CHECK EXISTING)
+ */
+    public function uploadDokumenFromRequest(array $dokumenData, UploadedFile $file, int $reqDokumenId): ReqDokumen
+    {
+        DB::beginTransaction();
+        
+        try {
+            // 1. Validasi file
+            $this->validatePdfFile($file, 2);
+            $maker = Auth::user();
+            
+            // 2. Set default status untuk dokumen baru
+            $dokumenData['status'] = $dokumenData['status'] ?? 'approved'; // Langsung approved karena dari admin
+            
+            // 3. Create dokumen (ALWAYS CREATE NEW)
+            $Dokumen = $this->create($maker, $dokumenData);
+            
+            // 4. Upload file dan simpan detail dengan reqDokumen_id
+            $this->fileDetailService->uploadForDokumen(
+                $file, 
+                $Dokumen->id, 
+                $reqDokumenId // Simpan reqDokumen_id di fileDetail
+            );
+            
+            
+            DB::commit();
+            
+            return $Dokumen->load('fileDetail', 'history');
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error uploading dokumen from request: ' . $e->getMessage(), [
+                'dokumen_data' => $dokumenData,
+                'reqDokumen_id' => $reqDokumenId,
+                'trace' => $e->getTraceAsString()
+            ]);
             throw $e;
         }
     }
@@ -436,5 +478,34 @@ class DokumenService extends BaseService
         $dokumen = $query->latest()->first();
         
         return $dokumen;
+    }
+
+    /**
+ * Get history dokumen untuk mahasiswa tertentu
+ */
+    public function getHistoryForMahasiswa(int $mahasiswaId, array $filters = [])
+    {
+        $query = \App\Models\HistoryDokumen::with(['dokumen', 'user'])
+            ->whereHas('dokumen', function($q) use ($mahasiswaId) {
+                $q->where('mahasiswa_id', $mahasiswaId);
+            });
+        
+        if (isset($filters['dokumen_id'])) {
+            $query->where('dokumen_id', $filters['dokumen_id']);
+        }
+        
+        if (isset($filters['action'])) {
+            $query->where('action', $filters['action']);
+        }
+        
+        if (isset($filters['from_date'])) {
+            $query->whereDate('created_at', '>=', $filters['from_date']);
+        }
+        
+        if (isset($filters['to_date'])) {
+            $query->whereDate('created_at', '<=', $filters['to_date']);
+        }
+        
+        return $query->latest()->paginate($filters['per_page'] ?? 15);
     }
 }

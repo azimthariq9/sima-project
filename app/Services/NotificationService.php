@@ -6,6 +6,8 @@ namespace App\Services;
 use App\Models\Notification;
 use App\Traits\LogsActivityTrait;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class NotificationService extends BaseService
 {
@@ -62,18 +64,86 @@ class NotificationService extends BaseService
         return $notification->load('targetUsers');
     }
 
+        /**
+     * Kirim notifikasi ke multiple users (hanya attach, tidak create baru)
+     */
     public function sendToUsers(int $notification_id, array $user_ids): void
     {
-        $notification = $this->findOrFail($notification_id);
-        $notification->users()->attach($user_ids, [
-        'is_read' => false,
-        'created_at' => now(),
-        'updated_at' => now()
-        ]);
+        if (empty($user_ids)) {
+            return; // Tidak ada user tujuan
+        }
         
-        // Log activity for each user
-        foreach ($user_ids as $userId) {
-            $this->logActivity('SEND', $notification, "Mengirim notifikasi '{$notification->title}' ke user ID {$userId}", null);
+        DB::beginTransaction();
+        
+        try {
+            $notification = $this->findOrFail($notification_id);
+            
+            // Attach users ke notification
+            $notification->users()->attach($user_ids, [
+                'is_read' => false,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            
+            // // Log activity
+            // $this->logActivity(
+            //     'SEND_NOTIFICATION', 
+            //     $notification, 
+            //     "Mengirim notifikasi '{$notification->title}' ke " . count($user_ids) . " users",
+            //     auth()->user()
+            // );
+            
+            DB::commit();
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error sending notification: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+        /**
+     * Kirim notifikasi ke single user
+     */
+    public function sendToUser(int $notification_id, int $user_id): void
+    {
+        $this->sendToUsers($notification_id, [$user_id]);
+    }
+
+      /**
+     * Kirim notifikasi ke multiple mahasiswa(hanya attach, tidak create baru)
+     */
+    public function sendToMahasiswa(int $notification_id, array $mahasiswa_ids): void
+    {
+        if (empty($mahasiswa_ids)) {
+            return; // Tidak ada user tujuan
+        }
+        
+        DB::beginTransaction();
+        
+        try {
+            $notification = $this->findOrFail($notification_id);
+            
+            // Attach users ke notification
+            $notification->mahasiswa()->attach($mahasiswa_ids, [
+                'is_read' => false,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            
+            // // Log activity
+            // $this->logActivity(
+            //     'SEND_NOTIFICATION', 
+            //     $notification, 
+            //     "Mengirim notifikasi '{$notification->title}' ke " . count($user_ids) . " users",
+            //     auth()->user()
+            // );
+            
+            DB::commit();
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error sending notification: ' . $e->getMessage());
+            throw $e;
         }
     }
 }

@@ -24,8 +24,9 @@ class updateMahasiswaRequest extends FormRequest
     {
         return [
             'nama' => ['sometimes', 'required', 'string', 'max:255'],
-            'npm' => ['sometimes', 'required', 'string', 'max:20', Rule::unique(Mahasiswa::class)->ignore($this->route('mahasiswa')->id)],
-            'noWa' => ['sometimes', 'required', 'string', 'max:20', Rule::unique(Mahasiswa::class)->ignore($this->route('mahasiswa')->id)],
+            'npm' => ['sometimes', 'required', 'string', 'max:20', Rule::unique(Mahasiswa::class)->ignore($this->route('mahasiswa'))],
+            'noWa' => ['sometimes', 'required', 'string', 'max:20', Rule::unique(Mahasiswa::class)->ignore($this->route('mahasiswa'))],
+            'noDarurat' => ['sometimes', 'required', 'string', 'max:20'],
             'tglLahir' => ['sometimes', 'required', 'date'],
             'warNeg' => ['sometimes', 'required', 'string', 'max:50'],
             'alamatAsal' => ['sometimes', 'required', 'string', 'max:255'],

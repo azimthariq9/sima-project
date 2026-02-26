@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use app\Enums\Status;
 use app\Enums\Role;
+use GuzzleHttp\Psr7\Query;
 use Illuminate\Support\Facades\Log;
 class AnnouncementService extends BaseService
 {
@@ -99,5 +100,12 @@ class AnnouncementService extends BaseService
         }
         
         return Status::PENDING->value; // default
+    }
+
+    public function getForMahasiswa(int $id, int $perPage){
+        $query = Announcement::with(['user_id', 'createdBy']);
+
+
+
     }
 }

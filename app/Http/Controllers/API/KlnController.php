@@ -12,6 +12,7 @@ use App\Services\DokumenService;
 use App\Services\NotificationService;
 use App\Services\AnnouncementService;
 use App\Services\HistoryDokumenService;
+use App\Services\ReqDokumenService;
 use App\Http\Requests\User\createUserRequest;
 use App\Http\Requests\User\updateUserRequest;
 use App\Http\Requests\dokumen\updateDokumenRequest;
@@ -22,6 +23,9 @@ use App\Http\Requests\ReqDokumen\createReqDokumenRequest;
 use App\Http\Requests\ReqDokumen\updateReqDokumenRequest;
 use App\Http\Requests\updateStatusRequest;
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use App\Enums\Status;
 use Illuminate\Http\Request;
 use PhpParser\Node\Stmt\TryCatch;
 
@@ -35,6 +39,8 @@ class KlnController extends Controller
     protected $NotificationService;
     protected $AnnouncementService;
     protected $HistoryDokumenService;
+    protected $reqDokumenService;
+    
 
     public function __construct(
         DashboardService $dashboardService,
@@ -42,7 +48,8 @@ class KlnController extends Controller
         DokumenService $dokumenService,
         NotificationService $NotificationService,
         AnnouncementService $AnnouncementService,
-        HistoryDokumenService $HistoryDokumenService
+        HistoryDokumenService $HistoryDokumenService,
+        ReqDokumenService $reqDokumenService,
     ) {
         $this->dashboardService = $dashboardService;
         $this->UserService = $userService;
@@ -50,6 +57,7 @@ class KlnController extends Controller
         $this->NotificationService = $NotificationService;
         $this->AnnouncementService = $AnnouncementService;
         $this->HistoryDokumenService = $HistoryDokumenService;
+        $this->reqDokumenService = $reqDokumenService;
     }
 
     /**
@@ -214,23 +222,113 @@ class KlnController extends Controller
     }
 
 // request Dokumen
-    public function storeReqDokumen(createReqDokumenRequest $request)
+    public function indexReqDocument(Request $request)
     {
-        try{
+        try {
+            $filters = $request->only(['status', 'tipeDkmn', 'search', 'per_page']);
+            $requests = $this->reqDokumenService->getForAdmin($filters);
             
-        } catch (\Exception $e){
+            return $this->paginatedResponse($requests, 'Requests retrieved successfully');
+            
+        } catch (\Exception $e) {
+            Log::error('Error in getRequests: ' . $e->getMessage());
+            return $this->errorResponse('Gagal mengambil data', 500, $e->getMessage());
+        }
+    }
+
+     /**
+     * Get detail request
+     */
+    public function showReqDocument($id)
+    {
+        try {
+            $request = $this->reqDokumenService->findOrFail($id);
+            $request->load(['mahasiswa', 'user', 'fileDetail']);
+            
+            return $this->successResponse($request, 'Request detail retrieved');
+            
+        } catch (\Exception $e) {
+            return $this->errorResponse('Request tidak ditemukan', 404);
+        }
+    }
+
+    public function updateReqDokumen(updateReqDokumenRequest $request, $id)
+    {
+        try {
+            $admin = Auth::user();
+            
+            $reqDokumen = $this->reqDokumenService->updateStatus(
+                $id,
+                $request->validated(),
+                $admin
+            );
+            
+            $message = $this->getStatusMessage($request->status);
+            
+            return $this->successResponse([
+                'id' => $reqDokumen->id,
+                'status' => $reqDokumen->status,
+                'catatan' => $reqDokumen->catatan,
+            ], $message);
+            
+        } catch (\Exception $e) {
+            Log::error('Error updating request status: ' . $e->getMessage());
             return $this->errorResponse('Gagal update status', 500, $e->getMessage());
         }
     }
 
-    public function updateReqDokumen(updateReqDokumenRequest $request)
+    /**
+     * Upload dokumen untuk request (complete request)
+     */
+        /**
+         * Upload dokumen untuk request (complete request)
+         */
+        public function uploadReqDokumen(Request $request, $id)
     {
-        try{
+        try {
+            $admin = Auth::user();
             
-        } catch (\Exception $e){
-            return $this->errorResponse('Gagal update status', 500, $e->getMessage());
+            // Validasi manual karena ini upload file
+            $request->validate([
+                'file' => 'required|file|mimes:pdf|max:2048',
+                'notification_id' => 'nullable|exists:notification,id',
+                'tipeDkmn' => 'required|string|max:50'
+            ]);
+            
+            // Upload file dan complete request
+            $reqDokumen = $this->reqDokumenService->completeRequestWithFile(
+                $id,
+                $request->file('file'),
+                [], // data tambahan jika perlu
+                $admin
+            );
+            
+            // Kirim notifikasi ke mahasiswa
+            if ($request->notification_id) {
+                $this->NotificationService->sendToUsers(
+                    $request->notification_id,
+                    [$reqDokumen->user_id]
+                );
+            }
+            
+            return $this->successResponse([
+                'request' => [
+                    'id' => $reqDokumen->id,
+                    'tipeDkmn' => $reqDokumen->tipeDkmn,
+                    'namaDkmn' => $reqDokumen->namaDkmn,
+                    'status' => $reqDokumen->status,
+                    'file' => $reqDokumen->fileDetail->first(),
+                ]
+            ], 'Request dokumen berhasil diselesaikan', 201);
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse('Validasi gagal', 422, $e->errors());
+        } catch (\Exception $e) {
+            Log::error('Error uploading dokumen for request: ' . $e->getMessage());
+            return $this->errorResponse('Gagal upload dokumen: ' . $e->getMessage(), 500);
         }
     }
+
 // announcement
 
     public function storeAnnouncement(createAnnouncementRequest $request)
@@ -284,6 +382,18 @@ class KlnController extends Controller
 
 
 
+//private function
+private function getStatusMessage($status)
+    {
+        $messages = [
+            'processing' => 'Request sedang diproses',
+            'ready' => 'Dokumen siap, silakan upload file',
+            'rejected' => 'Request ditolak',
+            'completed' => 'Request selesai',
+        ];
+        
+        return $messages[$status] ?? 'Status berhasil diupdate';
+    }
 
 
 

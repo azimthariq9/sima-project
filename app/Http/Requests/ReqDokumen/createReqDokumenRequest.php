@@ -25,12 +25,19 @@ class createReqDokumenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'mahasiswa_id' => ['sometimes','required', 'exists:mahasiswa,id'],
+            // 'mahasiswa_id' => ['sometimes','required', 'exists:mahasiswa,id'],
             'tipeDkmn' => ['sometimes','required', new Enum(tipeDok::class)],
-            'namaDkmn' => ['sometimes','required', 'string', 'max:255'],
+            // 'namaDkmn' => ['sometimes','required', 'string', 'max:255'],
             'message'=>['required','string','max:255'],
-            'status' => ['sometimes','required', new Enum(status::class)],
-            'user_id' => ['sometimes','required', 'exists:users,id']
+            // 'status' => ['sometimes','required', new Enum(status::class)],
+            // 'user_id' => ['sometimes','required', 'exists:users,id']
+        ];
+    }
+    public function messages(): array
+    {
+        return [
+            'tipeDkmn.required' => 'Tipe dokumen harus dipilih',
+            'tipeDkmn.enum' => 'Tipe dokumen tidak valid',
         ];
     }
 }
