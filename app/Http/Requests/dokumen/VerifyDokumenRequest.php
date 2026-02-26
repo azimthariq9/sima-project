@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\HistoryDok;
+namespace App\Http\Requests\dokumen;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class createHistoryDokRequest extends FormRequest
+class VerifyDokumenRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +22,8 @@ class createHistoryDokRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'mahasiswa_id' => ['required', 'exists:mahasiswa,id'],
-            'dokumen_id' => ['required', 'exists:dokumen,id'],
-            'users_id' => ['required', 'exists:users,id'],
-            'message' => ['required', 'string', 'max:255'],
-
+            'action' => ['required', 'in:APPROVE,REJECT,REVISION,VERIFY'],
+            'message' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

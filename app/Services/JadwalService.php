@@ -35,14 +35,14 @@ class JadwalService extends BaseService
     public function create($maker, array $data): Jadwal
     {
         $jadwal = parent::create($maker, $data);
-        $this->logActivity('CREATE', $jadwal, "Membuat jadwal baru: {$jadwal->matakuliah->nama_mk}", $maker, $jadwal);
+        $this->logActivity('CREATE', $jadwal, "Membuat jadwal baru: {$jadwal->matakuliah->nama_mk}", $maker);
         return $jadwal;
     }
     
     public function update($maker, int $id, array $data): Jadwal
     {
         $jadwal = parent::update($maker, $id, $data);
-        $this->logActivity('UPDATE', $jadwal, "Mengupdate jadwal: {$jadwal->matakuliah->nama_mk}", $maker, $jadwal);
+        $this->logActivity('UPDATE', $jadwal, "Mengupdate jadwal: {$jadwal->matakuliah->nama_mk}", $maker);
         return $jadwal;
     }
 }

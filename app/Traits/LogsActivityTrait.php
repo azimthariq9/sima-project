@@ -7,9 +7,8 @@ use Illuminate\Support\Facades\Auth;
 
 trait LogsActivityTrait
 {
-    protected function logActivity($action, $model, $description, $maker, $user)
+    protected function logActivity($action, $model, $description, $maker)
     {
-        $user = $user;
         $maker = $maker;
         $description1 = $this->generateDescription($action, $model);
         

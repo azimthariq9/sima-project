@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\MahasiswaRequestController;
 use App\Http\Controllers\API\KlnController;
+use App\Http\Controllers\API\DokumenController;
 
 /*
 |--------------------------------------------------------------------------
@@ -124,7 +125,20 @@ Route::middleware(['auth', 'check.role:MAHASISWA'])
 
         Route::post('/request', [MahasiswaRequestController::class, 'store'])
             ->name('request.store');
+
+        
     });
+
+    // Mahasiswa routes
+Route::middleware(['auth', 'check.role:MAHASISWA'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+    
+    // Dokumen routes
+    Route::prefix('dokumen')->name('dokumen.')->group(function () {
+        Route::get('/', [DokumenController::class, 'index'])->name('index');
+        Route::post('/', [DokumenController::class, 'store'])->name('store');
+        Route::get('{id}/download', [DokumenController::class, 'download'])->name('download');
+    });
+});
 
 /*
 |--------------------------------------------------------------------------

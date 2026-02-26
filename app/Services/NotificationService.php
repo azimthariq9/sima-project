@@ -42,7 +42,7 @@ class NotificationService extends BaseService
             $notification->targetUsers()->attach($userIds);
         }
         
-        $this->logActivity('CREATE', $notification, "Membuat notifikasi: {$notification->title}", $maker, $notification);
+        $this->logActivity('CREATE', $notification, "Membuat notifikasi: {$notification->title}", $maker);
         
         return $notification->load('targetUsers');
     }
@@ -57,7 +57,7 @@ class NotificationService extends BaseService
             $notification->targetUsers()->attach($userIds);
         }
         
-        $this->logActivity('UPDATE', $notification, "Mengupdate notifikasi: {$notification->title}", $maker, $notification);
+        $this->logActivity('UPDATE', $notification, "Mengupdate notifikasi: {$notification->title}", $maker);
         
         return $notification->load('targetUsers');
     }
@@ -73,7 +73,7 @@ class NotificationService extends BaseService
         
         // Log activity for each user
         foreach ($user_ids as $userId) {
-            $this->logActivity('SEND', $notification, "Mengirim notifikasi '{$notification->title}' ke user ID {$userId}", null, $notification);
+            $this->logActivity('SEND', $notification, "Mengirim notifikasi '{$notification->title}' ke user ID {$userId}", null);
         }
     }
 }

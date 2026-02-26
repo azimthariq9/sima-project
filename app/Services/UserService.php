@@ -158,7 +158,7 @@ class UserService extends BaseService
                 
                 Log::info('Dosen created', ['user_id' => $newUser->id]);
                 
-            } elseif ($userRole === Role::adminJurusan->value || $userRole === Role::adminBipa->value || $userRole === Role::KLN->value) {
+            } elseif ($userRole === Role::JURUSAN->value || $userRole === Role::BIPA->value || $userRole === Role::KLN->value) {
                 // Admin roles tidak punya relasi tambahan
                 Log::info('Admin user created', ['role' => $userRole]);
                 
@@ -168,7 +168,7 @@ class UserService extends BaseService
                 throw new \InvalidArgumentException("Role '{$userRole}' tidak dikenal");
             }
             
-            $this->logActivity('CREATE', $newUser, "Membuat user baru: {$userData['email']} dengan role {$userRole},", $maker, $newUser);
+            $this->logActivity('CREATE', $newUser, "Membuat user baru: {$userData['email']} dengan role {$userRole},", $maker);
             
             DB::commit();
             return $newUser->load(['mahasiswa', 'dosen']);
@@ -214,7 +214,7 @@ class UserService extends BaseService
                 );
             }
             
-            $this->logActivity('UPDATE', $user, "Mengupdate user: {$user->name}", $maker, $user);
+            $this->logActivity('UPDATE', $user, "Mengupdate user: {$user->name}", $maker);
             
             DB::commit();
             return $user->fresh(['mahasiswa', 'dosen']);
@@ -244,7 +244,7 @@ class UserService extends BaseService
             $user->update(['status' => $status]);
             $this->NotificationService->sendToUsers($notification_id, [$user->id]);
 
-            $this->logActivity('UPDATE_STATUS', $user, "Mengupdate status user {$user->name} menjadi {$status}", $maker, $user);
+            $this->logActivity('UPDATE_STATUS', $user, "Mengupdate status user {$user->name} menjadi {$status}", $maker);
             
             DB::commit();
             return $user;

@@ -17,6 +17,7 @@ use App\Http\Requests\User\updateUserRequest;
 use App\Http\Requests\dokumen\updateDokumenRequest;
 use App\Http\Requests\Jadwal\createJadwalRequest;
 use App\Http\Requests\Jadwal\updateJadwalRequest;
+use App\Http\Requests\Mahasiswa\updateMahasiswaRequest;
 use App\Http\Requests\ReqDokumen\createReqDokumenRequest;
 use App\Http\Requests\ReqDokumen\updateReqDokumenRequest;
 use App\Http\Requests\updateStatusRequest;
@@ -47,8 +48,8 @@ class MahasiswaController extends Controller
         $this->AnnouncementService = $AnnouncementService;
     }
 
-    public function storeReqDokumen(){
-
+    public function updateProfile(updateMahasiswaRequest $request){
+        $mahasiswa = 
     }
 
 

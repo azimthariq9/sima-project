@@ -26,14 +26,14 @@ class createDokumenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'mahasiswa_id' => ['required', 'exists:mahasiswa,id'],
-            'tipeDkmn' => ['required', new Enum(tipeDok::class)],
-            'namaDkmn' => ['required', 'string', 'max:255'],
-            'penerbit' => ['required', new Enum(penerbit::class)],
-            'noDkmn' => ['required', 'string', 'max:255'],
-            'tglTerbit' => ['required', 'date'],
-            'tglkdlwrs' => ['required', 'date', 'after_or_equal:tglTerbit'],
-            'status' => ['required', new Enum(status::class)],
+            'mahasiswa_id' => ['sometimes', 'exists:mahasiswa,id'],
+            'tipeDkmn' => ['sometimes','required', new Enum(tipeDok::class)],
+            'namaDkmn' => ['sometimes','required', 'string', 'max:255'],
+            'penerbit' => ['sometimes','required', new Enum(penerbit::class)],
+            'noDkmn' => ['sometimes','required', 'string', 'max:255'],
+            'tglTerbit' => ['sometimes','required', 'date'],
+            'tglKdlwrs' => ['sometimes','required', 'date', 'after_or_equal:tglTerbit'],
+            'status' => ['sometimes','required', new Enum(status::class)],
 
         ];
     }

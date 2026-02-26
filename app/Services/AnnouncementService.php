@@ -82,7 +82,7 @@ class AnnouncementService extends BaseService
             'published_at' => now()
         ]);
         
-        $this->logActivity('PUBLISH', $announcement, "Mempublikasikan pengumuman: {$announcement->title}", $maker, $announcement);
+        $this->logActivity('PUBLISH', $announcement, "Mempublikasikan pengumuman: {$announcement->title}", $maker);
         
         return $announcement;
     }

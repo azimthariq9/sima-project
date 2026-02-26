@@ -4,15 +4,15 @@ namespace App\Enums;
 
 enum TipeDok:string
 {
-    case suratKeterangan = 'Surat Keterangan';
-    case suratIzin = 'Surat Izin';
-    case suratTugas = 'Surat Tugas';
-    case suratUndangan = 'Surat Undangan';
-    case suratPernyataan = 'Surat Pernyataan';
+    case suratKeterangan = 'Surat_Keterangan';
+    case suratIzin = 'Surat_Izin';
+    case suratTugas = 'Surat_Tugas';
+    case suratUndangan = 'Surat_Undangan';
+    case suratPernyataan = 'Surat_Pernyataan';
     case kitas = 'KITAS';
     case kitap = 'KITAP';
     case paspor = 'Paspor';
     case ktp = 'KTP';
-    case polis = 'Polis Asuransi';
-    case foto_profile = 'Foto Profil';
+    case polis = 'Polis_Asuransi';
+    case foto_profile = 'Foto_Profil';
 }

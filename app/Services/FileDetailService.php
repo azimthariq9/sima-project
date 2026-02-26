@@ -8,6 +8,7 @@ use App\Traits\FileValidationTrait;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class FileDetailService extends BaseService
 {
@@ -20,12 +21,23 @@ class FileDetailService extends BaseService
     {
         parent::__construct($fileDetail);
     }
-    
+     /**
+     * Soft delete semua file untuk dokumen
+     */
+    public function softDeleteForDokumen(int $dokumenId): void
+    {
+        $fileDetails = $this->model->where('dokumen_id', $dokumenId)->get();
+        
+        foreach ($fileDetails as $fileDetail) {
+            $fileDetail->delete(); // soft delete
+        }
+    }
     /**
      * Upload file untuk dokumen tertentu
      */
     public function uploadForDokumen(UploadedFile $file, int $dokumenId, ?int $reqDokumenId = null): FileDetail
     {
+        $maker = Auth::user();
         // 1. Validasi file
         $this->validatePdfFile($file, 2);
         
@@ -42,12 +54,12 @@ class FileDetailService extends BaseService
         $fileDetailData = [
             'path' => $path,
             'mimeType' => $file->getMimeType(),
-            'size' => $file->getSize(),
+            'fileSize' => $file->getSize(),
             'dokumen_id' => $dokumenId,
             'reqDokumen_id' => $reqDokumenId,
         ];
         
-        return $this->create($fileDetailData);
+        return $this->create($maker,$fileDetailData);
     }
     
     /**

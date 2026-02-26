@@ -31,14 +31,14 @@ class JurusanService extends BaseService
     public function create($maker,array $data): Jurusan
     {
         $jurusan = parent::create($maker,$data);
-        $this->logActivity('CREATE', $jurusan, "Membuat jurusan baru: {$jurusan->nama_jurusan}", $maker, $jurusan);
+        $this->logActivity('CREATE', $jurusan, "Membuat jurusan baru: {$jurusan->nama_jurusan}", $maker);
         return $jurusan;
     }
     
     public function update($maker, int $id, array $data): Jurusan
     {
         $jurusan = parent::update($maker, $id, $data);
-        $this->logActivity('UPDATE', $jurusan, "Mengupdate jurusan: {$jurusan->nama_jurusan}", $maker, $jurusan);
+        $this->logActivity('UPDATE', $jurusan, "Mengupdate jurusan: {$jurusan->nama_jurusan}", $maker);
         return $jurusan;
     }
     
@@ -49,7 +49,7 @@ class JurusanService extends BaseService
         $result = parent::delete($maker, $id);
         
         if ($result) {
-            $this->logActivity('DELETE', $jurusan, "Menghapus jurusan: {$nama}", $maker, $jurusan);
+            $this->logActivity('DELETE', $jurusan, "Menghapus jurusan: {$nama}", $maker);
         }
         
         return $result;

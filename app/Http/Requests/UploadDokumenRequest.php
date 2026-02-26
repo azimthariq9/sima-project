@@ -1,7 +1,7 @@
 <?php
 // app/Http/Requests/Dokumen/UploadDokumenRequest.php
 
-namespace App\Http\Requests\Dokumen;
+namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;

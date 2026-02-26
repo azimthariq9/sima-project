@@ -66,7 +66,7 @@ abstract class BaseService
     /**
      * Create new record
      */
-    public function create($maker,array $data): Model
+    public function create($maker, array $data): Model
     {
         DB::beginTransaction();
         

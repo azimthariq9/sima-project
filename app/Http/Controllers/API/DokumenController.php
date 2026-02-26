@@ -1,7 +1,7 @@
 <?php
 // app/Http/Controllers/API/Mahasiswa/DokumenController.php
 
-namespace App\Http\Controllers\API\Mahasiswa;
+namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponseTrait;
@@ -45,39 +45,37 @@ class DokumenController extends Controller
             }
             
             $file = $request->file('file');
+            $fileName = $file->getClientOriginalName();
             
             // Siapkan data dokumen
             $dokumenData = [
                 'mahasiswa_id' => $mahasiswa->id,
                 'tipeDkmn' => $request->tipeDkmn,
-                'namaDkmn' => $request->namaDkmn,
+                'namaDkmn' => $fileName,
                 'penerbit' => $request->penerbit,
                 'noDkmn' => $request->noDkmn,
                 'tglTerbit' => $request->tglTerbit,
-                'tglkdlwrs' => $request->tglkdlwrs,
-                'status' => 'pending', // Default status pending
+                'tglKdlwrs' => $request->tglKdlwrs,
+                'status' => $request->status ?? null
             ];
             
             // Upload dokumen
-            $dokumen = $this->dokumenService->uploadDokumen(
+            $dokumen = $this->dokumenService->uploadOrUpdateDokumen(
                 $dokumenData, 
                 $file,
                 $request->reqDokumen_id ?? null
             );
-            
+
+            $message = $dokumen->isExisting ? 'Dokumen berhasil diperbarui' : 'Dokumen berhasil diupload';
+
             return $this->successResponse([
-                'dokumen' => [
-                    'id' => $dokumen->id,
-                    'nama' => $dokumen->namaDkmn,
-                    'tipe' => $dokumen->tipeDkmn,
-                    'status' => $dokumen->status,
-                    'file' => [
-                        'path' => $dokumen->fileDetail->first()->path ?? null,
-                        'size' => $dokumen->fileDetail->first()->size ?? null,
-                        'mime_type' => $dokumen->fileDetail->first()->mimeType ?? null,
-                    ]
-                ]
-            ], 'Dokumen berhasil diupload', 201);
+                'id' => $dokumen->id,
+                'nama' => $dokumen->namaDkmn,
+                'tipe' => $dokumen->tipeDkmn,
+                'status' => $dokumen->status,
+                'is_update' => $this->isExisting ?? false,
+                'file_count' => $dokumen->fileDetail()->count()
+            ], $message, 201);
             
         } catch (\Exception $e) {
             Log::error('Error uploading dokumen: ' . $e->getMessage());

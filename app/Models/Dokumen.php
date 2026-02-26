@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use App\Enums\penerbit;
 use App\Enums\tipeDok;
 use App\Enums\status;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Dokumen extends Model
 {
+    use SoftDeletes; // TAMBAHKAN INI
     protected $table = 'dokumen';
 
     protected $guarded = [];
@@ -29,6 +31,16 @@ class Dokumen extends Model
     public function fileDetail(){
         return $this->hasMany(FileDetail::class, 'dokumen_id');
     }
+    public function history(){
+        return $this->hasMany(HistoryDokumen::class,'dokumen_id');
+    }
     
+        /**
+     * Ambil history terbaru
+     */
+    public function latestHistory()
+    {
+        return $this->hasOne(HistoryDokumen::class, 'dokumen_id')->latestOfMany();
+    }
 
 }

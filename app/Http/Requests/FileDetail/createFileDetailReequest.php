@@ -24,7 +24,7 @@ class createFileDetailReequest extends FormRequest
         return [
             'path' => ['required', 'string', 'max:255'],
             'mimeType' => ['required', 'string', 'max:50'],
-            'size' => ['required', 'integer'],
+            'fileSize' => ['required', 'integer'],
             'dokumen_id' => ['sometimes', 'exists: dokumen,id'],
             'reqDokumen_id' => ['sometimes', 'exists: reqDokumen,id']
         ];

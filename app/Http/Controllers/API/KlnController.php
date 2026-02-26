@@ -11,9 +11,11 @@ use App\Services\UserService;
 use App\Services\DokumenService;
 use App\Services\NotificationService;
 use App\Services\AnnouncementService;
+use App\Services\HistoryDokumenService;
 use App\Http\Requests\User\createUserRequest;
 use App\Http\Requests\User\updateUserRequest;
 use App\Http\Requests\dokumen\updateDokumenRequest;
+use App\Http\Requests\HistoryDok\createHistoryDokRequest;
 use App\Http\Requests\Jadwal\createJadwalRequest;
 use App\Http\Requests\Jadwal\updateJadwalRequest;
 use App\Http\Requests\ReqDokumen\createReqDokumenRequest;
@@ -32,19 +34,22 @@ class KlnController extends Controller
     protected $dokumenService;
     protected $NotificationService;
     protected $AnnouncementService;
+    protected $HistoryDokumenService;
 
     public function __construct(
         DashboardService $dashboardService,
         UserService $userService,
         DokumenService $dokumenService,
         NotificationService $NotificationService,
-        AnnouncementService $AnnouncementService
+        AnnouncementService $AnnouncementService,
+        HistoryDokumenService $HistoryDokumenService
     ) {
         $this->dashboardService = $dashboardService;
         $this->UserService = $userService;
         $this->dokumenService = $dokumenService;
         $this->NotificationService = $NotificationService;
         $this->AnnouncementService = $AnnouncementService;
+        $this->HistoryDokumenService = $HistoryDokumenService;
     }
 
     /**
@@ -171,6 +176,40 @@ class KlnController extends Controller
             return $this->successResponse($dokumen, 'Status updated');
         } catch (\Exception $e) {
             return $this->errorResponse('Gagal update status', 500, $e->getMessage());
+        }
+    }
+
+    public function verifyDokumen(createHistoryDokRequest $request, $id)
+    {
+        try {
+            $admin = auth()->user();
+            
+            $dokumen = $this->dokumenService->verifyDokumen(
+                $id,
+                $admin,
+                $request->action,
+                $request->message
+            );
+            
+            return $this->successResponse([
+                'id' => $dokumen->id,
+                'status' => $dokumen->status,
+                'history' => $dokumen->histories
+            ], "Dokumen berhasil di{$request->action}");
+            
+        } catch (\Exception $e) {
+            return $this->errorResponse('Gagal verifikasi dokumen', 500, $e->getMessage());
+        }
+    }
+
+    // Untuk lihat history dokumen
+    public function getHistory($id)
+    {
+        try {
+            $history = $this->HistoryDokumenService->getHistoryForDokumen($id);
+            return $this->paginatedResponse($history, 'History retrieved');
+        } catch (\Exception $e) {
+            return $this->errorResponse('Gagal ambil history', 500);
         }
     }
 
