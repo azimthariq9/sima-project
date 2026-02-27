@@ -17,65 +17,108 @@
                 </div>
             </div>
             <div class="sima-card__body">
-                <form method="POST" action="{{ route('mahasiswa.request.store') }}" enctype="multipart/form-data">
-                    @csrf
+            <form method="POST" action="{{ route('mahasiswa.request.store') }}" enctype="multipart/form-data">
+                @csrf
 
-                    <div style="margin-bottom:18px">
-                        <label class="sima-label">Jenis Dokumen <span style="color:var(--c-red)">*</span></label>
-                        <select name="jenis_dokumen" class="sima-input" required>
-                            <option value="">— Pilih jenis dokumen —</option>
-                            <option value="surat_aktif">Surat Keterangan Aktif</option>
-                            <option value="surat_izin">Surat Izin Tinggal</option>
-                            <option value="kitas">Perpanjangan KITAS</option>
-                            <option value="itas">Perpanjangan ITAS</option>
-                            <option value="kitap">Perpanjangan KITAP</option>
-                            <option value="skck">SKCK</option>
-                            <option value="asuransi">Asuransi Kesehatan</option>
-                            <option value="lainnya">Lainnya</option>
-                        </select>
-                        @error('jenis_dokumen')
-                            <div style="font-size:12px;color:var(--c-red);margin-top:5px"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
-                        @enderror
-                    </div>
+                <div style="margin-bottom:18px">
+                    <label class="sima-label">
+                        Jenis Dokumen <span style="color:var(--c-red)">*</span>
+                    </label>
 
-                    <div style="margin-bottom:18px">
-                        <label class="sima-label">Keperluan / Keterangan <span style="color:var(--c-red)">*</span></label>
-                        <textarea name="keterangan" class="sima-input" rows="3"
-                                  placeholder="Jelaskan keperluan dokumen ini…"
-                                  required style="resize:vertical">{{ old('keterangan') }}</textarea>
-                    </div>
+                    <select name="tipeDkmn" class="sima-input" required>
+                        <option value="">— Pilih jenis dokumen —</option>
 
-                    <div style="margin-bottom:18px">
-                        <label class="sima-label">Tanggal Dibutuhkan</label>
-                        <input type="date" name="tanggal_dibutuhkan" class="sima-input"
-                               value="{{ old('tanggal_dibutuhkan') }}"
-                               min="{{ now()->addDay()->format('Y-m-d') }}">
-                    </div>
+                        @foreach(\App\Enums\TipeDok::cases() as $dok)
+                            <option value="{{ $dok->value }}"
+                                {{ old('tipeDkmn') == $dok->value ? 'selected' : '' }}>
+                                {{ str_replace('_',' ', $dok->value) }}
+                            </option>
+                        @endforeach
+                    </select>
 
-                    <div style="margin-bottom:18px">
-                        <label class="sima-label">Upload Dokumen Pendukung</label>
-                        <div style="border:2px dashed var(--c-border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s;background:var(--c-bg)"
-                             onclick="document.getElementById('file-upload').click()"
-                             ondragover="this.style.borderColor='var(--c-accent)'"
-                             ondragleave="this.style.borderColor='var(--c-border)'">
-                            <i class="fas fa-cloud-arrow-up" style="font-size:28px;color:var(--c-text-4);margin-bottom:8px;display:block"></i>
-                            <div style="font-size:13.5px;color:var(--c-text-2);font-weight:500">Drag & drop atau klik untuk upload</div>
-                            <div style="font-size:12px;color:var(--c-text-3);margin-top:4px">PDF, JPG, PNG — max 5MB</div>
+                    @error('tipeDkmn')
+                        <div style="font-size:12px;color:var(--c-red);margin-top:5px">
+                            <i class="fas fa-exclamation-circle"></i> {{ $message }}
                         </div>
-                        <input type="file" id="file-upload" name="file_pendukung[]" multiple accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="showFiles(this)">
-                        <div id="file-list" style="margin-top:8px;font-size:12.5px;color:var(--c-text-3)"></div>
+                    @enderror
+                </div>
+
+
+                <div style="margin-bottom:18px">
+                    <label class="sima-label">
+                        Keperluan / Keterangan <span style="color:var(--c-red)">*</span>
+                    </label>
+
+                    <textarea name="message"
+                            class="sima-input"
+                            rows="3"
+                            placeholder="Jelaskan keperluan dokumen ini…"
+                            required
+                            style="resize:vertical">{{ old('message') }}</textarea>
+
+                    @error('message')
+                        <div style="font-size:12px;color:var(--c-red);margin-top:5px">
+                            <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                        </div>
+                    @enderror
+                </div>
+
+
+                <div style="margin-bottom:18px">
+                    <label class="sima-label">Tanggal Dibutuhkan</label>
+                    <input type="date"
+                        name="tanggal_dibutuhkan"
+                        class="sima-input"
+                        value="{{ old('tanggal_dibutuhkan') }}"
+                        min="{{ now()->addDay()->format('Y-m-d') }}">
+                </div>
+
+
+                <div style="margin-bottom:18px">
+                    <label class="sima-label">Upload Dokumen Pendukung</label>
+
+                    <div style="border:2px dashed var(--c-border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s;background:var(--c-bg)"
+                        onclick="document.getElementById('file-upload').click()"
+                        ondragover="this.style.borderColor='var(--c-accent)'"
+                        ondragleave="this.style.borderColor='var(--c-border)'">
+
+                        <i class="fas fa-cloud-arrow-up"
+                        style="font-size:28px;color:var(--c-text-4);margin-bottom:8px;display:block"></i>
+
+                        <div style="font-size:13.5px;color:var(--c-text-2);font-weight:500">
+                            Drag & drop atau klik untuk upload
+                        </div>
+
+                        <div style="font-size:12px;color:var(--c-text-3);margin-top:4px">
+                            PDF, JPG, PNG — max 5MB
+                        </div>
                     </div>
 
-                    <div style="display:flex;gap:10px;margin-top:24px">
-                        <button type="submit" class="sima-btn">
-                            <i class="fas fa-paper-plane"></i> Kirim Request
-                        </button>
-                        <a href="{{ route('mahasiswa.dashboard') }}" class="sima-btn sima-btn--outline">
-                            <i class="fas fa-arrow-left"></i> Batal
-                        </a>
-                    </div>
-                </form>
-            </div>
+                    <input type="file"
+                        id="file-upload"
+                        name="file_pendukung[]"
+                        multiple
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        style="display:none"
+                        onchange="showFiles(this)">
+
+                    <div id="file-list"
+                        style="margin-top:8px;font-size:12.5px;color:var(--c-text-3)"></div>
+                </div>
+
+
+                <div style="display:flex;gap:10px;margin-top:24px">
+                    <button type="submit" class="sima-btn">
+                        <i class="fas fa-paper-plane"></i> Kirim Request
+                    </button>
+
+                    <a href="{{ route('mahasiswa.dashboard') }}"
+                    class="sima-btn sima-btn--outline">
+                        <i class="fas fa-arrow-left"></i> Batal
+                    </a>
+                </div>
+
+            </form>            </div>
         </div>
     </div>
 

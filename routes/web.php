@@ -9,6 +9,7 @@ use App\Http\Controllers\MahasiswaRequestController;
 use App\Http\Controllers\API\KlnController;
 use App\Http\Controllers\API\DokumenController;
 use App\Http\Controllers\MahasiswaController;
+use App\Http\Controllers\DosenController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,6 +60,8 @@ Route::middleware(['auth', 'check.role:KLN'])
     ->name('kln.')
     ->group(function () {
 
+        
+
         Route::get('profile', [KlnController::class, 'profile'])
         ->name('profile');
 
@@ -81,10 +84,11 @@ Route::middleware(['auth', 'check.role:KLN'])
         Route::delete('users/{id}', [KlnController::class, 'destroyUser'])->name('users.destroy');
         Route::patch('users/{id}/status', [KlnController::class, 'updateStatusMahasiswa'])->name('users.status');
 
-        /* ---- DOKUMEN ---- */
-        Route::get('dokumen', [KlnController::class, 'dokumenPage'])->name('dokumen.page');
-        Route::patch('dokumen/{id}/status', [KlnController::class, 'updateDokumenStatus'])->name('dokumen.status');
-
+        /* ---- DOKUMEN (FINAL FIX) ---- */
+        Route::get('dokumen', [KlnController::class, 'dokumen'])->name('dokumen');
+        Route::get('dokumen/{id}', [KlnController::class, 'show'])->name('dokumen.show');
+        Route::delete('dokumen/{id}', [KlnController::class, 'destroy'])->name('dokumen.destroy');
+        Route::post('dokumen/{id}/upload', [KlnController::class, 'uploadFile'])->name('dokumen.upload');
         /* ---- REQUEST ---- */
         Route::prefix('requestDok')->name('request.')->group(function () {
             Route::get('/', [KlnController::class, 'indexReqDocument'])->name('index');
@@ -127,6 +131,12 @@ Route::middleware(['auth', 'check.role:MAHASISWA', 'profile.completed'])
     ->name('mahasiswa.')
     ->group(function () {
 
+        Route::get('request/create', [MahasiswaController::class, 'createRequest'])
+            ->name('request.create');
+
+        Route::post('request/store', [MahasiswaController::class, 'storeRequest'])
+            ->name('request.store');
+
         // DASHBOARD
         Route::get('dashboard', [MahasiswaController::class, 'dashboard'])
             ->name('dashboard');
@@ -141,9 +151,6 @@ Route::middleware(['auth', 'check.role:MAHASISWA', 'profile.completed'])
         // REQUEST
         Route::get('request', [MahasiswaRequestController::class, 'index'])
             ->name('request.index');
-
-        Route::get('request/create', [MahasiswaRequestController::class, 'create'])
-            ->name('request.create');
 
         Route::post('request', [MahasiswaRequestController::class, 'store'])
             ->name('request.store');
@@ -213,4 +220,31 @@ Route::get('test-update', function() {
         'after' => $mahasiswa->fresh(),
     ]);
 })->middleware('auth');
+
+
+
+Route::prefix('dosen')
+    ->name('dosen.')
+    ->middleware(['auth','check.role:DOSEN'])
+    ->group(function () {
+
+        Route::get('/dashboard', [DosenController::class, 'dashboard'])
+            ->name('dashboard');
+
+        Route::get('/profil', [DosenController::class, 'profil'])
+            ->name('profil');
+
+        Route::get('/jadwal', [DosenController::class, 'jadwal'])
+            ->name('jadwal');
+
+        Route::get('/announcement', [DosenController::class, 'announcement'])
+            ->name('announcement');
+
+        Route::get('/notifikasi', [DosenController::class, 'notifikasi'])
+            ->name('notifikasi');
+
+        Route::get('/analytics', [DosenController::class, 'analytics'])
+            ->name('analytics');
+
+});
 require __DIR__.'/auth.php';

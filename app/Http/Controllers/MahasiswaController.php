@@ -5,16 +5,42 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Mahasiswa;
-
+use App\Services\ReqDokumenService;
 
 class MahasiswaController extends Controller
 {
-    
+    /*
+    |--------------------------------------------------------------------------
+    | REQUEST DOKUMEN
+    |--------------------------------------------------------------------------
+    */
+
+    public function createRequest()
+    {
+        return view('mahasiswa.request.create');
+    }
+
+    public function storeRequest(Request $request, ReqDokumenService $service)
+    {
+        $request->validate([
+            'tipeDkmn' => 'required|string',
+            'message' => 'required|string',
+            'tanggal_dibutuhkan' => 'nullable|date'
+        ]);
+
+        $mahasiswa = auth()->user()->mahasiswa;
+
+        $req = $service->createRequest($mahasiswa, $request->all());
+
+        return redirect()->back()->with('success', 'Request berhasil dikirim');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | DASHBOARD
     |--------------------------------------------------------------------------
     */
+
     public function dashboard()
     {
         $user = auth()->user();
@@ -28,9 +54,9 @@ class MahasiswaController extends Controller
     | COMPLETE PROFILE (FIRST LOGIN ONLY)
     |--------------------------------------------------------------------------
     */
+
     public function completeProfile()
     {
-        // Jika sudah lengkap, jangan boleh balik lagi
         if (auth()->user()->profile_completed) {
             return redirect()->route('dashboard');
         }
@@ -81,6 +107,7 @@ class MahasiswaController extends Controller
     | PROFILE (VIEW + EDIT NORMAL)
     |--------------------------------------------------------------------------
     */
+
     public function getProfile()
     {
         $mahasiswa = auth()->user()->mahasiswa;
@@ -118,7 +145,6 @@ class MahasiswaController extends Controller
             'alamatIndo' => $request->alamatIndo,
         ]);
 
-        // Jika user ingin ganti password
         if ($request->filled('password')) {
             $user->update([
                 'password' => Hash::make($request->password),
@@ -133,6 +159,7 @@ class MahasiswaController extends Controller
     | STATIC PAGES
     |--------------------------------------------------------------------------
     */
+
     public function dokumen()
     {
         return view('mahasiswa.dokumen');

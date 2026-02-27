@@ -51,7 +51,7 @@
 
 
     {{-- Request Documents --}}
-    <a href="{{ route('kln.dokumen.page') }}"
+    <a href="{{ route('kln.dokumen') }}"
        class="sima-nav__item {{ request()->routeIs('kln.dokumen.page') ? 'active' : '' }}">
         <i class="fas fa-file-alt sima-nav__icon"></i>
         Request Documents
