@@ -247,7 +247,6 @@ body.dark .sima-sidebar {
     box-shadow: 0 4px 12px rgba(108,143,255,.3);
 }
 .sima-brand__logo svg { color: white; }
-.sima-brand__text {}
 .sima-brand__name {
     font-family: var(--f-display);
     font-size: 16px;
