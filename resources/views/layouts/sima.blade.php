@@ -106,19 +106,7 @@ html, body {
 }
 
 .sima-nav__item::after {
-    content: '';
-    position: absolute;
-    left: -100%;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        120deg,
-        transparent,
-        rgba(255,255,255,.2),
-        transparent
-    );
-    transition: .6s;
+    display: none;
 }
 
 .sima-nav__item:hover::after {
@@ -181,14 +169,6 @@ body.dark .sima-sidebar .sima-nav__item {
     color: #e2e8f0;
 }
 
-body.dark .sima-sidebar .sima-nav__item:hover {
-    background: rgba(255,255,255,.08);
-}
-
-body.dark .sima-sidebar .sima-nav__item.active {
-    background: rgba(167,139,250,.25);
-    color: #fff;
-}
 /* Avatar fix */
 .sima-avatar {
     width: 36px;
@@ -247,6 +227,7 @@ body.dark {
 body.dark .sima-sidebar {
     background: linear-gradient(180deg, #2d1b69 0%, #1e293b 60%, #0f172a 100%);
 }
+
 /* Brand */
 .sima-brand {
     padding: 22px 20px 18px;
@@ -302,13 +283,36 @@ body.dark .sima-sidebar {
 }
 
 .sima-nav__item:hover {
-    background: #ececf4;
+    background: rgba(108,143,255,0.08);
+    transform: translateX(4px);
 }
 
+body.dark .sima-nav__item:hover {
+    background: rgba(108,143,255,0.18);
+    color: #ffffff;
+}
+
+body.dark .sima-nav__item:hover .sima-nav__icon {
+    color: #ffffff;
+}
+
+.sima-nav__item {
+    transition: all .18s cubic-bezier(.22,1,.36,1);
+}
 .sima-nav__item.active {
     background: #dcd3f5;
     color: #4c3bbf;
     font-weight: 600;
+}
+
+body.dark .sima-nav__item.active {
+    background: linear-gradient(135deg, #6c8fff, #a78bfa);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(108,143,255,.35);
+}
+
+body.dark .sima-nav__item.active .sima-nav__icon {
+    color: #ffffff;
 }
 
 .sima-nav__icon {
