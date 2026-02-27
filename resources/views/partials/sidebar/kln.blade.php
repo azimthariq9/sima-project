@@ -34,19 +34,19 @@
     </a>
 
 
-    {{-- Students --}}
+    {{-- List Users --}}
     <a href="{{ route('kln.users.page') }}"
        class="sima-nav__item {{ request()->routeIs('kln.users.page') ? 'active' : '' }}">
         <i class="fas fa-users sima-nav__icon"></i>
-        Students
+        List Users
     </a>
 
 
-    {{-- Lecturers --}}
+    {{-- Students & Lecturers --}}
     <a href="#"
        class="sima-nav__item">
         <i class="fas fa-user-tie sima-nav__icon"></i>
-        Lecturers
+        Students & Lecturers
     </a>
 
 

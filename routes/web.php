@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+
 /*
 |--------------------------------------------------------------------------
 | =========================
@@ -52,10 +53,14 @@ Route::middleware('auth')->group(function () {
 | =========================
 |--------------------------------------------------------------------------
 */
+
 Route::middleware(['auth', 'check.role:KLN'])
     ->prefix('kln')
     ->name('kln.')
     ->group(function () {
+
+        Route::get('profile', [KlnController::class, 'profile'])
+        ->name('profile');
 
         /* ---- MAIN ---- */
         Route::get('dashboard', [KlnController::class, 'index'])->name('dashboard');
@@ -69,6 +74,8 @@ Route::middleware(['auth', 'check.role:KLN'])
 
         /* ---- USERS ---- */
         Route::get('users', [KlnController::class, 'usersPage'])->name('users.page');
+        Route::get('users-data', [KlnController::class, 'getUsers'])->name('users.data');
+        Route::post('users', [KlnController::class, 'storeUser'])->name('users.store');
         Route::get('users/{id}', [KlnController::class, 'showUser'])->name('users.show');
         Route::put('users/{id}', [KlnController::class, 'updateUser'])->name('users.update');
         Route::delete('users/{id}', [KlnController::class, 'destroyUser'])->name('users.destroy');
@@ -89,7 +96,6 @@ Route::middleware(['auth', 'check.role:KLN'])
         /* ---- ANNOUNCEMENT ---- */
         Route::post('announcement/store', [KlnController::class, 'storeAnnouncement'])->name('announcement.store');
     });
-
 /*
 |--------------------------------------------------------------------------
 | MAHASISWA ROUTES

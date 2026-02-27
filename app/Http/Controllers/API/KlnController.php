@@ -29,6 +29,8 @@ use App\Enums\Status;
 use Illuminate\Http\Request;
 use PhpParser\Node\Stmt\TryCatch;
 
+
+
 class KlnController extends Controller
 {
     use ApiResponseTrait; // ← TETAP DIPAKAI
@@ -91,6 +93,11 @@ class KlnController extends Controller
     public function monitoringPage()
     {
         return view('kln.monitoring.index');
+    }
+
+    public function profile()
+    {
+        return view('kln.profile');
     }
 
     /**
