@@ -1095,7 +1095,7 @@ body.dark .sima-nav__item.active .sima-nav__icon {
 
                 <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border-radius:12px;">
                     <li>
-                        <a class="dropdown-item" href="{{ route($prefix.'.profil') }}">
+                        <a class="dropdown-item" href="{{ route($prefix.'.profile') }}">
                             <i class="fas fa-user me-2"></i> Profile
                         </a>
                     </li>

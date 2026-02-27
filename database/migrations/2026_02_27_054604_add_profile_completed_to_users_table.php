@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('reqDokumen', function (Blueprint $table) {
-            // $table->string('message');
+        Schema::table('users', function (Blueprint $table) {
+            $table->boolean('profile_completed')->default(false);
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('req_dokumen', function (Blueprint $table) {
-            //
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('profile_completed');
         });
     }
 };

@@ -29,7 +29,7 @@
         </a>
     </div>
     <div class="col-6 col-md-3 sima-fade sima-fade--2">
-        <a href="{{ route('mahasiswa.profil') }}" class="sima-stat sima-stat--red d-block text-decoration-none">
+        <a href="{{ route('mahasiswa.profile') }}" class="sima-stat sima-stat--red d-block text-decoration-none">
             <div class="sima-stat__icon sima-stat__icon--red"><i class="fas fa-exclamation-circle"></i></div>
             <div class="sima-stat__label">Dokumen Expired</div>
             <span class="sima-stat__value" data-count="{{ $expiredDocs ?? 1 }}">{{ $expiredDocs ?? 1 }}</span>
@@ -201,7 +201,7 @@
                         </a>
                     </div>
                     <div class="col-6">
-                        <a href="{{ route('mahasiswa.profil') }}" class="sima-quick">
+                        <a href="{{ route('mahasiswa.profile') }}" class="sima-quick">
                             <div class="sima-quick__icon" style="background:#F5F3FF;color:#7C3AED"><i class="fas fa-id-card"></i></div>
                             <div class="sima-quick__label">Profil & Dokumen</div>
                         </a>
@@ -239,7 +239,7 @@
                             <div style="font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--c-text-3);margin-top:2px">IPK</div>
                         </div>
                     </div>
-                    <a href="{{ route('mahasiswa.profil') }}"
+                    <a href="{{ route('mahasiswa.profile') }}"
                        class="sima-btn sima-btn--outline sima-btn--sm sima-btn--full d-flex justify-content-center"
                        style="margin-top:12px">
                         <i class="fas fa-user-circle"></i> Lihat Profil Lengkap
@@ -326,7 +326,7 @@
                     <h5 class="sima-card__title">Status Dokumen</h5>
                     <div class="sima-card__subtitle">Kelengkapan dokumen resmi kamu</div>
                 </div>
-                <a href="{{ route('mahasiswa.profil') }}" class="sima-card__action"><i class="fas fa-folder-open"></i> Kelola</a>
+                <a href="{{ route('mahasiswa.profile') }}" class="sima-card__action"><i class="fas fa-folder-open"></i> Kelola</a>
             </div>
             <div class="sima-card__body" style="padding:0">
                 @php
@@ -351,7 +351,7 @@
                     <tbody>
                         @foreach($docs as $doc)
                         @php $s = is_array($doc) ? $doc : $doc->toArray(); $status = $s['status']; $info = $sm[$status] ?? $sm['pending']; @endphp
-                        <tr onclick="window.location='{{ route('mahasiswa.profil') }}'" style="cursor:pointer">
+                        <tr onclick="window.location='{{ route('mahasiswa.profile') }}'" style="cursor:pointer">
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px">
                                     <div style="width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;
