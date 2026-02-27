@@ -312,31 +312,26 @@ return [
         'text' => 'Jadwal Saya',
         'route' => 'mahasiswa.jadwal',
         'icon' => 'fas fa-calendar',
-        'can'  => 'mahasiswa',
     ],
     [
         'text' => 'Request Dokumen',
-        'route' => 'mahasiswa.request',
+        'route' => 'mahasiswa.request.index',
         'icon' => 'fas fa-file-alt',
-        'can'  => 'mahasiswa',
     ],
     [
         'text' => 'Profil & Dokumen',
-        'route' => 'mahasiswa.profile',
+        'route' => 'mahasiswa.profil',
         'icon' => 'fas fa-user',
-        'can'  => 'mahasiswa',
     ],
     [
         'text' => 'Announcement',
         'route' => 'mahasiswa.announcement',
         'icon' => 'fas fa-bullhorn',
-        'can'  => 'mahasiswa',
     ],
     [
         'text' => 'Notifikasi',
         'route' => 'mahasiswa.notifikasi',
         'icon' => 'fas fa-bell',
-        'can'  => 'mahasiswa',
     ],
 
     /*

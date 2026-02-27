@@ -8,16 +8,28 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
-
+use App\Services\RoleServices;
 class ProfileController extends Controller
 {
+
+    public function __construct()
+    {
+        $userRole = Auth::user()->role;
+        $roleServices = new RoleServices($userRole);
+        $userRole = $roleServices->trimRole($userRole);
+    }
     /**
      * Display the user's profile form.
      */
     public function edit(Request $request): View
     {
+        $userRole = $request->user()->role;
+        $roleServices = new RoleServices();
+        $userRole = $roleServices->trimRole($userRole);
+
         return view('profile.edit', [
             'user' => $request->user(),
+            
         ]);
     }
 
