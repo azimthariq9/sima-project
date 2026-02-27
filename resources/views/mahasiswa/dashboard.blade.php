@@ -1,7 +1,7 @@
 @extends('layouts.sima')
 
 @section('page_title', 'Dashboard Mahasiswa')
-@section('page_subtitle', 'Selamat datang kembali, {{ auth()->user()->name ?? "Mahasiswa" }} 👋')
+@section('page_subtitle', 'Selamat datang kembali, ' . (auth()->user()->name ?? 'Mahasiswa'))
 
 @section('main_content')
 
