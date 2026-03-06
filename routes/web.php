@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\MahasiswaRequestController;
 use App\Http\Controllers\API\KlnController;
 use App\Http\Controllers\API\DokumenController;
+use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\DosenController;
 
@@ -76,19 +77,25 @@ Route::middleware(['auth', 'check.role:KLN'])
         Route::view('profil', 'kln.profil')->name('profil');
 
         /* ---- USERS ---- */
-        Route::get('users', [KlnController::class, 'usersPage'])->name('users.page');
-        Route::get('users-data', [KlnController::class, 'getUsers'])->name('users.data');
-        Route::post('users', [KlnController::class, 'storeUser'])->name('users.store');
-        Route::get('users/{id}', [KlnController::class, 'showUser'])->name('users.show');
-        Route::put('users/{id}', [KlnController::class, 'updateUser'])->name('users.update');
-        Route::delete('users/{id}', [KlnController::class, 'destroyUser'])->name('users.destroy');
-        Route::patch('users/{id}/status', [KlnController::class, 'updateStatusMahasiswa'])->name('users.status');
+        Route::prefix('users')->name('users.')->group(function(){
+            Route::get('/', [KlnController::class, 'usersPage'])->name('page');
+            Route::post('/', [UserController::class, 'storeUser'])->name('store');
+            Route::get('/data', [UserController::class, 'getUsers'])->name('data');
+            Route::get('{id}', [UserController::class, 'showUser'])->name('show');
+            Route::put('{id}', [UserController::class, 'updateUser'])->name('update');
+            Route::delete('{id}', [UserController::class, 'destroyUser'])->name('destroy');
+            Route::patch('{id}/status', [UserController::class, 'updateStatusMahasiswa'])->name('status'); //ini belum tau mau taro dimana
+        });
+        
 
         /* ---- DOKUMEN (FINAL FIX) ---- */
-        Route::get('dokumen', [KlnController::class, 'dokumen'])->name('dokumen');
-        Route::get('dokumen/{id}', [KlnController::class, 'show'])->name('dokumen.show');
-        Route::delete('dokumen/{id}', [KlnController::class, 'destroy'])->name('dokumen.destroy');
-        Route::post('dokumen/{id}/upload', [KlnController::class, 'uploadFile'])->name('dokumen.upload');
+        Route::prefix('dokumen')->name('dokumen.')->group(function(){
+            Route::get('/', [KlnController::class, 'dokumen'])->name('page');
+            Route::get('{id}', [KlnController::class, 'show'])->name('show');
+            Route::delete('{id}', [KlnController::class, 'destroy'])->name('destroy');
+            Route::post('{id}/upload', [KlnController::class, 'uploadFile'])->name('upload');
+        });
+        
         /* ---- REQUEST ---- */
         Route::prefix('requestDok')->name('request.')->group(function () {
             Route::get('/', [KlnController::class, 'indexReqDocument'])->name('index');
@@ -98,7 +105,10 @@ Route::middleware(['auth', 'check.role:KLN'])
         });
 
         /* ---- ANNOUNCEMENT ---- */
-        Route::post('announcement/store', [KlnController::class, 'storeAnnouncement'])->name('announcement.store');
+        Route::prefix('announcement')->name('announcement.')->group(function(){
+            Route::post('store', [KlnController::class, 'storeAnnouncement'])->name('store');
+        });
+        
     });
 /*
 |--------------------------------------------------------------------------
@@ -247,4 +257,6 @@ Route::prefix('dosen')
             ->name('analytics');
 
 });
+
+
 require __DIR__.'/auth.php';
