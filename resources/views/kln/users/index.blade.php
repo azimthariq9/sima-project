@@ -97,9 +97,16 @@
             </div>
 
             <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Jurusan ID</label>
-                <input type="number" name="jurusan_id"
+                <label style="color:#94a3b8;">Jurusan</label>
+                <select name="jurusan_id" id="jurusan_id" onchange="handleRoleChange()" 
                     style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
+                    <option value="">Select Jurusan</option>
+                    @foreach ( $jurusan as $j)
+                        <option value="{{ $j->id }}">{{ $j->namaJurusan }}</option>
+                    @endforeach
+                </select>
+                {{-- <input type="number" name="jurusan_id"
+                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;"> --}}
             </div>
 
             <!-- MAHASISWA SECTION -->
@@ -222,8 +229,18 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function extractUsers(response) {
-        if (response?.data?.data) return response.data.data;
-        if (response?.data) return response.data;
+        // Jika response adalah array, gunakan langsung
+        if (Array.isArray(response)) {
+            return response;
+        }
+        // Jika response punya property data yang berupa array
+        if (response?.data && Array.isArray(response.data)) {
+            return response.data;
+        }
+        // Jika response punya property data.data (pagination)
+        if (response?.data?.data && Array.isArray(response.data.data)) {
+            return response.data.data;
+        }
         return [];
     }
 

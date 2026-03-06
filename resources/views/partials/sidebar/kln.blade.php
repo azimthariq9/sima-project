@@ -26,49 +26,46 @@
 ========================= --}}
 <div class="sima-nav">
 
-    {{-- Dashboard --}}
-    <a href="{{ route('kln.dashboard') }}"
-       class="sima-nav__item {{ request()->routeIs('kln.dashboard') ? 'active' : '' }}">
+    <a href="{{ route('kln.dashboard') }}" class="sima-nav__item {{ request()->routeIs('kln.dashboard') ? 'active' : '' }}" data-title="Dashboard">
         <i class="fas fa-home sima-nav__icon"></i>
-        Dashboard
+        <span>Dashboard</span>
     </a>
 
-
-    {{-- List Users --}}
-    <a href="{{ route('kln.users.page') }}"
-       class="sima-nav__item {{ request()->routeIs('kln.users.page') ? 'active' : '' }}">
+    <a href="{{ route('kln.users.page') }}" class="sima-nav__item {{ request()->routeIs('kln.users.*') ? 'active' : '' }}" data-title="Users">
         <i class="fas fa-users sima-nav__icon"></i>
-        List Users
+        <span>Users</span>
     </a>
 
-
-    {{-- Students & Lecturers --}}
-    <a href="#"
-       class="sima-nav__item">
-        <i class="fas fa-user-tie sima-nav__icon"></i>
-        Students & Lecturers
-    </a>
-
-
-    {{-- Request Documents --}}
-    <a href="{{ route('kln.dokumen') }}"
-       class="sima-nav__item {{ request()->routeIs('kln.dokumen.page') ? 'active' : '' }}">
-        <i class="fas fa-file-alt sima-nav__icon"></i>
-        Request Documents
-    </a>
-
+    {{-- Untuk menu dengan dropdown --}}
+    <div class="sima-nav__item has-sub" onclick="toggleNav(this)" data-title="Dokumen">
+        <i class="fas fa-file sima-nav__icon"></i>
+        <span>Dokumen</span>
+        <i class="fas fa-chevron-down sima-nav__chevron"></i>
+    </div>
+    <div class="sima-nav__sub">
+        <a href="{{ route('kln.dokumen.page') }}" class="sima-nav__sub-item">Semua Dokumen</a>
+        {{-- <a href="{{ route('kln.dokumen.pending') }}" class="sima-nav__sub-item">Pending</a> --}}
+    </div>
 
     {{-- SCHEDULE DROPDOWN --}}
     @php
         $scheduleActive = request()->routeIs('kln.schedule');
     @endphp
-
-    <button class="sima-nav__item {{ $scheduleActive ? 'open active' : '' }}"
-            onclick="toggleNav(this)">
+    <div class="sima-nav__item has-sub {{ $scheduleActive ? 'open active' : '' }}" onclick="toggleNav(this)" data-title="Jadwal">
         <i class="fas fa-clock sima-nav__icon"></i>
-        Schedules
-        <i class="fas fa-chevron-right sima-nav__chevron"></i>
-    </button>
+        <span>Jadwal</span>
+        <i class="fas fa-chevron-down sima-nav__chevron"></i>
+    </div>
+
+    {{-- <div class="sima-nav__item has-sub" onclick="toggleNav(this)" data-title="Jadwal">
+        <a href="" class="sima-nav__item {{ $scheduleActive ? 'open active' : '' }}"
+                onclick="toggleNav(this)">
+            <i class="fas fa-clock sima-nav__icon"></i>
+            Schedules
+            <i class="fas fa-chevron-right sima-nav__chevron"></i>
+        </a>
+    </div> --}}
+    
 
     <div class="sima-nav__sub {{ $scheduleActive ? 'open' : '' }}">
         <a href="{{ route('kln.schedule') }}"
@@ -85,12 +82,11 @@
         </a>
     </div>
 
-
     {{-- Announcement --}}
     <a href="{{ route('kln.announcement') }}"
-       class="sima-nav__item {{ request()->routeIs('kln.announcement') ? 'active' : '' }}">
+       class="sima-nav__item {{ request()->routeIs('kln.announcement') ? 'active' : '' }}" data-title="announcement">
         <i class="fas fa-envelope sima-nav__icon"></i>
-        Announcement
+        <span>Pengumuman</span>
     </a>
 
 
@@ -98,7 +94,7 @@
     <a href="#"
        class="sima-nav__item">
         <i class="fas fa-bell sima-nav__icon"></i>
-        Notification
+        <span>Notifikasi</span>
     </a>
 
 
@@ -106,7 +102,7 @@
     <a href="#"
        class="sima-nav__item">
         <i class="fas fa-check-square sima-nav__icon"></i>
-        Details Presence
+        <span>Daftar Kehadiran</span>
     </a>
 
 
@@ -138,7 +134,7 @@
                        background:white;
                        font-weight:600;
                        font-size:12px;">
-            🌙 Toggle Dark Mode
+            🌙 
         </button>
 
     </div>
@@ -153,7 +149,7 @@
                 class="sima-nav__item"
                 style="border:none;background:none;width:100%;">
             <i class="fas fa-power-off sima-nav__icon"></i>
-            Logout
+            <span>Logout</span>
         </button>
     </form>
 
