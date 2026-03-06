@@ -5,6 +5,8 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\ReqDokumen;
 use App\Models\FileDetail;
+use App\Models\User;
+use App\Models\jurusan;
 use Illuminate\Http\Request;
 
 class KlnController extends Controller
@@ -19,6 +21,7 @@ class KlnController extends Controller
     public function index()
     {
         return view('kln.dashboard');
+       
     }
 
 
@@ -103,5 +106,23 @@ class KlnController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | USER PAGE (VIEW)
+    |--------------------------------------------------------------------------
+    */
+    public function usersPage(){
+
+        $jurusan = jurusan::all();
+
+
+        return response()->view('kln.users.index', compact('jurusan'));
+        // return dd($users);
+    }
+
+
+
 
 }
