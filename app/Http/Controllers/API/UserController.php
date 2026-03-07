@@ -78,7 +78,8 @@ class UserController extends Controller
     */
     public function destroy($user)
     {
-        $this->userService->delete($user);
+        $maker = Auth::user();
+        $this->userService->delete($maker,$user);
 
         return response()->json([
             'success' => true,
