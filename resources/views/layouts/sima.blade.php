@@ -1146,6 +1146,7 @@ body.dark .sima-nav__item.active .sima-nav__icon {
 ::-webkit-scrollbar-thumb:hover { background: var(--c-text-4); }
 </style>
 @stack('head_styles')
+<meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 @php
     $role = strtolower(auth()->user()->role instanceof \App\Enums\Role

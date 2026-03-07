@@ -1,7 +1,7 @@
 {{-- =========================
    SIDEBAR HEADER
 ========================= --}}
-<div class="sima-sidebar__header">
+<div @class(['sima-sidebar__header'])>
     <div class="sima-sidebar__brand">
 
         <div class="sima-sidebar__logo-wrapper">
@@ -28,7 +28,7 @@
 
     <a href="{{ route('kln.dashboard') }}" class="sima-nav__item {{ request()->routeIs('kln.dashboard') ? 'active' : '' }}" data-title="Dashboard">
         <i class="fas fa-home sima-nav__icon"></i>
-        <span>Dashboard</span>
+                 <span>Dashboard</span>
     </a>
 
     <a href="{{ route('kln.users.page') }}" class="sima-nav__item {{ request()->routeIs('kln.users.*') ? 'active' : '' }}" data-title="Users">
@@ -144,13 +144,15 @@
        LOGOUT
     ========================= --}}
     <form method="POST" action="{{ route('logout') }}" style="margin-top:15px;">
-        @csrf
-        <button type="submit"
+    @csrf
+    <button type="submit"
                 class="sima-nav__item"
                 style="border:none;background:none;width:100%;">
             <i class="fas fa-power-off sima-nav__icon"></i>
             <span>Logout</span>
         </button>
     </form>
+
+
 
 </div>
