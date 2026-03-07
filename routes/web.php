@@ -79,11 +79,11 @@ Route::middleware(['auth', 'check.role:KLN'])
         /* ---- USERS ---- */
         Route::prefix('users')->name('users.')->group(function(){
             Route::get('/', [KlnController::class, 'usersPage'])->name('page');
-            Route::post('/', [UserController::class, 'storeUser'])->name('store');
+            Route::post('/', [UserController::class, 'store'])->name('store');
             Route::get('/data', [UserController::class, 'getUsers'])->name('data');
             Route::get('{id}', [UserController::class, 'showUser'])->name('show');
-            Route::put('{id}', [UserController::class, 'updateUser'])->name('update');
-            Route::delete('{id}', [UserController::class, 'destroyUser'])->name('destroy');
+            Route::put('{id}', [UserController::class, 'update'])->name('update');
+            Route::delete('{id}', [UserController::class, 'destroy'])->name('destroy');
             Route::patch('{id}/status', [UserController::class, 'updateStatusMahasiswa'])->name('status'); //ini belum tau mau taro dimana
         });
         

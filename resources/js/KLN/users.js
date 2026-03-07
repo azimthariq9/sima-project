@@ -1,282 +1,10 @@
-<x-app-layout>
-@section('page_title',    'User Index')
-@section('page_section',  'KERJA SAMA LUAR NEGERI')
-@section('page_subtitle', 'Pengelolaan Akun Admin, Mahasiswa, dan Dosen')
-    {{-- <x-slot name="header">
-        <h2 class="text-2xl font-bold text-white">
-            Users KLN
-        </h2>
-    </x-slot> --}}
-@section('main_content')
-    
-
-    <div class="p-6">
-
-        <div class="bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700">
-
-            <!-- Header -->
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid #334155;">
-                <h3 style="color:white; font-size:18px; font-weight:600;">
-                    List Users
-                </h3>
-
-                <div style="display:flex; gap:12px;">
-                    <input id="searchInput"
-                        type="text"
-                        placeholder="Search email..."
-                        style="padding:10px 16px; border-radius:12px; background:#1e293b; border:1px solid #334155; color:white; outline:none;">
-
-                    <button id="openAddUserModal"
-                        style="padding:10px 18px; background:#6366f1; color:white; border-radius:12px; border:none; cursor:pointer;">
-                        + Add User
-                    </button>
-                </div>
-            </div>
-            <!-- Table -->
-            <div class="overflow-x-auto">
-                <table style="width:100%; border-collapse: collapse; font-size:14px; color:#e2e8f0;">
-                    
-                    <thead style="background-color:#1e293b; text-transform:uppercase; font-size:12px; letter-spacing:1px; color:#94a3b8;">
-                        <tr>
-                            <th style="padding:16px 24px; text-align:left;">ID</th>
-                            <th style="padding:16px 24px; text-align:left;">ROLE</th>
-                            <th style="padding:16px 24px; text-align:left;">EMAIL</th>
-                            <th style="padding:16px 24px; text-align:left;">STATUS</th>
-                            <th style="padding:16px 24px; text-align:left;"></th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="usersTable">
-                        <tr>
-                            <td colspan="4" style="padding:24px; text-align:center; color:#94a3b8;">
-                                Loading data...
-                            </td>
-                        </tr>
-                    </tbody>
-
-                </table>
-            </div>
-        </div>
-
-    </div>
-
-    
-<div id="userModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); z-index:9999; align-items:center; justify-content:center;">
-    
-    <div style="background:#0f172a; width:600px; max-height:90vh; overflow:auto; padding:30px; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,.5);">
-
-        <h2 style="color:white; font-size:20px; margin-bottom:20px;">Create New User</h2>
-
-        <form id="userForm">
-            {{-- @csrf --}}
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Role</label>
-                <select name="role" id="roleSelect" onchange="handleRoleChange()" 
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                    <option value="">Select Role</option>
-                    <option value="bipa">BIPA</option>
-                    <option value="kln">KLN</option>
-                    <option value="mahasiswa">Mahasiswa</option>
-                    <option value="dosen">Dosen</option>
-                </select>
-            </div>
-
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Email</label>
-                <input type="email" name="email"
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-            </div>
-
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Password</label>
-                <input type="password" name="password"
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-            </div>
-
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Status</label>
-                <select name="status"
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
-            </div>
-
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Jurusan</label>
-                <select name="jurusan_id" id="jurusan_id" onchange="handleRoleChange()" 
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                    <option value="">Select Jurusan</option>
-                    @foreach ( $jurusan as $j)
-                        <option value="{{ $j->id }}">{{ $j->namaJurusan }}</option>
-                    @endforeach
-                </select>
-                {{-- <input type="number" name="jurusan_id"
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;"> --}}
-            </div>
-
-            <!-- MAHASISWA SECTION -->
-            <div id="mahasiswaSection" style="display:none;">
-
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">NPM</label>
-                    <input type="text" name="mahasiswa[npm]"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                </div>
-
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">Nama Mahasiswa</label>
-                    <input type="text" name="mahasiswa[nama]"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                </div>
-
-            </div>
-
-            <!-- DOSEN SECTION -->
-            <div id="dosenSection" style="display:none;">
-
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">Nama Dosen</label>
-                    <input type="text" name="dosen[nama]"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                </div>
-
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">NIDN</label>
-                    <input type="text" name="dosen[nidn]"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                </div>
-
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">Kode Dosen</label>
-                    <input type="text" name="dosen[kodeDos]"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                </div>
-
-            </div>
-
-            <div style="display:flex; justify-content:space-between; margin-top:20px;">
-                <button type="button" onclick="closeModal()" 
-                    style="background:#475569; color:white; padding:10px 20px; border-radius:10px;">
-                    Cancel
-                </button>
-
-                <button  
-                    style="background:#6366f1; color:white; padding:10px 20px; border-radius:10px;">
-                    Save
-                </button>
-            </div>
-
-        </form>
-    </div>
-</div>
-<div id="userEdit" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); z-index:9999; align-items:center; justify-content:center;">
-    <div style="background:#0f172a; width:600px; max-height:90vh; overflow:auto; padding:30px; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,.5);">
-
-        <h2 style="color:white; font-size:20px; margin-bottom:20px;">Edit User</h2>
-        <form id="userEditForm">
-            <input type="hidden" id="editUserId" name="user_id">
-            
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Role</label>
-                <select name="role" id="editRoleSelect" onchange="handleEditRoleChange()" 
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                    <option value="">Select Role</option>
-                    <option value="bipa">BIPA</option>
-                    <option value="kln">KLN</option>
-                    <option value="mahasiswa">Mahasiswa</option>
-                    <option value="dosen">Dosen</option>
-                </select>
-            </div>
-
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Email</label>
-                <input type="email" name="email" id="editEmail"
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-            </div>
-
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Password (Kosongkan jika tidak diubah)</label>
-                <input type="password" name="password" id="editPassword"
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-            </div>
-
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Status</label>
-                <select name="status" id="editStatus"
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
-            </div>
-
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Jurusan</label>
-                <select name="jurusan_id" id="editJurusanId"
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                    <option value="">Select Jurusan</option>
-                    @foreach ( $jurusan as $j)
-                        <option value="{{ $j->id }}">{{ $j->namaJurusan }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- MAHASISWA SECTION EDIT -->
-            <div id="editMahasiswaSection" style="display:none;">
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">NPM</label>
-                    <input type="text" name="mahasiswa[npm]" id="editMahasiswaNpm"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                </div>
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">Nama Mahasiswa</label>
-                    <input type="text" name="mahasiswa[nama]" id="editMahasiswaNama"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                </div>
-            </div>
-
-            <!-- DOSEN SECTION EDIT -->
-            <div id="editDosenSection" style="display:none;">
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">Nama Dosen</label>
-                    <input type="text" name="dosen[nama]" id="editDosenNama"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                </div>
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">NIDN</label>
-                    <input type="text" name="dosen[nidn]" id="editDosenNidn"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                </div>
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">Kode Dosen</label>
-                    <input type="text" name="dosen[kodeDos]" id="editDosenKode"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                </div>
-            </div>
-
-            <div style="display:flex; justify-content:space-between; margin-top:20px;">
-                <button type="button" onclick="closeModal()" 
-                    style="background:#475569; color:white; padding:10px 20px; border-radius:10px;">
-                    Cancel
-                </button>
-                <button type="submit" 
-                    style="background:#6366f1; color:white; padding:10px 20px; border-radius:10px;">
-                    Update
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
 
     const tbody = document.getElementById('usersTable');
     const searchInput = document.getElementById('searchInput');
     const modal = document.getElementById('userModal');
     const editModal = document.getElementById('userEdit');
     const openBtn = document.getElementById('openAddUserModal');
-    const editBtn = document.getElementById('openEditUserModal')
     const form = document.getElementById('userForm');
     const editForm = document.getElementById('userEditForm');
 
@@ -331,7 +59,7 @@
                         </span>
                     </td>
                     <td>
-                        <button id="openEditUserModal" onclick="editUser(${user.id})" style="padding:10px 18px; background:#6366f1; color:white; border-radius:12px; border:none; cursor:pointer;">
+                        <button onclick="editUser(${user.id})" style="padding:10px 18px; background:#6366f1; color:white; border-radius:12px; border:none; cursor:pointer;">
                          <i class="fa-solid fa-pen"></i>    Edit
                         </button>
                         <button onclick="deleteUser(${user.id})" style="padding:10px 18px; background:#991b1b; color:white; border-radius:12px; border:none; cursor:pointer;">
@@ -405,12 +133,12 @@
        EDIT FORM CONTROL
     ==========================*/
 
-    editBtn.addEventListener('click', () => {
-        editModal.style.display = 'flex';
+    openBtn.addEventListener('click', () => {
+        modal.style.display = 'flex';
     });
 
     window.closeModal = function() {
-        editModal.style.display = 'none';
+        modal.style.display = 'none';
     }
 
     window.handleRoleChange = function() {
@@ -718,8 +446,3 @@
     }
 
 });
-</script>
-@endsection
-
-
-</x-app-layout>

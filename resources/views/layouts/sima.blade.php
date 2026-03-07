@@ -407,6 +407,11 @@ body.dark .sima-nav__item:hover .sima-nav__icon {
     font-weight: 600;
 }
 
+.sima-nav__icon {
+    width: 20px;
+    font-size: 16px;
+    color: #111827;
+}
 body.dark .sima-nav__item.active {
     background: linear-gradient(135deg, #6c8fff, #a78bfa);
     color: #ffffff;
@@ -417,11 +422,7 @@ body.dark .sima-nav__item.active .sima-nav__icon {
     color: #ffffff;
 }
 
-.sima-nav__icon {
-    width: 20px;
-    font-size: 16px;
-    color: #111827;
-}
+
 
 .sima-nav__sub {
     padding-left: 36px;
