@@ -82,7 +82,7 @@ Route::middleware(['auth', 'check.role:KLN'])
             Route::post('/', [UserController::class, 'store'])->name('store');
             Route::get('/data', [UserController::class, 'getUsers'])->name('data');
             Route::get('{id}', [UserController::class, 'showUser'])->name('show');
-            Route::put('{id}', [UserController::class, 'update'])->name('update');
+            Route::patch('{user}', [UserController::class, 'update'])->name('update');
             Route::delete('{id}', [UserController::class, 'destroy'])->name('destroy');
             Route::patch('{id}/status', [UserController::class, 'updateStatusMahasiswa'])->name('status'); //ini belum tau mau taro dimana
         });

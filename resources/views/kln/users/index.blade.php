@@ -161,7 +161,7 @@
                     Cancel
                 </button>
 
-                <button  
+                <button
                     style="background:#6366f1; color:white; padding:10px 20px; border-radius:10px;">
                     Save
                 </button>
@@ -175,7 +175,7 @@
 
         <h2 style="color:white; font-size:20px; margin-bottom:20px;">Edit User</h2>
         <form id="userEditForm">
-            <input type="hidden" id="editUserId" name="user_id">
+            <input type="hidden" id="editUserId" name="id">
             
             <div style="margin-bottom:15px;">
                 <label style="color:#94a3b8;">Role</label>
@@ -212,7 +212,7 @@
 
             <div style="margin-bottom:15px;">
                 <label style="color:#94a3b8;">Jurusan</label>
-                <select name="jurusan_id" id="editJurusanId"
+                <select name="jurusan_id" id="editJurusanId" onchange="handleEditRoleChange()"
                     style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
                     <option value="">Select Jurusan</option>
                     @foreach ( $jurusan as $j)
@@ -259,7 +259,8 @@
                     style="background:#475569; color:white; padding:10px 20px; border-radius:10px;">
                     Cancel
                 </button>
-                <button type="submit" 
+                <button 
+                    type="submit" 
                     style="background:#6366f1; color:white; padding:10px 20px; border-radius:10px;">
                     Update
                 </button>
@@ -421,7 +422,23 @@ document.addEventListener('DOMContentLoaded', function () {
     /* =========================
        EDIT FORM CONTROL
     ==========================*/
+    window.handleEditRoleChange = function() {
+        const role = document.getElementById('editRoleSelect').value;
 
+        if(!role){
+            return alert('role tidak berhasil di load')
+        }
+        
+        document.getElementById('editMahasiswaSection').style.display =
+            role === 'mahasiswa' ? 'block' : 'none';
+  
+            
+        document.getElementById('editDosenSection').style.display =
+            role === 'dosen' ? 'block' : 'none';
+  
+
+        
+    }
     /* ====================================
        VALIDATION INPUT FORM
     =======================================*/
@@ -581,7 +598,9 @@ document.addEventListener('DOMContentLoaded', function () {
     
     window.editUser = function(userId) {
         // const url = userShowRoute + userId;
+        console.log('Editing user with ID:', userId);
         const url = `/kln/users/${userId}`;
+        console.log('Fetching from URL:', url);
         // Fetch user data
         fetch(url, {
             method:"GET",
@@ -591,23 +610,31 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         })
         .then(res => {
+                console.log('Response status:', res.status);
                 if (!res.ok) {
                 throw new Error('Network response was not ok');
             }
             return res.json();
         })
-        .then(user => {
+        .then(response => {
+            console.log('User data received:', response); // LIHAT INI DI CONSOLE
+            const user = Array.isArray(response) ? response[0] : response;
+        
+            if (!user) {
+                throw new Error('User data is empty');
+            }
             // Populate form
             document.getElementById('editUserId').value = user.id;
             document.getElementById('editRoleSelect').value = user.role;
             document.getElementById('editEmail').value = user.email;
+            document.getElementById('editPassword').value = ''; // Kosongkan password
             document.getElementById('editStatus').value = user.status;
             document.getElementById('editJurusanId').value = user.jurusan_id || '';
             
             // Handle role-specific fields
             if (user.role === 'mahasiswa' && user.mahasiswa) {
                 document.getElementById('editMahasiswaNpm').value = user.mahasiswa.npm || '';
-                document.getElementById('editMahasiswaNama').value = user.mahasiswa.nama || '';
+                document.getElementById('editMahasiswaNama').value = user.mahasiswa.nama|| '';
                 document.getElementById('editMahasiswaSection').style.display = 'block';
             } else {
                 document.getElementById('editMahasiswaSection').style.display = 'none';
@@ -636,15 +663,17 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
         
         const userId = document.getElementById('editUserId').value;
+        console.log('user Id: ', userId);
         const formData = new FormData(editForm);
         const data = buildUserData(formData, true);
+        const url = `/kln/users/${userId}`;
         
         if (!validateForm(data, true)) {
             return;
         }
 
-        fetch(`/kln/users/${userId}`, {
-            method: "PUT",
+        fetch(url, {
+            method: "PATCH",
             headers: {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}",
                 "Content-Type": "application/json",
@@ -655,12 +684,14 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(async res => {
             if (!res.ok) {
                 const text = await res.text();
+                
                 try {
                     return JSON.parse(text);
                 } catch {
                     throw new Error(`HTTP ${res.status}`);
                 }
             }
+            console.log('response', res);
             return res.json();
         })
         .then(response => {

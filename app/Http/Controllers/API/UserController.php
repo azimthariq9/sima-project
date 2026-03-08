@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\createUserRequest;
 use App\Http\Requests\User\updateUserRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -59,16 +60,37 @@ class UserController extends Controller
     | UPDATE USER
     |--------------------------------------------------------------------------
     */
-    public function update(updateUserRequest $request, $id)
+    public function update(updateUserRequest $request, User $user)
     {   
-        $maker = Auth::User();
-        $updated = $this->userService->update($maker, $id, $request->validated());
-
-        return response()->json([
-            'success' => true,
-            'message' => 'User updated successfully',
-            'data' => $updated
-        ], 200);
+            try {
+            $maker = Auth::user();
+            
+            Log::info('Updating user', [
+                'user_id' => $user->id,
+                'maker_id' => $maker->id,
+                'data' => $request->validated()
+            ]);
+            
+            $updated = $this->userService->update($maker, $user->id, $request->validated());
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'User updated successfully',
+                'data' => $updated
+            ], 200);
+            
+        } catch (\Exception $e) {
+            Log::error('Update user failed', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /*
@@ -107,8 +129,9 @@ class UserController extends Controller
         return response()->json($users, 200);
     }
 
-    public function showUsers($id){
-        $user = User::findOrFail($id);
+    public function showUser($id){
+
+        $user = User::where('id','LIKE',$id)->with(['dosen','mahasiswa'])->get();
     
         return response()->json($user);
     }
