@@ -47,11 +47,11 @@
                     </thead>
 
                     <tbody id="usersTable">
-                        <tr>
-                            <td colspan="4" style="padding:24px; text-align:center; color:#94a3b8;">
+                        {{-- <tr>
+                            {{-- <td colspan="4" style="padding:24px; text-align:center; color:#94a3b8;">
                                 Loading data...
-                            </td>
-                        </tr>
+                            </td> 
+                        </tr> --}}
                     </tbody>
 
                 </table>
@@ -269,17 +269,18 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOM loaded'); // Debug
 
     const tbody = document.getElementById('usersTable');
     const searchInput = document.getElementById('searchInput');
     const modal = document.getElementById('userModal');
     const editModal = document.getElementById('userEdit');
     const openBtn = document.getElementById('openAddUserModal');
-    const editBtn = document.getElementById('openEditUserModal')
     const form = document.getElementById('userForm');
     const editForm = document.getElementById('userEditForm');
-
+    console.log('tbody exists:', !!tbody);
+    console.log('searchInput exists:', !!searchInput);
     /* =========================
        USERS TABLE
     ==========================*/
@@ -295,6 +296,7 @@
     }
 
     function renderUsers(users) {
+        console.log('Rendering users:', users); // Debug
 
         tbody.innerHTML = '';
 
@@ -331,7 +333,7 @@
                         </span>
                     </td>
                     <td>
-                        <button id="openEditUserModal" onclick="editUser(${user.id})" style="padding:10px 18px; background:#6366f1; color:white; border-radius:12px; border:none; cursor:pointer;">
+                        <button onclick="editUser(${user.id})" style="padding:10px 18px; background:#6366f1; color:white; border-radius:12px; border:none; cursor:pointer;">
                          <i class="fa-solid fa-pen"></i>    Edit
                         </button>
                         <button onclick="deleteUser(${user.id})" style="padding:10px 18px; background:#991b1b; color:white; border-radius:12px; border:none; cursor:pointer;">
@@ -363,15 +365,29 @@
 
         renderEmpty('Loading...');
 
-        fetch(`{{ route('kln.users.data') }}?email=${encodeURIComponent(search)}`)
-            .then(res => res.json())
+            // Gunakan URL yang benar
+        const url = search 
+            ? `{{ route('kln.users.data') }}?email=${encodeURIComponent(search)}`
+            : "{{ route('kln.users.data') }}";
+        
+        fetch(url)
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
             .then(response => {
+                console.log('Response from server:', response); // Debug
                 renderUsers(extractUsers(response));
             })
-            .catch(() => renderEmpty('Failed to load data'));
+            .catch(error => {
+                console.error('Error loading users:', error);
+                renderEmpty('Failed to load data: ' + error.message);
+            });
     }
 
-    loadUsers();
+    
 
     if (searchInput) {
         searchInput.addEventListener('keyup', function () {
@@ -388,7 +404,8 @@
     });
 
     window.closeModal = function() {
-        modal.style.display = 'none';
+        if (modal) modal.style.display = 'none';
+        if (editModal) editModal.style.display = 'none';
     }
 
     window.handleRoleChange = function() {
@@ -404,24 +421,6 @@
     /* =========================
        EDIT FORM CONTROL
     ==========================*/
-
-    editBtn.addEventListener('click', () => {
-        editModal.style.display = 'flex';
-    });
-
-    window.closeModal = function() {
-        editModal.style.display = 'none';
-    }
-
-    window.handleRoleChange = function() {
-        const role = document.getElementById('roleSelect').value;
-
-        document.getElementById('mahasiswaSection').style.display =
-            role === 'mahasiswa' ? 'block' : 'none';
-
-        document.getElementById('dosenSection').style.display =
-            role === 'dosen' ? 'block' : 'none';
-    }
 
     /* ====================================
        VALIDATION INPUT FORM
@@ -579,16 +578,24 @@
     /* =========================
        EDIT USER
     ==========================*/
+    
     window.editUser = function(userId) {
+        // const url = userShowRoute + userId;
+        const url = `/kln/users/${userId}`;
         // Fetch user data
-        fetch(`/kln/users/${userId}`, {
+        fetch(url, {
             method:"GET",
             headers: {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}",
                 "Accept": "application/json"
             }
         })
-        .then(res => res.json())
+        .then(res => {
+                if (!res.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return res.json();
+        })
         .then(user => {
             // Populate form
             document.getElementById('editUserId').value = user.id;
@@ -717,6 +724,7 @@
         }
     }
 
+    loadUsers();
 });
 </script>
 @endsection
