@@ -1253,7 +1253,7 @@ body.dark .sima-nav__item.active .sima-nav__icon {
 
             <!-- Page Header -->
             <div class="sima-page-header">
-                <div class="sima-page-title">@yield('page_title', 'Dashboard')</div>
+                <div class="sima-page-title">@yield('page_title', '')</div>
                 <div class="sima-page-subtitle">@yield('page_subtitle', '')</div>
             </div>
 

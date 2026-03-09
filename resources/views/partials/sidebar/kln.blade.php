@@ -36,7 +36,21 @@
         <span>Users</span>
     </a>
 
-    {{-- Untuk menu dengan dropdown --}}
+    {{-- Students & Lecturers --}}
+    <a href="#"
+       class="sima-nav__item">
+        <i class="fas fa-user-tie sima-nav__icon"></i>
+        Students & Lecturers
+    </a>
+
+     {{-- Request Documents --}}
+    <a href="{{ route('kln.dokumen.page') }}"
+       class="sima-nav__item {{ request()->routeIs('kln.dokumen.page') ? 'active' : '' }}">
+        <i class="fas fa-file-alt sima-nav__icon"></i>
+        Request Documents
+    </a>
+
+    {{-- Untuk menu dengan dropdown
     <div class="sima-nav__item has-sub" onclick="toggleNav(this)" data-title="Dokumen">
         <i class="fas fa-file sima-nav__icon"></i>
         <span>Dokumen</span>
@@ -44,8 +58,8 @@
     </div>
     <div class="sima-nav__sub">
         <a href="{{ route('kln.dokumen.page') }}" class="sima-nav__sub-item">Semua Dokumen</a>
-        {{-- <a href="{{ route('kln.dokumen.pending') }}" class="sima-nav__sub-item">Pending</a> --}}
-    </div>
+        {{-- <a href="{{ route('kln.dokumen.pending') }}" class="sima-nav__sub-item">Pending</a> 
+    </div> --}}
 
     {{-- SCHEDULE DROPDOWN --}}
     @php

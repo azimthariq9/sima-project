@@ -1,11 +1,9 @@
 <x-app-layout>
 
-<x-slot name="header">
-    <h2 class="text-2xl font-bold tracking-wide text-slate-800 dark:text-white">
-        📄 Manajemen Request Dokumen
-    </h2>
-</x-slot>
+@section('page_title','📄 Manajemen Request Dokumen')
+@section('page_subtitle', 'Pengelolaan permintaan dokumen dari mahasiswa')
 
+@section('main_content')
 <div class="p-8">
 
     <!-- Premium Card -->
@@ -104,6 +102,8 @@
 <div id="toast"
     class="fixed bottom-6 right-6 bg-slate-900 text-white px-6 py-3 rounded-xl shadow-xl hidden">
 </div>
+@endsection
+
 
 <script>
 
