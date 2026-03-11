@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\AnnouncementController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProfileController;
@@ -106,7 +107,10 @@ Route::middleware(['auth', 'check.role:KLN'])
 
         /* ---- ANNOUNCEMENT ---- */
         Route::prefix('announcement')->name('announcement.')->group(function(){
-            Route::post('store', [KlnController::class, 'storeAnnouncement'])->name('store');
+            Route::post('store', [AnnouncementController::class, 'store'])->name('store');
+            Route::get('data', [AnnouncementController::class, 'getAnnouncement'])->name('data');
+            Route::get('{id}', [AnnouncementController::class, 'specificAnnouncement'])->name('show');
+            Route::patch('update/{id}', [AnnouncementController::class, 'updateAnnouncement'])->name('update');
         });
         
     });
