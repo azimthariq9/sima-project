@@ -116,16 +116,40 @@ class UserController extends Controller
     | GET USERS
     |--------------------------------------------------------------------------
     */
-    public function getUsers(Request $request){
-        $email = $request->query('email'); // ambil dari query string
+    public function getUsers(Request $request)
+    {
+        $query = User::query();
         
-        if ($email) {
-            // Gunakan where seperti ini, bukan where('email'==$email)
-            $users = User::where('email', 'LIKE', "%{$email}%")->get();
-        } else {
-            $users = User::all();
+        // Fitur Search berdasarkan email
+        if ($request->has('email') && !empty($request->email)) {
+            $query->where('email', 'LIKE', "%{$request->email}%");
         }
         
+        // Fitur Sorting
+        if ($request->has('sort') && !empty($request->sort)) {
+            if ($request->sort === 'email_asc') {
+                $query->orderBy('email', 'asc');
+            } elseif ($request->sort === 'email_desc') {
+                $query->orderBy('email', 'desc');
+            } elseif ($request->sort === 'role_asc') {
+                $query->orderBy('role', 'asc');
+            } elseif ($request->sort === 'role_desc') {
+                $query->orderBy('role', 'desc');
+            } elseif ($request->sort === 'status_asc') {
+                $query->orderBy('status', 'asc');
+            } elseif ($request->sort === 'status_desc') {
+                $query->orderBy('status', 'desc');
+            } elseif ($request->sort === 'id_asc') {
+                $query->orderBy('id', 'asc');
+            } elseif ($request->sort === 'id_desc') {
+                $query->orderBy('id', 'desc');
+            }
+        } else {
+            // Default sorting
+            $query->orderBy('id', 'desc');
+        }
+        
+        $users = $query->get();
         return response()->json($users, 200);
     }
 

@@ -16,7 +16,27 @@
                     <h5 class="sima-card__title">Users List</h5>
                     {{-- <div class="sima-card__subtitle">kumpulan user yang ada dalam sistem</div> --}}
                 </div>
-
+                <div>
+                    <select name="sort" id="sortInput" class="sima-input" style="min-width: 150px;">
+                        <option value="">Sort By</option>
+                        <optgroup label="Email">
+                            <option value="email_asc">Email (A-Z)</option>
+                            <option value="email_desc">Email (Z-A)</option>
+                        </optgroup>
+                        <optgroup label="Role">
+                            <option value="role_asc">Role (A-Z)</option>
+                            <option value="role_desc">Role (Z-A)</option>
+                        </optgroup>
+                        <optgroup label="Status">
+                            <option value="status_asc">Status (Active first)</option>
+                            <option value="status_desc">Status (Inactive first)</option>
+                        </optgroup>
+                        <optgroup label="ID">
+                            <option value="id_asc">ID (Ascending)</option>
+                            <option value="id_desc">ID (Descending)</option>
+                        </optgroup>
+                    </select>
+                </div>
                 <div style="display:flex; gap:12px;">
                     <input id="searchInput"
                         type="text"
@@ -35,10 +55,18 @@
                 <table class="sima-table">
                     <thead >
                         <tr>
-                            <th style="padding:16px 24px; text-align:left;">ID</th>
-                            <th style="padding:16px 24px; text-align:left;">ROLE</th>
-                            <th style="padding:16px 24px; text-align:left;">EMAIL</th>
-                            <th style="padding:16px 24px; text-align:left;">STATUS</th>
+                            <th style="padding:16px 24px; text-align:left; cursor: pointer;" onclick="sortBy('id')">
+                                ID <i class="fa-solid fa-sort"></i>
+                            </th>
+                            <th style="padding:16px 24px; text-align:left; cursor: pointer;" onclick="sortBy('role')">
+                                ROLE <i class="fa-solid fa-sort"></i>
+                            </th>
+                            <th style="padding:16px 24px; text-align:left; cursor: pointer;" onclick="sortBy('email')">
+                                EMAIL <i class="fa-solid fa-sort"></i>
+                            </th>
+                            <th style="padding:16px 24px; text-align:left; cursor: pointer;" onclick="sortBy('status')">
+                                STATUS <i class="fa-solid fa-sort"></i>
+                            </th>
                             <th style="padding:16px 24px; text-align:left;">ACTION</th>
                         </tr>
                     </thead>
@@ -265,6 +293,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const tbody = document.getElementById('usersTable');
     const searchInput = document.getElementById('searchInput');
+    const sortInput = document.getElementById('sortInput');
     const modal = document.getElementById('userModal');
     const editModal = document.getElementById('userEdit');
     const openBtn = document.getElementById('openAddUserModal');
@@ -345,22 +374,44 @@ document.addEventListener('DOMContentLoaded', function () {
         if (response?.data && Array.isArray(response.data)) {
             return response.data;
         }
-        // Jika response punya property data.data (pagination)
-        if (response?.data?.data && Array.isArray(response.data.data)) {
-            return response.data.data;
+        // Jika response punya property users
+        if (response?.users && Array.isArray(response.users)) {
+            return response.users;
+        }
+        // Jika response adalah object dengan data di dalamnya
+        if (response && typeof response === 'object') {
+            // Coba cari array di dalam response
+            for (let key in response) {
+                if (Array.isArray(response[key])) {
+                    return response[key];
+                }
+            }
         }
         return [];
     }
 
-    function loadUsers(search = '') {
-
+    function loadUsers(search = '', sort = '') {
         renderEmpty('Loading...');
-
-            // Gunakan URL yang benar
-        const url = search 
-            ? `{{ route('kln.users.data') }}?email=${encodeURIComponent(search)}`
-            : "{{ route('kln.users.data') }}";
         
+        // Build URL dengan parameter
+        let url = "{{ route('kln.users.data') }}";
+        let params = new URLSearchParams();
+        
+        if (search) {
+            params.append('email', search);
+        }
+        
+        if (sort) {
+            params.append('sort', sort);
+        }
+        
+        // Jika ada parameter, tambahkan ke URL
+        if (params.toString()) {
+            url += '?' + params.toString();
+        }
+        
+        console.log('Fetching URL:', url); // Debug
+
         fetch(url)
             .then(res => {
                 if (!res.ok) {
@@ -378,12 +429,44 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    
-
+    /* =========================
+       Search And Sorting Table
+    ==========================*/
+    let searchTimeout;
     if (searchInput) {
-        searchInput.addEventListener('keyup', function () {
-            loadUsers(this.value);
+        searchInput.addEventListener('keyup', function() {
+            clearTimeout(searchTimeout);
+            const searchValue = this.value;
+            const sortValue = sortInput ? sortInput.value : '';
+            
+            searchTimeout = setTimeout(() => {
+                loadUsers(searchValue, sortValue);
+            }, 500); // Debounce 500ms
         });
+    }
+
+    // Event listener untuk sort
+    if (sortInput) {
+        sortInput.addEventListener('change', function() {
+            const searchValue = searchInput ? searchInput.value : '';
+            const sortValue = this.value;
+            loadUsers(searchValue, sortValue);
+        });
+    }
+
+    window.sortBy = function(field) {
+        const currentSort = sortInput.value;
+        let newSort = '';
+        
+        if (currentSort === field + '_asc') {
+            newSort = field + '_desc';
+        } else {
+            newSort = field + '_asc';
+        }
+        
+        sortInput.value = newSort;
+        const searchValue = searchInput ? searchInput.value : '';
+        loadUsers(searchValue, newSort);
     }
 
     /* =========================
