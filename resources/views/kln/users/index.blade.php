@@ -10,52 +10,42 @@
 @section('main_content')
     
 
-    <div class="p-6">
-
-        <div class="bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700">
-
-            <!-- Header -->
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid #334155;">
-                <h3 style="color:white; font-size:18px; font-weight:600;">
-                    List Users
-                </h3>
+    <div class="sima-card">
+        <div class="sima-card__header">
+                <div>
+                    <h5 class="sima-card__title">Users List</h5>
+                    {{-- <div class="sima-card__subtitle">kumpulan user yang ada dalam sistem</div> --}}
+                </div>
 
                 <div style="display:flex; gap:12px;">
                     <input id="searchInput"
                         type="text"
                         placeholder="Search email..."
-                        style="padding:10px 16px; border-radius:12px; background:#1e293b; border:1px solid #334155; color:white; outline:none;">
+                        class="sima-input"
+                        >
 
                     <button id="openAddUserModal"
-                        style="padding:10px 18px; background:#6366f1; color:white; border-radius:12px; border:none; cursor:pointer;">
+                        class="sima-btn sima-btn--blue sima-btn--full">
                         + Add User
                     </button>
                 </div>
-            </div>
+        </div>
+        <div class="overflow-x-auto">
             <!-- Table -->
-            <div class="overflow-x-auto">
-                <table style="width:100%; border-collapse: collapse; font-size:14px; color:#e2e8f0;">
-                    
-                    <thead style="background-color:#1e293b; text-transform:uppercase; font-size:12px; letter-spacing:1px; color:#94a3b8;">
+                <table class="sima-table">
+                    <thead >
                         <tr>
                             <th style="padding:16px 24px; text-align:left;">ID</th>
                             <th style="padding:16px 24px; text-align:left;">ROLE</th>
                             <th style="padding:16px 24px; text-align:left;">EMAIL</th>
                             <th style="padding:16px 24px; text-align:left;">STATUS</th>
-                            <th style="padding:16px 24px; text-align:left;"></th>
+                            <th style="padding:16px 24px; text-align:left;">ACTION</th>
                         </tr>
                     </thead>
-
                     <tbody id="usersTable">
-                        {{-- <tr>
-                            {{-- <td colspan="4" style="padding:24px; text-align:center; color:#94a3b8;">
-                                Loading data...
-                            </td> 
-                        </tr> --}}
                     </tbody>
 
                 </table>
-            </div>
         </div>
 
     </div>
@@ -157,12 +147,12 @@
 
             <div style="display:flex; justify-content:space-between; margin-top:20px;">
                 <button type="button" onclick="closeModal()" 
-                    style="background:#475569; color:white; padding:10px 20px; border-radius:10px;">
+                    class="sima-btn sima-btn--gold">
                     Cancel
                 </button>
 
                 <button
-                    style="background:#6366f1; color:white; padding:10px 20px; border-radius:10px;">
+                    class="sima-btn sima-btn--blue">
                     Save
                 </button>
             </div>
@@ -256,12 +246,12 @@
 
             <div style="display:flex; justify-content:space-between; margin-top:20px;">
                 <button type="button" onclick="closeModal()" 
-                    style="background:#475569; color:white; padding:10px 20px; border-radius:10px;">
+                class="sima-btn sima-btn--gold">
                     Cancel
                 </button>
                 <button 
                     type="submit" 
-                    style="background:#6366f1; color:white; padding:10px 20px; border-radius:10px;">
+                    class="sima-btn sima-btn--blue">
                     Update
                 </button>
             </div>
@@ -334,10 +324,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         </span>
                     </td>
                     <td>
-                        <button onclick="editUser(${user.id})" style="padding:10px 18px; background:#6366f1; color:white; border-radius:12px; border:none; cursor:pointer;">
+                        <button onclick="editUser(${user.id})" class="sima-btn sima-btn--blue">
                          <i class="fa-solid fa-pen"></i>    Edit
                         </button>
-                        <button onclick="deleteUser(${user.id})" style="padding:10px 18px; background:#991b1b; color:white; border-radius:12px; border:none; cursor:pointer;">
+                        <button onclick="deleteUser(${user.id})" class="sima-btn sima-btn--danger">
                             <i class="fa-solid fa-trash"></i> Delete
                         </button>                        
                     </td>
