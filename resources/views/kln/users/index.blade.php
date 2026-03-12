@@ -287,10 +287,12 @@
     </div>
 </div>
 
+
+<script src="https://cdn.jsdelivr.net/npm/@flasher/flasher@1.0/dist/flasher.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     console.log('DOM loaded'); // Debug
-
+    // console.log('window.flasher exists:', !!window.flasher); // Seharusnya true
     const tbody = document.getElementById('usersTable');
     const searchInput = document.getElementById('searchInput');
     const sortInput = document.getElementById('sortInput');
@@ -301,6 +303,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const editForm = document.getElementById('userEditForm');
     console.log('tbody exists:', !!tbody);
     console.log('searchInput exists:', !!searchInput);
+
+    // if (typeof flasher !== 'undefined') {
+    //     flasher.success('Flasher siap dari CDN!');
+    // }
     /* =========================
        USERS TABLE
     ==========================*/
@@ -393,7 +399,6 @@ document.addEventListener('DOMContentLoaded', function () {
     function loadUsers(search = '', sort = '') {
         renderEmpty('Loading...');
         
-        // Build URL dengan parameter
         let url = "{{ route('kln.users.data') }}";
         let params = new URLSearchParams();
         
@@ -405,28 +410,74 @@ document.addEventListener('DOMContentLoaded', function () {
             params.append('sort', sort);
         }
         
-        // Jika ada parameter, tambahkan ke URL
         if (params.toString()) {
             url += '?' + params.toString();
         }
-        
-        console.log('Fetching URL:', url); // Debug
 
         fetch(url)
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error(`HTTP error! status: ${res.status}`);
-                }
-                return res.json();
-            })
+            .then(res => res.json())
             .then(response => {
-                console.log('Response from server:', response); // Debug
-                renderUsers(extractUsers(response));
+                console.log('Response from server:', response);
+                
+                // Tampilkan flash message dari response
+                if (response.flash) {
+                    showFlasherNotification(response.flash);
+                }
+                
+                if (response.success) {
+                    renderUsers(extractUsers(response.data));
+                } else {
+                    renderEmpty(response.message || 'Failed to load data');
+                }
             })
             .catch(error => {
                 console.error('Error loading users:', error);
                 renderEmpty('Failed to load data: ' + error.message);
+                
+                // Tampilkan error flash
+                showFlasherNotification({
+                    type: 'error',
+                    message: 'Failed to load data: ' + error.message,
+                    theme: 'amazon',
+                    timeout: 5000
+                });
             });
+    }
+
+    // Fungsi untuk menampilkan notifikasi menggunakan PHPFlasher dari JavaScript
+    function showFlasherNotification(flash) {
+        // PHPFlasher biasanya menyediakan JavaScript API
+        if (flasher) {
+            // Cek apakah PHPFlasher punya JavaScript counterpart
+            switch(flash.type) {
+                case 'success':
+                    flasher.success(flash.message, {
+                        theme: flash.theme,
+                        timeout: flash.timeout
+                    });
+                    break;
+                case 'error':
+                    flasher.error(flash.message, {
+                        theme: flash.theme,
+                        timeout: flash.timeout
+                    });
+                    break;
+                case 'warning':
+                    flasher.warning(flash.message, {
+                        theme: flash.theme,
+                        timeout: flash.timeout
+                    });
+                    break;
+                default:
+                    flasher.info(flash.message, {
+                        theme: flash.theme,
+                        timeout: flash.timeout
+                    });
+            }
+        } else {
+            // Fallback: buat notifikasi manual
+            alert('error: ' + flash.message);
+        }
     }
 
     /* =========================
@@ -645,6 +696,14 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => {
             if (response.success) {
                 modal.style.display = 'none';
+                // Tampilkan flash message dari response
+                if (response.flash) {
+                    showFlasherNotification(response.flash);
+                }
+                
+                if (response.success) {
+                    renderUsers(extractUsers(response.data));
+                }// Debounce 500ms
                 form.reset();
                 loadUsers();
             } else {
@@ -770,9 +829,16 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => {
             if (response.success) {
                 editModal.style.display = 'none';
+                // Tampilkan flash message dari response
+                if (response.flash) {
+                    showFlasherNotification(response.flash);
+                }
+                if (response.success) {
+                    renderUsers(extractUsers(response.data));
+                }// Debounce 500ms
+
                 editForm.reset();
                 loadUsers();
-                alert('User berhasil diupdate!');
             } else {
                 let errorMsg = response.message || "Update failed";
                 if (response.errors) {
@@ -815,10 +881,21 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(response => {
                 if (response.success) {
+                    // Tampilkan flash message dari response
+                    if (response.flash) {
+                        showFlasherNotification(response.flash);
+                    }
+                    if (response.success) {
+                    renderUsers(extractUsers(response.data));
+                    }// Debounce 500ms
                     loadUsers();
-                    alert('User berhasil dihapus!');
+
                 } else {
-                    alert(response.message || 'Gagal menghapus user');
+                    if (response.flash) {
+                        showFlasherNotification(response.flash);
+                    }else{
+                        alert('Delete Failed')
+                    }
                 }
             })
             .catch(error => {

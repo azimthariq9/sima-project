@@ -28,9 +28,10 @@
                     <thead>
                         <tr>
                             <th style="padding:16px 24px; text-align:left;">ID</th>
-                            <th style="padding:16px 24px; text-align:left;">ROLE</th>
-                            <th style="padding:16px 24px; text-align:left;">EMAIL</th>
+                            <th style="padding:16px 24px; text-align:left;">SUBJECT</th>
+                            <th style="padding:16px 24px; text-align:left;">MESSAGE</th>
                             <th style="padding:16px 24px; text-align:left;">STATUS</th>
+                            <th style="padding:16px 24px; text-align:left;">CREATED AT</th>
                             <th style="padding:16px 24px; text-align:left;"></th>
                         </tr>
                     </thead>
@@ -95,6 +96,7 @@
             </form>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/@flasher/flasher@1.0/dist/flasher.min.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         console.log('DOM loaded'); // Debug
@@ -106,64 +108,82 @@
         const openBtn = document.getElementById('openAddAnnouncementModal');
         const form = document.getElementById('announceForm');
         const editForm = document.getElementById('announceEditForm');
+        
         console.log('tbody exists:', !!tbody);
         console.log('searchInput exists:', !!searchInput);
+
         /* =========================
-        USERS TABLE
+        ANNOUNCEMENT TABLE
         ==========================*/
 
-        function renderEmpty(message = 'No announcement found') {
+        function renderEmpty(message = 'No announcements found') {
+            if (!tbody) return;
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="4" style="padding:24px;text-align:center;color:#94a3b8;">
+                    <td colspan="5" style="padding:24px;text-align:center;color:#94a3b8;">
                         ${message}
                     </td>
                 </tr>
             `;
         }
 
-        function renderAnnounce(users) {
-            console.log('Rendering users:', users); // Debug
+        function renderAnnouncements(announcements) {
+            console.log('Rendering announcements:', announcements);
 
+            if (!tbody) return;
             tbody.innerHTML = '';
 
-            if (!Array.isArray(users) || users.length === 0) {
+            if (!Array.isArray(announcements) || announcements.length === 0) {
                 renderEmpty();
                 return;
             }
 
-            users.forEach(user => {
+            announcements.forEach(announcement => {
+                // Format tanggal
+                const createdAt = announcement.created_at 
+                    ? new Date(announcement.created_at).toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+                    : '-';
 
                 tbody.innerHTML += `
                     <tr style="border-bottom:1px solid #334155;">
-                        <td style="padding:18px 24px;">${user.id ?? '-'}</td>
+                        <td style="padding:18px 24px;">${announcement.id ?? '-'}</td>
 
                         <td style="padding:18px 24px;">
-                            <span style="">
-                                ${user.role ?? '-'}
-                            </span>
+                            <div style="font-weight:500; margin-bottom:4px;">${announcement.subject ?? '-'}</div>
+                            <div style="font-size:12px; color:#94a3b8;">${announcement.excerpt ?? ''}</div>
                         </td>
 
                         <td style="padding:18px 24px;">
-                            ${user.email ?? '-'}
+                            ${announcement.message ?? '-'}
                         </td>
 
                         <td style="padding:18px 24px;">
                             <span style="
-                                background:${user.status === 'active' ? 'rgba(34,197,94,0.15)' : 'rgba(234,179,8,0.15)'};
-                                color:${user.status === 'active' ? '#22c55e' : '#eab308'};
+                                background:${announcement.status === 'published' ? 'rgba(34,197,94,0.15)' : 'rgba(234,179,8,0.15)'};
+                                color:${announcement.status === 'published' ? '#22c55e' : '#eab308'};
                                 padding:6px 12px;
                                 border-radius:999px;
                                 font-size:12px;
                             ">
-                                ${user.status ?? '-'}
+                                ${announcement.status ?? 'draft'}
                             </span>
                         </td>
+
+                        <td style="padding:18px 24px; font-size:13px; color:#94a3b8;">
+                            ${createdAt}
+                        </td>
+
                         <td>
-                            <button onclick="editUser(${user.id})" class="sima-btn sima-btn--blue">
-                            <i class="fa-solid fa-pen"></i>    Edit
+                            <button onclick="editAnnouncement(${announcement.id})" class="sima-btn sima-btn--blue">
+                                <i class="fa-solid fa-pen"></i> Edit
                             </button>
-                            <button onclick="deleteUser(${user.id})" class="sima-btn sima-btn--danger">
+                            <button onclick="deleteAnnouncement(${announcement.id})" class="sima-btn sima-btn--danger">
                                 <i class="fa-solid fa-trash"></i> Delete
                             </button>                        
                         </td>
@@ -172,7 +192,7 @@
             });
         }
 
-        function extractUsers(response) {
+        function extractAnnouncements(response) {
             // Jika response adalah array, gunakan langsung
             if (Array.isArray(response)) {
                 return response;
@@ -185,17 +205,20 @@
             if (response?.data?.data && Array.isArray(response.data.data)) {
                 return response.data.data;
             }
+            // Jika response punya property announcements
+            if (response?.announcements && Array.isArray(response.announcements)) {
+                return response.announcements;
+            }
             return [];
         }
 
-        function loadUsers(search = '') {
-
+        function loadAnnouncements(search = '') {
             renderEmpty('Loading...');
 
-                // Gunakan URL yang benar
+            // Gunakan URL yang benar sesuai route announcement.data
             const url = search 
-                ? `{{ route('kln.users.data') }}?email=${encodeURIComponent(search)}`
-                : "{{ route('kln.users.data') }}";
+                ? `{{ route('kln.announcement.data') }}?search=${encodeURIComponent(search)}`
+                : "{{ route('kln.announcement.data') }}";
             
             fetch(url)
                 .then(res => {
@@ -205,20 +228,73 @@
                     return res.json();
                 })
                 .then(response => {
-                    console.log('Response from server:', response); // Debug
-                    renderAnnounce(extractUsers(response));
+                    console.log('Response from server:', response);
+                    
+                    // Tampilkan flash message dari response jika ada
+                    if (response.flash) {
+                        showFlasherNotification(response.flash);
+                    }
+                    
+                    renderAnnouncements(extractAnnouncements(response));
                 })
                 .catch(error => {
-                    console.error('Error loading users:', error);
+                    console.error('Error loading announcements:', error);
                     renderEmpty('Failed to load data: ' + error.message);
+                    
+                    showFlasherNotification({
+                        type: 'error',
+                        message: 'Failed to load data: ' + error.message,
+                        theme: 'amazon',
+                        timeout: 5000
+                    });
                 });
         }
 
-        
+        // Fungsi untuk menampilkan notifikasi menggunakan PHPFlasher
+        function showFlasherNotification(flash) {
+            if (typeof flasher !== 'undefined') {
+                switch(flash.type) {
+                    case 'success':
+                        flasher.success(flash.message, {
+                            theme: flash.theme || 'amazon',
+                            timeout: flash.timeout || 5000
+                        });
+                        break;
+                    case 'error':
+                        flasher.error(flash.message, {
+                            theme: flash.theme || 'amazon',
+                            timeout: flash.timeout || 5000
+                        });
+                        break;
+                    case 'warning':
+                        flasher.warning(flash.message, {
+                            theme: flash.theme || 'amazon',
+                            timeout: flash.timeout || 5000
+                        });
+                        break;
+                    default:
+                        flasher.info(flash.message, {
+                            theme: flash.theme || 'amazon',
+                            timeout: flash.timeout || 5000
+                        });
+                }
+            } else {
+                // Fallback jika flasher tidak tersedia
+                console.log('Notification:', flash.type, flash.message);
+                alert(flash.type + ': ' + flash.message);
+            }
+        }
 
+        /* =========================
+        SEARCH ANNOUNCEMENT
+        ==========================*/
+        let searchTimeout;
         if (searchInput) {
-            searchInput.addEventListener('keyup', function () {
-                loadUsers(this.value);
+            searchInput.addEventListener('keyup', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    loadAnnouncements(this.value);
+                }, 500); // Debounce 500ms
             });
         }
 
@@ -226,329 +302,277 @@
         MODAL CONTROL
         ==========================*/
 
-        openBtn.addEventListener('click', () => {
-            modal.style.display = 'flex';
-        });
+        if (openBtn) {
+            openBtn.addEventListener('click', () => {
+                if (modal) modal.style.display = 'flex';
+            });
+        }
 
         window.closeModal = function() {
             if (modal) modal.style.display = 'none';
             if (editModal) editModal.style.display = 'none';
         }
 
-        window.handleRoleChange = function() {
-            const role = document.getElementById('roleSelect').value;
-
-            document.getElementById('mahasiswaSection').style.display =
-                role === 'mahasiswa' ? 'block' : 'none';
-
-            document.getElementById('dosenSection').style.display =
-                role === 'dosen' ? 'block' : 'none';
-        }
-
         /* =========================
-        EDIT FORM CONTROL
+        FORM VALIDATION
         ==========================*/
-        window.handleEditRoleChange = function() {
-            const role = document.getElementById('editRoleSelect').value;
 
-            if(!role){
-                return alert('role tidak berhasil di load')
-            }
-            
-            document.getElementById('editMahasiswaSection').style.display =
-                role === 'mahasiswa' ? 'block' : 'none';
-    
-                
-            document.getElementById('editDosenSection').style.display =
-                role === 'dosen' ? 'block' : 'none';
-    
-
-            
-        }
-        /* ====================================
-        VALIDATION INPUT FORM
-        =======================================*/
-
-        function validateForm(data) {
-            const role = data.role;
-            
-            // Validasi umum
-            if (!role) {
-                alert('Role harus dipilih');
+        function validateAnnouncementForm(data) {
+            if (!data.title || data.title.trim() === '') {
+                showFlasherNotification({
+                    type: 'error',
+                    message: 'Title harus diisi',
+                    theme: 'amazon',
+                    timeout: 5000
+                });
                 return false;
             }
             
-            if (!data.email || !data.email.includes('@')) {
-                alert('Email tidak valid');
+            if (!data.content || data.content.trim() === '') {
+                showFlasherNotification({
+                    type: 'error',
+                    message: 'Content harus diisi',
+                    theme: 'amazon',
+                    timeout: 5000
+                });
                 return false;
-            }
-            
-            if (!data.password || data.password.length < 6) {
-                alert('Password minimal 6 karakter');
-                return false;
-            }
-            
-            // Validasi spesifik role
-            if (role === 'mahasiswa') {
-                if (!data.mahasiswa?.npm) {
-                    alert('NPM harus diisi');
-                    return false;
-                }
-                if (!data.mahasiswa?.nama) {
-                    alert('Nama mahasiswa harus diisi');
-                    return false;
-                }
-                if (!data.jurusan_id) {
-                    alert('Jurusan harus dipilih');
-                    return false;
-                }
-            }
-            
-            if (role === 'dosen') {
-                if (!data.dosen?.nama) {
-                    alert('Nama dosen harus diisi');
-                    return false;
-                }
-                if (!data.dosen?.nidn) {
-                    alert('NIDN harus diisi');
-                    return false;
-                }
-                if (!data.jurusan_id) {
-                    alert('Jurusan harus dipilih');
-                    return false;
-                }
             }
             
             return true;
         }
 
-        /* ====================================
-        USER DATA BUILDER, SEPARATING ROLE
-        =======================================*/
+        /* =========================
+        BUILD ANNOUNCEMENT DATA
+        ==========================*/
 
-        function buildUserData(formData) {
-            const role = formData.get('role');
-            const data = {
-                role: role,
-                email: formData.get('email'),
-                password: formData.get('password'),
-                status: formData.get('status'),
-                jurusan_id: formData.get('jurusan_id')
+        function buildAnnouncementData(formData) {
+            return {
+                title: formData.get('title'),
+                content: formData.get('content'),
+                excerpt: formData.get('excerpt') || null,
+                status: formData.get('status') || 'draft',
+                published_at: formData.get('published_at') || null
             };
-            
-            // Tambah jurusan_id hanya untuk mahasiswa/dosen
-            if (role === 'mahasiswa' || role === 'dosen') {
-                data.jurusan_id = formData.get('jurusan_id');
-            }
-            
-            // Data spesifik role
-            if (role === 'mahasiswa') {
-                data.mahasiswa = {
-                    npm: formData.get('mahasiswa[npm]'),
-                    nama: formData.get('mahasiswa[nama]')
-                };
-            }
-            
-            if (role === 'dosen') {
-                data.dosen = {
-                    nama: formData.get('dosen[nama]'),
-                    nidn: formData.get('dosen[nidn]'),
-                    kodeDos: formData.get('dosen[kodeDos]')
-                };
-            }
-            
-            return data;
         }
 
         /* =========================
-        SUBMIT USER
+        SUBMIT ANNOUNCEMENT
         ==========================*/
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
 
-            const formData = new FormData(form);
-            const data = buildUserData(formData);
-            
-            if (!validateForm(data)){
-                return;
-            }
-            console.log('Filtered data to send:', data); // DEBUG
+                const formData = new FormData(form);
+                const data = buildAnnouncementData(formData);
+                
+                if (!validateAnnouncementForm(data)) {
+                    return;
+                }
+                
+                console.log('Data to send:', data);
 
-            fetch("{{ route('kln.users.store') }}", {
-                method: "POST",
-                headers: {
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify(data)
-            })
-            .then(async res => {
-                if (!res.ok) {
-                    const text = await res.text();
-                    console.log('Error response:', text);
-                    try {
-                        return JSON.parse(text);
-                    } catch {
-                        throw new Error(`HTTP ${res.status}: ${text.substring(0, 200)}`);
+                fetch("{{ route('kln.announcement.store') }}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(async res => {
+                    if (!res.ok) {
+                        const text = await res.text();
+                        console.log('Error response:', text);
+                        try {
+                            return JSON.parse(text);
+                        } catch {
+                            throw new Error(`HTTP ${res.status}: ${text.substring(0, 200)}`);
+                        }
                     }
-                }
-                return res.json();
-            })
-            .then(response => {
-                if (response.success) {
-                    modal.style.display = 'none';
-                    form.reset();
-                    loadUsers();
-                } else {
-                    // Tampilkan error dengan lebih baik
-                    let errorMsg = response.message || "Validation failed";
-                    if (response.errors) {
-                        errorMsg += "\n\n" + Object.entries(response.errors)
-                            .map(([field, errors]) => `${field}: ${errors.join(', ')}`)
-                            .join('\n');
+                    return res.json();
+                })
+                .then(response => {
+                    if (response.success) {
+                        if (modal) modal.style.display = 'none';
+                        form.reset();
+                        
+                        if (response.flash) {
+                            showFlasherNotification(response.flash);
+                        }
+                        
+                        loadAnnouncements();
+                    } else {
+                        let errorMsg = response.message || "Validation failed";
+                        if (response.errors) {
+                            errorMsg += "\n\n" + Object.entries(response.errors)
+                                .map(([field, errors]) => `${field}: ${errors.join(', ')}`)
+                                .join('\n');
+                        }
+                        
+                        showFlasherNotification({
+                            type: 'error',
+                            message: errorMsg,
+                            theme: 'amazon',
+                            timeout: 5000
+                        });
+                        
+                        console.log(response.errors);
                     }
-                    alert(errorMsg);
-                    console.log(response.errors);
-                }
-            })
-            .catch(error => {
-                console.error('Fetch Error:', error);
-                alert("Server error: " + error.message);
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                    
+                    showFlasherNotification({
+                        type: 'error',
+                        message: "Server error: " + error.message,
+                        theme: 'amazon',
+                        timeout: 5000
+                    });
+                });
             });
-        });
+        }
 
         /* =========================
-        EDIT USER
+        EDIT ANNOUNCEMENT
         ==========================*/
         
-        window.editUser = function(userId) {
-            // const url = userShowRoute + userId;
-            console.log('Editing user with ID:', userId);
-            const url = `/kln/users/${userId}`;
-            console.log('Fetching from URL:', url);
-            // Fetch user data
+        window.editAnnouncement = function(announcementId) {
+            console.log('Editing announcement with ID:', announcementId);
+            const url = `/kln/announcement/${announcementId}`; // Sesuai route announcement.show
+            
             fetch(url, {
-                method:"GET",
+                method: "GET",
                 headers: {
                     "X-CSRF-TOKEN": "{{ csrf_token() }}",
                     "Accept": "application/json"
                 }
             })
             .then(res => {
-                    console.log('Response status:', res.status);
-                    if (!res.ok) {
+                console.log('Response status:', res.status);
+                if (!res.ok) {
                     throw new Error('Network response was not ok');
                 }
                 return res.json();
             })
             .then(response => {
-                console.log('User data received:', response); // LIHAT INI DI CONSOLE
-                const user = Array.isArray(response) ? response[0] : response;
+                console.log('Announcement data received:', response);
+                
+                // Sesuaikan dengan struktur response dari controller
+                const announcement = response.data || response;
             
-                if (!user) {
-                    throw new Error('User data is empty');
+                if (!announcement) {
+                    throw new Error('Announcement data is empty');
                 }
+                
                 // Populate form
-                document.getElementById('editUserId').value = user.id;
-                document.getElementById('editRoleSelect').value = user.role;
-                document.getElementById('editEmail').value = user.email;
-                document.getElementById('editPassword').value = ''; // Kosongkan password
-                document.getElementById('editStatus').value = user.status;
-                document.getElementById('editJurusanId').value = user.jurusan_id || '';
+                document.getElementById('editAnnouncementId').value = announcement.id;
+                document.getElementById('editTitle').value = announcement.title || '';
+                document.getElementById('editContent').value = announcement.content || '';
+                document.getElementById('editExcerpt').value = announcement.excerpt || '';
+                document.getElementById('editStatus').value = announcement.status || 'draft';
                 
-                // Handle role-specific fields
-                if (user.role === 'mahasiswa' && user.mahasiswa) {
-                    document.getElementById('editMahasiswaNpm').value = user.mahasiswa.npm || '';
-                    document.getElementById('editMahasiswaNama').value = user.mahasiswa.nama|| '';
-                    document.getElementById('editMahasiswaSection').style.display = 'block';
-                } else {
-                    document.getElementById('editMahasiswaSection').style.display = 'none';
-                }
-                
-                if (user.role === 'dosen' && user.dosen) {
-                    document.getElementById('editDosenNama').value = user.dosen.nama || '';
-                    document.getElementById('editDosenNidn').value = user.dosen.nidn || '';
-                    document.getElementById('editDosenKode').value = user.dosen.kodeDos || '';
-                    document.getElementById('editDosenSection').style.display = 'block';
-                } else {
-                    document.getElementById('editDosenSection').style.display = 'none';
+                if (document.getElementById('editPublishedAt')) {
+                    document.getElementById('editPublishedAt').value = announcement.published_at || '';
                 }
                 
                 // Show modal
-                editModal.style.display = 'flex';
+                if (editModal) editModal.style.display = 'flex';
             })
             .catch(error => {
-                console.error('Error fetching user:', error);
-                alert('Gagal mengambil data user');
+                console.error('Error fetching announcement:', error);
+                
+                showFlasherNotification({
+                    type: 'error',
+                    message: 'Gagal mengambil data announcement',
+                    theme: 'amazon',
+                    timeout: 5000
+                });
             });
         }
 
         // Handle Edit Form Submit
-        editForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const userId = document.getElementById('editUserId').value;
-            console.log('user Id: ', userId);
-            const formData = new FormData(editForm);
-            const data = buildUserData(formData, true);
-            const url = `/kln/users/${userId}`;
-            
-            if (!validateForm(data, true)) {
-                return;
-            }
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const announcementId = document.getElementById('editAnnouncementId').value;
+                console.log('Announcement Id: ', announcementId);
+                
+                const formData = new FormData(editForm);
+                const data = buildAnnouncementData(formData);
+                const url = `/kln/announcement/update/${announcementId}`; // Sesuai route announcement.update
+                
+                if (!validateAnnouncementForm(data)) {
+                    return;
+                }
 
-            fetch(url, {
-                method: "PATCH",
-                headers: {
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify(data)
-            })
-            .then(async res => {
-                if (!res.ok) {
-                    const text = await res.text();
+                fetch(url, {
+                    method: "PATCH",
+                    headers: {
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(async res => {
+                    if (!res.ok) {
+                        const text = await res.text();
+                        try {
+                            return JSON.parse(text);
+                        } catch {
+                            throw new Error(`HTTP ${res.status}`);
+                        }
+                    }
+                    return res.json();
+                })
+                .then(response => {
+                    if (response.success) {
+                        if (editModal) editModal.style.display = 'none';
+                        editForm.reset();
+                        
+                        if (response.flash) {
+                            showFlasherNotification(response.flash);
+                        }
+                        
+                        loadAnnouncements();
+                    } else {
+                        let errorMsg = response.message || "Update failed";
+                        if (response.errors) {
+                            errorMsg += "\n\n" + Object.entries(response.errors)
+                                .map(([field, errors]) => `${field}: ${errors.join(', ')}`)
+                                .join('\n');
+                        }
+                        
+                        showFlasherNotification({
+                            type: 'error',
+                            message: errorMsg,
+                            theme: 'amazon',
+                            timeout: 5000
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
                     
-                    try {
-                        return JSON.parse(text);
-                    } catch {
-                        throw new Error(`HTTP ${res.status}`);
-                    }
-                }
-                console.log('response', res);
-                return res.json();
-            })
-            .then(response => {
-                if (response.success) {
-                    editModal.style.display = 'none';
-                    editForm.reset();
-                    loadUsers();
-                    alert('User berhasil diupdate!');
-                } else {
-                    let errorMsg = response.message || "Update failed";
-                    if (response.errors) {
-                        errorMsg += "\n\n" + Object.entries(response.errors)
-                            .map(([field, errors]) => `${field}: ${errors.join(', ')}`)
-                            .join('\n');
-                    }
-                    alert(errorMsg);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert("Server error: " + error.message);
+                    showFlasherNotification({
+                        type: 'error',
+                        message: "Server error: " + error.message,
+                        theme: 'amazon',
+                        timeout: 5000
+                    });
+                });
             });
-        });
+        }
 
         /* =========================
-        DELETE USER
+        DELETE ANNOUNCEMENT
         ==========================*/
 
-        window.deleteUser = function(userId) {
-            if (confirm('Apakah Anda yakin ingin menghapus user ini?')) {
-                fetch(`/kln/users/${userId}`, {
+        window.deleteAnnouncement = function(announcementId) {
+            if (confirm('Apakah Anda yakin ingin menghapus announcement ini?')) {
+                fetch(`/kln/announcement/${announcementId}`, {
                     method: "DELETE",
                     headers: {
                         "X-CSRF-TOKEN": "{{ csrf_token() }}",
@@ -568,20 +592,38 @@
                 })
                 .then(response => {
                     if (response.success) {
-                        loadUsers();
-                        alert('User berhasil dihapus!');
+                        if (response.flash) {
+                            showFlasherNotification(response.flash);
+                        }
+                        loadAnnouncements();
                     } else {
-                        alert(response.message || 'Gagal menghapus user');
+                        if (response.flash) {
+                            showFlasherNotification(response.flash);
+                        } else {
+                            showFlasherNotification({
+                                type: 'error',
+                                message: response.message || 'Delete Failed',
+                                theme: 'amazon',
+                                timeout: 5000
+                            });
+                        }
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert("Server error: " + error.message);
+                    
+                    showFlasherNotification({
+                        type: 'error',
+                        message: "Server error: " + error.message,
+                        theme: 'amazon',
+                        timeout: 5000
+                    });
                 });
             }
         }
 
-        loadUsers();
+        // Initial load
+        loadAnnouncements();
     });
     </script>
     @endsection

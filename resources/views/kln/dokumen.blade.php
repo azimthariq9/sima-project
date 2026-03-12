@@ -47,7 +47,7 @@
 
                         <td class="p-4 text-center space-x-2">
                             <button onclick="showDetail({{ $req->id }})"
-                                class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition">
+                                class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-black-700 text-xs font-semibold transition">
                                 Detail
                             </button>
 

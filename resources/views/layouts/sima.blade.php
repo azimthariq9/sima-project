@@ -1279,7 +1279,7 @@ body.dark .sima-nav__item.active .sima-nav__icon {
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+{{-- <script src="https://cdn.jsdelivr.net/npm/@flasher/flasher@1.0/dist/flasher.min.js"></script> --}}
 <script>
 /* ── Sidebar toggle ─────────────────────────── */
 function openSidebar() {
