@@ -12,7 +12,7 @@ use App\Http\Requests\User\updateUserRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
-
+use function Flasher\Prime\flash;
 
 class UserController extends Controller
 {
@@ -48,12 +48,20 @@ class UserController extends Controller
     {
         $maker = Auth::User();
         $user = $this->userService->create($maker, $request->validated());
-
+        // flash()->use('theme.amazon')
+        // ->option('timeout',5000)
+        // ->success('User has been created succesfully');
         return response()->json([
             'success' => true,
-            'message' => 'User created successfully',
-            'data' => $user
-        ], 201);
+            'data' => $user,
+            'flash' => [
+                'type' => 'success',
+                'message' => 'User created successfully',
+                'theme' => 'amazon',
+                'timeout' => 5000
+            ]
+            ,201
+        ]);
     }
      /*
     |--------------------------------------------------------------------------
@@ -72,12 +80,17 @@ class UserController extends Controller
             ]);
             
             $updated = $this->userService->update($maker, $user->id, $request->validated());
-            
             return response()->json([
-                'success' => true,
+            'success' => true,
+            'data' => $updated,
+            'flash' => [
+                'type' => 'success',
                 'message' => 'User updated successfully',
-                'data' => $updated
-            ], 200);
+                'theme' => 'amazon',
+                'timeout' => 5000
+            ]
+            ,201
+        ]);
             
         } catch (\Exception $e) {
             Log::error('Update user failed', [
@@ -87,9 +100,16 @@ class UserController extends Controller
             ]);
             
             return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            'success' => true,
+            'data' => $e->getMessage(),
+            'flash' => [
+                'type' => 'error',
+                'message' => 'User update failed',
+                'theme' => 'amazon',
+                'timeout' => 5000
+            ]
+            ,500
+        ]);
         }
     }
 
@@ -105,8 +125,15 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'User deleted successfully'
-        ], 200);
+            'data' => [],
+            'flash' => [
+                'type' => 'success',
+                'message' => 'User deleted successfully',
+                'theme' => 'amazon',
+                'timeout' => 5000
+            ]
+            ,200
+        ]);
     }
 
 
@@ -150,7 +177,20 @@ class UserController extends Controller
         }
         
         $users = $query->get();
-        return response()->json($users, 200);
+        // flash()->use('theme.amazon')
+        // ->option('timeout',5000)
+        // ->success('User Retrieve');
+        return response()->json([
+            'success' => true,
+            'data' => $users,
+            'flash' => [
+                'type' => 'success',
+                'message' => 'Users retrieved successfully',
+                'theme' => 'amazon',
+                'timeout' => 5000
+            ]
+            ,200
+        ]);
     }
 
     public function showUser($id){

@@ -30,10 +30,18 @@ class AnnouncementController extends Controller
     {
         $data = $request->validated();
         $maker = Auth::user();
-        $this->announcementService->create($maker, $data);
+        $store=$this->announcementService->create($maker, $data);
 
         return response()->json(
-           ['success' => true, 'message' => 'Announcement created successfully'],
+           ['success' => true, 
+           'data'=> $store,
+           'flash' => [
+                'type' => 'success',
+                'message' => 'Announcement created successfully',
+                'theme' => 'amazon',
+                'timeout' => 5000
+            ]
+            ],201
         );
     }
     /*
@@ -43,7 +51,15 @@ class AnnouncementController extends Controller
     */
     public function getAnnouncement(){
         $data = $this->announcementService->getAll();
-        return response()->json($data);
+        return response()->json(['success' => true, 
+           'data'=> $data,
+           'flash' => [
+                'type' => 'success',
+                'message' => 'Announcement Retrieved successfully',
+                'theme' => 'amazon',
+                'timeout' => 5000
+            ]
+            ],200);
     }
     /*
     |--------------------------------------------------------------------------
@@ -78,11 +94,15 @@ class AnnouncementController extends Controller
             $data = $request->validated();
             $updated = $this->announcementService->update($maker, $id, $data);
             
-            return response()->json([
-                'success' => true, 
-                'message' => 'Announcement updated successfully',
-                'data' => $updated
-            ]);
+            return response()->json(['success' => true, 
+           'data'=> $updated,
+           'flash' => [
+                'type' => 'success',
+                'message' => 'Announcement Updated successfully',
+                'theme' => 'amazon',
+                'timeout' => 5000
+            ]
+            ],201);
 
 
             
@@ -93,10 +113,15 @@ class AnnouncementController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
             
-            return response()->json([
-                'error' => 'Update failed',
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 
+           'data'=> [],
+           'flash' => [
+                'type' => 'success',
+                'message' => 'Announcement Updated failed',
+                'theme' => 'amazon',
+                'timeout' => 5000
+            ]
+            ],200);
         }
     }
 

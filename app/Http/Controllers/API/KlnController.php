@@ -19,7 +19,8 @@ class KlnController extends Controller
     */
 
     public function index()
-    {
+    {   
+        
         return view('kln.dashboard');
        
     }
@@ -39,6 +40,7 @@ class KlnController extends Controller
 
         return view('kln.dokumen', compact('requests'));
     }
+
 
 
     /*
@@ -122,6 +124,15 @@ class KlnController extends Controller
         // return dd($users);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Announcemet PAGE
+    |--------------------------------------------------------------------------
+    */
+
+    public function announcementPage(){
+        return response()->view('kln.announcement');
+    }
 
 
 
