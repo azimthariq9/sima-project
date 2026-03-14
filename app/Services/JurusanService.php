@@ -1,57 +1,134 @@
 <?php
-// app/Services/JurusanService.php
 
 namespace App\Services;
 
-use App\Models\Jurusan;
+use App\Models\jurusan;
 use App\Traits\LogsActivityTrait;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class JurusanService extends BaseService
 {
     use LogsActivityTrait;
-    
-    public function __construct(Jurusan $jurusan)
+
+    public function __construct(jurusan $jurusan)
     {
         parent::__construct($jurusan);
     }
-    
-    public function getAll(array $filters = [], int $perPage = 15):LengthAwarePaginator
+
+    /*
+    |--------------------------------------------------------------------------
+    | GET ALL
+    | Tidak di-scope jurusan karena ini dikelola oleh KLN (lihat semua)
+    |--------------------------------------------------------------------------
+    */
+    public function getAll(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Jurusan::withCount(['prodis', 'mahasiswas']);
-        
-        if (isset($filters['search'])) {
-            $query->where('nama_jurusan', 'like', "%{$filters['search']}%")
-                  ->orWhere('kode_jurusan', 'like', "%{$filters['search']}%");
+        $query = jurusan::query();
+
+        if (isset($filters['namaJurusan'])) {
+            $query->where('namaJurusan', 'like', "%{$filters['namaJurusan']}%");
         }
-        
-        return $query->latest()->paginate($perPage);
+
+        if (request()->has('sort_by') && request()->has('sort_direction')) {
+            $query->orderBy(request('sort_by'), request('sort_direction'));
+        } else {
+            $query->latest();
+        }
+
+        return $query->paginate($perPage);
     }
-    
-    public function create($maker,array $data): Jurusan
+
+    /*
+    |--------------------------------------------------------------------------
+    | CREATE
+    |--------------------------------------------------------------------------
+    */
+    public function create($maker, array $data): jurusan
     {
-        $jurusan = parent::create($maker,$data);
-        $this->logActivity('CREATE', $jurusan, "Membuat jurusan baru: {$jurusan->nama_jurusan}", $maker);
-        return $jurusan;
+        DB::beginTransaction();
+
+        try {
+            $jurusan = jurusan::create([
+                'namaJurusan' => $data['namaJurusan'],
+            ]);
+
+            $this->logActivity('CREATE', $jurusan, "Membuat jurusan: {$jurusan->namaJurusan}", $maker);
+
+            DB::commit();
+            return $jurusan;
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating jurusan: ' . $e->getMessage(), [
+                'data'  => $data,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
+        }
     }
-    
-    public function update($maker, int $id, array $data): Jurusan
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE
+    |--------------------------------------------------------------------------
+    */
+    public function update($maker, int $id, array $data): jurusan
     {
-        $jurusan = parent::update($maker, $id, $data);
-        $this->logActivity('UPDATE', $jurusan, "Mengupdate jurusan: {$jurusan->nama_jurusan}", $maker);
-        return $jurusan;
+        DB::beginTransaction();
+
+        try {
+            $jurusan = $this->findOrFail($id);
+            $jurusan->update([
+                'namaJurusan' => $data['namaJurusan'] ?? $jurusan->namaJurusan,
+            ]);
+
+            $this->logActivity('UPDATE', $jurusan, "Mengupdate jurusan: {$jurusan->namaJurusan}", $maker);
+
+            DB::commit();
+            return $jurusan->fresh();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating jurusan: ' . $e->getMessage());
+            throw $e;
+        }
     }
-    
+
+    /*
+    |--------------------------------------------------------------------------
+    | DELETE
+    | Perhatian: hapus jurusan akan berdampak ke semua user, kelas, matakuliah,
+    | jadwal yang terhubung. Pastikan ada foreign key constraint atau
+    | soft delete di tabel-tabel terkait.
+    |--------------------------------------------------------------------------
+    */
     public function delete($maker, int $id): bool
     {
-        $jurusan = $this->findOrFail($id);
-        $nama = $jurusan->nama_jurusan;
-        $result = parent::delete($maker, $id);
-        
-        if ($result) {
-            $this->logActivity('DELETE', $jurusan, "Menghapus jurusan: {$nama}", $maker);
+        DB::beginTransaction();
+
+        try {
+            $jurusan = $this->findOrFail($id);
+            $namaJurusan = $jurusan->namaJurusan;
+
+            // Cek apakah jurusan masih punya user aktif
+            $hasUsers = $jurusan->user()->exists();
+            if ($hasUsers) {
+                throw new \Exception("Jurusan '{$namaJurusan}' masih memiliki user terdaftar dan tidak bisa dihapus");
+            }
+
+            $result = $jurusan->delete();
+
+            $this->logActivity('DELETE', $jurusan, "Menghapus jurusan: {$namaJurusan}", $maker);
+
+            DB::commit();
+            return $result;
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error deleting jurusan: ' . $e->getMessage());
+            throw $e;
         }
-        
-        return $result;
     }
 }

@@ -119,6 +119,22 @@ Route::middleware(['auth', 'check.role:KLN'])
             Route::get('{id}', [AnnouncementController::class, 'specificAnnouncement'])->name('show');
             Route::patch('update/{id}', [AnnouncementController::class, 'updateAnnouncement'])->name('update');
         });
+
+        /* ---- JURUSAN ---- */
+        Route::prefix('jurusan')->name('jurusan.')->group(function () {
+        
+            // Jika ada halaman view khusus management jurusan di KLN, tambahkan di sini:
+            // Route::get('/', [KlnController::class, 'jurusanPage'])->name('page');
+        
+            // AJAX data untuk table
+            Route::get('data', [JurusanController::class, 'getJurusan'])->name('data');
+        
+            // CRUD
+            Route::get('{id}', [JurusanController::class, 'showJurusan'])->name('show');
+            Route::post('/', [JurusanController::class, 'storeJurusan'])->name('store');
+            Route::patch('{id}', [JurusanController::class, 'updateJurusan'])->name('update');
+            Route::delete('{id}', [JurusanController::class, 'destroyJurusan'])->name('destroy');
+        });
         
     });
 
@@ -129,12 +145,6 @@ Route::middleware(['auth', 'check.role:KLN'])
 | =========================
 |--------------------------------------------------------------------------
 */
-
-
-
-
-
-
 /*
 |--------------------------------------------------------------------------
 | =========================
