@@ -45,17 +45,17 @@ class KlnController extends Controller
     */
     public function show($id)
     {
-    $req = ReqDokumen::with('mahasiswa')
-        ->findOrFail($id);
+        $req = ReqDokumen::with('mahasiswa')
+            ->findOrFail($id);
 
-    return response()->json([
-        'id' => $req->id,
-        'mahasiswa' => $req->mahasiswa->nama ?? '-',
-        'tipe' => $req->tipeDkmn->value,
-        'status' => $req->status->value,
-        'message' => $req->message,
-    ]);
-}
+        return response()->json([
+            'id' => $req->id,
+            'mahasiswa' => $req->mahasiswa->nama ?? '-',
+            'tipe' => $req->tipeDkmn->value,
+            'status' => $req->status->value,
+            'message' => $req->message,
+        ]);
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -101,6 +101,87 @@ class KlnController extends Controller
             'status' => 'approved'
         ]);
 
+        return response()->json(['success' => true]);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | USERS PAGE
+    |--------------------------------------------------------------------------
+    */
+
+    public function usersPage()
+    {
+        return view('kln.users.index');
+    }
+    /*
+    |--------------------------------------------------------------------------
+    | GET USERS DATA
+    |--------------------------------------------------------------------------
+    */
+
+    public function getUsers()
+    {
+        $users = \App\Models\User::all();
+
+        return response()->json($users);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | STORE USER
+    |--------------------------------------------------------------------------
+    */
+
+    public function storeUser(Request $request)
+    {
+        return response()->json(['success' => true]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | SHOW USER
+    |--------------------------------------------------------------------------
+    */
+
+    public function showUser($id)
+    {
+        $user = \App\Models\User::findOrFail($id);
+
+        return response()->json($user);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE USER
+    |--------------------------------------------------------------------------
+    */
+
+    public function updateUser(Request $request, $id)
+    {
+        return response()->json(['success' => true]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DELETE USER
+    |--------------------------------------------------------------------------
+    */
+
+    public function destroyUser($id)
+    {
+        return response()->json(['success' => true]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE STATUS MAHASISWA
+    |--------------------------------------------------------------------------
+    */
+
+    public function updateStatusMahasiswa($id)
+    {
         return response()->json(['success' => true]);
     }
 
