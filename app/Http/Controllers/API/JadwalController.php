@@ -3,21 +3,21 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
-use App\Models\Dosen;
-use App\Services\DosenService;
+use App\Models\Jadwal;
+use App\Services\JadwalService;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Dosen\createDosenRequest;
-use App\Http\Requests\Dosen\updateDosenRequest;
+use App\Http\Requests\Jadwal\createJadwalRequest;
+use App\Http\Requests\Jadwal\updateJadwalRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
-class DosenController extends Controller
+class JadwalController extends Controller
 {
-    protected DosenService $dosenService;
+    protected JadwalService $jadwalService;
 
-    public function __construct(DosenService $dosenService)
+    public function __construct(JadwalService $jadwalService)
     {
-        $this->dosenService = $dosenService;
+        $this->jadwalService = $jadwalService;
     }
 
     /*
@@ -27,12 +27,12 @@ class DosenController extends Controller
     */
     public function index()
     {
-        $dosen = $this->dosenService->getAll();
+        $jadwal = $this->jadwalService->getAll();
 
         return response()->json([
             'success' => true,
-            'message' => 'Dosen retrieved successfully',
-            'data'    => $dosen,
+            'message' => 'Jadwal retrieved successfully',
+            'data'    => $jadwal,
         ], 200);
     }
 
@@ -45,25 +45,26 @@ class DosenController extends Controller
     {
         $filters = [];
 
-        if ($request->filled('nama')) {
-            $filters['nama'] = $request->nama;
+        if ($request->filled('hari')) {
+            $filters['hari'] = $request->hari;
         }
 
-        if ($request->filled('nidn')) {
-            $filters['nidn'] = $request->nidn;
+        if ($request->filled('kelas_id')) {
+            $filters['kelas_id'] = $request->kelas_id;
         }
 
-        $sortBy        = $request->get('sort_by', 'id');
-        $sortDirection = $request->get('sort_direction', 'desc');
+        if ($request->filled('dosen_id')) {
+            $filters['dosen_id'] = $request->dosen_id;
+        }
 
-        $dosen = $this->dosenService->getAll($filters);
+        $jadwal = $this->jadwalService->getAll($filters);
 
         return response()->json([
             'success' => true,
-            'data'    => $dosen,
+            'data'    => $jadwal,
             'flash'   => [
                 'type'    => 'success',
-                'message' => 'Dosen retrieved successfully',
+                'message' => 'Jadwal retrieved successfully',
                 'theme'   => 'amazon',
                 'timeout' => 5000,
             ],
@@ -72,17 +73,17 @@ class DosenController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | SHOW SPECIFIC DOSEN
+    | SHOW SPECIFIC JADWAL
     |--------------------------------------------------------------------------
     */
     public function show($id)
     {
         try {
-            $dosen = $this->dosenService->findOrFail($id);
+            $jadwal = $this->jadwalService->findOrFail($id);
 
             return response()->json([
                 'success' => true,
-                'data'    => $dosen->load('user'),
+                'data'    => $jadwal->load(['kelas', 'dosen', 'matakuliah']),
             ], 200);
 
         } catch (\Exception $e) {
@@ -95,30 +96,28 @@ class DosenController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | STORE DOSEN
-    | Digunakan oleh admin jurusan untuk menambah data dosen
-    | (User dengan role dosen sudah dibuat via UserController)
+    | STORE JADWAL
     |--------------------------------------------------------------------------
     */
-    public function store(createDosenRequest $request)
+    public function store(createJadwalRequest $request)
     {
         try {
-            $maker = Auth::user();
-            $dosen = $this->dosenService->create($maker, $request->validated());
+            $maker  = Auth::user();
+            $jadwal = $this->jadwalService->create($maker, $request->validated());
 
             return response()->json([
                 'success' => true,
-                'data'    => $dosen,
+                'data'    => $jadwal,
                 'flash'   => [
                     'type'    => 'success',
-                    'message' => 'Dosen created successfully',
+                    'message' => 'Jadwal created successfully',
                     'theme'   => 'amazon',
                     'timeout' => 5000,
                 ],
             ], 201);
 
         } catch (\Exception $e) {
-            Log::error('Create dosen failed', [
+            Log::error('Create jadwal failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -128,7 +127,7 @@ class DosenController extends Controller
                 'message' => $e->getMessage(),
                 'flash'   => [
                     'type'    => 'error',
-                    'message' => 'Dosen creation failed',
+                    'message' => 'Jadwal creation failed',
                     'theme'   => 'amazon',
                     'timeout' => 5000,
                 ],
@@ -138,39 +137,38 @@ class DosenController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | UPDATE DOSEN
-    | Bisa digunakan oleh admin jurusan ATAU dosen itu sendiri (update profile)
+    | UPDATE JADWAL
     |--------------------------------------------------------------------------
     */
-    public function update(updateDosenRequest $request, $id)
+    public function update(updateJadwalRequest $request, $id)
     {
         try {
             $maker = Auth::user();
 
-            Log::info('Updating dosen', [
-                'dosen_id' => $id,
-                'maker_id' => $maker->id,
-                'data'     => $request->validated(),
+            Log::info('Updating jadwal', [
+                'jadwal_id' => $id,
+                'maker_id'  => $maker->id,
+                'data'      => $request->validated(),
             ]);
 
-            $updated = $this->dosenService->update($maker, $id, $request->validated());
+            $updated = $this->jadwalService->update($maker, $id, $request->validated());
 
             return response()->json([
                 'success' => true,
                 'data'    => $updated,
                 'flash'   => [
                     'type'    => 'success',
-                    'message' => 'Dosen updated successfully',
+                    'message' => 'Jadwal updated successfully',
                     'theme'   => 'amazon',
                     'timeout' => 5000,
                 ],
             ], 200);
 
         } catch (\Exception $e) {
-            Log::error('Update dosen failed', [
-                'dosen_id' => $id,
-                'error'    => $e->getMessage(),
-                'trace'    => $e->getTraceAsString(),
+            Log::error('Update jadwal failed', [
+                'jadwal_id' => $id,
+                'error'     => $e->getMessage(),
+                'trace'     => $e->getTraceAsString(),
             ]);
 
             return response()->json([
@@ -178,7 +176,7 @@ class DosenController extends Controller
                 'message' => $e->getMessage(),
                 'flash'   => [
                     'type'    => 'error',
-                    'message' => 'Dosen update failed',
+                    'message' => 'Jadwal update failed',
                     'theme'   => 'amazon',
                     'timeout' => 5000,
                 ],
@@ -188,30 +186,30 @@ class DosenController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | DELETE DOSEN
+    | DELETE JADWAL
     |--------------------------------------------------------------------------
     */
     public function destroy($id)
     {
         try {
             $maker = Auth::user();
-            $this->dosenService->delete($maker, $id);
+            $this->jadwalService->delete($maker, $id);
 
             return response()->json([
                 'success' => true,
                 'data'    => [],
                 'flash'   => [
                     'type'    => 'success',
-                    'message' => 'Dosen deleted successfully',
+                    'message' => 'Jadwal deleted successfully',
                     'theme'   => 'amazon',
                     'timeout' => 5000,
                 ],
             ], 200);
 
         } catch (\Exception $e) {
-            Log::error('Delete dosen failed', [
-                'dosen_id' => $id,
-                'error'    => $e->getMessage(),
+            Log::error('Delete jadwal failed', [
+                'jadwal_id' => $id,
+                'error'     => $e->getMessage(),
             ]);
 
             return response()->json([
@@ -219,7 +217,7 @@ class DosenController extends Controller
                 'message' => $e->getMessage(),
                 'flash'   => [
                     'type'    => 'error',
-                    'message' => 'Dosen deletion failed',
+                    'message' => 'Jadwal deletion failed',
                     'theme'   => 'amazon',
                     'timeout' => 5000,
                 ],

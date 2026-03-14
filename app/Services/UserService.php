@@ -4,6 +4,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Models\Mahasiswa;
 use App\Traits\LogsActivityTrait;
 use App\Services\NotificationService;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -274,7 +275,13 @@ class UserService extends BaseService
             throw $e;
         }
     }
-    
+
+    public function getIds(){
+        $user = User::pluck('id')->toArray();
+        $mahasiswa = Mahasiswa::pluck('id')->toArray();
+
+        return ['user' => $user, 'mahasiswa' => $mahasiswa];
+    }
     /**
      * Get mahasiswa list for verification
      */

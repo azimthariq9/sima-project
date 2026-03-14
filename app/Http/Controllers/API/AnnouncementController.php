@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Announcement\createAnnouncementRequest;
 use App\Http\Requests\Announcement\updateAnnouncementRequest;
 use App\Services\AnnouncementService;
+use App\Services\UserService;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Announcement;
 use Illuminate\Support\Facades\Log;
@@ -13,11 +14,14 @@ use Illuminate\Http\Request;
 
 class AnnouncementController extends Controller
 {
-    protected AnnouncementService $announcementService;
-    public function __construct(AnnouncementService $announcementService)
-    {
-        // $this->middleware('auth');
+    protected $announcementService;
+    protected $userService;
+    public function __construct(
+        UserService $userService,
+        AnnouncementService $announcementService,
+    ){
         $this->announcementService = $announcementService;
+        $this->userService = $userService;
     }
 
     
@@ -102,7 +106,7 @@ class AnnouncementController extends Controller
                 'theme' => 'amazon',
                 'timeout' => 5000
             ]
-            ],201);
+            ],203);
 
 
             
@@ -116,12 +120,71 @@ class AnnouncementController extends Controller
             return response()->json(['success' => false, 
            'data'=> [],
            'flash' => [
-                'type' => 'success',
+                'type' => 'error',
                 'message' => 'Announcement Updated failed',
                 'theme' => 'amazon',
                 'timeout' => 5000
             ]
+            ],500);
+        }
+    }
+
+    public function destroy($id)
+    {   
+        try{
+            $maker = Auth::user();
+            $delete = $this->announcementService->delete($maker, $id);
+
+           return response()->json(['success' => true, 
+           'data'=> $delete,
+           'flash' => [
+                'type' => 'success',
+                'message' => 'Announcement deleted successfully',
+                'theme' => 'amazon',
+                'timeout' => 5000
+            ]
             ],200);
+        }catch(\Exception $e){
+            Log::error('Delete Error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json(['success' => false, 
+           'data'=> [],
+           'flash' => [
+                'type' => 'error',
+                'message' => 'Announcement Delete failed',
+                'theme' => 'amazon',
+                'timeout' => 5000
+            ]
+            ],500);
+        }
+        
+    }
+
+    public function getAllIds(){
+        try{
+        $data = $this->userService->getIds();
+        return response()->json(['success' => true, 
+           'data'=> $data,
+           'flash' => [
+                'type' => 'success',
+                'message' => 'Announcement Ids retrieved successfully',
+                'theme' => 'amazon',
+                'timeout' => 5000
+            ]
+            ],200);
+        }catch(\Exception $e){
+            Log::error('Error getting announcement ids: ' . $e->getMessage());
+            return response()->json(['success' => false, 
+           'data'=> [],
+           'flash' => [
+                'type' => 'error',
+                'message' => 'get all ids failed',
+                'theme' => 'amazon',
+                'timeout' => 5000
+            ]
+            ],500);
         }
     }
 

@@ -156,6 +156,11 @@ class AnnouncementService extends BaseService
         $query = Announcement::with(['user_id', 'createdBy']);
 
     }
+    
+    public function delete($maker, int $id): bool
+    {
+        return parent::delete($maker, $id);
+    }
 
     
 }

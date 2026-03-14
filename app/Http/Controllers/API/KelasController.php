@@ -3,21 +3,21 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
-use App\Models\Dosen;
-use App\Services\DosenService;
+use App\Models\Kelas;
+use App\Services\KelasService;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Dosen\createDosenRequest;
-use App\Http\Requests\Dosen\updateDosenRequest;
+use App\Http\Requests\Kelas\createKelasRequest;
+use App\Http\Requests\Kelas\updateKelasRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
-class DosenController extends Controller
+class KelasController extends Controller
 {
-    protected DosenService $dosenService;
+    protected KelasService $kelasService;
 
-    public function __construct(DosenService $dosenService)
+    public function __construct(KelasService $kelasService)
     {
-        $this->dosenService = $dosenService;
+        $this->kelasService = $kelasService;
     }
 
     /*
@@ -27,12 +27,12 @@ class DosenController extends Controller
     */
     public function index()
     {
-        $dosen = $this->dosenService->getAll();
+        $kelas = $this->kelasService->getAll();
 
         return response()->json([
             'success' => true,
-            'message' => 'Dosen retrieved successfully',
-            'data'    => $dosen,
+            'message' => 'Kelas retrieved successfully',
+            'data'    => $kelas,
         ], 200);
     }
 
@@ -49,21 +49,18 @@ class DosenController extends Controller
             $filters['nama'] = $request->nama;
         }
 
-        if ($request->filled('nidn')) {
-            $filters['nidn'] = $request->nidn;
+        if ($request->filled('kode')) {
+            $filters['kode'] = $request->kode;
         }
 
-        $sortBy        = $request->get('sort_by', 'id');
-        $sortDirection = $request->get('sort_direction', 'desc');
-
-        $dosen = $this->dosenService->getAll($filters);
+        $kelas = $this->kelasService->getAll($filters);
 
         return response()->json([
             'success' => true,
-            'data'    => $dosen,
+            'data'    => $kelas,
             'flash'   => [
                 'type'    => 'success',
-                'message' => 'Dosen retrieved successfully',
+                'message' => 'Kelas retrieved successfully',
                 'theme'   => 'amazon',
                 'timeout' => 5000,
             ],
@@ -72,17 +69,17 @@ class DosenController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | SHOW SPECIFIC DOSEN
+    | SHOW SPECIFIC KELAS
     |--------------------------------------------------------------------------
     */
     public function show($id)
     {
         try {
-            $dosen = $this->dosenService->findOrFail($id);
+            $kelas = $this->kelasService->findOrFail($id);
 
             return response()->json([
                 'success' => true,
-                'data'    => $dosen->load('user'),
+                'data'    => $kelas->load(['matakuliah', 'dosen', 'mahasiswaKelas.mahasiswa']),
             ], 200);
 
         } catch (\Exception $e) {
@@ -95,30 +92,28 @@ class DosenController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | STORE DOSEN
-    | Digunakan oleh admin jurusan untuk menambah data dosen
-    | (User dengan role dosen sudah dibuat via UserController)
+    | STORE KELAS
     |--------------------------------------------------------------------------
     */
-    public function store(createDosenRequest $request)
+    public function store(createKelasRequest $request)
     {
         try {
             $maker = Auth::user();
-            $dosen = $this->dosenService->create($maker, $request->validated());
+            $kelas = $this->kelasService->create($maker, $request->validated());
 
             return response()->json([
                 'success' => true,
-                'data'    => $dosen,
+                'data'    => $kelas,
                 'flash'   => [
                     'type'    => 'success',
-                    'message' => 'Dosen created successfully',
+                    'message' => 'Kelas created successfully',
                     'theme'   => 'amazon',
                     'timeout' => 5000,
                 ],
             ], 201);
 
         } catch (\Exception $e) {
-            Log::error('Create dosen failed', [
+            Log::error('Create kelas failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -128,7 +123,7 @@ class DosenController extends Controller
                 'message' => $e->getMessage(),
                 'flash'   => [
                     'type'    => 'error',
-                    'message' => 'Dosen creation failed',
+                    'message' => 'Kelas creation failed',
                     'theme'   => 'amazon',
                     'timeout' => 5000,
                 ],
@@ -138,37 +133,36 @@ class DosenController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | UPDATE DOSEN
-    | Bisa digunakan oleh admin jurusan ATAU dosen itu sendiri (update profile)
+    | UPDATE KELAS
     |--------------------------------------------------------------------------
     */
-    public function update(updateDosenRequest $request, $id)
+    public function update(updateKelasRequest $request, $id)
     {
         try {
             $maker = Auth::user();
 
-            Log::info('Updating dosen', [
-                'dosen_id' => $id,
+            Log::info('Updating kelas', [
+                'kelas_id' => $id,
                 'maker_id' => $maker->id,
                 'data'     => $request->validated(),
             ]);
 
-            $updated = $this->dosenService->update($maker, $id, $request->validated());
+            $updated = $this->kelasService->update($maker, $id, $request->validated());
 
             return response()->json([
                 'success' => true,
                 'data'    => $updated,
                 'flash'   => [
                     'type'    => 'success',
-                    'message' => 'Dosen updated successfully',
+                    'message' => 'Kelas updated successfully',
                     'theme'   => 'amazon',
                     'timeout' => 5000,
                 ],
             ], 200);
 
         } catch (\Exception $e) {
-            Log::error('Update dosen failed', [
-                'dosen_id' => $id,
+            Log::error('Update kelas failed', [
+                'kelas_id' => $id,
                 'error'    => $e->getMessage(),
                 'trace'    => $e->getTraceAsString(),
             ]);
@@ -178,7 +172,7 @@ class DosenController extends Controller
                 'message' => $e->getMessage(),
                 'flash'   => [
                     'type'    => 'error',
-                    'message' => 'Dosen update failed',
+                    'message' => 'Kelas update failed',
                     'theme'   => 'amazon',
                     'timeout' => 5000,
                 ],
@@ -188,29 +182,29 @@ class DosenController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | DELETE DOSEN
+    | DELETE KELAS
     |--------------------------------------------------------------------------
     */
     public function destroy($id)
     {
         try {
             $maker = Auth::user();
-            $this->dosenService->delete($maker, $id);
+            $this->kelasService->delete($maker, $id);
 
             return response()->json([
                 'success' => true,
                 'data'    => [],
                 'flash'   => [
                     'type'    => 'success',
-                    'message' => 'Dosen deleted successfully',
+                    'message' => 'Kelas deleted successfully',
                     'theme'   => 'amazon',
                     'timeout' => 5000,
                 ],
             ], 200);
 
         } catch (\Exception $e) {
-            Log::error('Delete dosen failed', [
-                'dosen_id' => $id,
+            Log::error('Delete kelas failed', [
+                'kelas_id' => $id,
                 'error'    => $e->getMessage(),
             ]);
 
@@ -219,7 +213,7 @@ class DosenController extends Controller
                 'message' => $e->getMessage(),
                 'flash'   => [
                     'type'    => 'error',
-                    'message' => 'Dosen deletion failed',
+                    'message' => 'Kelas deletion failed',
                     'theme'   => 'amazon',
                     'timeout' => 5000,
                 ],

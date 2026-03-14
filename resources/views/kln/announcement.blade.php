@@ -71,15 +71,11 @@
 
                 <div style="margin-bottom:15px;">
                     <label style="color:#94a3b8;">Send To</label>
-                    <select name="jurusan_id" id="jurusan_id" onchange="handleRoleChange()" 
+                    <select name="mahasiswa_ids" id="mahasiswa_ids" onchange="handleRoleChange()" 
                         style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                        {{-- <option value="">Select </option>
-                        @foreach ( $jurusan as $j)
-                            <option value="{{ $j->id }}">{{ $j->namaJurusan }}</option>
-                        @endforeach --}}
+                        <option value="mahasiswa">Mahasiswa Only</option>
+                        <option value="all">All User</option>
                     </select>
-                    {{-- <input type="number" name="jurusan_id"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;"> --}}
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-top:20px;">
                     <button type="button" onclick="closeModal()" 
@@ -318,20 +314,20 @@
         ==========================*/
 
         function validateAnnouncementForm(data) {
-            if (!data.title || data.title.trim() === '') {
+            if (!data.subject || data.subject.trim() === '') {
                 showFlasherNotification({
                     type: 'error',
-                    message: 'Title harus diisi',
+                    message: 'Subject harus diisi',
                     theme: 'amazon',
                     timeout: 5000
                 });
                 return false;
             }
             
-            if (!data.content || data.content.trim() === '') {
+            if (!data.message || data.message.trim() === '') {
                 showFlasherNotification({
                     type: 'error',
-                    message: 'Content harus diisi',
+                    message: 'message harus diisi',
                     theme: 'amazon',
                     timeout: 5000
                 });
@@ -340,18 +336,34 @@
             
             return true;
         }
-
+        /* =========================
+        BUILD ANNOUNCEMENT DATA
+        ==========================*/
+        function getIds(data) {
+            
+        }
         /* =========================
         BUILD ANNOUNCEMENT DATA
         ==========================*/
 
         function buildAnnouncementData(formData) {
+            if (formData.has('id')) {
+                return {
+                    id: formData.get('id'),
+                    subject: formData.get('subject'),
+                    message: formData.get('message'),
+                    status: formData.get('status') || 'draft',
+                    mahasiswa_ids: formData.get('mahasiswa_ids')
+                };
+            }
+            if (formData.has('mahasiswa_ids')) {
+                
+            }
             return {
-                title: formData.get('title'),
-                content: formData.get('content'),
-                excerpt: formData.get('excerpt') || null,
+                subject: formData.get('subject'),
+                message: formData.get('message'),
                 status: formData.get('status') || 'draft',
-                published_at: formData.get('published_at') || null
+                mahasiswa_ids: formData.get('mahasiswa_ids')
             };
         }
 
@@ -467,14 +479,13 @@
                 
                 // Populate form
                 document.getElementById('editAnnouncementId').value = announcement.id;
-                document.getElementById('editTitle').value = announcement.title || '';
-                document.getElementById('editContent').value = announcement.content || '';
-                document.getElementById('editExcerpt').value = announcement.excerpt || '';
+                document.getElementById('editSubject').value = announcement.subject || '';
+                document.getElementById('editMessage').value = announcement.Message || '';
                 document.getElementById('editStatus').value = announcement.status || 'draft';
                 
-                if (document.getElementById('editPublishedAt')) {
-                    document.getElementById('editPublishedAt').value = announcement.published_at || '';
-                }
+                // if (document.getElementById('editPublishedAt')) {
+                //     document.getElementById('editPublishedAt').value = announcement.published_at || '';
+                // }
                 
                 // Show modal
                 if (editModal) editModal.style.display = 'flex';
