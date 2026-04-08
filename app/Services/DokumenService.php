@@ -508,4 +508,157 @@ class DokumenService extends BaseService
         
         return $query->latest()->paginate($filters['per_page'] ?? 15);
     }
+        /**
+     * Count pending documents
+     */
+    public function countPending(): int
+    {
+        return Dokumen::where('status', status::PENDING->value)
+            ->count();
+    }
+
+    /**
+     * Count critical documents (expired or expiring soon)
+     */
+    public function countCritical(): int
+    {
+        $today = now();
+        $criticalDate = now()->addDays(30);
+        
+        return Dokumen::where(function($query) use ($today, $criticalDate) {
+                $query->where('tglKdlwrs', '<', $today) // expired
+                    ->orWhereBetween('tglKdlwrs', [$today, $criticalDate]); // expiring soon
+            })
+            ->count();
+    }
+
+    /**
+     * Count documents validated today
+     */
+    public function countValidatedToday(): int
+    {
+        return Dokumen::whereDate('updated_at', today())
+            ->whereIn('status', [status::APPROVED->value])
+            ->count();
+    }
+
+    /**
+     * Get critical documents list
+     */
+    public function getCriticalDocuments(int $limit = 10): array
+    {
+        $today = now();
+        $criticalDate = now()->addDays(30);
+        
+        $documents = Dokumen::with(['mahasiswa'])
+            ->where(function($query) use ($today, $criticalDate) {
+                $query->where('tglkdlwrs', '<', $today)
+                    ->orWhereBetween('tglkdlwrs', [$today, $criticalDate]);
+            })
+            ->orderBy('tglkdlwrs')
+            ->limit($limit)
+            ->get();
+        
+        return $documents->map(function($doc) {
+            $isExpired = $doc->tglkdlwrs < now();
+            
+            return [
+                'id' => $doc->id,
+                'init' => strtoupper(substr($doc->mahasiswa->nama ?? 'NA', 0, 2)),
+                'name' => $doc->mahasiswa->nama ?? 'Unknown',
+                'flag' => $this->getFlagEmoji($doc->mahasiswa->warNeg ?? ''),
+                'doc' => $doc->tipeDkmn->value ?? $doc->tipeDkmn,
+                'exp' => $doc->tglkdlwrs->format('d/m/Y'),
+                'status' => $isExpired ? 'expired' : 'expiring',
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Get validation queue
+     */
+    public function getValidationQueue(int $limit = 10): array
+    {
+        $documents = Dokumen::with(['mahasiswa'])
+            ->where('status', status::PENDING->value)
+            ->orderBy('created_at')
+            ->limit($limit)
+            ->get();
+        
+        return $documents->map(function($doc, $index) {
+            $priority = $index < 2 ? 'high' : ($index < 5 ? 'medium' : 'low');
+            
+            return [
+                'init' => strtoupper(substr($doc->mahasiswa->nama ?? 'NA', 0, 2)),
+                'name' => $doc->mahasiswa->nama ?? 'Unknown',
+                'doc' => $doc->tipeDkmn->value ?? $doc->tipeDkmn,
+                'time' => $doc->created_at->format('H:i'),
+                'priority' => $priority,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Get mahasiswa preview for dashboard
+     */
+    public function getMahasiswaPreview(int $limit = 10): array
+    {
+        $mahasiswa = \App\Models\Mahasiswa::with(['user', 'dokumen' => function($q) {
+                $q->latest()->limit(1);
+            }])
+            ->limit($limit)
+            ->get();
+        
+        return $mahasiswa->map(function($mhs) {
+            $kitas = $mhs->dokumen->firstWhere('tipeDkmn', 'kitas');
+            
+            return [
+                'init' => strtoupper(substr($mhs->nama, 0, 2)),
+                'name' => $mhs->nama,
+                'flag' => $this->getFlagEmoji($mhs->warNeg),
+                'prodi' => $mhs->prodi ?? '-',
+                'smt' => $mhs->semester ?? 1,
+                'kitas' => $kitas ? $kitas->tglkdlwrs->format('d/m/Y') : '-',
+                'attendance' => rand(75, 100), // Anda bisa ganti dengan data real
+                'status' => $mhs->user?->status_profile ?? 'pending',
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Get monthly chart data (dokumen valid)
+     */
+    public function getMonthlyChartData(int $months = 6): array
+    {
+        $data = [];
+        
+        for ($i = $months - 1; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            
+            $data[] = [
+                'label' => $month->format('M'),
+                'b' => Dokumen::whereMonth('updated_at', $month->month)
+                    ->whereYear('updated_at', $month->year)
+                    ->whereIn('status', [status::APPROVED->value])
+                    ->count(),
+            ];
+        }
+        
+        return $data;
+    }
+
+    /**
+     * Get flag emoji helper (copy dari UserService atau buat trait)
+     */
+    private function getFlagEmoji(?string $negara): string
+    {
+        // sama dengan yang di UserService
+        $flags = [
+            'Uzbekistan' => '🇺🇿',
+            'Vietnam' => '🇻🇳',
+            // ... lengkapi sesuai kebutuhan
+        ];
+        
+        return $flags[$negara] ?? '🌍';
+    }
 }

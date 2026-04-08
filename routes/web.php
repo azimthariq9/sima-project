@@ -212,11 +212,7 @@ Route::middleware(['auth', 'check.role:KLN'])
             Route::put('users/{id}/status', [KlnController::class, 'updateStatusMahasiswa'])
                 ->name('users.status');
 
-            Route::get('dokumen', [KlnController::class, 'getDokumen'])
-                ->name('dokumen.index');
 
-            Route::put('dokumen/{id}/status', [KlnController::class, 'updateDokumenStatus'])
-                ->name('dokumen.status');
 
             //Request Dokumen
             Route::prefix('requestDok')->name('request.')->group(function () {
@@ -225,7 +221,43 @@ Route::middleware(['auth', 'check.role:KLN'])
                 Route::get('{id}', [KlnController::class, 'showReqDocument'])->name('show');
                 Route::patch('{id}/status', [KlnController::class, 'updateReqDokumen'])->name('status');
                 Route::post('{id}/upload', [KlnController::class, 'uploadReqDokumen'])->name('upload');
-        });
+            });
+                    // ===== HALAMAN (return view) =====
+            Route::get('dashboard', [KlnController::class, 'index'])->name('dashboard');
+            Route::get('users', [KlnController::class, 'usersPage'])->name('users.page');
+            Route::get('dokumen', [KlnController::class, 'dokumenPage'])->name('dokumen.page');
+            
+                // Dashboard
+                Route::get('dashboard/stats', [KlnController::class, 'getDashboardStats'])->name('dashboard.stats');
+                //Announcement
+                Route::post('coba-announcement', [KlnController::class, 'storeAnnouncement'])->name('announcement.store');
+                // Users
+                Route::get('users', [KlnController::class, 'getUsers'])->name('users.index');
+                Route::post('users', [KlnController::class, 'storeUser'])->name('users.store');
+                Route::get('users/{id}', [KlnController::class, 'showUser'])->name('users.show');
+                Route::put('users/{id}', [KlnController::class, 'updateUser'])->name('users.update');
+                Route::delete('users/{id}', [KlnController::class, 'destroyUser'])->name('users.destroy');
+                Route::post('test-announcement', function() {
+                    return response()->json([
+                        'message' => 'Test route works',
+                        'user' => auth()->user()
+                    ]);
+                })->name('test.announcement');
+                // Dokumen
+                Route::get('dokumen', [KlnController::class, 'getDokumen'])->name('dokumen.index');
+                Route::patch('dokumen/{id}/status', [KlnController::class, 'updateDokumenStatus'])->name('dokumen.status');
+                // Jadwal
+                Route::apiResource('jadwal', KlnController::class)->only(['index', 'store', 'update', 'destroy']);
+
+                //dashboard
+                Route::get('dashboard/stats', [KlnController::class, 'getDashboardStats'])->name('dashboard.stats');
+                Route::get('dashboard/critical-documents', [KlnController::class, 'getCriticalDocuments'])->name('critical.documents');
+                Route::get('dashboard/validation-queue', [KlnController::class, 'getValidationQueue'])->name('validation.queue');
+                Route::get('dashboard/country-distribution', [KlnController::class, 'getCountryDistribution'])->name('country.distribution');
+                Route::get('dashboard/mahasiswa-preview', [KlnController::class, 'getMahasiswaPreview'])->name('mahasiswa.preview');
+                Route::get('dashboard/activity-log', [KlnController::class, 'getActivityLog'])->name('activity.log');
+                Route::get('dashboard/monthly-chart', [KlnController::class, 'getMonthlyChart'])->name('monthly.chart');
+
         });
     });
 
@@ -236,38 +268,7 @@ Route::middleware(['auth', 'check.role:KLN'])
 */
 Route::middleware(['auth', 'check.role:KLN'])->prefix('kln')->name('kln.')->group(function () {
     
-    // ===== HALAMAN (return view) =====
-    Route::get('dashboard', [KlnController::class, 'index'])->name('dashboard');
-    Route::get('users', [KlnController::class, 'usersPage'])->name('users.page');
-    Route::get('dokumen', [KlnController::class, 'dokumenPage'])->name('dokumen.page');
-    
-    // ===== API INTERNAL (return JSON) =====
-    Route::prefix('api')->name('api.')->group(function () {
-        // Dashboard
-        Route::get('dashboard/stats', [KlnController::class, 'getDashboardStats'])->name('dashboard.stats');
-        //Announcement
-        Route::post('coba-announcement', [KlnController::class, 'storeAnnouncement'])->name('announcement.store');
-        // Users
-        Route::get('users', [KlnController::class, 'getUsers'])->name('users.index');
-        Route::post('users', [KlnController::class, 'storeUser'])->name('users.store');
-        Route::get('users/{id}', [KlnController::class, 'showUser'])->name('users.show');
-        Route::put('users/{id}', [KlnController::class, 'updateUser'])->name('users.update');
-        Route::delete('users/{id}', [KlnController::class, 'destroyUser'])->name('users.destroy');
-        Route::post('test-announcement', function() {
-            return response()->json([
-                'message' => 'Test route works',
-                'user' => auth()->user()
-            ]);
-        })->name('test.announcement');
-        // Dokumen
-        Route::get('dokumen', [KlnController::class, 'getDokumen'])->name('dokumen.index');
-        Route::patch('dokumen/{id}/status', [KlnController::class, 'updateDokumenStatus'])->name('dokumen.status');
-        
-        // Jadwal
-        Route::apiResource('jadwal', KlnController::class)->only(['index', 'store', 'update', 'destroy']);
-
-        
-    });
+   
 });
 
         Route::patch('users/status/{id}', [KlnController::class, 'updateStatusMahasiswa'])->name('users.status.update')->middleware(['auth','check.role:KLN']);
@@ -296,7 +297,7 @@ Route::get('test-role/{role}', function($role) {
         'required_role' => $role,
         'can_access' => true
     ]);
-})->middleware(['auth', 'check.role:adminJurusan']);
+})->middleware(['auth', 'check.role:KLN']);
 
 
 

@@ -13,6 +13,7 @@ use App\Services\NotificationService;
 use App\Services\AnnouncementService;
 use App\Services\HistoryDokumenService;
 use App\Services\ReqDokumenService;
+use App\Services\JadwalService;
 use App\Http\Requests\User\createUserRequest;
 use App\Http\Requests\User\updateUserRequest;
 use App\Http\Requests\dokumen\updateDokumenRequest;
@@ -40,6 +41,7 @@ class KlnController extends Controller
     protected $AnnouncementService;
     protected $HistoryDokumenService;
     protected $reqDokumenService;
+    protected $JadwalService;
     
 
     public function __construct(
@@ -50,6 +52,7 @@ class KlnController extends Controller
         AnnouncementService $AnnouncementService,
         HistoryDokumenService $HistoryDokumenService,
         ReqDokumenService $reqDokumenService,
+        JadwalService $JadwalService,
     ) {
         $this->dashboardService = $dashboardService;
         $this->UserService = $userService;
@@ -58,6 +61,7 @@ class KlnController extends Controller
         $this->AnnouncementService = $AnnouncementService;
         $this->HistoryDokumenService = $HistoryDokumenService;
         $this->reqDokumenService = $reqDokumenService;
+        $this->JadwalService = $JadwalService;
     }
 
     /**
@@ -383,7 +387,7 @@ class KlnController extends Controller
 
 
 //private function
-private function getStatusMessage($status)
+    private function getStatusMessage($status)
     {
         $messages = [
             'processing' => 'Request sedang diproses',
@@ -395,7 +399,128 @@ private function getStatusMessage($status)
         return $messages[$status] ?? 'Status berhasil diupdate';
     }
 
+    public function getDashboardStats()
+{
+    try {
+        // Ambil data dari services
+        $stats = [
+            'statistics' => [
+                'total_mahasiswa' => $this->UserService->countByRole('mahasiswa'),
+                'pending_docs' => $this->dokumenService->countPending(),
+                'critical_docs' => $this->dokumenService->countCritical(),
+                'validated_today' => $this->dokumenService->countValidatedToday(),
+                'total_negara' => $this->UserService->countCountries(),
+                'weekly_schedule' => $this->JadwalService->countThisWeek(),
+            ]
+        ];
+        
+        return $this->successResponse($stats, 'Dashboard stats retrieved');
+        
+    } catch (\Exception $e) {
+        Log::error('Error in getDashboardStats: ' . $e->getMessage());
+        return $this->errorResponse('Gagal ambil data statistik', 500, $e->getMessage());
+    }
+}
 
+public function getCriticalDocuments(Request $request)
+{
+    try {
+        $limit = $request->get('limit', 10);
+        $documents = $this->dokumenService->getCriticalDocuments($limit);
+        
+        return $this->successResponse($documents, 'Critical documents retrieved');
+        
+    } catch (\Exception $e) {
+        Log::error('Error in getCriticalDocuments: ' . $e->getMessage());
+        return $this->errorResponse('Gagal ambil data dokumen kritis', 500);
+    }
+}
+
+public function getValidationQueue(Request $request)
+{
+    try {
+        $limit = $request->get('limit', 10);
+        $queue = $this->dokumenService->getValidationQueue($limit);
+        
+        return $this->successResponse($queue, 'Validation queue retrieved');
+        
+    } catch (\Exception $e) {
+        Log::error('Error in getValidationQueue: ' . $e->getMessage());
+        return $this->errorResponse('Gagal ambil antrian validasi', 500);
+    }
+}
+
+public function getCountryDistribution(Request $request)
+{
+    try {
+        $limit = $request->get('limit', 7);
+        $distribution = $this->UserService->getCountryDistribution($limit);
+        
+        return $this->successResponse($distribution, 'Country distribution retrieved');
+        
+    } catch (\Exception $e) {
+        Log::error('Error in getCountryDistribution: ' . $e->getMessage());
+        return $this->errorResponse('Gagal ambil sebaran negara', 500);
+    }
+}
+
+public function getMahasiswaPreview(Request $request)
+{
+    try {
+        $limit = $request->get('limit', 10);
+        $preview = $this->dokumenService->getMahasiswaPreview($limit);
+        
+        return $this->successResponse($preview, 'Mahasiswa preview retrieved');
+        
+    } catch (\Exception $e) {
+        Log::error('Error in getMahasiswaPreview: ' . $e->getMessage());
+        return $this->errorResponse('Gagal ambil preview mahasiswa', 500);
+    }
+}
+
+public function getActivityLog(Request $request)
+{
+    try {
+        $limit = $request->get('limit', 10);
+        $logService = app(\App\Services\LogService::class);
+        $logs = $logService->getRecentActivities($limit);
+        
+        return $this->successResponse($logs, 'Activity log retrieved');
+        
+    } catch (\Exception $e) {
+        Log::error('Error in getActivityLog: ' . $e->getMessage());
+        return $this->errorResponse('Gagal ambil activity log', 500);
+    }
+}
+
+public function getMonthlyChart(Request $request)
+{
+    try {
+        $months = $request->get('months', 6);
+        
+        // Ambil data dari user service
+        $userChart = $this->UserService->getMonthlyStats($months);
+        
+        // Ambil data dari dokumen service
+        $docChart = $this->dokumenService->getMonthlyChartData($months);
+        
+        // Gabungkan data
+        $chartData = [];
+        foreach ($userChart as $index => $item) {
+            $chartData[] = [
+                'label' => $item['label'],
+                'a' => $item['a'],
+                'b' => $docChart[$index]['b'] ?? 0,
+            ];
+        }
+        
+        return $this->successResponse($chartData, 'Monthly chart data retrieved');
+        
+    } catch (\Exception $e) {
+        Log::error('Error in getMonthlyChart: ' . $e->getMessage());
+        return $this->errorResponse('Gagal ambil data chart', 500);
+    }
+}
 
 
     // ... method lainnya SAMA PERSIS dengan sebelumnya
