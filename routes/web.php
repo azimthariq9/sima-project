@@ -156,127 +156,209 @@ Route::middleware(['auth', 'check.role:KLN'])
 |--------------------------------------------------------------------------
 */
 
+// Route::middleware(['auth', 'check.role:JURUSAN'])
+//     ->prefix('jurusan')
+//     ->name('jurusan.')
+//     ->group(function () {
+
+//         /*
+//         |----------------------------------------------------------------------
+//         | DASHBOARD
+//         |----------------------------------------------------------------------
+//         */
+//         Route::get('dashboard', [JurusanController::class, 'index'])
+//             ->name('dashboard');
+//         Route::view('notifikasi', 'jurusan.notifikasi')->name('notifikasi');
+//         /*
+//         |----------------------------------------------------------------------
+//         | DOSEN
+//         | Page   : JurusanController (return view)
+//         | Data   : DosenController (return JSON)
+//         | Note   : store/update/destroy untuk data model Dosen
+//         |          Create User dosen tetap via UserController
+//         |----------------------------------------------------------------------
+//         */
+//         Route::prefix('dosen')->name('dosen.')->group(function () {
+//             // View page
+//             Route::get('/', [JurusanController::class, 'dosenPage'])->name('page');
+
+//             // AJAX data untuk table
+//             Route::get('data', [DosenController::class, 'getData'])->name('data');
+
+//             // CRUD
+//             Route::get('{id}', [DosenController::class, 'show'])->name('show');
+//             Route::post('/', [DosenController::class, 'store'])->name('store'); // ini sepertinya tidak dipakai
+//             Route::patch('{id}', [DosenController::class, 'update'])->name('update');
+//             Route::delete('{id}', [DosenController::class, 'destroy'])->name('destroy');
+//         });
+
+//         /*
+//         |----------------------------------------------------------------------
+//         | USER DOSEN (Create/manage akun User dengan role dosen)
+//         | Reuse UserController — hanya expose endpoint yang relevan
+//         | untuk admin jurusan (bukan seluruh user management seperti KLN)
+//         |----------------------------------------------------------------------
+//         */
+//         Route::prefix('users')->name('users.')->group(function () {
+//             Route::get('data', [UserController::class, 'getUsers'])->name('data');
+//             Route::get('{id}', [UserController::class, 'showUser'])->name('show');
+//             Route::post('/', [UserController::class, 'store'])->name('store');
+//             Route::patch('{user}', [UserController::class, 'update'])->name('update');
+//             Route::delete('{id}', [UserController::class, 'destroy'])->name('destroy');
+//         });
+
+//         /*
+//         |----------------------------------------------------------------------
+//         | MATAKULIAH
+//         |----------------------------------------------------------------------
+//         */
+//         Route::prefix('matakuliah')->name('matakuliah.')->group(function () {
+//             // View page
+//             Route::get('/', [JurusanController::class, 'matakuliahPage'])->name('page');
+
+//             // AJAX data untuk table
+//             Route::get('data', [MatakuliahController::class, 'getData'])->name('data');
+
+//             // CRUD
+//             Route::get('{id}', [MatakuliahController::class, 'show'])->name('show');
+//             Route::post('/', [MatakuliahController::class, 'store'])->name('store');
+//             Route::patch('{id}', [MatakuliahController::class, 'update'])->name('update');
+//             Route::delete('{id}', [MatakuliahController::class, 'destroy'])->name('destroy');
+//         });
+
+//         /*
+//         |----------------------------------------------------------------------
+//         | KELAS
+//         |----------------------------------------------------------------------
+//         */
+//         Route::prefix('kelas')->name('kelas.')->group(function () {
+//             // View page
+//             Route::get('/', [JurusanController::class, 'kelasPage'])->name('page');
+
+//             // AJAX data untuk table
+//             Route::get('data', [KelasController::class, 'getData'])->name('data');
+
+//             // CRUD
+//             Route::get('{id}', [KelasController::class, 'show'])->name('show');
+//             Route::post('/', [KelasController::class, 'store'])->name('store');
+//             Route::patch('{id}', [KelasController::class, 'update'])->name('update');
+//             Route::delete('{id}', [KelasController::class, 'destroy'])->name('destroy');
+
+//             /*
+//             |------------------------------------------------------------------
+//             | MAHASISWA KELAS (nested di bawah kelas)
+//             | GET  kelas/{id}/mahasiswa  → lihat semua mahasiswa di kelas
+//             | POST kelas/{id}/mahasiswa  → tambah mahasiswa ke kelas
+//             | DELETE kelas/{id}/mahasiswa/{mahasiswaId} → hapus dari kelas
+//             |------------------------------------------------------------------
+//             */
+//             Route::prefix('{kelasId}/mahasiswa')->name('mahasiswa.')->group(function () {
+//                 Route::get('/', [MahasiswaKelasController::class, 'getMahasiswa'])->name('get');
+//                 Route::post('/', [MahasiswaKelasController::class, 'addMahasiswa'])->name('add');
+//                 Route::delete('{mahasiswaId}', [MahasiswaKelasController::class, 'removeMahasiswa'])->name('remove');
+//             });
+//         });
+
+//         /*
+//         |----------------------------------------------------------------------
+//         | JADWAL
+//         |----------------------------------------------------------------------
+//         */
+//         Route::prefix('jadwal')->name('jadwal.')->group(function () {
+//             // View page
+//             Route::get('/', [JurusanController::class, 'jadwalPage'])->name('page');
+
+//             // AJAX data untuk table
+//             Route::get('data', [JadwalController::class, 'getData'])->name('data');
+
+//             // CRUD
+//             Route::get('{id}', [JadwalController::class, 'show'])->name('show');
+//             Route::post('/', [JadwalController::class, 'store'])->name('store');
+//             Route::patch('{id}', [JadwalController::class, 'update'])->name('update');
+//             Route::delete('{id}', [JadwalController::class, 'destroy'])->name('destroy');
+//         });
+
+//     });
 Route::middleware(['auth', 'check.role:JURUSAN'])
     ->prefix('jurusan')
     ->name('jurusan.')
     ->group(function () {
-
-        /*
-        |----------------------------------------------------------------------
-        | DASHBOARD
-        |----------------------------------------------------------------------
-        */
-        Route::get('dashboard', [JurusanController::class, 'index'])
-            ->name('dashboard');
-        /*
-        |----------------------------------------------------------------------
-        | DOSEN
-        | Page   : JurusanController (return view)
-        | Data   : DosenController (return JSON)
-        | Note   : store/update/destroy untuk data model Dosen
-        |          Create User dosen tetap via UserController
-        |----------------------------------------------------------------------
-        */
+ 
+        Route::get('dashboard', [JurusanController::class, 'index'])->name('dashboard');
+ 
+        /* ---- DOSEN ---- */
         Route::prefix('dosen')->name('dosen.')->group(function () {
-            // View page
-            Route::get('/', [JurusanController::class, 'dosenPage'])->name('page');
-
-            // AJAX data untuk table
-            Route::get('data', [DosenController::class, 'getData'])->name('data');
-
-            // CRUD
-            Route::get('{id}', [DosenController::class, 'show'])->name('show');
-            Route::post('/', [DosenController::class, 'store'])->name('store'); // ini sepertinya tidak dipakai
+            Route::get('/',      [JurusanController::class, 'dosenPage'])->name('page');
+            Route::get('data',   [DosenController::class, 'getData'])->name('data');
+            Route::get('{id}',   [DosenController::class, 'show'])->name('show');
+            Route::post('/',     [DosenController::class, 'store'])->name('store');
             Route::patch('{id}', [DosenController::class, 'update'])->name('update');
-            Route::delete('{id}', [DosenController::class, 'destroy'])->name('destroy');
+            Route::delete('{id}',[DosenController::class, 'destroy'])->name('destroy');
         });
-
-        /*
-        |----------------------------------------------------------------------
-        | USER DOSEN (Create/manage akun User dengan role dosen)
-        | Reuse UserController — hanya expose endpoint yang relevan
-        | untuk admin jurusan (bukan seluruh user management seperti KLN)
-        |----------------------------------------------------------------------
-        */
+ 
+        /* ---- USER DOSEN (buat akun user role dosen) ---- */
         Route::prefix('users')->name('users.')->group(function () {
-            Route::get('data', [UserController::class, 'getUsers'])->name('data');
-            Route::get('{id}', [UserController::class, 'showUser'])->name('show');
-            Route::post('/', [UserController::class, 'store'])->name('store');
-            Route::patch('{user}', [UserController::class, 'update'])->name('update');
+            Route::get('data',    [UserController::class, 'getUsers'])->name('data');
+            Route::get('{id}',    [UserController::class, 'showUser'])->name('show');
+            Route::post('/',      [UserController::class, 'store'])->name('store');
+            Route::patch('{user}',[UserController::class, 'update'])->name('update');
             Route::delete('{id}', [UserController::class, 'destroy'])->name('destroy');
         });
-
-        /*
-        |----------------------------------------------------------------------
-        | MATAKULIAH
-        |----------------------------------------------------------------------
-        */
-        Route::prefix('matakuliah')->name('matakuliah.')->group(function () {
-            // View page
-            Route::get('/', [JurusanController::class, 'matakuliahPage'])->name('page');
-
-            // AJAX data untuk table
-            Route::get('data', [MatakuliahController::class, 'getData'])->name('data');
-
-            // CRUD
-            Route::get('{id}', [MatakuliahController::class, 'show'])->name('show');
-            Route::post('/', [MatakuliahController::class, 'store'])->name('store');
-            Route::patch('{id}', [MatakuliahController::class, 'update'])->name('update');
-            Route::delete('{id}', [MatakuliahController::class, 'destroy'])->name('destroy');
-        });
-
-        /*
-        |----------------------------------------------------------------------
-        | KELAS
-        |----------------------------------------------------------------------
-        */
-        Route::prefix('kelas')->name('kelas.')->group(function () {
-            // View page
-            Route::get('/', [JurusanController::class, 'kelasPage'])->name('page');
-
-            // AJAX data untuk table
-            Route::get('data', [KelasController::class, 'getData'])->name('data');
-
-            // CRUD
-            Route::get('{id}', [KelasController::class, 'show'])->name('show');
-            Route::post('/', [KelasController::class, 'store'])->name('store');
-            Route::patch('{id}', [KelasController::class, 'update'])->name('update');
-            Route::delete('{id}', [KelasController::class, 'destroy'])->name('destroy');
-
+ 
+        /* ---- MAHASISWA (view data mahasiswa jurusan) ---- */
+        Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+            Route::get('/',      [JurusanController::class, 'mahasiswaPage'])->name('page');
+ 
             /*
-            |------------------------------------------------------------------
-            | MAHASISWA KELAS (nested di bawah kelas)
-            | GET  kelas/{id}/mahasiswa  → lihat semua mahasiswa di kelas
-            | POST kelas/{id}/mahasiswa  → tambah mahasiswa ke kelas
-            | DELETE kelas/{id}/mahasiswa/{mahasiswaId} → hapus dari kelas
-            |------------------------------------------------------------------
-            */
+             * getData mahasiswa — opsi A: pakai UserController dengan filter role=mahasiswa
+             * opsi B: buat MahasiswaController sendiri dengan scope jurusan
+             * Sementara pakai UserController dengan query param role=mahasiswa
+             */
+            Route::get('data',   [UserController::class, 'getUsers'])->name('data');
+            Route::get('{id}',   [UserController::class, 'showUser'])->name('show');
+        });
+ 
+        /* ---- MATAKULIAH ---- */
+        Route::prefix('matakuliah')->name('matakuliah.')->group(function () {
+            Route::get('/',      [JurusanController::class, 'matakuliahPage'])->name('page');
+            Route::get('data',   [MatakuliahController::class, 'getData'])->name('data');
+            Route::get('{id}',   [MatakuliahController::class, 'show'])->name('show');
+            Route::post('/',     [MatakuliahController::class, 'store'])->name('store');
+            Route::patch('{id}', [MatakuliahController::class, 'update'])->name('update');
+            Route::delete('{id}',[MatakuliahController::class, 'destroy'])->name('destroy');
+        });
+ 
+        /* ---- KELAS ---- */
+        Route::prefix('kelas')->name('kelas.')->group(function () {
+            Route::get('/',      [JurusanController::class, 'kelasPage'])->name('page');
+            Route::get('data',   [KelasController::class, 'getData'])->name('data');
+            Route::get('{id}',   [KelasController::class, 'show'])->name('show');
+            Route::post('/',     [KelasController::class, 'store'])->name('store');
+            Route::patch('{id}', [KelasController::class, 'update'])->name('update');
+            Route::delete('{id}',[KelasController::class, 'destroy'])->name('destroy');
+ 
+            /* Mahasiswa dalam kelas (nested) */
             Route::prefix('{kelasId}/mahasiswa')->name('mahasiswa.')->group(function () {
-                Route::get('/', [MahasiswaKelasController::class, 'getMahasiswa'])->name('get');
-                Route::post('/', [MahasiswaKelasController::class, 'addMahasiswa'])->name('add');
-                Route::delete('{mahasiswaId}', [MahasiswaKelasController::class, 'removeMahasiswa'])->name('remove');
+                Route::get('/',                   [MahasiswaKelasController::class, 'getMahasiswa'])->name('get');
+                Route::post('/',                  [MahasiswaKelasController::class, 'addMahasiswa'])->name('add');
+                Route::delete('{mahasiswaId}',    [MahasiswaKelasController::class, 'removeMahasiswa'])->name('remove');
             });
         });
-
-        /*
-        |----------------------------------------------------------------------
-        | JADWAL
-        |----------------------------------------------------------------------
-        */
+ 
+        /* ---- JADWAL ---- */
         Route::prefix('jadwal')->name('jadwal.')->group(function () {
-            // View page
-            Route::get('/', [JurusanController::class, 'jadwalPage'])->name('page');
-
-            // AJAX data untuk table
-            Route::get('data', [JadwalController::class, 'getData'])->name('data');
-
-            // CRUD
-            Route::get('{id}', [JadwalController::class, 'show'])->name('show');
-            Route::post('/', [JadwalController::class, 'store'])->name('store');
+            Route::get('/',      [JurusanController::class, 'jadwalPage'])->name('page');
+            Route::get('data',   [JadwalController::class, 'getData'])->name('data');
+            Route::get('{id}',   [JadwalController::class, 'show'])->name('show');
+            Route::post('/',     [JadwalController::class, 'store'])->name('store');
             Route::patch('{id}', [JadwalController::class, 'update'])->name('update');
-            Route::delete('{id}', [JadwalController::class, 'destroy'])->name('destroy');
+            Route::delete('{id}',[JadwalController::class, 'destroy'])->name('destroy');
         });
-
+ 
+        /* ---- MISC ---- */
+        Route::view('notifikasi', 'jurusan.notifikasi')->name('notifikasi');
+        Route::view('profil',     'jurusan.profil')->name('profil');
+ 
     });
 
 /*
