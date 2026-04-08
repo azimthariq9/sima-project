@@ -25,8 +25,8 @@ class updateDosenRequest extends FormRequest
     {
         return [
             'nama' => ['sometimes', 'required', 'string', 'max:255'],
-            'nidn' => ['sometimes', 'required', 'string', 'max:255', 'unique:dosen,nidn', Rule::unique(Dosen::class)->ignore($this->route('dosen')->id)],
-            'kodeDos'=> ['sometimes', 'required', 'string', 'max:255', 'unique:dosen,kodeDos', Rule::unique(Dosen::class)->ignore($this->route('dosen')->id)],
+            'nidn' => ['sometimes', 'required', 'string', 'max:255', 'unique:dosen,nidn', Rule::unique(Dosen::class)->ignore($this->route('dosen')?->id)],
+            'kodeDos'=> ['sometimes', 'required', 'string', 'max:255', 'unique:dosen,kodeDos', Rule::unique(Dosen::class)->ignore($this->route('dosen')?->id)],
             'users_id' => ['sometimes', 'required', 'exists:users,id'],
         ];
     }

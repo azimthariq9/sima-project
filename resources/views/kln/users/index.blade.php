@@ -64,6 +64,9 @@
                             <th style="padding:16px 24px; text-align:left; cursor: pointer;" onclick="sortBy('email')">
                                 EMAIL <i class="fa-solid fa-sort"></i>
                             </th>
+                            <th style="padding:16px 24px; text-align:left; cursor: pointer;">
+                                JURUSAN <i class="fa-solid fa-sort"></i>
+                            </th>
                             <th style="padding:16px 24px; text-align:left; cursor: pointer;" onclick="sortBy('status')">
                                 STATUS <i class="fa-solid fa-sort"></i>
                             </th>
@@ -202,6 +205,7 @@
                     <option value="">Select Role</option>
                     <option value="bipa">BIPA</option>
                     <option value="kln">KLN</option>
+                    <option value="jurusan">Jurusan</option>
                     <option value="mahasiswa">Mahasiswa</option>
                     <option value="dosen">Dosen</option>
                 </select>
@@ -310,6 +314,11 @@ document.addEventListener('DOMContentLoaded', function () {
     /* =========================
        USERS TABLE
     ==========================*/
+    const jurusanMap = {
+        @foreach($jurusan as $j)
+            {{ $j->id }}: "{{ $j->namaJurusan }}",
+        @endforeach
+    };
 
     function renderEmpty(message = 'No users found') {
         tbody.innerHTML = `
@@ -331,7 +340,11 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+
         users.forEach(user => {
+            const namaJurusan = user.jurusan_id
+            ? (jurusanMap[user.jurusan_id] ?? '-')
+            : '-';
 
             tbody.innerHTML += `
                 <tr style="border-bottom:1px solid #334155;">
@@ -346,7 +359,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td style="padding:18px 24px;">
                         ${user.email ?? '-'}
                     </td>
-
+                     <td style="padding:18px 24px;">
+                        ${namaJurusan ?? '-'}
+                    </td>
                     <td style="padding:18px 24px;">
                         <span style="
                             background:${user.status === 'active' ? 'rgba(34,197,94,0.15)' : 'rgba(234,179,8,0.15)'};

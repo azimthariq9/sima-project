@@ -15,7 +15,7 @@ class createUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check() && (auth()->user()->role === Role::KLN || auth()->user()->role === Role::adminJurusan);
+        return auth()->check() && (auth()->user()->role === Role::KLN || auth()->user()->role === Role::JURUSAN);
     }
 
     /**

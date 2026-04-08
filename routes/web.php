@@ -11,7 +11,7 @@ use App\Http\Controllers\API\KlnController;
 use App\Http\Controllers\API\DokumenController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\MahasiswaController;
-use App\Http\Controllers\DosenController;
+use App\Http\Controllers\API\DosenController;
 use App\Http\Controllers\API\JurusanController;
 use App\Http\Controllers\API\MatakuliahController;
 use App\Http\Controllers\API\KelasController;
@@ -76,7 +76,7 @@ Route::middleware(['auth', 'check.role:KLN'])
         Route::get('dashboard', [KlnController::class, 'index'])->name('dashboard');
         Route::view('monitoring', 'kln.monitoring')->name('monitoring');
         Route::view('validasi', 'kln.validasi')->name('validasi');
-        // Route::view('schedule', 'kln.schedule')->name('schedule');
+        Route::view('schedule', 'kln.schedule')->name('schedule');
         Route::view('analytics', 'kln.analytics')->name('analytics');
         Route::view('announcement', 'kln.announcement')->name('announcement');
         Route::view('notifikasi', 'kln.notifikasi')->name('notifikasi');
@@ -168,7 +168,6 @@ Route::middleware(['auth', 'check.role:JURUSAN'])
         */
         Route::get('dashboard', [JurusanController::class, 'index'])
             ->name('dashboard');
-
         /*
         |----------------------------------------------------------------------
         | DOSEN
@@ -187,7 +186,7 @@ Route::middleware(['auth', 'check.role:JURUSAN'])
 
             // CRUD
             Route::get('{id}', [DosenController::class, 'show'])->name('show');
-            Route::post('/', [DosenController::class, 'store'])->name('store');
+            Route::post('/', [DosenController::class, 'store'])->name('store'); // ini sepertinya tidak dipakai
             Route::patch('{id}', [DosenController::class, 'update'])->name('update');
             Route::delete('{id}', [DosenController::class, 'destroy'])->name('destroy');
         });
@@ -279,12 +278,6 @@ Route::middleware(['auth', 'check.role:JURUSAN'])
         });
 
     });
-
-/*
-|--------------------------------------------------------------------------
-| MAHASISWA ROUTES
-|--------------------------------------------------------------------------
-*/
 
 /*
 |--------------------------------------------------------------------------
