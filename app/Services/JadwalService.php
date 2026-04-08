@@ -113,4 +113,37 @@ class JadwalService extends BaseService
             throw $e;
         }
     }
+        /**
+     * Count schedules for this week
+     */
+    public function countThisWeek(): int
+    {
+        return Jadwal::whereBetween('hari', [
+                now()->startOfWeek(),
+                now()->endOfWeek()
+            ])
+            ->count();
+    }
+
+    /**
+     * Get upcoming schedules
+     */
+    public function getUpcoming(int $limit = 5): array
+    {
+        return Jadwal::with(['matakuliah', 'dosen'])
+            ->where('tanggal', '>=', now())
+            ->orderBy('tanggal')
+            ->limit($limit)
+            ->get()
+            ->map(function($jadwal) {
+                return [
+                    'id' => $jadwal->id,
+                    'matakuliah' => $jadwal->matakuliah->nama ?? '-',
+                    'dosen' => $jadwal->dosen->name ?? '-',
+                    'tanggal' => $jadwal->tanggal->format('d/m/Y'),
+                    'jam' => $jadwal->jam_mulai . ' - ' . $jadwal->jam_selesai,
+                    'ruang' => $jadwal->ruang ?? '-',
+                ];
+            })->toArray();
+    }
 }

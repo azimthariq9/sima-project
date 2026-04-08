@@ -379,7 +379,7 @@ Route::get('test-role/{role}', function($role) {
         'required_role' => $role,
         'can_access' => true
     ]);
-})->middleware(['auth', 'check.role:adminJurusan']);
+})->middleware(['auth', 'check.role:KLN']);
 
 
 

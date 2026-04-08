@@ -49,7 +49,7 @@ class UserService extends BaseService
             $query->where(function ($q) use ($filters) {
                 $q->where('name', 'like', "%{$filters['search']}%")
                   ->orWhere('email', 'like', "%{$filters['search']}%")
-                  ->orWhere('nim_nip', 'like', "%{$filters['search']}%");
+                  ->orWhere('npm', 'like', "%{$filters['search']}%");
             });
         }
         
@@ -294,5 +294,139 @@ class UserService extends BaseService
             })
             ->latest()
             ->paginate($filters['per_page'] ?? 15);
+    }
+
+    public function countByRole(string $role): int
+    {
+        return User::where('role', $role)->count();
+    }
+    /**
+     * Count total countries from mahasiswa
+     */
+    public function countCountries(): int
+    {
+        return Mahasiswa::whereNotNull('warNeg')
+            ->distinct('warNeg')
+            ->count('warNeg');
+    }
+
+    /**
+     * Get country distribution for chart
+     */
+    public function getCountryDistribution(int $limit = 7): array
+    {
+        $countries = Mahasiswa::select('warNeg')
+            ->selectRaw('count(*) as total')
+            ->whereNotNull('warNeg')
+            ->groupBy('warNeg')
+            ->orderByDesc('total')
+            ->limit($limit)
+            ->get();
+        
+        $total = $countries->sum('total');
+        $colors = ['#2563EB', '#0D9488', '#7C3AED', '#D97706', '#DC2626', '#059669', '#94A3B8'];
+        
+        return $countries->map(function($item, $index) use ($total, $colors) {
+            return [
+                'flag' => $this->getFlagEmoji($item->warNeg),
+                'name' => $item->warNeg,
+                'count' => $item->total,
+                'pct' => round(($item->total / $total) * 100),
+                'color' => $colors[$index] ?? $colors[array_rand($colors)]
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Get monthly statistics for chart
+     */
+    public function getMonthlyStats(int $months = 6): array
+    {
+        $data = [];
+        
+        for ($i = $months - 1; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $startOfMonth = $month->copy()->startOfMonth();
+            $endOfMonth = $month->copy()->endOfMonth();
+            
+            $data[] = [
+                'label' => $month->format('M'),
+                'a' => User::whereMonth('created_at', $month->month)
+                    ->whereYear('created_at', $month->year)
+                    ->count(),
+                'b' => 0, // akan diisi dari dokumen service
+            ];
+        }
+        
+        return $data;
+    }
+
+    /**
+     * Get flag emoji helper
+     */
+    private function getFlagEmoji(?string $negara): string
+    {
+        $flags = [
+            'Uzbekistan' => '🇺🇿',
+            'Vietnam' => '🇻🇳',
+            'Korea Selatan' => '🇰🇷',
+            'Tajikistan' => '🇹🇯',
+            'Senegal' => '🇸🇳',
+            'Malaysia' => '🇲🇾',
+            'Jepang' => '🇯🇵',
+            'China' => '🇨🇳',
+            'Indonesia' => '🇮🇩',
+            'Thailand' => '🇹🇭',
+            'Filipina' => '🇵🇭',
+            'Kamboja' => '🇰🇭',
+            'Laos' => '🇱🇦',
+            'Myanmar' => '🇲🇲',
+            'Timor Leste' => '🇹🇱',
+            'Brunei' => '🇧🇳',
+            'Singapura' => '🇸🇬',
+            'India' => '🇮🇳',
+            'Pakistan' => '🇵🇰',
+            'Afghanistan' => '🇦🇫',
+            'Iran' => '🇮🇷',
+            'Irak' => '🇮🇶',
+            'Arab Saudi' => '🇸🇦',
+            'Yaman' => '🇾🇪',
+            'Suriah' => '🇸🇾',
+            'Yordania' => '🇯🇴',
+            'Palestina' => '🇵🇸',
+            'Mesir' => '🇪🇬',
+            'Libya' => '🇱🇾',
+            'Aljazair' => '🇩🇿',
+            'Maroko' => '🇲🇦',
+            'Tunisia' => '🇹🇳',
+            'Sudan' => '🇸🇩',
+            'Somalia' => '🇸🇴',
+            'Nigeria' => '🇳🇬',
+            'Kenya' => '🇰🇪',
+            'Tanzania' => '🇹🇿',
+            'Afrika Selatan' => '🇿🇦',
+            'Inggris' => '🇬🇧',
+            'Amerika Serikat' => '🇺🇸',
+            'Kanada' => '🇨🇦',
+            'Australia' => '🇦🇺',
+            'Selandia Baru' => '🇳🇿',
+            'Belanda' => '🇳🇱',
+            'Prancis' => '🇫🇷',
+            'Jerman' => '🇩🇪',
+            'Italia' => '🇮🇹',
+            'Spanyol' => '🇪🇸',
+            'Portugal' => '🇵🇹',
+            'Rusia' => '🇷🇺',
+            'Ukraina' => '🇺🇦',
+            'Polandia' => '🇵🇱',
+            'Republik Ceko' => '🇨🇿',
+            'Hongaria' => '🇭🇺',
+            'Rumania' => '🇷🇴',
+            'Bulgaria' => '🇧🇬',
+            'Yunani' => '🇬🇷',
+            'Turki' => '🇹🇷',
+        ];
+        
+        return $flags[$negara] ?? '🌍';
     }
 }
