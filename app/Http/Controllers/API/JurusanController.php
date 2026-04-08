@@ -67,7 +67,18 @@ class JurusanController extends Controller
     public function jadwalPage()
     {
         return view('jurusan.jadwal.index');
+    }    
+    /*
+    |--------------------------------------------------------------------------
+    | MAHASISWA PAGE
+    |--------------------------------------------------------------------------
+    */
+    public function mahasiswaPage()
+    {
+        return view('jurusan.mahasiswa.index');
     }
+
+
 
     /*
     |==========================================================================
