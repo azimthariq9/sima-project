@@ -1,527 +1,139 @@
 <?php
+
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Announcement\createAnnouncementRequest;
-use App\Http\Requests\Announcement\updateAnnouncementRequest;
-use App\Http\Requests\Dokumen\createDokumenRequest;
-use App\Traits\ApiResponseTrait;
-use App\Services\DashboardService;
-use App\Services\UserService;
-use App\Services\DokumenService;
-use App\Services\NotificationService;
-use App\Services\AnnouncementService;
-use App\Services\HistoryDokumenService;
-use App\Services\ReqDokumenService;
-use App\Services\JadwalService;
-use App\Http\Requests\User\createUserRequest;
-use App\Http\Requests\User\updateUserRequest;
-use App\Http\Requests\dokumen\updateDokumenRequest;
-use App\Http\Requests\HistoryDok\createHistoryDokRequest;
-use App\Http\Requests\Jadwal\createJadwalRequest;
-use App\Http\Requests\Jadwal\updateJadwalRequest;
-use App\Http\Requests\ReqDokumen\createReqDokumenRequest;
-use App\Http\Requests\ReqDokumen\updateReqDokumenRequest;
-use App\Http\Requests\updateStatusRequest;
-
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use App\Enums\Status;
+use App\Models\ReqDokumen;
+use App\Models\FileDetail;
+use App\Models\User;
+use App\Models\jurusan;
 use Illuminate\Http\Request;
-use PhpParser\Node\Stmt\TryCatch;
 
 class KlnController extends Controller
 {
-    use ApiResponseTrait; // ← TETAP DIPAKAI
 
-    protected $dashboardService;
-    protected $UserService;
-    protected $dokumenService;
-    protected $NotificationService;
-    protected $AnnouncementService;
-    protected $HistoryDokumenService;
-    protected $reqDokumenService;
-    protected $JadwalService;
-    
+    /*
+    |--------------------------------------------------------------------------
+    | DASHBOARD
+    |--------------------------------------------------------------------------
+    */
 
-    public function __construct(
-        DashboardService $dashboardService,
-        UserService $userService,
-        DokumenService $dokumenService,
-        NotificationService $NotificationService,
-        AnnouncementService $AnnouncementService,
-        HistoryDokumenService $HistoryDokumenService,
-        ReqDokumenService $reqDokumenService,
-        JadwalService $JadwalService,
-    ) {
-        $this->dashboardService = $dashboardService;
-        $this->UserService = $userService;
-        $this->dokumenService = $dokumenService;
-        $this->NotificationService = $NotificationService;
-        $this->AnnouncementService = $AnnouncementService;
-        $this->HistoryDokumenService = $HistoryDokumenService;
-        $this->reqDokumenService = $reqDokumenService;
-        $this->JadwalService = $JadwalService;
-    }
-
-    /**
-     * ========== HALAMAN (return VIEW) ==========
-     */
     public function index()
-    {
+    {   
+        
         return view('kln.dashboard');
+       
     }
 
-    public function usersPage()
+
+    /*
+    |--------------------------------------------------------------------------
+    | DOKUMEN LIST
+    |--------------------------------------------------------------------------
+    */
+
+    public function dokumen()
     {
-        return view('kln.users.index');
+        $requests = ReqDokumen::with('mahasiswa')
+            ->latest()
+            ->get();
+
+        return view('kln.dokumen', compact('requests'));
     }
 
-    public function dokumenPage()
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SHOW DETAIL (AJAX)
+    |--------------------------------------------------------------------------
+    */
+    public function show($id)
     {
-        return view('kln.dokumen.index');
-    }
+    $req = ReqDokumen::with('mahasiswa')
+        ->findOrFail($id);
 
-    public function announcementPage()
-    {
-        return view('kln.announcements.index');
-    }
-
-    public function jadwalPage()
-    {
-        return view('kln.jadwal.index');
-    }
-
-    public function monitoringPage()
-    {
-        return view('kln.monitoring.index');
-    }
-
-    /**
-     * ========== API ENDPOINTS (return JSON) ==========
-     * METHOD INI SAMA PERSIS DENGAN YANG SEBELUMNYA
-     */
-    // public function getDashboardStats()
-    // {
-    //     try {
-    //         $data = [
-    //             'statistics' => [
-    //                 'total_mahasiswa' => $this->UserService->countByRole('mahasiswa'),
-    //                 'pending_docs' => $this->dokumenService->countPending(),
-    //                 'critical_docs' => $this->dokumenService->countCritical(),
-    //                 'validated_today' => $this->dokumenService->countValidatedToday(),
-    //             ],
-    //             'critical_documents' => $this->dokumenService->getCriticalDocuments(5),
-    //             'validation_queue' => $this->dokumenService->getValidationQueue(6),
-    //             'negara_distribution' => $this->UserService->getCountryDistribution(),
-    //             'monthly_chart' => $this->UserService->getMonthlyStats(),
-    //         ];
-    //         return $this->successResponse($data, 'Dashboard stats retrieved');
-            
-    //     } catch (\Exception $e) {
-    //         return $this->errorResponse('Gagal ambil data', 500, $e->getMessage());
-    //     }
-    // }
-
-    public function getUsers(Request $request)
-    {
-        try {
-            $filters = $request->only(['role', 'email', 'status_profile']);
-            $users = $this->UserService->getAll($filters, $request->get('per_page', 15));
-            
-            return $this->paginatedResponse($users, 'Users retrieved');
-            
-        } catch (\Exception $e) {
-            return $this->errorResponse('Gagal ambil users', 500, $e->getMessage());
-        }
-    }
-
-    public function storeUser(createUserRequest $request)
-    {
-        try {
-            $maker = $request->user();
-            $user = $this->UserService->create($maker,$request->validated());
-            return $this->successResponse($user, 'User created', 201);
-        } catch (\Exception $e) {
-            return $this->errorResponse('Gagal create user'. $maker->email, 500, $e->getMessage());
-        }
-    }
-
-    public function updateStatusMahasiswa($id, updateStatusRequest $request)
-    {
-        try {
-            $maker = $request->user();
-            $mahasiswa = $this->UserService->updateProfileStatus(
-                $maker, 
-                $id,
-                $request->status,
-                $request->notification_id
-            );
-
-            return $this->successResponse($mahasiswa, 'Status updated');
-        } catch (\Exception $e) {
-            return $this->errorResponse('Gagal update status', 500, $e->getMessage());
-        }
-    }
-
-    public function showUser($id)
-    {
-        try {
-            $user = $this->UserService->findOrFail($id);
-            return $this->successResponse($user, 'User details retrieved');
-        } catch (\Exception $e) {
-            return $this->errorResponse('Gagal ambil user', 404, $e->getMessage());
-        }
-    }
-
-//Dokumen
-
-
-    public function updateDokumenStatus(updateDokumenRequest $request, $id)
-    {
-        try {
-            $dokumen = $this->dokumenService->updateStatus(
-                $id, 
-                $request->status, 
-                $request->catatan_revisi
-            );
-            return $this->successResponse($dokumen, 'Status updated');
-        } catch (\Exception $e) {
-            return $this->errorResponse('Gagal update status', 500, $e->getMessage());
-        }
-    }
-
-    public function verifyDokumen(createHistoryDokRequest $request, $id)
-    {
-        try {
-            $admin = auth()->user();
-            
-            $dokumen = $this->dokumenService->verifyDokumen(
-                $id,
-                $admin,
-                $request->action,
-                $request->message
-            );
-            
-            return $this->successResponse([
-                'id' => $dokumen->id,
-                'status' => $dokumen->status,
-                'history' => $dokumen->histories
-            ], "Dokumen berhasil di{$request->action}");
-            
-        } catch (\Exception $e) {
-            return $this->errorResponse('Gagal verifikasi dokumen', 500, $e->getMessage());
-        }
-    }
-
-    // Untuk lihat history dokumen
-    public function getHistory($id)
-    {
-        try {
-            $history = $this->HistoryDokumenService->getHistoryForDokumen($id);
-            return $this->paginatedResponse($history, 'History retrieved');
-        } catch (\Exception $e) {
-            return $this->errorResponse('Gagal ambil history', 500);
-        }
-    }
-
-// request Dokumen
-    public function indexReqDocument(Request $request)
-    {
-        try {
-            $filters = $request->only(['status', 'tipeDkmn', 'search', 'per_page']);
-            $requests = $this->reqDokumenService->getForAdmin($filters);
-            
-            return $this->paginatedResponse($requests, 'Requests retrieved successfully');
-            
-        } catch (\Exception $e) {
-            Log::error('Error in getRequests: ' . $e->getMessage());
-            return $this->errorResponse('Gagal mengambil data', 500, $e->getMessage());
-        }
-    }
-
-     /**
-     * Get detail request
-     */
-    public function showReqDocument($id)
-    {
-        try {
-            $request = $this->reqDokumenService->findOrFail($id);
-            $request->load(['mahasiswa', 'user', 'fileDetail']);
-            
-            return $this->successResponse($request, 'Request detail retrieved');
-            
-        } catch (\Exception $e) {
-            return $this->errorResponse('Request tidak ditemukan', 404);
-        }
-    }
-
-    public function updateReqDokumen(updateReqDokumenRequest $request, $id)
-    {
-        try {
-            $admin = Auth::user();
-            
-            $reqDokumen = $this->reqDokumenService->updateStatus(
-                $id,
-                $request->validated(),
-                $admin
-            );
-            
-            $message = $this->getStatusMessage($request->status);
-            
-            return $this->successResponse([
-                'id' => $reqDokumen->id,
-                'status' => $reqDokumen->status,
-                'catatan' => $reqDokumen->catatan,
-            ], $message);
-            
-        } catch (\Exception $e) {
-            Log::error('Error updating request status: ' . $e->getMessage());
-            return $this->errorResponse('Gagal update status', 500, $e->getMessage());
-        }
-    }
-
-    /**
-     * Upload dokumen untuk request (complete request)
-     */
-        /**
-         * Upload dokumen untuk request (complete request)
-         */
-        public function uploadReqDokumen(Request $request, $id)
-    {
-        try {
-            $admin = Auth::user();
-            
-            // Validasi manual karena ini upload file
-            $request->validate([
-                'file' => 'required|file|mimes:pdf|max:2048',
-                'notification_id' => 'nullable|exists:notification,id',
-                'tipeDkmn' => 'required|string|max:50'
-            ]);
-            
-            // Upload file dan complete request
-            $reqDokumen = $this->reqDokumenService->completeRequestWithFile(
-                $id,
-                $request->file('file'),
-                [], // data tambahan jika perlu
-                $admin
-            );
-            
-            // Kirim notifikasi ke mahasiswa
-            if ($request->notification_id) {
-                $this->NotificationService->sendToUsers(
-                    $request->notification_id,
-                    [$reqDokumen->user_id]
-                );
-            }
-            
-            return $this->successResponse([
-                'request' => [
-                    'id' => $reqDokumen->id,
-                    'tipeDkmn' => $reqDokumen->tipeDkmn,
-                    'namaDkmn' => $reqDokumen->namaDkmn,
-                    'status' => $reqDokumen->status,
-                    'file' => $reqDokumen->fileDetail->first(),
-                ]
-            ], 'Request dokumen berhasil diselesaikan', 201);
-            
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->errorResponse('Validasi gagal', 422, $e->errors());
-        } catch (\Exception $e) {
-            Log::error('Error uploading dokumen for request: ' . $e->getMessage());
-            return $this->errorResponse('Gagal upload dokumen: ' . $e->getMessage(), 500);
-        }
-    }
-
-// announcement
-
-    public function storeAnnouncement(createAnnouncementRequest $request)
-    {
-        try{
-            $maker = $request->user();
-            $announcement = $this->AnnouncementService->create(
-                $maker,
-                $request->validated()
-            );
-            return $this->successResponse($announcement, 'Announcement Created');
-        } catch (\Exception $e){
-            return $this->errorResponse('Gagal membuat announcement', 500, $e->getMessage());
-        }
-    }
-
-    public function updateAnnouncement(updateAnnouncementRequest $request, $id)
-    {
-        try{
-            
-        } catch (\Exception $e){
-            return $this->errorResponse('Gagal update status', 500, $e->getMessage());
-        }
-    }
-
-    public function destroyAnnouncement($id)
-    {
-        try{
-            
-        } catch (\Exception $e){
-            return $this->errorResponse('Gagal update status', 500, $e->getMessage());
-        }
-    }
-
-
-// Jadwal
-    public function storeJadwal(createJadwalRequest $request)
-    {
-        // Implementasi create jadwal
-    }
-
-    public function updateJadwal(updateJadwalRequest $request, $id)
-    {
-        // Implementasi update jadwal
-    }
-
-    public function destroyJadwal($id)
-    {
-        // Implementasi delete jadwal
-    }
-
-
-
-//private function
-    private function getStatusMessage($status)
-    {
-        $messages = [
-            'processing' => 'Request sedang diproses',
-            'ready' => 'Dokumen siap, silakan upload file',
-            'rejected' => 'Request ditolak',
-            'completed' => 'Request selesai',
-        ];
-        
-        return $messages[$status] ?? 'Status berhasil diupdate';
-    }
-
-    public function getDashboardStats()
-{
-    try {
-        // Ambil data dari services
-        $stats = [
-            'statistics' => [
-                'total_mahasiswa' => $this->UserService->countByRole('mahasiswa'),
-                'pending_docs' => $this->dokumenService->countPending(),
-                'critical_docs' => $this->dokumenService->countCritical(),
-                'validated_today' => $this->dokumenService->countValidatedToday(),
-                'total_negara' => $this->UserService->countCountries(),
-                'weekly_schedule' => $this->JadwalService->countThisWeek(),
-            ]
-        ];
-        
-        return $this->successResponse($stats, 'Dashboard stats retrieved');
-        
-    } catch (\Exception $e) {
-        Log::error('Error in getDashboardStats: ' . $e->getMessage());
-        return $this->errorResponse('Gagal ambil data statistik', 500, $e->getMessage());
-    }
+    return response()->json([
+        'id' => $req->id,
+        'mahasiswa' => $req->mahasiswa->nama ?? '-',
+        'tipe' => $req->tipeDkmn->value,
+        'status' => $req->status->value,
+        'message' => $req->message,
+    ]);
 }
 
-public function getCriticalDocuments(Request $request)
-{
-    try {
-        $limit = $request->get('limit', 10);
-        $documents = $this->dokumenService->getCriticalDocuments($limit);
-        
-        return $this->successResponse($documents, 'Critical documents retrieved');
-        
-    } catch (\Exception $e) {
-        Log::error('Error in getCriticalDocuments: ' . $e->getMessage());
-        return $this->errorResponse('Gagal ambil data dokumen kritis', 500);
+    /*
+    |--------------------------------------------------------------------------
+    | DELETE REQUEST
+    |--------------------------------------------------------------------------
+    */
+
+    public function destroy($id)
+    {
+        $req = ReqDokumen::findOrFail($id);
+        $req->delete();
+
+        return response()->json(['success' => true]);
     }
-}
 
-public function getValidationQueue(Request $request)
-{
-    try {
-        $limit = $request->get('limit', 10);
-        $queue = $this->dokumenService->getValidationQueue($limit);
-        
-        return $this->successResponse($queue, 'Validation queue retrieved');
-        
-    } catch (\Exception $e) {
-        Log::error('Error in getValidationQueue: ' . $e->getMessage());
-        return $this->errorResponse('Gagal ambil antrian validasi', 500);
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPLOAD & APPROVE
+    |--------------------------------------------------------------------------
+    */
+
+    public function uploadFile(Request $request, $id)
+    {
+        $request->validate([
+            'file' => 'required|mimes:pdf|max:2048'
+        ]);
+
+        $req = ReqDokumen::findOrFail($id);
+
+        $file = $request->file('file');
+        $path = $file->store('req_dokumen', 'public');
+
+        FileDetail::create([
+            'dokumen_id' => null,
+            'reqDokumen_id' => $req->id,
+            'path' => $path,
+            'mimeType' => $file->getClientMimeType(),
+            'fileSize' => $file->getSize(),
+        ]);
+
+        $req->update([
+            'status' => 'approved'
+        ]);
+
+        return response()->json(['success' => true]);
     }
-}
 
-public function getCountryDistribution(Request $request)
-{
-    try {
-        $limit = $request->get('limit', 7);
-        $distribution = $this->UserService->getCountryDistribution($limit);
-        
-        return $this->successResponse($distribution, 'Country distribution retrieved');
-        
-    } catch (\Exception $e) {
-        Log::error('Error in getCountryDistribution: ' . $e->getMessage());
-        return $this->errorResponse('Gagal ambil sebaran negara', 500);
+
+    /*
+    |--------------------------------------------------------------------------
+    | USER PAGE (VIEW)
+    |--------------------------------------------------------------------------
+    */
+    public function usersPage(){
+
+        $jurusan = jurusan::all();
+
+
+        return response()->view('kln.users.index', compact('jurusan'));
+        // return dd($users);
     }
-}
 
-public function getMahasiswaPreview(Request $request)
-{
-    try {
-        $limit = $request->get('limit', 10);
-        $preview = $this->dokumenService->getMahasiswaPreview($limit);
-        
-        return $this->successResponse($preview, 'Mahasiswa preview retrieved');
-        
-    } catch (\Exception $e) {
-        Log::error('Error in getMahasiswaPreview: ' . $e->getMessage());
-        return $this->errorResponse('Gagal ambil preview mahasiswa', 500);
+    /*
+    |--------------------------------------------------------------------------
+    | Announcemet PAGE
+    |--------------------------------------------------------------------------
+    */
+
+    public function announcementPage(){
+        return response()->view('kln.announcement');
     }
-}
-
-public function getActivityLog(Request $request)
-{
-    try {
-        $limit = $request->get('limit', 10);
-        $logService = app(\App\Services\LogService::class);
-        $logs = $logService->getRecentActivities($limit);
-        
-        return $this->successResponse($logs, 'Activity log retrieved');
-        
-    } catch (\Exception $e) {
-        Log::error('Error in getActivityLog: ' . $e->getMessage());
-        return $this->errorResponse('Gagal ambil activity log', 500);
-    }
-}
-
-public function getMonthlyChart(Request $request)
-{
-    try {
-        $months = $request->get('months', 6);
-        
-        // Ambil data dari user service
-        $userChart = $this->UserService->getMonthlyStats($months);
-        
-        // Ambil data dari dokumen service
-        $docChart = $this->dokumenService->getMonthlyChartData($months);
-        
-        // Gabungkan data
-        $chartData = [];
-        foreach ($userChart as $index => $item) {
-            $chartData[] = [
-                'label' => $item['label'],
-                'a' => $item['a'],
-                'b' => $docChart[$index]['b'] ?? 0,
-            ];
-        }
-        
-        return $this->successResponse($chartData, 'Monthly chart data retrieved');
-        
-    } catch (\Exception $e) {
-        Log::error('Error in getMonthlyChart: ' . $e->getMessage());
-        return $this->errorResponse('Gagal ambil data chart', 500);
-    }
-}
 
 
-    // ... method lainnya SAMA PERSIS dengan sebelumnya
+
 }

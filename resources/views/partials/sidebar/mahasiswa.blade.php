@@ -34,21 +34,17 @@
     </a>
 
 
-    {{-- Profile --}}
-    <a href="{{ route('mahasiswa.profil') }}"
-       class="sima-nav__item {{ request()->routeIs('mahasiswa.profil*') ? 'active' : '' }}">
+    <a href="{{ route('mahasiswa.profile') }}"
+    class="sima-nav__item {{ request()->routeIs('mahasiswa.profile') ? 'active' : '' }}">
         <i class="fas fa-user sima-nav__icon"></i>
         Biodata / Profile
     </a>
-
-
     {{-- Complimentary Docs --}}
-    <a href="{{ route('mahasiswa.profil') }}"
-       class="sima-nav__item {{ request()->routeIs('mahasiswa.profil.dokumen') ? 'active' : '' }}">
+    <a href="{{ route('mahasiswa.request.create') }}"
+    class="sima-nav__item {{ request()->routeIs('mahasiswa.request.create') ? 'active' : '' }}">
         <i class="fas fa-folder-open sima-nav__icon"></i>
         Complimentary Docs
     </a>
-
 
     {{-- SCHEDULES DROPDOWN --}}
     @php

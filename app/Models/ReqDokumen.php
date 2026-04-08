@@ -26,3 +26,4 @@ class ReqDokumen extends Model
         return $this->hasMany(fileDetail::class, 'reqDokumen_id');
     }
 }
+

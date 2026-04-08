@@ -12,7 +12,7 @@ public function index()
     $role = auth()->user()->role instanceof \App\Enums\Role
         ? auth()->user()->role->value
         : auth()->user()->role;
-
+    
     return match(strtolower($role)) {
         'kln' => view('kln.dashboard'),
         'dosen' => view('dosen.dashboard'),

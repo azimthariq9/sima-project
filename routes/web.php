@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\AnnouncementController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProfileController;
@@ -8,19 +9,20 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\MahasiswaRequestController;
 use App\Http\Controllers\API\KlnController;
 use App\Http\Controllers\API\DokumenController;
-use App\Http\Controllers\API\MahasiswaController;
-
+use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\MahasiswaController;
+use App\Http\Controllers\DosenController;
 
 /*
 |--------------------------------------------------------------------------
-| Redirect Root
+| ROOT
 |--------------------------------------------------------------------------
 */
 Route::get('/', fn () => redirect()->route('login'));
 
 /*
 |--------------------------------------------------------------------------
-| Auth Custom
+| AUTH
 |--------------------------------------------------------------------------
 */
 Route::post('login1', [AuthenticatedSessionController::class, 'store'])->name('login1');
@@ -28,17 +30,16 @@ Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name(
 
 /*
 |--------------------------------------------------------------------------
-| Global Dashboard (Role Redirect Logic)
+| GLOBAL DASHBOARD
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Global Profile (Generic Breeze)
+| GLOBAL PROFILE (BREEZE)
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
@@ -47,231 +48,153 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+
 /*
 |--------------------------------------------------------------------------
-| KLN / ADMIN ROUTES
+| =========================
+| KLN ROUTES (FINAL FIX)
+| =========================
 |--------------------------------------------------------------------------
 */
 
-// Route::middleware(['auth', 'check.role:KLN'])->group(function () {
+Route::middleware(['auth', 'check.role:KLN'])
+    ->prefix('kln')
+    ->name('kln.')
+    ->group(function () {
 
-//     Route::apiResource('users', UserController::class);
+        
 
-// });
+        Route::get('profile', [KlnController::class, 'profile'])
+        ->name('profile');
 
+        /* ---- MAIN ---- */
+        Route::get('dashboard', [KlnController::class, 'index'])->name('dashboard');
+        Route::view('monitoring', 'kln.monitoring')->name('monitoring');
+        Route::view('validasi', 'kln.validasi')->name('validasi');
+        Route::view('schedule', 'kln.schedule')->name('schedule');
+        Route::view('analytics', 'kln.analytics')->name('analytics');
+        Route::view('announcement', 'kln.announcement')->name('announcement');
+        Route::view('notifikasi', 'kln.notifikasi')->name('notifikasi');
+        Route::view('profil', 'kln.profil')->name('profil');
+
+        /* ---- USERS ---- */
+        Route::prefix('users')->name('users.')->group(function(){
+            Route::get('/', [KlnController::class, 'usersPage'])->name('page');
+            Route::post('/', [UserController::class, 'store'])->name('store');
+            Route::get('/data', [UserController::class, 'getUsers'])->name('data');
+            Route::get('{id}', [UserController::class, 'showUser'])->name('show');
+            Route::patch('{user}', [UserController::class, 'update'])->name('update');
+            Route::delete('{id}', [UserController::class, 'destroy'])->name('destroy');
+            Route::patch('{id}/status', [UserController::class, 'updateStatusMahasiswa'])->name('status'); //ini belum tau mau taro dimana
+        });
+        
+
+        /* ---- DOKUMEN (FINAL FIX) ---- */
+        Route::prefix('dokumen')->name('dokumen.')->group(function(){
+            Route::get('/', [KlnController::class, 'dokumen'])->name('page');
+            Route::get('{id}', [KlnController::class, 'show'])->name('show');
+            Route::delete('{id}', [KlnController::class, 'destroy'])->name('destroy');
+            Route::post('{id}/upload', [KlnController::class, 'uploadFile'])->name('upload');
+        });
+        
+        /* ---- REQUEST ---- */
+        Route::prefix('requestDok')->name('request.')->group(function () {
+            Route::get('/', [KlnController::class, 'indexReqDocument'])->name('index');
+            Route::get('{id}', [KlnController::class, 'showReqDocument'])->name('show');
+            Route::patch('{id}/status', [KlnController::class, 'updateReqDokumen'])->name('status');
+            Route::post('{id}/upload', [KlnController::class, 'uploadReqDokumen'])->name('upload');
+        });
+
+        /* ---- ANNOUNCEMENT ---- */
+        Route::prefix('announcement')->name('announcement.')->group(function(){
+            Route::post('store', [AnnouncementController::class, 'store'])->name('store');
+            Route::get('data', [AnnouncementController::class, 'getAnnouncement'])->name('data');
+            Route::get('{id}', [AnnouncementController::class, 'specificAnnouncement'])->name('show');
+            Route::patch('update/{id}', [AnnouncementController::class, 'updateAnnouncement'])->name('update');
+        });
+        
+    });
 /*
 |--------------------------------------------------------------------------
 | MAHASISWA ROUTES
 |--------------------------------------------------------------------------
 */
 
-$roles = [
-    'mahasiswa' => 'MAHASISWA',
-    'kln'       => 'KLN',
-    'dosen'     => 'DOSEN',
-    'bipa'      => 'BIPA',
-    'jurusan'   => 'JURUSAN',
-];
-
-foreach ($roles as $prefix => $enumName) {
-
-    Route::middleware(['auth', "check.role:$enumName"])
-        ->prefix($prefix)
-        ->name($prefix . '.')
-        ->group(function () use ($prefix) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Dashboard
-            |--------------------------------------------------------------------------
-            */
-            Route::get('/dashboard', fn () => view("$prefix.dashboard"))
-                ->name('dashboard');
-
-            /*
-            |--------------------------------------------------------------------------
-            | Common Pages (Auto)
-            |--------------------------------------------------------------------------
-            */
-            Route::get('/profil', fn () => view("$prefix.profil"))
-                ->name('profil');
-
-            Route::get('/notifikasi', fn () => view("$prefix.notifikasi"))
-                ->name('notifikasi');
-
-            Route::get('/announcement', fn () => view("$prefix.announcement"))
-                ->name('announcement');
-
-            Route::get('/jadwal', fn () => view("$prefix.jadwal"))
-                ->name('jadwal');
-
-            Route::get('/analytics', fn () => view("$prefix.analytics"))
-                ->name('analytics');
-        });
-}
-
 /*
 |--------------------------------------------------------------------------
-| MAHASISWA EXTRA
+| MAHASISWA ROUTES (FINAL CLEAN)
 |--------------------------------------------------------------------------
 */
+
 Route::middleware(['auth', 'check.role:MAHASISWA'])
     ->prefix('mahasiswa')
     ->name('mahasiswa.')
     ->group(function () {
 
+        // COMPLETE PROFILE
+        Route::get('complete-profile', [MahasiswaController::class, 'completeProfile'])
+            ->name('complete-profile');
+
+        Route::post('complete-profile', [MahasiswaController::class, 'storeCompleteProfile'])
+            ->name('complete-profile.store');
+    });
+
+
+Route::middleware(['auth', 'check.role:MAHASISWA', 'profile.completed'])
+    ->prefix('mahasiswa')
+    ->name('mahasiswa.')
+    ->group(function () {
+
+        Route::get('request/create', [MahasiswaController::class, 'createRequest'])
+            ->name('request.create');
+
+        Route::post('request/store', [MahasiswaController::class, 'storeRequest'])
+            ->name('request.store');
+
+        // DASHBOARD
+        Route::get('dashboard', [MahasiswaController::class, 'dashboard'])
+            ->name('dashboard');
+
+        // PROFILE
+        Route::get('profile', [MahasiswaController::class, 'getProfile'])
+            ->name('profile');
+
+        Route::patch('profile', [MahasiswaController::class, 'updateProfile'])
+            ->name('profile.update');
+
+        // REQUEST
         Route::get('request', [MahasiswaRequestController::class, 'index'])
             ->name('request.index');
-
-        Route::get('request/create', [MahasiswaRequestController::class, 'create'])
-            ->name('request.create');
 
         Route::post('request', [MahasiswaRequestController::class, 'store'])
             ->name('request.store');
 
-        
-    });
+        // DOKUMEN
+        Route::prefix('dokumen')->name('dokumen.')->group(function () {
 
-    // Mahasiswa routes
-Route::middleware(['auth', 'check.role:MAHASISWA'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
-    // Profile
-    Route::get('profile', [MahasiswaController::class, 'getProfile'])->name('profile');
-    Route::patch('profile', [MahasiswaController::class, 'updateProfile'])->name('profile.update');
-    
-    // Dashboard
-    Route::get('dashboard', [MahasiswaController::class, 'dashboard'])->name('dashboard');
-    // Dokumen routes
-    Route::prefix('dokumen')->name('dokumen.')->group(function () {
-        Route::get('/', [DokumenController::class, 'index'])->name('index');
-        Route::post('/', [DokumenController::class, 'store'])->name('store');
-        Route::get('{id}/download', [DokumenController::class, 'download'])->name('download');
-        
-    });
-     // Request Dokumen
-    Route::prefix('requestDok')->name('request.')->group(function () {
-        Route::get('/', [MahasiswaController::class, 'getRequestDokumen'])->name('index');
-        Route::post('/', [MahasiswaController::class, 'requestDokumen'])->name('store');
-    });
+            Route::get('/', [DokumenController::class, 'index'])
+                ->name('index');
 
-});
+            Route::post('/', [DokumenController::class, 'store'])
+                ->name('store');
 
-/*
-|--------------------------------------------------------------------------
-| KLN EXTRA
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'check.role:KLN'])
-    ->prefix('kln')
-    ->name('kln.')
-    ->group(function () {
-
-        Route::get('/monitoring', fn () => view('kln.monitoring'))
-            ->name('monitoring');
-
-        Route::get('/validasi', fn () => view('kln.validasi'))
-            ->name('validasi');
-
-        Route::get('/schedule', fn () => view('kln.schedule'))
-            ->name('schedule');
-
-        Route::post('/announcement/store', fn () =>
-            back()->with('success', 'Pengumuman berhasil dikirim')
-        )->name('announcement.store');
-
-        Route::get('/users', [KlnController::class, 'usersPage'])
-            ->name('users.page');
-
-        Route::get('/dokumen', [KlnController::class, 'dokumenPage'])
-            ->name('dokumen.page');
-
-        /*
-        |--------------------------------------------------------------------------
-        | KLN API
-        |--------------------------------------------------------------------------
-        */
-        Route::prefix('api')->name('api.')->group(function () {
-
-            Route::get('dashboard/stats', [KlnController::class, 'getDashboardStats'])
-                ->name('dashboard.stats');
-
-            Route::get('users', [KlnController::class, 'getUsers'])
-                ->name('users.index');
-
-            Route::post('users', [KlnController::class, 'storeUser'])
-                ->name('users.store');
-
-            Route::get('users/{id}', [KlnController::class, 'showUser'])
-                ->name('users.show');
-
-            Route::put('users/{id}', [KlnController::class, 'updateUser'])
-                ->name('users.update');
-
-            Route::delete('users/{id}', [KlnController::class, 'destroyUser'])
-                ->name('users.destroy');
-
-            Route::put('users/{id}/status', [KlnController::class, 'updateStatusMahasiswa'])
-                ->name('users.status');
-
-
-
-            //Request Dokumen
-            Route::prefix('requestDok')->name('request.')->group(function () {
-                Route::get('/', [KlnController::class, 'indexReqDocument'])->name('index');
-                // Route::get('stats', [KlnController::class, 'getStats'])->name('stats');
-                Route::get('{id}', [KlnController::class, 'showReqDocument'])->name('show');
-                Route::patch('{id}/status', [KlnController::class, 'updateReqDokumen'])->name('status');
-                Route::post('{id}/upload', [KlnController::class, 'uploadReqDokumen'])->name('upload');
-            });
-                    // ===== HALAMAN (return view) =====
-            Route::get('dashboard', [KlnController::class, 'index'])->name('dashboard');
-            Route::get('users', [KlnController::class, 'usersPage'])->name('users.page');
-            Route::get('dokumen', [KlnController::class, 'dokumenPage'])->name('dokumen.page');
-            
-                // Dashboard
-                Route::get('dashboard/stats', [KlnController::class, 'getDashboardStats'])->name('dashboard.stats');
-                //Announcement
-                Route::post('coba-announcement', [KlnController::class, 'storeAnnouncement'])->name('announcement.store');
-                // Users
-                Route::get('users', [KlnController::class, 'getUsers'])->name('users.index');
-                Route::post('users', [KlnController::class, 'storeUser'])->name('users.store');
-                Route::get('users/{id}', [KlnController::class, 'showUser'])->name('users.show');
-                Route::put('users/{id}', [KlnController::class, 'updateUser'])->name('users.update');
-                Route::delete('users/{id}', [KlnController::class, 'destroyUser'])->name('users.destroy');
-                Route::post('test-announcement', function() {
-                    return response()->json([
-                        'message' => 'Test route works',
-                        'user' => auth()->user()
-                    ]);
-                })->name('test.announcement');
-                // Dokumen
-                Route::get('dokumen', [KlnController::class, 'getDokumen'])->name('dokumen.index');
-                Route::patch('dokumen/{id}/status', [KlnController::class, 'updateDokumenStatus'])->name('dokumen.status');
-                // Jadwal
-                Route::apiResource('jadwal', KlnController::class)->only(['index', 'store', 'update', 'destroy']);
-
-                //dashboard
-                Route::get('dashboard/stats', [KlnController::class, 'getDashboardStats'])->name('dashboard.stats');
-                Route::get('dashboard/critical-documents', [KlnController::class, 'getCriticalDocuments'])->name('critical.documents');
-                Route::get('dashboard/validation-queue', [KlnController::class, 'getValidationQueue'])->name('validation.queue');
-                Route::get('dashboard/country-distribution', [KlnController::class, 'getCountryDistribution'])->name('country.distribution');
-                Route::get('dashboard/mahasiswa-preview', [KlnController::class, 'getMahasiswaPreview'])->name('mahasiswa.preview');
-                Route::get('dashboard/activity-log', [KlnController::class, 'getActivityLog'])->name('activity.log');
-                Route::get('dashboard/monthly-chart', [KlnController::class, 'getMonthlyChart'])->name('monthly.chart');
-
+            Route::get('{id}/download', [DokumenController::class, 'download'])
+                ->name('download');
         });
+
+        Route::view('jadwal', 'mahasiswa.jadwal')->name('jadwal');
+
+        Route::view('announcement', 'mahasiswa.announcement')->name('announcement');
+
+        Route::view('notifikasi', 'mahasiswa.notifikasi')->name('notifikasi');
+
+        Route::get('analytics', [MahasiswaController::class, 'analytics'])
+        ->name('analytics');
+
     });
 
-/*
-|--------------------------------------------------------------------------
-| Breeze Auth
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'check.role:KLN'])->prefix('kln')->name('kln.')->group(function () {
-    
-   
-});
 
-        Route::patch('users/status/{id}', [KlnController::class, 'updateStatusMahasiswa'])->name('users.status.update')->middleware(['auth','check.role:KLN']);
+     Route::patch('users/status/{id}', [KlnController::class, 'updateStatusMahasiswa'])->name('users.status.update')->middleware(['auth','check.role:KLN']);
 
 
 // routes/web.php - TEMPORARY
@@ -311,4 +234,33 @@ Route::get('test-update', function() {
         'after' => $mahasiswa->fresh(),
     ]);
 })->middleware('auth');
+
+
+
+Route::prefix('dosen')
+    ->name('dosen.')
+    ->middleware(['auth','check.role:DOSEN'])
+    ->group(function () {
+
+        Route::get('/dashboard', [DosenController::class, 'dashboard'])
+            ->name('dashboard');
+
+        Route::get('/profil', [DosenController::class, 'profil'])
+            ->name('profil');
+
+        Route::get('/jadwal', [DosenController::class, 'jadwal'])
+            ->name('jadwal');
+
+        Route::get('/announcement', [DosenController::class, 'announcement'])
+            ->name('announcement');
+
+        Route::get('/notifikasi', [DosenController::class, 'notifikasi'])
+            ->name('notifikasi');
+
+        Route::get('/analytics', [DosenController::class, 'analytics'])
+            ->name('analytics');
+
+});
+
+
 require __DIR__.'/auth.php';

@@ -30,7 +30,7 @@
     /* Text */
     --c-text-1:  #111827;
     --c-text-2:  #374151;
-    --c-text-3:  #9ca3af;
+    --c-text-3:  #616f86;
     --c-text-4:  #d1d5db;
 
     /* Brand / Accent */
@@ -95,11 +95,109 @@ html, body {
 }
 
 /* COLLAPSE MODE */
+/* COLLAPSED STATE - SEMUA ELEMEN YANG HARUS DISEMBUNYIKAN */
 .sima-sidebar.collapsed {
     width: 78px;
 }
 
-.sima-sidebar.collapsed 
+/* Brand section - collapsed */
+.sima-sidebar.collapsed .sima-brand__name,
+.sima-sidebar.collapsed .sima-brand__sub,
+.sima-sidebar.collapsed .sima-sidebar__title,
+.sima-sidebar.collapsed .sima-sidebar__subtitle {
+    display: none;
+}
+
+.sima-sidebar.collapsed .sima-brand {
+    justify-content: center;
+    padding: 22px 0;
+}
+
+.sima-sidebar.collapsed .sima-brand__logo {
+    margin: 0 auto;
+}
+
+/* Nav items - collapsed */
+.sima-sidebar.collapsed .sima-nav__item span:not(.sima-nav__icon) {
+    display: none; /* Sembunyikan teks menu */
+}
+
+.sima-sidebar.collapsed .sima-nav__item {
+    justify-content: center;
+    padding: 12px 0;
+}
+
+.sima-sidebar.collapsed .sima-nav__icon {
+    margin: 0;
+    font-size: 20px; /* Ikon lebih besar saat collapsed */
+}
+
+.sima-sidebar.collapsed .sima-nav__chevron,
+.sima-sidebar.collapsed .sima-nav__sub {
+    display: none; /* Sembunyikan submenu dan chevron */
+}
+
+/* Footer - collapsed */
+.sima-sidebar.collapsed .sima-sidebar__foot > *:not(.sima-avatar-wrapper) {
+    display: none;
+}
+
+.sima-sidebar.collapsed .sima-sidebar__foot {
+    display: flex;
+    justify-content: center;
+    padding: 12px 0;
+}
+
+/* Tooltip saat hover di collapsed mode */
+
+
+.sima-sidebar.collapsed .sima-nav__item:hover::after {
+    content: attr(data-title);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1f2937;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    margin-left: 10px;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.sima-sidebar.collapsed .sima-nav__item:hover::before {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-right-color: #1f2937;
+    margin-left: 0;
+}
+
+/* MAIN CONTENT - harus menyesuaikan dengan sidebar */
+.sima-main{
+    flex: 1;
+    margin-left: var(--sidebar-w);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    transition: margin-left 0.25s ease; /* Sinkron dengan sidebar */
+}
+
+/* Saat sidebar collapsed, main content ikut bergeser */
+.sima-sidebar.collapsed + .sima-main{
+    margin-left: 78px;
+}
+
+/* .sima-main.collapsed{
+    margin-left: 1000px;
+} */
+
 .sima-nav__item {
     position: relative;
     overflow: hidden;
@@ -111,7 +209,7 @@ html, body {
 
 .sima-nav__item:hover::after {
     left: 100%;
-}
+} 
 
 .sima-nav__item.active {
     box-shadow: 0 6px 18px rgba(108,143,255,.25);
@@ -142,9 +240,11 @@ body.dark .sima-topbar {
    SIDEBAR — PREMIUM MODE
 ================================ */
 
+
 .sima-sidebar {
     width: var(--sidebar-w);
-    background: linear-gradient(180deg, #6c5ce7 0%, #5a4bd6 40%, #ffffff 100%);
+    /* background: linear-gradient(180deg, #b9b1f5 0%, #958be9 40%, #ffffff 100%); */
+    background: #bbb2fc;
     border-right: 1px solid var(--sidebar-border);
     position: fixed;
     top: 0;
@@ -152,9 +252,12 @@ body.dark .sima-topbar {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    transition: width .25s ease, transform .25s ease;
+    transition: width 0.25s ease; /* Hanya transisi width */
     z-index: 200;
+    overflow-x: hidden; /* Hindari scroll horizontal */
+    overflow-y: auto;
 }
+
 
 /* TEXT FIX */
 .sima-sidebar .sima-nav__item {
@@ -304,6 +407,11 @@ body.dark .sima-nav__item:hover .sima-nav__icon {
     font-weight: 600;
 }
 
+.sima-nav__icon {
+    width: 20px;
+    font-size: 16px;
+    color: #111827;
+}
 body.dark .sima-nav__item.active {
     background: linear-gradient(135deg, #6c8fff, #a78bfa);
     color: #ffffff;
@@ -314,11 +422,7 @@ body.dark .sima-nav__item.active .sima-nav__icon {
     color: #ffffff;
 }
 
-.sima-nav__icon {
-    width: 20px;
-    font-size: 16px;
-    color: #111827;
-}
+
 
 .sima-nav__sub {
     padding-left: 36px;
@@ -329,7 +433,7 @@ body.dark .sima-nav__item.active .sima-nav__icon {
     display: block;
     padding: 6px 0;
     font-size: 13px;
-    color: #6b7280;
+    color: var(--c-text-2);
     text-decoration: none;
 }
 
@@ -354,17 +458,18 @@ body.dark .sima-nav__item.active .sima-nav__icon {
 /* ═══════════════════════════════════════════════════
    MAIN CONTENT
    ═══════════════════════════════════════════════════ */
-.sima-main {
+/* .sima-main {
     flex: 1;
     margin-left: var(--sidebar-w);
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-}
+} */
 
 /* Topbar */
 .sima-topbar {
     height: 60px;
+    width: flex;
     background: var(--c-surface);
     border-bottom: 1px solid var(--c-border-soft);
     display: flex;
@@ -995,26 +1100,42 @@ body.dark .sima-nav__item.active .sima-nav__icon {
 /* ═══════════════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════════════ */
+/* RESPONSIVE - mobile */
 @media (max-width: 768px) {
-    .sima-sidebar {
-        transform: translateX(-100%);
+    
+    .sima-sidebar.collapsed {
+        transform: translateX(-100%); /* Tetap hidden di mobile */
+        width: var(--sidebar-w); /* Kembalikan width normal */
     }
-    .sima-sidebar.open {
+    
+    /* .sima-sidebar {
         transform: translateX(0);
-        box-shadow: var(--shadow-md);
-    }
+    } */
+    
     .sima-main {
-        margin-left: 0;
+        margin-left: 0 !important; /* No margin di mobile */
+        
     }
-    .sima-topbar__hamburger { display: block; }
-    .sima-content { padding: 16px; }
-    .sima-overlay {
-        display: none;
-        position: fixed; inset: 0;
-        background: rgba(0,0,0,.35);
-        z-index: 150;
+
+    .sima-sidebar {
+        transform: translateX(0);
+        height: auto;
+        width: var(--sidebar-w);
+        /* background: linear-gradient(180deg, #b9b1f5 0%, #958be9 40%, #ffffff 100%); */
+        background: #bbb2fc;
+        border-right: 1px solid var(--sidebar-border);
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        transition: width 3s ease; /* Hanya transisi width */
+        z-index: 200;
+        overflow-x: auto; /* Hindari scroll horizontal */
+        overflow-y: auto;
     }
-    .sima-overlay.open { display: block; }
+
+    
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1026,6 +1147,7 @@ body.dark .sima-nav__item.active .sima-nav__icon {
 ::-webkit-scrollbar-thumb:hover { background: var(--c-text-4); }
 </style>
 @stack('head_styles')
+<meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 @php
     $role = strtolower(auth()->user()->role instanceof \App\Enums\Role
@@ -1042,18 +1164,17 @@ body.dark .sima-nav__item.active .sima-nav__icon {
 @endphp
 <body>
 <div class="sima-shell">
-
-    <!-- ── SIDEBAR ─────────────────────────────── -->
-    <aside class="sima-sidebar" id="sidebar">
-        @include('partials.sidebar.'.$prefix)
-    </aside>
-    <!-- Mobile overlay -->
-    <div class="sima-overlay" id="overlay" onclick="closeSidebar()"></div>
-
+        
+        <!-- Mobile overlay -->
+        <div class="sima-overlay" id="overlay" onclick="closeSidebar()"></div>
+        <!-- ── SIDEBAR ─────────────────────────────── -->
+        <aside class="sima-sidebar" id="sidebar">
+            @include('partials.sidebar.'.$prefix)
+        </aside>
     <!-- ── MAIN ───────────────────────────────── -->
     <div class="sima-main">
 
-        <!-- Topbar -->
+            <!-- Topbar -->
         <header class="sima-topbar">
             <button class="sima-topbar__hamburger" onclick="openSidebar()">
                 <i class="fas fa-bars"></i>
@@ -1062,9 +1183,9 @@ body.dark .sima-nav__item.active .sima-nav__icon {
             <div class="sima-topbar__breadcrumb">
                 SIMA <i class="fas fa-slash" style="font-size:9px;opacity:.3;margin:0 2px"></i>
                 <span>@yield('page_section', ucfirst($prefix))</span>
-                <button onclick="toggleCollapse()" 
-                        style="background:none;border:none;margin-right:10px;cursor:pointer;">
-                    <i class="fas fa-angle-double-left"></i>
+                <button onclick="toggleCollapse(event)" 
+                style="background:none;border:none;margin-right:10px;cursor:pointer;">
+                <i class="fas fa-angle-double-left"></i>
                 </button>
             </div>
 
@@ -1083,19 +1204,19 @@ body.dark .sima-nav__item.active .sima-nav__icon {
                 <button class="sima-user-btn" data-bs-toggle="dropdown">
                 <div class="sima-avatar-wrapper">
                     <div class="sima-avatar">
-                        {{ strtoupper(substr(auth()->user()->name ?? 'M', 0, 2)) }}
+                        {{ strtoupper(substr(auth()->user()->name ?? auth()->user()->role->value, 0)) }}
                     </div>
                     <div class="sima-role-badge">
                         {{ strtoupper($prefix) }}
                     </div>
                 </div>
-                    <span>{{ auth()->user()->nim ?? auth()->user()->id }}</span>
+                    <span>{{ auth()->user()->mahasiswa->npm ?? auth()->user()->id }}</span>
                     <i class="fas fa-chevron-down" style="font-size:11px;"></i>
                 </button>
 
                 <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border-radius:12px;">
                     <li>
-                        <a class="dropdown-item" href="{{ route($prefix.'.profil') }}">
+                        <a class="dropdown-item" href="{{ route('dosen.profil') }}">
                             <i class="fas fa-user me-2"></i> Profile
                         </a>
                     </li>
@@ -1132,7 +1253,7 @@ body.dark .sima-nav__item.active .sima-nav__icon {
 
             <!-- Page Header -->
             <div class="sima-page-header">
-                <div class="sima-page-title">@yield('page_title', 'Dashboard')</div>
+                <div class="sima-page-title">@yield('page_title', '')</div>
                 <div class="sima-page-subtitle">@yield('page_subtitle', '')</div>
             </div>
 
@@ -1158,7 +1279,7 @@ body.dark .sima-nav__item.active .sima-nav__icon {
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+{{-- <script src="https://cdn.jsdelivr.net/npm/@flasher/flasher@1.0/dist/flasher.min.js"></script> --}}
 <script>
 /* ── Sidebar toggle ─────────────────────────── */
 function openSidebar() {
@@ -1224,19 +1345,58 @@ function toggleLang() {
     alert('Language switched to: ' + newLang.toUpperCase());
 }
 
-function toggleCollapse() {
+function toggleCollapse(event) {
+    // Deklarasikan di dalam function
     const sidebar = document.getElementById('sidebar');
+    const main = document.querySelector('.sima-main');
+    
+    if (!sidebar || !main) return; // Guard clause
+    
     sidebar.classList.toggle('collapsed');
+    
+    // Update margin
+    if (sidebar.classList.contains('collapsed')) {
+        main.style.marginLeft = '78px';
 
-    localStorage.setItem(
-        'sidebar',
-        sidebar.classList.contains('collapsed') ? 'mini' : 'full'
-    );
+    } else {
+        main.style.marginLeft = '240px'; // atau ambil dari CSS variable
+    }
+    
+    // Simpan preferensi
+    localStorage.setItem('sidebar', sidebar.classList.contains('collapsed') ? 'mini' : 'full');
+    
+    // Update icon
+    if (event && event.currentTarget) {
+        const icon = event.currentTarget.querySelector('i');
+        if (icon) {
+            if (sidebar.classList.contains('collapsed')) {
+                icon.classList.remove('fa-angle-double-left');
+                icon.classList.add('fa-angle-double-right');
+            } else {
+                icon.classList.remove('fa-angle-double-right');
+                icon.classList.add('fa-angle-double-left');
+            }
+        }
+    }
 }
 
+// Inisialisasi
 document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.getElementById('sidebar');
+    const main = document.querySelector('.sima-main');
+    
     if (localStorage.getItem('sidebar') === 'mini') {
-        document.getElementById('sidebar').classList.add('collapsed');
+        sidebar.classList.add('collapsed');
+        if (main) main.style.marginLeft = '78px';
+        
+        // Update icon
+        const btn = document.querySelector('.sima-topbar__breadcrumb button i');
+        if (btn) {
+            btn.classList.remove('fa-angle-double-left');
+            btn.classList.add('fa-angle-double-right');
+        }
+    } else {
+        if (main) main.style.marginLeft = '240px';
     }
 });
 </script>

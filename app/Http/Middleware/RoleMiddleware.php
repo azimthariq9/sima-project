@@ -71,7 +71,7 @@ class RoleMiddleware
             'user_role' => $userRoleValue,
             'required_roles' => $roles
         ]);
-
+        
         abort(403, 'Unauthorized - Required role: ' . implode(', ', $roles));
     }
 }

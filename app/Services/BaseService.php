@@ -60,7 +60,13 @@ abstract class BaseService
      */
     public function findOrFail(int $id): Model
     {
-        return $this->model->findOrFail($id);
+        $record = $this->model->find($id);
+        
+        if (!$record) {
+            throw new \Exception("Record with ID {$id} not found");
+        }
+        
+        return $record;
     }
     
     /**
@@ -94,6 +100,7 @@ abstract class BaseService
             $record = $this->findOrFail($id);
             $cleanData = $this->cleanEnumData($data);
             $record->update($cleanData);
+            
             DB::commit();
             return $record->fresh();
         } catch (\Exception $e) {
