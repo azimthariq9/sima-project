@@ -45,12 +45,12 @@ class MatakuliahController extends Controller
     {
         $filters = [];
 
-        if ($request->filled('nama')) {
-            $filters['nama'] = $request->nama;
+        if ($request->filled('namaMk')) {
+            $filters['namaMk'] = $request->namaMk;
         }
 
         if ($request->filled('kode')) {
-            $filters['kode'] = $request->kode;
+            $filters['kodeMk'] = $request->kodeMk;
         }
 
         $matakuliah = $this->matakuliahService->getAll($filters);

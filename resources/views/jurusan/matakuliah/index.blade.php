@@ -58,12 +58,12 @@
         <form id="mkForm">
             <div style="margin-bottom:15px;">
                 <label style="color:#94a3b8;">Kode Matakuliah</label>
-                <input type="text" name="kode"
+                <input type="text" name="kodeMk"
                        style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
             </div>
             <div style="margin-bottom:15px;">
                 <label style="color:#94a3b8;">Nama Matakuliah</label>
-                <input type="text" name="nama"
+                <input type="text" name="namaMk"
                        style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:15px;">
@@ -73,12 +73,11 @@
                            style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
                 </div>
                 <div>
-                    <label style="color:#94a3b8;">Semester</label>
-                    <select name="semester"
+                    <label style="color:#94a3b8;">Keterangan</label>
+                    <select name="keterangan"
                             style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
-                        @for($i = 1; $i <= 8; $i++)
-                            <option value="{{ $i }}">Semester {{ $i }}</option>
-                        @endfor
+                        <option value="Utama">Utama</option>
+                        <option value="Wajib">Wajib</option>
                     </select>
                 </div>
             </div>
@@ -100,12 +99,12 @@
             <input type="hidden" id="editMkId">
             <div style="margin-bottom:15px;">
                 <label style="color:#94a3b8;">Kode Matakuliah</label>
-                <input type="text" name="kode" id="editMkKode"
+                <input type="text" name="kodeMk" id="editMkKode"
                        style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
             </div>
             <div style="margin-bottom:15px;">
                 <label style="color:#94a3b8;">Nama Matakuliah</label>
-                <input type="text" name="nama" id="editMkNama"
+                <input type="text" name="namaMk" id="editMkNama"
                        style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:15px;">
@@ -115,12 +114,11 @@
                            style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
                 </div>
                 <div>
-                    <label style="color:#94a3b8;">Semester</label>
-                    <select name="semester" id="editMkSemester"
+                    <label style="color:#94a3b8;">Keterangan</label>
+                    <select name="keterangan"
                             style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
-                        @for($i = 1; $i <= 8; $i++)
-                            <option value="{{ $i }}">Semester {{ $i }}</option>
-                        @endfor
+                        <option value="Utama">Utama</option>
+                        <option value="Wajib">Wajib</option>
                     </select>
                 </div>
             </div>
@@ -157,10 +155,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 <tr>
                     <td>${mk.id ?? '-'}</td>
                     <td><span style="font-family:var(--f-mono);font-size:12px;background:var(--c-blue-lt);
-                                     color:var(--c-blue);padding:3px 8px;border-radius:6px">${mk.kode ?? '-'}</span></td>
-                    <td style="font-weight:500">${mk.nama ?? '-'}</td>
+                                     color:var(--c-blue);padding:3px 8px;border-radius:6px">${mk.kodeMk ?? '-'}</span></td>
+                    <td style="font-weight:500">${mk.namaMk ?? '-'}</td>
                     <td style="text-align:center">${mk.sks ?? '-'}</td>
-                    <td style="text-align:center">${mk.semester ?? '-'}</td>
+                    <td style="text-align:center">${mk.keterangan ?? '-'}</td>
                     <td>
                         <button onclick="editMk(${mk.id})" class="sima-btn sima-btn--blue sima-btn--sm">
                             <i class="fas fa-pen"></i> Edit
@@ -226,8 +224,8 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(res => {
             const mk = res.data ?? res;
             document.getElementById('editMkId').value       = mk.id;
-            document.getElementById('editMkKode').value     = mk.kode ?? '';
-            document.getElementById('editMkNama').value     = mk.nama ?? '';
+            document.getElementById('editMkKode').value     = mk.kodeMk ?? '';
+            document.getElementById('editMkNama').value     = mk.namaMk ?? '';
             document.getElementById('editMkSks').value      = mk.sks ?? '';
             document.getElementById('editMkSemester').value = mk.semester ?? '';
             editModal.style.display = 'flex';

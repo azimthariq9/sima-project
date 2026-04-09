@@ -23,7 +23,7 @@ class createMatakuliahRequest extends FormRequest
     {
         return [
             'namaMk' => ['required', 'string', 'max:255'],
-            'kodeMk' => ['required', 'string', 'max:255', 'unique:matakuliah,kodemk'],
+            'kodeMk' => ['required', 'string', 'max:255', 'unique:matakuliah,kodeMk'],
             'sks' => ['required', 'integer', 'min:1'],
             'keterangan' => ['nullable', 'string', 'max:5'],
 
