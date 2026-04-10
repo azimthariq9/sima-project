@@ -1204,13 +1204,13 @@ body.dark .sima-nav__item.active .sima-nav__icon {
                 <button class="sima-user-btn" data-bs-toggle="dropdown">
                 <div class="sima-avatar-wrapper">
                     <div class="sima-avatar">
-                        {{ strtoupper(substr(auth()->user()->name ?? auth()->user()->role->value, 0)) }}
+                        {{ strtoupper(substr(auth()->user()->name?? auth()->user()->role->value, 0,1)) }}
                     </div>
                     <div class="sima-role-badge">
                         {{ strtoupper($prefix) }}
                     </div>
                 </div>
-                    <span>{{ auth()->user()->mahasiswa->npm ?? auth()->user()->id }}</span>
+                    <span>{{ substr(auth()->user()->jurusan->namaJurusan ?? auth()->user()->nama,0,15)}}</span>
                     <i class="fas fa-chevron-down" style="font-size:11px;"></i>
                 </button>
 

@@ -56,11 +56,12 @@ class KelasService extends BaseService
 
         try {
             // Otomatis set jurusan_id dari admin yang login
-            $data['jurusan_id'] = $maker->jurusan_id;
+            // $data['jurusan_id'] = $maker->jurusan_id;
 
             $kelas = Kelas::create($data);
-
-            $this->logActivity('CREATE', $kelas, "Membuat kelas: {$kelas->nama}", $maker);
+            
+            Log::info($kelas);
+            $this->logActivity('CREATE', $kelas, "Membuat kelas baru", $maker);
 
             DB::commit();
             return $kelas->load(['matakuliah', 'dosen']);
