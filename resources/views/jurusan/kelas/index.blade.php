@@ -1,3 +1,7 @@
+{{-- ============================================================
+   FILE 1: jurusan/kelas/index.blade.php
+   Kelas hanya punya field: kodeKelas
+   ============================================================ --}}
 @extends('layouts.sima')
 
 @section('page_title',    'Kelas')
@@ -8,20 +12,18 @@
 
 <div class="sima-card">
     <div class="sima-card__header">
-        <div>
-            <h5 class="sima-card__title">Daftar Kelas</h5>
-        </div>
+        <div><h5 class="sima-card__title">Daftar Kelas</h5></div>
         <div>
             <select id="sortInput" class="sima-input" style="min-width:150px;">
                 <option value="">Sort By</option>
-                <option value="nama_asc">Nama (A-Z)</option>
-                <option value="nama_desc">Nama (Z-A)</option>
+                <option value="kodeKelas_asc">Kode (A-Z)</option>
+                <option value="kodeKelas_desc">Kode (Z-A)</option>
                 <option value="id_asc">ID (Ascending)</option>
                 <option value="id_desc">ID (Descending)</option>
             </select>
         </div>
         <div style="display:flex;gap:12px;">
-            <input id="searchInput" type="text" placeholder="Cari nama / kode kelas..."
+            <input id="searchInput" type="text" placeholder="Cari kode kelas..."
                    class="sima-input">
             <button id="openAddKelasModal" class="sima-btn sima-btn--blue">
                 <i class="fas fa-plus"></i> Tambah Kelas
@@ -34,9 +36,7 @@
                 <tr>
                     <th>ID</th>
                     <th>KODE KELAS</th>
-                    <th>NAMA KELAS</th>
-                    <th>MATA KULIAH</th>
-                    <th>DOSEN</th>
+                    <th>JUMLAH MAHASISWA</th>
                     <th>MAHASISWA</th>
                     <th>AKSI</th>
                 </tr>
@@ -52,7 +52,7 @@
         <div class="sima-card__header">
             <div>
                 <h5 class="sima-card__title" id="panelKelasTitle">Mahasiswa Kelas</h5>
-                <div class="sima-card__subtitle">Daftar mahasiswa terdaftar di kelas ini</div>
+                <div class="sima-card__subtitle">Daftar mahasiswa terdaftar</div>
             </div>
             <div style="display:flex;gap:8px;">
                 <button id="openAddMahasiswaModal" class="sima-btn sima-btn--blue sima-btn--sm">
@@ -83,29 +83,16 @@
 {{-- ── MODAL TAMBAH KELAS ───────────────────────────── --}}
 <div id="kelasModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
      backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#0f172a;width:520px;max-height:90vh;overflow:auto;
-                padding:30px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.5);">
+    <div style="background:#0f172a;width:420px;padding:30px;border-radius:20px;
+                box-shadow:0 20px 60px rgba(0,0,0,.5);">
         <h2 style="color:white;font-size:20px;margin-bottom:20px;">Tambah Kelas</h2>
         <form id="kelasForm">
             <div style="margin-bottom:15px;">
                 <label style="color:#94a3b8;">Kode Kelas</label>
-                <input type="text" name="kode"
-                       style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
-            </div>
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Nama Kelas</label>
-                <input type="text" name="nama"
-                       style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
-            </div>
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Mata Kuliah (ID)</label>
-                <input type="number" name="matakuliah_id"
-                       style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
-            </div>
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Dosen (ID)</label>
-                <input type="number" name="dosen_id"
-                       style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
+                <input type="text" name="kodeKelas"
+                       style="width:100%;padding:10px;background:#1e293b;color:white;
+                              border-radius:10px;border:1px solid #334155;"
+                       placeholder="Contoh: TI-3A">
             </div>
             <div style="display:flex;justify-content:space-between;margin-top:20px;">
                 <button type="button" onclick="closeModal()" class="sima-btn sima-btn--gold">Cancel</button>
@@ -118,30 +105,16 @@
 {{-- ── MODAL EDIT KELAS ─────────────────────────────── --}}
 <div id="kelasEditModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
      backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#0f172a;width:520px;max-height:90vh;overflow:auto;
-                padding:30px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.5);">
+    <div style="background:#0f172a;width:420px;padding:30px;border-radius:20px;
+                box-shadow:0 20px 60px rgba(0,0,0,.5);">
         <h2 style="color:white;font-size:20px;margin-bottom:20px;">Edit Kelas</h2>
         <form id="kelasEditForm">
             <input type="hidden" id="editKelasId">
             <div style="margin-bottom:15px;">
                 <label style="color:#94a3b8;">Kode Kelas</label>
-                <input type="text" name="kode" id="editKelasKode"
-                       style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
-            </div>
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Nama Kelas</label>
-                <input type="text" name="nama" id="editKelasNama"
-                       style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
-            </div>
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Mata Kuliah (ID)</label>
-                <input type="number" name="matakuliah_id" id="editKelasMkId"
-                       style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
-            </div>
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Dosen (ID)</label>
-                <input type="number" name="dosen_id" id="editKelasDosenId"
-                       style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
+                <input type="text" name="kodeKelas" id="editKodeKelas"
+                       style="width:100%;padding:10px;background:#1e293b;color:white;
+                              border-radius:10px;border:1px solid #334155;">
             </div>
             <div style="display:flex;justify-content:space-between;margin-top:20px;">
                 <button type="button" onclick="closeModal()" class="sima-btn sima-btn--gold">Cancel</button>
@@ -154,14 +127,16 @@
 {{-- ── MODAL TAMBAH MAHASISWA KE KELAS ─────────────── --}}
 <div id="addMhsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
      backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#0f172a;width:420px;padding:30px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.5);">
+    <div style="background:#0f172a;width:420px;padding:30px;border-radius:20px;
+                box-shadow:0 20px 60px rgba(0,0,0,.5);">
         <h2 style="color:white;font-size:20px;margin-bottom:20px;">Tambah Mahasiswa ke Kelas</h2>
         <form id="addMhsForm">
             <input type="hidden" id="addMhsKelasId">
             <div style="margin-bottom:15px;">
                 <label style="color:#94a3b8;">ID Mahasiswa</label>
                 <input type="number" name="mahasiswa_id" id="addMhsMhsId"
-                       style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;"
+                       style="width:100%;padding:10px;background:#1e293b;color:white;
+                              border-radius:10px;border:1px solid #334155;"
                        placeholder="Masukkan ID mahasiswa">
             </div>
             <div style="display:flex;justify-content:space-between;margin-top:20px;">
@@ -187,26 +162,33 @@ document.addEventListener('DOMContentLoaded', function () {
     const editForm    = document.getElementById('kelasEditForm');
     const addMhsForm  = document.getElementById('addMhsForm');
     let activeKelasId = null;
+    let activeKelasNama = '';
 
     /* ── RENDER KELAS ────────────────────────────────── */
     function renderEmpty(msg = 'Tidak ada kelas') {
-        tbody.innerHTML = `<tr><td colspan="7" style="padding:24px;text-align:center;color:#94a3b8;">${msg}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="padding:24px;text-align:center;color:#94a3b8;">${msg}</td></tr>`;
     }
 
     function renderKelas(list) {
         tbody.innerHTML = '';
         if (!Array.isArray(list) || !list.length) { renderEmpty(); return; }
         list.forEach(k => {
+            const mhsCount = k.mahasiswa?.length ?? k.mahasiswa_count ?? '-';
             tbody.innerHTML += `
                 <tr>
                     <td>${k.id ?? '-'}</td>
-                    <td><span style="font-family:var(--f-mono);font-size:12px;background:var(--c-teal-lt);
-                                     color:var(--c-teal);padding:3px 8px;border-radius:6px">${k.kode ?? '-'}</span></td>
-                    <td style="font-weight:500">${k.nama ?? '-'}</td>
-                    <td style="font-size:12px;color:var(--c-text-2)">${k.matakuliah?.nama ?? '-'}</td>
-                    <td style="font-size:12px;color:var(--c-text-2)">${k.dosen?.nama ?? '-'}</td>
                     <td>
-                        <button onclick="viewMahasiswa(${k.id}, '${k.nama}')"
+                        <span style="font-family:var(--f-mono);font-size:13px;font-weight:600;
+                                     background:var(--c-teal-lt);color:var(--c-teal);
+                                     padding:4px 10px;border-radius:6px">
+                            ${k.kodeKelas ?? '-'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="sima-badge sima-badge--purple">${mhsCount} mahasiswa</span>
+                    </td>
+                    <td>
+                        <button onclick="viewMahasiswa(${k.id}, '${k.kodeKelas}')"
                                 class="sima-btn sima-btn--outline sima-btn--sm">
                             <i class="fas fa-users"></i> Lihat
                         </button>
@@ -225,15 +207,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /* ── RENDER MAHASISWA KELAS ──────────────────────── */
     function renderMahasiswaKelas(data) {
-        const tbl = document.getElementById('mahasiswaKelasTable');
-        const list = data?.mahasiswaKelas ?? data?.mahasiswa_kelas ?? [];
+        const tbl  = document.getElementById('mahasiswaKelasTable');
+        const list = data?.mahasiswaKelas ?? data?.mahasiswa ?? [];
         if (!list.length) {
             tbl.innerHTML = `<tr><td colspan="5" style="padding:20px;text-align:center;color:#94a3b8;">Belum ada mahasiswa di kelas ini</td></tr>`;
             return;
         }
         tbl.innerHTML = '';
-        list.forEach(mk => {
-            const m = mk.mahasiswa ?? mk;
+        list.forEach(item => {
+            const m = item.mahasiswa ?? item;
             tbl.innerHTML += `
                 <tr>
                     <td>${m.id ?? '-'}</td>
@@ -243,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td>
                         <button onclick="removeMahasiswa(${activeKelasId}, ${m.id})"
                                 class="sima-btn sima-btn--danger sima-btn--sm">
-                            <i class="fas fa-user-minus"></i> Hapus
+                            <i class="fas fa-user-minus"></i>
                         </button>
                     </td>
                 </tr>`;
@@ -262,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function () {
         renderEmpty('Memuat data...');
         let url = "{{ route('jurusan.kelas.data') }}";
         const p = new URLSearchParams();
-        if (search) p.append('nama', search);
+        if (search) p.append('kode', search);
         if (sort)   p.append('sort',  sort);
         if (p.toString()) url += '?' + p.toString();
 
@@ -272,20 +254,23 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(e => renderEmpty('Gagal memuat: ' + e.message));
     }
 
-    /* ── VIEW MAHASISWA KELAS ────────────────────────── */
-    window.viewMahasiswa = function (kelasId, kelasNama) {
-        activeKelasId = kelasId;
-        document.getElementById('panelKelasTitle').textContent = `Mahasiswa — ${kelasNama}`;
-        document.getElementById('mahasiswaPanel').style.display = 'block';
+    /* ── VIEW MAHASISWA ──────────────────────────────── */
+    window.viewMahasiswa = function (kelasId, kelasKode) {
+        activeKelasId   = kelasId;
+        activeKelasNama = kelasKode;
+        document.getElementById('panelKelasTitle').textContent = `Mahasiswa — Kelas ${kelasKode}`;
         document.getElementById('addMhsKelasId').value = kelasId;
+        document.getElementById('mahasiswaPanel').style.display = 'block';
         document.getElementById('mahasiswaKelasTable').innerHTML =
             `<tr><td colspan="5" style="padding:20px;text-align:center;color:#94a3b8;">Memuat...</td></tr>`;
 
         fetch(`/jurusan/kelas/${kelasId}/mahasiswa`, { headers: { 'Accept': 'application/json' } })
             .then(r => r.json())
             .then(res => renderMahasiswaKelas(res.data ?? res))
-            .catch(() => document.getElementById('mahasiswaKelasTable').innerHTML =
-                `<tr><td colspan="5" style="padding:20px;text-align:center;color:#94a3b8;">Gagal memuat</td></tr>`);
+            .catch(() => {
+                document.getElementById('mahasiswaKelasTable').innerHTML =
+                    `<tr><td colspan="5" style="padding:20px;text-align:center;color:#94a3b8;">Gagal memuat</td></tr>`;
+            });
     };
 
     window.closeMahasiswaPanel = () => {
@@ -320,7 +305,10 @@ document.addEventListener('DOMContentLoaded', function () {
             body: JSON.stringify(data)
         })
         .then(r => r.json())
-        .then(res => { if (res.success) { modal.style.display = 'none'; form.reset(); loadKelas(); } else alert(res.message); });
+        .then(res => {
+            if (res.success) { modal.style.display = 'none'; form.reset(); loadKelas(); }
+            else alert(res.message || 'Gagal menyimpan');
+        });
     });
 
     /* ── EDIT KELAS ──────────────────────────────────── */
@@ -329,11 +317,8 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(r => r.json())
         .then(res => {
             const k = res.data ?? res;
-            document.getElementById('editKelasId').value      = k.id;
-            document.getElementById('editKelasKode').value    = k.kode ?? '';
-            document.getElementById('editKelasNama').value    = k.nama ?? '';
-            document.getElementById('editKelasMkId').value    = k.matakuliah_id ?? '';
-            document.getElementById('editKelasDosenId').value = k.dosen_id ?? '';
+            document.getElementById('editKelasId').value    = k.id;
+            document.getElementById('editKodeKelas').value  = k.kodeKelas ?? '';
             editModal.style.display = 'flex';
         });
     };
@@ -353,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /* ── DELETE KELAS ────────────────────────────────── */
     window.deleteKelas = function (id) {
-        if (!confirm('Hapus kelas ini?')) return;
+        if (!confirm('Hapus kelas ini? Semua mahasiswa di kelas akan dilepas.')) return;
         fetch(`/jurusan/kelas/${id}`, {
             method: 'DELETE',
             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
@@ -366,7 +351,7 @@ document.addEventListener('DOMContentLoaded', function () {
     addMhsForm.addEventListener('submit', function (e) {
         e.preventDefault();
         const kelasId = document.getElementById('addMhsKelasId').value;
-        const data    = { mahasiswa_id: document.getElementById('addMhsMhsId').value };
+        const data    = { mahasiswa_id: parseInt(document.getElementById('addMhsMhsId').value) };
         fetch(`/jurusan/kelas/${kelasId}/mahasiswa`, {
             method: 'POST',
             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -377,12 +362,13 @@ document.addEventListener('DOMContentLoaded', function () {
             if (res.success) {
                 addMhsModal.style.display = 'none';
                 addMhsForm.reset();
-                window.viewMahasiswa(kelasId, document.getElementById('panelKelasTitle').textContent.split('— ')[1]);
+                window.viewMahasiswa(activeKelasId, activeKelasNama);
+                loadKelas(); // refresh count
             } else alert(res.message);
         });
     });
 
-    /* ── REMOVE MAHASISWA DARI KELAS ─────────────────── */
+    /* ── REMOVE MAHASISWA ────────────────────────────── */
     window.removeMahasiswa = function (kelasId, mahasiswaId) {
         if (!confirm('Hapus mahasiswa dari kelas ini?')) return;
         fetch(`/jurusan/kelas/${kelasId}/mahasiswa/${mahasiswaId}`, {
@@ -391,7 +377,7 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(r => r.json())
         .then(res => {
-            if (res.success) window.viewMahasiswa(kelasId, document.getElementById('panelKelasTitle').textContent.split('— ')[1]);
+            if (res.success) { window.viewMahasiswa(kelasId, activeKelasNama); loadKelas(); }
             else alert(res.message);
         });
     };

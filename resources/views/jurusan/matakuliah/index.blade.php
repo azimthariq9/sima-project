@@ -8,27 +8,21 @@
 
 <div class="sima-card">
     <div class="sima-card__header">
-        <div>
-            <h5 class="sima-card__title">Daftar Mata Kuliah</h5>
-        </div>
+        <div><h5 class="sima-card__title">Daftar Mata Kuliah</h5></div>
         <div>
             <select id="sortInput" class="sima-input" style="min-width:150px;">
                 <option value="">Sort By</option>
-                <optgroup label="Nama">
-                    <option value="nama_asc">Nama (A-Z)</option>
-                    <option value="nama_desc">Nama (Z-A)</option>
-                </optgroup>
-                <optgroup label="ID">
-                    <option value="id_asc">ID (Ascending)</option>
-                    <option value="id_desc">ID (Descending)</option>
-                </optgroup>
+                <option value="namaMk_asc">Nama (A-Z)</option>
+                <option value="namaMk_desc">Nama (Z-A)</option>
+                <option value="id_asc">ID (Ascending)</option>
+                <option value="id_desc">ID (Descending)</option>
             </select>
         </div>
         <div style="display:flex;gap:12px;">
-            <input id="searchInput" type="text" placeholder="Cari nama / kode..."
+            <input id="searchInput" type="text" placeholder="Cari nama / kode MK..."
                    class="sima-input">
             <button id="openAddMkModal" class="sima-btn sima-btn--blue">
-                <i class="fas fa-plus"></i> Tambah Matakuliah
+                <i class="fas fa-plus"></i> Tambah MK
             </button>
         </div>
     </div>
@@ -37,10 +31,10 @@
             <thead>
                 <tr>
                     <th onclick="sortBy('id')" style="cursor:pointer">ID <i class="fa-solid fa-sort"></i></th>
-                    <th onclick="sortBy('kode')" style="cursor:pointer">KODE <i class="fa-solid fa-sort"></i></th>
-                    <th onclick="sortBy('nama')" style="cursor:pointer">NAMA <i class="fa-solid fa-sort"></i></th>
+                    <th onclick="sortBy('kodeMk')" style="cursor:pointer">KODE MK <i class="fa-solid fa-sort"></i></th>
+                    <th onclick="sortBy('namaMk')" style="cursor:pointer">NAMA MK <i class="fa-solid fa-sort"></i></th>
                     <th>SKS</th>
-                    <th>SEMESTER</th>
+                    <th>KETERANGAN</th>
                     <th>AKSI</th>
                 </tr>
             </thead>
@@ -52,33 +46,37 @@
 {{-- ── MODAL TAMBAH ─────────────────────────────────── --}}
 <div id="mkModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
      backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#0f172a;width:500px;max-height:90vh;overflow:auto;
+    <div style="background:#0f172a;width:480px;max-height:90vh;overflow:auto;
                 padding:30px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.5);">
         <h2 style="color:white;font-size:20px;margin-bottom:20px;">Tambah Mata Kuliah</h2>
         <form id="mkForm">
             <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Kode Matakuliah</label>
+                <label style="color:#94a3b8;">Kode MK</label>
                 <input type="text" name="kodeMk"
-                       style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
+                       style="width:100%;padding:10px;background:#1e293b;color:white;
+                              border-radius:10px;border:1px solid #334155;"
+                       placeholder="Contoh: IT012236">
             </div>
             <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Nama Matakuliah</label>
+                <label style="color:#94a3b8;">Nama Mata Kuliah</label>
                 <input type="text" name="namaMk"
-                       style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
+                       style="width:100%;padding:10px;background:#1e293b;color:white;
+                              border-radius:10px;border:1px solid #334155;"
+                       placeholder="Contoh: Struktur Data">
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:15px;">
                 <div>
                     <label style="color:#94a3b8;">SKS</label>
                     <input type="number" name="sks" min="1" max="6"
-                           style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
+                           style="width:100%;padding:10px;background:#1e293b;color:white;
+                                  border-radius:10px;border:1px solid #334155;">
                 </div>
                 <div>
                     <label style="color:#94a3b8;">Keterangan</label>
-                    <select name="keterangan"
-                            style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
-                        <option value="Utama">Utama</option>
-                        <option value="Wajib">Wajib</option>
-                    </select>
+                    <input type="text" name="keterangan" maxlength="5"
+                           style="width:100%;padding:10px;background:#1e293b;color:white;
+                                  border-radius:10px;border:1px solid #334155;"
+                           placeholder="Maks 5 karakter">
                 </div>
             </div>
             <div style="display:flex;justify-content:space-between;margin-top:20px;">
@@ -92,34 +90,35 @@
 {{-- ── MODAL EDIT ───────────────────────────────────── --}}
 <div id="mkEditModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
      backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#0f172a;width:500px;max-height:90vh;overflow:auto;
+    <div style="background:#0f172a;width:480px;max-height:90vh;overflow:auto;
                 padding:30px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.5);">
         <h2 style="color:white;font-size:20px;margin-bottom:20px;">Edit Mata Kuliah</h2>
         <form id="mkEditForm">
             <input type="hidden" id="editMkId">
             <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Kode Matakuliah</label>
-                <input type="text" name="kodeMk" id="editMkKode"
-                       style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
+                <label style="color:#94a3b8;">Kode MK</label>
+                <input type="text" name="kodeMk" id="editKodeMk"
+                       style="width:100%;padding:10px;background:#1e293b;color:white;
+                              border-radius:10px;border:1px solid #334155;">
             </div>
             <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Nama Matakuliah</label>
-                <input type="text" name="namaMk" id="editMkNama"
-                       style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
+                <label style="color:#94a3b8;">Nama Mata Kuliah</label>
+                <input type="text" name="namaMk" id="editNamaMk"
+                       style="width:100%;padding:10px;background:#1e293b;color:white;
+                              border-radius:10px;border:1px solid #334155;">
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:15px;">
                 <div>
                     <label style="color:#94a3b8;">SKS</label>
-                    <input type="number" name="sks" id="editMkSks" min="1" max="6"
-                           style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
+                    <input type="number" name="sks" id="editSks" min="1" max="6"
+                           style="width:100%;padding:10px;background:#1e293b;color:white;
+                                  border-radius:10px;border:1px solid #334155;">
                 </div>
                 <div>
                     <label style="color:#94a3b8;">Keterangan</label>
-                    <select name="keterangan"
-                            style="width:100%;padding:10px;background:#1e293b;color:white;border-radius:10px;border:1px solid #334155;">
-                        <option value="Utama">Utama</option>
-                        <option value="Wajib">Wajib</option>
-                    </select>
+                    <input type="text" name="keterangan" id="editKeterangan" maxlength="5"
+                           style="width:100%;padding:10px;background:#1e293b;color:white;
+                                  border-radius:10px;border:1px solid #334155;">
                 </div>
             </div>
             <div style="display:flex;justify-content:space-between;margin-top:20px;">
@@ -154,11 +153,16 @@ document.addEventListener('DOMContentLoaded', function () {
             tbody.innerHTML += `
                 <tr>
                     <td>${mk.id ?? '-'}</td>
-                    <td><span style="font-family:var(--f-mono);font-size:12px;background:var(--c-blue-lt);
-                                     color:var(--c-blue);padding:3px 8px;border-radius:6px">${mk.kodeMk ?? '-'}</span></td>
+                    <td>
+                        <span style="font-family:var(--f-mono);font-size:12px;
+                                     background:var(--c-blue-lt);color:var(--c-blue);
+                                     padding:3px 8px;border-radius:6px">
+                            ${mk.kodeMk ?? '-'}
+                        </span>
+                    </td>
                     <td style="font-weight:500">${mk.namaMk ?? '-'}</td>
-                    <td style="text-align:center">${mk.sks ?? '-'}</td>
-                    <td style="text-align:center">${mk.keterangan ?? '-'}</td>
+                    <td style="text-align:center;font-family:var(--f-mono)">${mk.sks ?? '-'}</td>
+                    <td style="font-size:12px;color:var(--c-text-3)">${mk.keterangan ?? '-'}</td>
                     <td>
                         <button onclick="editMk(${mk.id})" class="sima-btn sima-btn--blue sima-btn--sm">
                             <i class="fas fa-pen"></i> Edit
@@ -182,8 +186,8 @@ document.addEventListener('DOMContentLoaded', function () {
         renderEmpty('Memuat data...');
         let url = "{{ route('jurusan.matakuliah.data') }}";
         const p = new URLSearchParams();
-        if (search) p.append('nama', search);
-        if (sort)   p.append('sort',  sort);
+        if (search) p.append('nama', search);  // MatakuliahService filter 'nama' → namaMk
+        if (sort)   p.append('sort', sort);
         if (p.toString()) url += '?' + p.toString();
 
         fetch(url)
@@ -206,6 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('openAddMkModal').addEventListener('click', () => { modal.style.display = 'flex'; });
     window.closeModal = () => { modal.style.display = 'none'; editModal.style.display = 'none'; };
 
+    /* STORE */
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(form).entries());
@@ -215,19 +220,28 @@ document.addEventListener('DOMContentLoaded', function () {
             body: JSON.stringify(data)
         })
         .then(r => r.json())
-        .then(res => { if (res.success) { modal.style.display = 'none'; form.reset(); loadMk(); } else alert(res.message); });
+        .then(res => {
+            if (res.success) { modal.style.display = 'none'; form.reset(); loadMk(); }
+            else {
+                const errMsg = res.errors
+                    ? Object.values(res.errors).flat().join('\n')
+                    : (res.message || 'Gagal menyimpan');
+                alert(errMsg);
+            }
+        });
     });
 
+    /* EDIT */
     window.editMk = function (id) {
         fetch(`/jurusan/matakuliah/${id}`, { headers: { 'Accept': 'application/json' } })
         .then(r => r.json())
         .then(res => {
             const mk = res.data ?? res;
-            document.getElementById('editMkId').value       = mk.id;
-            document.getElementById('editMkKode').value     = mk.kodeMk ?? '';
-            document.getElementById('editMkNama').value     = mk.namaMk ?? '';
-            document.getElementById('editMkSks').value      = mk.sks ?? '';
-            document.getElementById('editMkSemester').value = mk.semester ?? '';
+            document.getElementById('editMkId').value      = mk.id;
+            document.getElementById('editKodeMk').value    = mk.kodeMk ?? '';
+            document.getElementById('editNamaMk').value    = mk.namaMk ?? '';
+            document.getElementById('editSks').value       = mk.sks ?? '';
+            document.getElementById('editKeterangan').value= mk.keterangan ?? '';
             editModal.style.display = 'flex';
         });
     };
@@ -242,9 +256,13 @@ document.addEventListener('DOMContentLoaded', function () {
             body: JSON.stringify(data)
         })
         .then(r => r.json())
-        .then(res => { if (res.success) { editModal.style.display = 'none'; editForm.reset(); loadMk(); } else alert(res.message); });
+        .then(res => {
+            if (res.success) { editModal.style.display = 'none'; editForm.reset(); loadMk(); }
+            else alert(res.message || 'Gagal update');
+        });
     });
 
+    /* DELETE */
     window.deleteMk = function (id) {
         if (!confirm('Hapus mata kuliah ini?')) return;
         fetch(`/jurusan/matakuliah/${id}`, {
