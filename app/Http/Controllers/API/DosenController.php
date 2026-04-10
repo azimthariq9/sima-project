@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Models\Dosen;
+use App\Models\Jadwal;
 use App\Services\DosenService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dosen\createDosenRequest;
@@ -27,19 +28,92 @@ class DosenController extends Controller
     */
      public function dashboard()
     {
-        return view('dosen.dashboard');
+        $dosen = Auth::user()->dosen;
+ 
+        // Jadwal hari ini berdasarkan nama hari Indonesia
+        $hariIni = now()->locale('id')->isoFormat('dddd'); // Senin, Selasa, dst
+        // Fallback pakai nama Inggris jika locale belum diset
+        $hariMap = [
+            'Monday'    => 'Senin',
+            'Tuesday'   => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday'  => 'Kamis',
+            'Friday'    => 'Jumat',
+            'Saturday'  => 'Sabtu',
+            'Sunday'    => 'Minggu',
+        ];
+        $hariEn  = now()->format('l');
+        $hariId  = $hariMap[$hariEn] ?? $hariEn;
+ 
+        $jadwalHariIni = collect();
+        if ($dosen) {
+            $jadwalHariIni = Jadwal::with(['kelas', 'matakuliah'])
+                ->where('dosen_id', $dosen->id)
+                ->where('hari', $hariId)
+                ->get();
+        }
+ 
+        return view('dosen.dashboard', compact('jadwalHariIni', 'hariId'));
     }
 
     public function profil()
     {
         return view('dosen.profil');
     }
-
+    /*
+    |--------------------------------------------------------------------------
+    | JADWAL INDEX — semua jadwal + kelas yang diajar
+    |--------------------------------------------------------------------------
+    */
     public function jadwal()
     {
-        return view('dosen.jadwal');
+         $dosen = Auth::user()->dosen;
+ 
+        $jadwal = collect();
+        if ($dosen) {
+            $jadwal = Jadwal::with(['kelas', 'matakuliah'])
+                ->where('dosen_id', $dosen->id)
+                ->orderByRaw("CASE hari
+                    WHEN 'Senin'   THEN 1
+                    WHEN 'Selasa'  THEN 2
+                    WHEN 'Rabu'    THEN 3
+                    WHEN 'Kamis'   THEN 4
+                    WHEN 'Jumat'   THEN 5
+                    WHEN 'Sabtu'   THEN 6
+                    ELSE 7 END")
+                ->get();
+        }
+ 
+        return view('dosen.jadwal.index', compact('jadwal'));
     }
-
+        /*
+    |--------------------------------------------------------------------------
+    | DETAIL KELAS — mahasiswa + form input kehadiran
+    |--------------------------------------------------------------------------
+    */
+    public function jadwalDetail($jadwalId)
+    {
+        $dosen  = Auth::user()->dosen;
+ 
+        // Pastikan jadwal ini milik dosen yang login
+        $jadwal = Jadwal::with([
+                'kelas.mahasiswa.user',  // mahasiswa di kelas + akun mereka
+                'matakuliah',
+            ])
+            ->where('dosen_id', $dosen->id)
+            ->findOrFail($jadwalId);
+ 
+        // Ambil mahasiswa lewat relasi kelas → belongsToMany mahasiswa
+        $mahasiswa = $jadwal->kelas->mahasiswa ?? collect();
+ 
+        // Sesi yang sudah pernah diinput untuk jadwal ini (untuk info saja)
+        $sesiTerisi = \App\Models\Kehadiran::where('jadwal_id', $jadwalId)
+            ->distinct()
+            ->pluck('sesi')
+            ->toArray();
+ 
+        return view('dosen.jadwal.detail', compact('jadwal', 'mahasiswa', 'sesiTerisi'));
+    }
     public function announcement()
     {
         return view('dosen.announcement');
@@ -54,6 +128,8 @@ class DosenController extends Controller
     {
         return view('dosen.analytics');
     }
+
+    
 
     /*
     |--------------------------------------------------------------------------

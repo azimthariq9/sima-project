@@ -361,6 +361,64 @@ Route::middleware(['auth', 'check.role:JURUSAN'])
  
     });
 
+    /*
+|--------------------------------------------------------------------------
+| DOSEN ROUTES
+|--------------------------------------------------------------------------
+*/
+ 
+Route::middleware(['auth', 'check.role:DOSEN'])
+    ->prefix('dosen')
+    ->name('dosen.')
+    ->group(function () {
+ 
+        /*
+        |----------------------------------------------------------------------
+        | DASHBOARD — jadwal hari ini
+        |----------------------------------------------------------------------
+        */
+        Route::get('dashboard', [DosenPageController::class, 'index'])
+            ->name('dashboard');
+ 
+        /*
+        |----------------------------------------------------------------------
+        | JADWAL & KELAS
+        |----------------------------------------------------------------------
+        */
+        Route::prefix('jadwal')->name('jadwal.')->group(function () {
+ 
+            // List semua jadwal dosen
+            Route::get('/', [DosenPageController::class, 'jadwalIndex'])
+                ->name('index');
+ 
+            // Detail kelas + form kehadiran
+            Route::get('{jadwalId}', [DosenPageController::class, 'jadwalDetail'])
+                ->name('detail');
+ 
+            // Update jam jadwal (dari form di detail page)
+            Route::patch('{jadwalId}/jam', [KehadiranController::class, 'updateJam'])
+                ->name('jam.update');
+ 
+            // Store bulk kehadiran
+            Route::post('{jadwalId}/kehadiran', [KehadiranController::class, 'storeBulk'])
+                ->name('kehadiran.store');
+ 
+            // Get rekap kehadiran (opsional, untuk AJAX jika dibutuhkan)
+            Route::get('{jadwalId}/kehadiran', [KehadiranController::class, 'getByJadwal'])
+                ->name('kehadiran.get');
+        });
+ 
+        /*
+        |----------------------------------------------------------------------
+        | MISC
+        |----------------------------------------------------------------------
+        */
+        Route::get('profil',    [DosenPageController::class, 'profil'])->name('profil');
+        Route::view('notifikasi', 'dosen.notifikasi')->name('notifikasi');
+ 
+    });
+
+    
 /*
 |--------------------------------------------------------------------------
 | MAHASISWA ROUTES (FINAL CLEAN)
