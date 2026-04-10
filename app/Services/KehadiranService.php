@@ -1,58 +1,130 @@
 <?php
-// app/Services/KehadiranService.php
 
 namespace App\Services;
 
-use App\Models\Kehadiran;
+use App\Models\Jadwal;
+use App\Models\Kehadiran; // model untuk tabel jadwal_mahasiswa
 use App\Traits\LogsActivityTrait;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class KehadiranService extends BaseService
 {
     use LogsActivityTrait;
-    
+
     public function __construct(Kehadiran $kehadiran)
     {
         parent::__construct($kehadiran);
     }
-    
-    public function getAll(array $filters = [], int $perPage = 15):LengthAwarePaginator
+
+    /*
+    |--------------------------------------------------------------------------
+    | STORE BULK KEHADIRAN
+    | Satu submit untuk semua mahasiswa di satu sesi jadwal
+    |--------------------------------------------------------------------------
+    */
+    public function storeBulk($maker, array $data): array
     {
-        $query = Kehadiran::with(['user', 'user.mahasiswa', 'jadwal'])
-            ->when(isset($filters['tanggal']), function ($q) use ($filters) {
-                $q->whereDate('tanggal', $filters['tanggal']);
-            })
-            ->when(isset($filters['status']), function ($q) use ($filters) {
-                $q->where('status', $filters['status']);
-            })
-            ->when(isset($filters['user_id']), function ($q) use ($filters) {
-                $q->where('user_id', $filters['user_id']);
-            })
-            ->when(isset($filters['jadwal_id']), function ($q) use ($filters) {
-                $q->where('jadwal_id', $filters['jadwal_id']);
-            });
-            
-        return $query->latest()->paginate($perPage);
+        DB::beginTransaction();
+
+        try {
+            $jadwalId = $data['jadwal_id'];
+            $sesi     = $data['sesi'];
+            $tglSesi  = $data['tglSesi'];
+            $jam      = $data['jam'] ?? null;
+
+            // Update jam jika dosen ubah
+            if ($jam) {
+                Jadwal::where('id', $jadwalId)->update(['jam' => $jam]);
+            }
+
+            $created = [];
+            foreach ($data['kehadiran'] as $row) {
+                // Upsert: kalau sesi + jadwal + mahasiswa sudah ada, update statusnya
+                $kehadiran = Kehadiran::updateOrCreate(
+                    [
+                        'jadwal_id'    => $jadwalId,
+                        'mahasiswa_id' => $row['mahasiswa_id'],
+                        'sesi'         => $sesi,
+                    ],
+                    [
+                        'status'  => $row['status'],
+                        'tglSesi' => $tglSesi,
+                    ]
+                );
+                $created[] = $kehadiran;
+            }
+
+            $this->logActivity(
+                'CREATE',
+                (object)['id' => $jadwalId, 'jadwal_id' => $jadwalId],
+                "Dosen input kehadiran sesi {$sesi} untuk jadwal ID {$jadwalId}",
+                $maker
+            );
+
+            DB::commit();
+            return $created;
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error storing bulk kehadiran: ' . $e->getMessage(), [
+                'data'  => $data,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
+        }
     }
-    
-    public function getRekapitulasi(array $filters = [])
+
+    /*
+    |--------------------------------------------------------------------------
+    | GET KEHADIRAN BY JADWAL
+    | Rekap semua sesi kehadiran di jadwal tertentu
+    |--------------------------------------------------------------------------
+    */
+    public function getByJadwal(int $jadwalId): array
     {
-        $query = Kehadiran::query()
-            ->selectRaw('user_id, 
-                         COUNT(*) as total_kehadiran,
-                         SUM(CASE WHEN status = "hadir" THEN 1 ELSE 0 END) as total_hadir,
-                         SUM(CASE WHEN status = "izin" THEN 1 ELSE 0 END) as total_izin,
-                         SUM(CASE WHEN status = "sakit" THEN 1 ELSE 0 END) as total_sakit,
-                         SUM(CASE WHEN status = "alpha" THEN 1 ELSE 0 END) as total_alpha')
-            ->when(isset($filters['bulan']), function ($q) use ($filters) {
-                $q->whereMonth('tanggal', $filters['bulan']);
-            })
-            ->when(isset($filters['tahun']), function ($q) use ($filters) {
-                $q->whereYear('tanggal', $filters['tahun']);
-            })
-            ->groupBy('user_id')
-            ->with('user', 'user.mahasiswa');
-            
-        return $query->paginate($filters['per_page'] ?? 15);
+        $rows = Kehadiran::with('mahasiswa')
+            ->where('jadwal_id', $jadwalId)
+            ->orderBy('sesi')
+            ->orderBy('mahasiswa_id')
+            ->get();
+
+        // Group by sesi untuk tampilan rekap
+        return $rows->groupBy('sesi')->map(function ($items, $sesi) {
+            return [
+                'sesi'      => $sesi,
+                'kehadiran' => $items,
+            ];
+        })->values()->toArray();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE JAM JADWAL
+    |--------------------------------------------------------------------------
+    */
+    public function updateJamJadwal($maker, int $jadwalId, string $jam): Jadwal
+    {
+        DB::beginTransaction();
+
+        try {
+            $jadwal = Jadwal::findOrFail($jadwalId);
+            $jadwal->update(['jam' => $jam]);
+
+            $this->logActivity(
+                'UPDATE',
+                $jadwal,
+                "Dosen update jam jadwal ID {$jadwalId} menjadi {$jam}",
+                $maker
+            );
+
+            DB::commit();
+            return $jadwal->fresh(['kelas', 'matakuliah', 'dosen']);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating jam jadwal: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }
