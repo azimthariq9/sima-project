@@ -17,6 +17,7 @@ use App\Http\Controllers\API\MatakuliahController;
 use App\Http\Controllers\API\KelasController;
 use App\Http\Controllers\API\MahasiswaKelasController;
 use App\Http\Controllers\API\JadwalController;
+use App\Http\Controllers\API\KehadiranController;
 
 /*
 |--------------------------------------------------------------------------
@@ -377,7 +378,7 @@ Route::middleware(['auth', 'check.role:DOSEN'])
         | DASHBOARD — jadwal hari ini
         |----------------------------------------------------------------------
         */
-        Route::get('dashboard', [DosenPageController::class, 'index'])
+        Route::get('dashboard', [DosenController::class, 'dashboard'])
             ->name('dashboard');
  
         /*
@@ -388,11 +389,11 @@ Route::middleware(['auth', 'check.role:DOSEN'])
         Route::prefix('jadwal')->name('jadwal.')->group(function () {
  
             // List semua jadwal dosen
-            Route::get('/', [DosenPageController::class, 'jadwalIndex'])
+            Route::get('/', [DosenController::class, 'jadwal'])
                 ->name('index');
- 
+
             // Detail kelas + form kehadiran
-            Route::get('{jadwalId}', [DosenPageController::class, 'jadwalDetail'])
+            Route::get('{jadwalId}', [DosenController::class, 'jadwalDetail'])
                 ->name('detail');
  
             // Update jam jadwal (dari form di detail page)
@@ -413,12 +414,12 @@ Route::middleware(['auth', 'check.role:DOSEN'])
         | MISC
         |----------------------------------------------------------------------
         */
-        Route::get('profil',    [DosenPageController::class, 'profil'])->name('profil');
+        Route::get('profil',    [DosenController::class, 'profil'])->name('profil');
         Route::view('notifikasi', 'dosen.notifikasi')->name('notifikasi');
  
     });
 
-    
+
 /*
 |--------------------------------------------------------------------------
 | MAHASISWA ROUTES (FINAL CLEAN)

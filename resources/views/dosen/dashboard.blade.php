@@ -19,7 +19,7 @@
                         {{ $hariId }}, {{ now()->translatedFormat('d F Y') }}
                     </div>
                 </div>
-                <a href="{{ route('dosen.jadwal.index') }}" class="sima-card__action">
+                <a href="{{ route('dosen.jadwal') }}" class="sima-card__action">
                     <i class="fas fa-calendar-alt"></i> Semua Jadwal
                 </a>
             </div>
