@@ -2,31 +2,33 @@
 
 namespace App\Services;
 
-use App\Models\Dosen;
+use App\Models\dosen;
 use App\Traits\LogsActivityTrait;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\support\Facades\Auth;
+
 class DosenService extends BaseService
 {
     use LogsActivityTrait;
 
-    public function __construct(Dosen $dosen)
+    public function __construct(dosen $dosen)
     {
         parent::__construct($dosen);
     }
 
     /*
     |--------------------------------------------------------------------------
-    | GET ALL — di-scope otomatis berdasarkan jurusan_id auth user
+    | GET ALL
+    | Dosen tidak punya jurusan_id langsung di tabelnya.
+    | Scope via relasi dosen → user → jurusan_id
     |--------------------------------------------------------------------------
     */
     public function getAll(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Dosen::with('user')
+        $query = dosen::with('user')
             ->whereHas('user', function ($q) {
-                $q->where('jurusan_id', Auth::user()->jurusan_id);
+                $q->where('jurusan_id', auth()->user()->jurusan_id);
             });
 
         if (isset($filters['nama'])) {
@@ -49,18 +51,19 @@ class DosenService extends BaseService
     /*
     |--------------------------------------------------------------------------
     | CREATE
+    | Kolom di tabel dosen: nama, nidn, kodeDos, user_id (FK ke users)
     |--------------------------------------------------------------------------
     */
-    public function create($maker, array $data): Dosen
+    public function create($maker, array $data): dosen
     {
         DB::beginTransaction();
 
         try {
-            $dosen = Dosen::create([
-                'user_id'  => $data['user_id'],
-                'nama'     => $data['nama'],
-                'nidn'     => $data['nidn'] ?? null,
-                'kodeDos'  => $data['kodeDos'] ?? null,
+            $dosen = dosen::create([
+                'user_id'  => $data['user_id']  ?? null,
+                'nama'     => $data['nama']     ?? null,
+                'nidn'     => $data['nidn']     ?? null,
+                'kodeDos'  => $data['kodeDos']  ?? null,
             ]);
 
             $this->logActivity('CREATE', $dosen, "Membuat data dosen: {$dosen->nama}", $maker);
@@ -83,7 +86,7 @@ class DosenService extends BaseService
     | UPDATE
     |--------------------------------------------------------------------------
     */
-    public function update($maker, int $id, array $data): Dosen
+    public function update($maker, int $id, array $data): dosen
     {
         DB::beginTransaction();
 
@@ -96,7 +99,7 @@ class DosenService extends BaseService
                 'kodeDos' => $data['kodeDos'] ?? $dosen->kodeDos,
             ]);
 
-            $this->logActivity('UPDATE', $dosen, "Mengupdate data dosen: {$dosen->nama}", $maker);
+            $this->logActivity('UPDATE', $dosen, "Mengupdate dosen: {$dosen->nama}", $maker);
 
             DB::commit();
             return $dosen->fresh('user');

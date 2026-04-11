@@ -22,8 +22,8 @@ class AddMahasiswaKelasRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'mahasiswa_id' => 'required|exists:mahasiswas,id',
-            'kelas_id'     => 'required|exists:kelas,id',
+            'mahasiswa_id' => 'required|exists:mahasiswa,id',
+            // 'kelas_id'     => 'required|exists:kelas,id',
         ];
     }
 }

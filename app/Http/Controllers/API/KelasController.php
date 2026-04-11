@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
-use App\Models\Kelas;
+use App\Models\kelas;
 use App\Services\KelasService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Kelas\createKelasRequest;
@@ -28,7 +28,6 @@ class KelasController extends Controller
     public function index()
     {
         $kelas = $this->kelasService->getAll();
-
         return response()->json([
             'success' => true,
             'message' => 'Kelas retrieved successfully',
@@ -38,17 +37,12 @@ class KelasController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | GET DATA (dengan filter & sort, untuk AJAX table)
+    | GET DATA — AJAX table, dengan pagination
     |--------------------------------------------------------------------------
     */
     public function getData(Request $request)
     {
         $filters = [];
-
-        if ($request->filled('nama')) {
-            $filters['nama'] = $request->nama;
-        }
-
         if ($request->filled('kode')) {
             $filters['kode'] = $request->kode;
         }
@@ -56,9 +50,15 @@ class KelasController extends Controller
         $kelas = $this->kelasService->getAll($filters);
 
         return response()->json([
-            'success' => true,
-            'data'    => $kelas,
-            'flash'   => [
+            'success'    => true,
+            'data'       => $kelas->items(),       // array data halaman ini
+            'pagination' => [
+                'current_page' => $kelas->currentPage(),
+                'last_page'    => $kelas->lastPage(),
+                'per_page'     => $kelas->perPage(),
+                'total'        => $kelas->total(),
+            ],
+            'flash' => [
                 'type'    => 'success',
                 'message' => 'Kelas retrieved successfully',
                 'theme'   => 'amazon',
@@ -69,17 +69,20 @@ class KelasController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | SHOW SPECIFIC KELAS
+    | SHOW
+    | Model Kelas: hasMany(Jadwal), belongsToMany(Mahasiswa)
+    | TIDAK ada relasi langsung ke matakuliah/dosen di model Kelas
     |--------------------------------------------------------------------------
     */
     public function show($id)
     {
         try {
-            $kelas = $this->kelasService->findOrFail($id);
+            $kelas = kelas::with(['mahasiswa', 'mahasiswa.user'])
+                ->findOrFail($id);
 
             return response()->json([
                 'success' => true,
-                'data'    => $kelas->load(['matakuliah', 'dosen', 'mahasiswaKelas.mahasiswa']),
+                'data'    => $kelas,
             ], 200);
 
         } catch (\Exception $e) {
@@ -92,7 +95,7 @@ class KelasController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | STORE KELAS
+    | STORE
     |--------------------------------------------------------------------------
     */
     public function store(createKelasRequest $request)
@@ -113,76 +116,45 @@ class KelasController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
-            Log::error('Create kelas failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
+            Log::error('Create kelas failed', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
-                'flash'   => [
-                    'type'    => 'error',
-                    'message' => 'Kelas creation failed',
-                    'theme'   => 'amazon',
-                    'timeout' => 5000,
-                ],
+                'flash'   => ['type' => 'error', 'message' => 'Kelas creation failed', 'theme' => 'amazon', 'timeout' => 5000],
             ], 500);
         }
     }
 
     /*
     |--------------------------------------------------------------------------
-    | UPDATE KELAS
+    | UPDATE
     |--------------------------------------------------------------------------
     */
     public function update(updateKelasRequest $request, $id)
     {
         try {
-            $maker = Auth::user();
-
-            Log::info('Updating kelas', [
-                'kelas_id' => $id,
-                'maker_id' => $maker->id,
-                'data'     => $request->validated(),
-            ]);
-
+            $maker   = Auth::user();
             $updated = $this->kelasService->update($maker, $id, $request->validated());
 
             return response()->json([
                 'success' => true,
                 'data'    => $updated,
-                'flash'   => [
-                    'type'    => 'success',
-                    'message' => 'Kelas updated successfully',
-                    'theme'   => 'amazon',
-                    'timeout' => 5000,
-                ],
+                'flash'   => ['type' => 'success', 'message' => 'Kelas updated successfully', 'theme' => 'amazon', 'timeout' => 5000],
             ], 200);
 
         } catch (\Exception $e) {
-            Log::error('Update kelas failed', [
-                'kelas_id' => $id,
-                'error'    => $e->getMessage(),
-                'trace'    => $e->getTraceAsString(),
-            ]);
-
+            Log::error('Update kelas failed', ['kelas_id' => $id, 'error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
-                'flash'   => [
-                    'type'    => 'error',
-                    'message' => 'Kelas update failed',
-                    'theme'   => 'amazon',
-                    'timeout' => 5000,
-                ],
+                'flash'   => ['type' => 'error', 'message' => 'Kelas update failed', 'theme' => 'amazon', 'timeout' => 5000],
             ], 500);
         }
     }
 
     /*
     |--------------------------------------------------------------------------
-    | DELETE KELAS
+    | DESTROY
     |--------------------------------------------------------------------------
     */
     public function destroy($id)
@@ -194,29 +166,15 @@ class KelasController extends Controller
             return response()->json([
                 'success' => true,
                 'data'    => [],
-                'flash'   => [
-                    'type'    => 'success',
-                    'message' => 'Kelas deleted successfully',
-                    'theme'   => 'amazon',
-                    'timeout' => 5000,
-                ],
+                'flash'   => ['type' => 'success', 'message' => 'Kelas deleted successfully', 'theme' => 'amazon', 'timeout' => 5000],
             ], 200);
 
         } catch (\Exception $e) {
-            Log::error('Delete kelas failed', [
-                'kelas_id' => $id,
-                'error'    => $e->getMessage(),
-            ]);
-
+            Log::error('Delete kelas failed', ['kelas_id' => $id, 'error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
-                'flash'   => [
-                    'type'    => 'error',
-                    'message' => 'Kelas deletion failed',
-                    'theme'   => 'amazon',
-                    'timeout' => 5000,
-                ],
+                'flash'   => ['type' => 'error', 'message' => 'Kelas deletion failed', 'theme' => 'amazon', 'timeout' => 5000],
             ], 500);
         }
     }

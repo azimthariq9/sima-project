@@ -4,85 +4,75 @@ namespace App\Traits;
 
 use App\Models\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Model;
 
 trait LogsActivityTrait
 {
-    protected function logActivity($action, $model, $description, $maker)
+    /*
+    |--------------------------------------------------------------------------
+    | logActivity
+    |
+    | Aturan sederhana:
+    |  - Hanya baca direct attribute ($model->someColumn) — JANGAN akses relasi
+    |  - Relasi belongsToMany mengembalikan Collection, bukan Model → crash
+    |  - Kolom FK (kelas_id, jadwal_id, dst) sudah ada langsung di model jika
+    |    memang ada relasinya, jadi cukup baca atribut langsung
+    |--------------------------------------------------------------------------
+    */
+    protected function logActivity(string $action, Model $model, string $description, $maker): Log
     {
-        // 🛡️ Guard: pastikan model object
-        if (!is_object($model)) {
-            throw new \Exception('Model harus berupa object Eloquent');
-        }
+        $modelName  = strtolower(class_basename($model));
+        $foreignKey = $modelName . '_id'; // contoh: kelas → kelas_id
 
-        // ambil nama model (contoh: Kelas → kelas)
-        $modelName = strtolower(class_basename($model));
-    
-
-        // generate foreign key (kelas → kelas_id)
-        $foreignKey = $modelName . '_id';
-
-        // ambil semua field yang tersedia di tabel log
-        $logModel = new Log();
-        $fillable = $logModel->getFillable();
-
-        // base data
         $logData = [
             'user_id' => $maker->id,
-            'aksi' => $description,
+            'aksi'    => $description,
         ];
 
-        // 🎯 auto assign berdasarkan nama model
-        if (in_array($foreignKey, $fillable)) {
+        // Auto-assign FK model yang sedang di-log (cek dulu kolomnya ada di fillable Log)
+        $fillable = (new Log())->getFillable();
+        if (in_array($foreignKey, $fillable) && isset($model->id)) {
             $logData[$foreignKey] = $model->id;
         }
 
-        // 🔗 handle relasi (opsional tapi berguna)
-        $logData['mahasiswa_id'] = $model->mahasiswa->id ?? null;
-        $logData['dosen_id'] = $model->dosen->id ?? null;
-        $logData['kelas_id'] = $logData['kelas_id'] ?? ($model->kelas->id ?? null);
-        $logData['jadwal_id'] = $model->jadwal_id ?? null;
-        $logData['matakuliah_id'] = $model->matakuliah_id ?? null;
-        $logData['jurusan_id'] = $model->jurusan_id ?? null;
-        $logData['notification_id'] = $model->notification_id ?? null;
-        $logData['announcement_id'] = $model->announcement_id ?? null;
-
-        return Log::create($logData);
-    }
-
-    protected function logCustomActivity($action, $description)
-    {
-        $user = Auth::user();
-        $logData = [
-            'user_id' => $user->id,
-            'mahasiswa_id' => $user->mahasiswa->id ?? null,
-            'dosen_id' => $user->dosen->id ?? null,
-            'kelas_id' => $model->kelas_id ?? null,
-            'jadwal_id' => $model->jadwal_id ?? null,
-            'matakuliah_id' => $model->matakuliah_id ?? null,
-            'jurusan_id' => $model->jurusan_id ?? null,
-            'notification_id' => $model->notification_id ?? null,
-            'announcement_id' => $model->announcement_id ?? null,
-            'aksi' => $description,
+        // Assign FK lain yang ada LANGSUNG sebagai kolom di model (bukan relasi)
+        // Gunakan getRawOriginal atau getAttribute agar tidak trigger relasi
+        $directFkColumns = [
+            'mahasiswa_id',
+            'dosen_id',
+            'kelas_id',
+            'jadwal_id',
+            'matakuliah_id',
+            'jurusan_id',
+            'notification_id',
+            'announcement_id',
         ];
+
+        foreach ($directFkColumns as $col) {
+            // Skip kalau sudah di-set oleh auto-assign di atas
+            if (isset($logData[$col])) {
+                continue;
+            }
+            // Cek apakah kolom ini memang ada sebagai attribute (bukan relasi)
+            if (in_array($col, $fillable) && array_key_exists($col, $model->getAttributes())) {
+                $logData[$col] = $model->getAttribute($col);
+            }
+        }
+
         return Log::create($logData);
     }
 
-    private function generateDescription($action, $model)
+    /*
+    |--------------------------------------------------------------------------
+    | logCustomActivity
+    | Untuk log aktivitas tanpa model spesifik (contoh: login, logout)
+    |--------------------------------------------------------------------------
+    */
+    protected function logCustomActivity(string $description, $maker): Log
     {
-        $userName = Auth::user()->name;
-        $modelName = class_basename($model);
-        
-        switch ($action) {
-            case 'CREATE':
-                return "Admin {$userName} membuat {$modelName} baru dengan ID {$model->id}";
-            case 'UPDATE':
-                return "Admin {$userName} mengupdate {$modelName} dengan ID {$model->id}";
-            case 'DELETE':
-                return "Admin {$userName} menghapus {$modelName} dengan ID {$model->id}";
-            case 'UPDATE_STATUS':
-                return "Admin {$userName} mengupdate status {$modelName} dengan ID {$model->id}";
-            default:
-                return "Admin {$userName} melakukan {$action} pada {$modelName} ID {$model->id}";
-        }
+        return Log::create([
+            'user_id' => $maker->id,
+            'aksi'    => $description,
+        ]);
     }
 }

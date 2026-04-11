@@ -55,12 +55,12 @@ class KehadiranService extends BaseService
                 $created[] = $kehadiran;
             }
 
-            $this->logActivity(
-                'CREATE',
-                (object)['id' => $jadwalId, 'jadwal_id' => $jadwalId],
-                "Dosen input kehadiran sesi {$sesi} untuk jadwal ID {$jadwalId}",
-                $maker
-            );
+            // $this->logActivity(
+            //     'CREATE',
+            //     (object)['id' => $jadwalId, 'jadwal_id' => $jadwalId],
+            //     "Dosen input kehadiran sesi {$sesi} untuk jadwal ID {$jadwalId}",
+            //     $maker
+            // );
 
             DB::commit();
             return $created;

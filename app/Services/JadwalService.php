@@ -3,11 +3,11 @@
 namespace App\Services;
 
 use App\Models\Jadwal;
+use App\Models\kelas;
 use App\Traits\LogsActivityTrait;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 
 class JadwalService extends BaseService
 {
@@ -20,15 +20,18 @@ class JadwalService extends BaseService
 
     /*
     |--------------------------------------------------------------------------
-    | GET ALL — di-scope otomatis berdasarkan jurusan_id auth user
-    | via relasi ke kelas
+    | GET ALL
+    | Model Jadwal: belongsTo(Kelas), belongsTo(dosen), belongsTo(Matakuliah)
+    | Scope jurusan: via dosen → user.jurusan_id
     |--------------------------------------------------------------------------
     */
     public function getAll(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
         $query = Jadwal::with(['kelas', 'dosen', 'matakuliah'])
-            ->whereHas('kelas', function ($q) {
-                $q->where('jurusan_id', Auth::user()->jurusan_id);
+            ->whereHas('dosen', function ($q) {
+                $q->whereHas('user', function ($u) {
+                    $u->where('jurusan_id', auth()->user()->jurusan_id);
+                });
             });
 
         if (isset($filters['hari'])) {
@@ -54,8 +57,22 @@ class JadwalService extends BaseService
 
     /*
     |--------------------------------------------------------------------------
+    | SHOW (single dengan relasi lengkap)
+    |--------------------------------------------------------------------------
+    */
+    public function findWithRelations(int $id): Jadwal
+    {
+        $jadwal = Jadwal::with(['kelas', 'dosen.user', 'matakuliah'])
+            ->findOrFail($id);
+
+        return $jadwal;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | CREATE
-    | Validasi: kelas yang dipilih harus milik jurusan admin yang login
+    | Kolom: kelas_id, matakuliah_id, dosen_id, hari, jam, ruangan, totalSesi
+    | Validasi: kelas yang dipilih harus ada
     |--------------------------------------------------------------------------
     */
     public function create($maker, array $data): Jadwal
@@ -63,20 +80,28 @@ class JadwalService extends BaseService
         DB::beginTransaction();
 
         try {
-            // Pastikan kelas yang dipilih milik jurusan admin
-            $kelasExists = \App\Models\Kelas::where('id', $data['kelas_id'])
-                ->where('jurusan_id', $maker->jurusan_id)
-                ->exists();
+            // Pastikan kelas ada
+            kelas::findOrFail($data['kelas_id']);
 
-            if (!$kelasExists) {
-                throw new \Exception("Kelas tidak ditemukan atau bukan milik jurusan Anda");
-            }
+            $jadwal = Jadwal::create([
+                'kelas_id'       => $data['kelas_id'],
+                'matakuliah_id'  => $data['matakuliah_id'],
+                'dosen_id'       => $data['dosen_id'],
+                'hari'           => $data['hari'],
+                'jam'            => $data['jam'],
+                'ruangan'        => $data['ruangan'],
+                'totalSesi'      => $data['totalSesi'],
+            ]);
 
-            $jadwal = Jadwal::create($data);
-
-            $this->logActivity('CREATE', $jadwal, "Membuat jadwal untuk kelas ID {$data['kelas_id']}", $maker);
+            $this->logActivity(
+                'CREATE',
+                $jadwal,
+                "Membuat jadwal {$jadwal->hari} {$jadwal->jam} untuk kelas ID {$jadwal->kelas_id}",
+                $maker
+            );
 
             DB::commit();
+            // Load relasi yang benar sesuai model Jadwal
             return $jadwal->load(['kelas', 'dosen', 'matakuliah']);
 
         } catch (\Exception $e) {
@@ -100,7 +125,16 @@ class JadwalService extends BaseService
 
         try {
             $jadwal = $this->findOrFail($id);
-            $jadwal->update($data);
+
+            $jadwal->update([
+                'kelas_id'      => $data['kelas_id']      ?? $jadwal->kelas_id,
+                'matakuliah_id' => $data['matakuliah_id'] ?? $jadwal->matakuliah_id,
+                'dosen_id'      => $data['dosen_id']      ?? $jadwal->dosen_id,
+                'hari'          => $data['hari']          ?? $jadwal->hari,
+                'jam'           => $data['jam']           ?? $jadwal->jam,
+                'ruangan'       => $data['ruangan']       ?? $jadwal->ruangan,
+                'totalSesi'     => $data['totalSesi']     ?? $jadwal->totalSesi,
+            ]);
 
             $this->logActivity('UPDATE', $jadwal, "Mengupdate jadwal ID {$jadwal->id}", $maker);
 
@@ -112,38 +146,5 @@ class JadwalService extends BaseService
             Log::error('Error updating jadwal: ' . $e->getMessage());
             throw $e;
         }
-    }
-        /**
-     * Count schedules for this week
-     */
-    public function countThisWeek(): int
-    {
-        return Jadwal::whereBetween('hari', [
-                now()->startOfWeek(),
-                now()->endOfWeek()
-            ])
-            ->count();
-    }
-
-    /**
-     * Get upcoming schedules
-     */
-    public function getUpcoming(int $limit = 5): array
-    {
-        return Jadwal::with(['matakuliah', 'dosen'])
-            ->where('tanggal', '>=', now())
-            ->orderBy('tanggal')
-            ->limit($limit)
-            ->get()
-            ->map(function($jadwal) {
-                return [
-                    'id' => $jadwal->id,
-                    'matakuliah' => $jadwal->matakuliah->nama ?? '-',
-                    'dosen' => $jadwal->dosen->name ?? '-',
-                    'tanggal' => $jadwal->tanggal->format('d/m/Y'),
-                    'jam' => $jadwal->jam_mulai . ' - ' . $jadwal->jam_selesai,
-                    'ruang' => $jadwal->ruang ?? '-',
-                ];
-            })->toArray();
     }
 }

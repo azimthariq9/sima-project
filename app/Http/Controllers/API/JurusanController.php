@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Services\JurusanService;
 use App\Http\Requests\Jurusan\createJurusanRequest;
 use App\Http\Requests\Jurusan\updateJurusanRequest;
+use App\Models\User;
+use App\Enums\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -19,111 +21,60 @@ class JurusanController extends Controller
         $this->jurusanService = $jurusanService;
     }
 
+    /* ── PAGE METHODS (return view) ─────────────────── */
+
+    public function index()         { return view('jurusan.dashboard'); }
+    public function dosenPage()     { return view('jurusan.dosen.index'); }
+    public function matakuliahPage(){ return view('jurusan.matakuliah.index'); }
+    public function kelasPage()     { return view('jurusan.kelas.index'); }
+    public function jadwalPage()    { return view('jurusan.jadwal.index'); }
+    public function mahasiswaPage() { return view('jurusan.mahasiswa.index'); }
+
     /*
     |--------------------------------------------------------------------------
-    | DASHBOARD (view page — untuk admin jurusan)
+    | MAHASISWA DATA
+    | Query: User dengan role mahasiswa dan jurusan_id sama dengan admin login
+    | Load relasi mahasiswa agar nama, npm, dll tersedia
     |--------------------------------------------------------------------------
     */
-    public function index()
+    public function getMahasiswaData(Request $request)
     {
-        return view('jurusan.dashboard');
-    }
+        $jurusanId = Auth::user()->jurusan_id;
 
-    /*
-    |--------------------------------------------------------------------------
-    | DOSEN PAGE
-    |--------------------------------------------------------------------------
-    */
-    public function dosenPage()
-    {
-        return view('jurusan.dosen.index');
-    }
+        $query = User::where('role', Role::MAHASISWA)
+            ->where('jurusan_id', $jurusanId)
+            ->with([
+                'mahasiswa',
+                'mahasiswa.kelas', // kelas yang diikuti mahasiswa
+            ]);
 
-    /*
-    |--------------------------------------------------------------------------
-    | MATAKULIAH PAGE
-    |--------------------------------------------------------------------------
-    */
-    public function matakuliahPage()
-    {
-        return view('jurusan.matakuliah.index');
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | KELAS PAGE
-    |--------------------------------------------------------------------------
-    */
-    public function kelasPage()
-    {
-        return view('jurusan.kelas.index');
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | JADWAL PAGE
-    |--------------------------------------------------------------------------
-    */
-    public function jadwalPage()
-    {
-        return view('jurusan.jadwal.index');
-    }    
-    /*
-    |--------------------------------------------------------------------------
-    | MAHASISWA PAGE
-    |--------------------------------------------------------------------------
-    */
-    public function mahasiswaPage()
-    {
-        return view('jurusan.mahasiswa.index');
-    }
-
-
-
-    /*
-    |==========================================================================
-    | JURUSAN CRUD
-    | Dikelola oleh KLN (superAdmin) — route ada di kln routes
-    |==========================================================================
-    */
-
-    /*
-    |--------------------------------------------------------------------------
-    | INDEX — semua jurusan (untuk halaman management KLN)
-    |--------------------------------------------------------------------------
-    */
-    public function jurusanIndex()
-    {
-        $jurusan = $this->jurusanService->getAll();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Jurusan retrieved successfully',
-            'data'    => $jurusan,
-        ], 200);
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | GET DATA — untuk AJAX table dengan filter & sort
-    |--------------------------------------------------------------------------
-    */
-    public function getJurusan(Request $request)
-    {
-        $filters = [];
-
-        if ($request->filled('namaJurusan')) {
-            $filters['namaJurusan'] = $request->namaJurusan;
+        // Filter search nama/npm
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('email', 'like', "%{$search}%")
+                  ->orWhereHas('mahasiswa', function ($m) use ($search) {
+                      $m->where('nama', 'like', "%{$search}%")
+                        ->orWhere('npm',  'like', "%{$search}%");
+                  });
+            });
         }
 
-        $jurusan = $this->jurusanService->getAll($filters);
+        $perPage   = $request->get('per_page', 15);
+        $mahasiswa = $query->latest()->paginate($perPage);
 
         return response()->json([
-            'success' => true,
-            'data'    => $jurusan,
-            'flash'   => [
+            'success'    => true,
+            'data'       => $mahasiswa->items(),
+            'pagination' => [
+                'current_page' => $mahasiswa->currentPage(),
+                'last_page'    => $mahasiswa->lastPage(),
+                'per_page'     => $mahasiswa->perPage(),
+                'total'        => $mahasiswa->total(),
+            ],
+            'flash' => [
                 'type'    => 'success',
-                'message' => 'Jurusan retrieved successfully',
+                'message' => 'Mahasiswa retrieved successfully',
                 'theme'   => 'amazon',
                 'timeout' => 5000,
             ],
@@ -132,156 +83,117 @@ class JurusanController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | SHOW — detail jurusan tertentu
+    | SHOW MAHASISWA DETAIL
+    | Return user + relasi mahasiswa + kelas yang diikuti
     |--------------------------------------------------------------------------
     */
-    public function showJurusan($id)
+    public function showMahasiswa($id)
     {
         try {
-            $jurusan = $this->jurusanService->findOrFail($id);
+            $user = User::where('jurusan_id', Auth::user()->jurusan_id)
+                ->with([
+                    'mahasiswa',
+                    'mahasiswa.kelas',
+                    'mahasiswa.kelas.jadwal',
+                    'mahasiswa.kelas.jadwal.matakuliah',
+                    'mahasiswa.kelas.jadwal.dosen',
+                ])
+                ->findOrFail($id);
 
             return response()->json([
                 'success' => true,
-                'data'    => $jurusan,
+                'data'    => $user,
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => 'Mahasiswa tidak ditemukan',
             ], 404);
         }
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | STORE — tambah jurusan baru
-    |--------------------------------------------------------------------------
+    |==========================================================================
+    | JURUSAN CRUD (diakses oleh KLN)
+    |==========================================================================
     */
+
+    public function jurusanIndex()
+    {
+        $jurusan = $this->jurusanService->getAll();
+        return response()->json(['success' => true, 'data' => $jurusan], 200);
+    }
+
+    public function getJurusan(Request $request)
+    {
+        $filters = [];
+        if ($request->filled('namaJurusan')) {
+            $filters['namaJurusan'] = $request->namaJurusan;
+        }
+
+        $jurusan = $this->jurusanService->getAll($filters);
+
+        return response()->json([
+            'success'    => true,
+            'data'       => $jurusan->items(),
+            'pagination' => [
+                'current_page' => $jurusan->currentPage(),
+                'last_page'    => $jurusan->lastPage(),
+                'per_page'     => $jurusan->perPage(),
+                'total'        => $jurusan->total(),
+            ],
+        ], 200);
+    }
+
+    public function showJurusan($id)
+    {
+        try {
+            return response()->json(['success' => true, 'data' => $this->jurusanService->findOrFail($id)], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+        }
+    }
+
     public function storeJurusan(createJurusanRequest $request)
     {
         try {
-            $maker   = Auth::user();
-            $jurusan = $this->jurusanService->create($maker, $request->validated());
-
+            $jurusan = $this->jurusanService->create(Auth::user(), $request->validated());
             return response()->json([
-                'success' => true,
-                'data'    => $jurusan,
-                'flash'   => [
-                    'type'    => 'success',
-                    'message' => 'Jurusan created successfully',
-                    'theme'   => 'amazon',
-                    'timeout' => 5000,
-                ],
+                'success' => true, 'data' => $jurusan,
+                'flash'   => ['type' => 'success', 'message' => 'Jurusan created successfully', 'theme' => 'amazon', 'timeout' => 5000],
             ], 201);
-
         } catch (\Exception $e) {
-            Log::error('Create jurusan failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'flash'   => [
-                    'type'    => 'error',
-                    'message' => 'Jurusan creation failed',
-                    'theme'   => 'amazon',
-                    'timeout' => 5000,
-                ],
-            ], 500);
+            Log::error('Create jurusan failed', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE — edit nama jurusan
-    |--------------------------------------------------------------------------
-    */
     public function updateJurusan(updateJurusanRequest $request, $id)
     {
         try {
-            $maker = Auth::user();
-
-            Log::info('Updating jurusan', [
-                'jurusan_id' => $id,
-                'maker_id'   => $maker->id,
-                'data'       => $request->validated(),
-            ]);
-
-            $updated = $this->jurusanService->update($maker, $id, $request->validated());
-
+            $updated = $this->jurusanService->update(Auth::user(), $id, $request->validated());
             return response()->json([
-                'success' => true,
-                'data'    => $updated,
-                'flash'   => [
-                    'type'    => 'success',
-                    'message' => 'Jurusan updated successfully',
-                    'theme'   => 'amazon',
-                    'timeout' => 5000,
-                ],
+                'success' => true, 'data' => $updated,
+                'flash'   => ['type' => 'success', 'message' => 'Jurusan updated successfully', 'theme' => 'amazon', 'timeout' => 5000],
             ], 200);
-
         } catch (\Exception $e) {
-            Log::error('Update jurusan failed', [
-                'jurusan_id' => $id,
-                'error'      => $e->getMessage(),
-                'trace'      => $e->getTraceAsString(),
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'flash'   => [
-                    'type'    => 'error',
-                    'message' => 'Jurusan update failed',
-                    'theme'   => 'amazon',
-                    'timeout' => 5000,
-                ],
-            ], 500);
+            Log::error('Update jurusan failed', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DESTROY — hapus jurusan
-    | Hati-hati: cascade ke user, dosen, mahasiswa, kelas, dll
-    |--------------------------------------------------------------------------
-    */
     public function destroyJurusan($id)
     {
         try {
-            $maker = Auth::user();
-            $this->jurusanService->delete($maker, $id);
-
+            $this->jurusanService->delete(Auth::user(), $id);
             return response()->json([
-                'success' => true,
-                'data'    => [],
-                'flash'   => [
-                    'type'    => 'success',
-                    'message' => 'Jurusan deleted successfully',
-                    'theme'   => 'amazon',
-                    'timeout' => 5000,
-                ],
+                'success' => true, 'data' => [],
+                'flash'   => ['type' => 'success', 'message' => 'Jurusan deleted successfully', 'theme' => 'amazon', 'timeout' => 5000],
             ], 200);
-
         } catch (\Exception $e) {
-            Log::error('Delete jurusan failed', [
-                'jurusan_id' => $id,
-                'error'      => $e->getMessage(),
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'flash'   => [
-                    'type'    => 'error',
-                    'message' => 'Jurusan deletion failed',
-                    'theme'   => 'amazon',
-                    'timeout' => 5000,
-                ],
-            ], 500);
+            Log::error('Delete jurusan failed', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 }

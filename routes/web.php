@@ -289,77 +289,73 @@ Route::middleware(['auth', 'check.role:JURUSAN'])
  
         /* ---- DOSEN ---- */
         Route::prefix('dosen')->name('dosen.')->group(function () {
-            Route::get('/',      [JurusanController::class, 'dosenPage'])->name('page');
-            Route::get('data',   [DosenController::class, 'getData'])->name('data');
-            Route::get('{id}',   [DosenController::class, 'show'])->name('show');
-            Route::post('/',     [DosenController::class, 'store'])->name('store');
-            Route::patch('{id}', [DosenController::class, 'update'])->name('update');
-            Route::delete('{id}',[DosenController::class, 'destroy'])->name('destroy');
+            Route::get('/',       [JurusanController::class, 'dosenPage'])->name('page');
+            Route::get('data',    [DosenController::class, 'getData'])->name('data');
+            Route::get('{id}',    [DosenController::class, 'show'])->name('show');
+            Route::post('/',      [DosenController::class, 'store'])->name('store');
+            Route::patch('{id}',  [DosenController::class, 'update'])->name('update');
+            Route::delete('{id}', [DosenController::class, 'destroy'])->name('destroy');
         });
  
         /* ---- USER DOSEN (buat akun user role dosen) ---- */
         Route::prefix('users')->name('users.')->group(function () {
-            Route::get('data',    [UserController::class, 'getUsers'])->name('data');
-            Route::get('{id}',    [UserController::class, 'showUser'])->name('show');
-            Route::post('/',      [UserController::class, 'store'])->name('store');
-            Route::patch('{user}',[UserController::class, 'update'])->name('update');
-            Route::delete('{id}', [UserController::class, 'destroy'])->name('destroy');
+            Route::get('data',     [UserController::class, 'getUsers'])->name('data');
+            Route::get('{id}',     [UserController::class, 'showUser'])->name('show');
+            Route::post('/',       [UserController::class, 'store'])->name('store');
+            Route::patch('{user}', [UserController::class, 'update'])->name('update');
+            Route::delete('{id}',  [UserController::class, 'destroy'])->name('destroy');
         });
  
-        /* ---- MAHASISWA (view data mahasiswa jurusan) ---- */
+        /* ---- MAHASISWA ---- */
         Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
-            Route::get('/',      [JurusanController::class, 'mahasiswaPage'])->name('page');
- 
-            /*
-             * getData mahasiswa — opsi A: pakai UserController dengan filter role=mahasiswa
-             * opsi B: buat MahasiswaController sendiri dengan scope jurusan
-             * Sementara pakai UserController dengan query param role=mahasiswa
-             */
-            Route::get('data',   [UserController::class, 'getUsers'])->name('data');
-            Route::get('{id}',   [UserController::class, 'showUser'])->name('show');
+            // View page
+            Route::get('/',    [JurusanController::class, 'mahasiswaPage'])->name('page');
+            // Data AJAX — query User role=mahasiswa, jurusan sama, with('mahasiswa', 'mahasiswa.kelas')
+            Route::get('data', [JurusanController::class, 'getMahasiswaData'])->name('data');
+            // Detail mahasiswa (return user + relasi)
+            Route::get('{id}', [JurusanController::class, 'showMahasiswa'])->name('show');
         });
  
         /* ---- MATAKULIAH ---- */
         Route::prefix('matakuliah')->name('matakuliah.')->group(function () {
-            Route::get('/',      [JurusanController::class, 'matakuliahPage'])->name('page');
-            Route::get('data',   [MatakuliahController::class, 'getData'])->name('data');
-            Route::get('{id}',   [MatakuliahController::class, 'show'])->name('show');
-            Route::post('/',     [MatakuliahController::class, 'store'])->name('store');
-            Route::patch('{id}', [MatakuliahController::class, 'update'])->name('update');
-            Route::delete('{id}',[MatakuliahController::class, 'destroy'])->name('destroy');
+            Route::get('/',       [JurusanController::class, 'matakuliahPage'])->name('page');
+            Route::get('data',    [MatakuliahController::class, 'getData'])->name('data');
+            Route::get('{id}',    [MatakuliahController::class, 'show'])->name('show');
+            Route::post('/',      [MatakuliahController::class, 'store'])->name('store');
+            Route::patch('{id}',  [MatakuliahController::class, 'update'])->name('update');
+            Route::delete('{id}', [MatakuliahController::class, 'destroy'])->name('destroy');
         });
  
         /* ---- KELAS ---- */
         Route::prefix('kelas')->name('kelas.')->group(function () {
-            Route::get('/',      [JurusanController::class, 'kelasPage'])->name('page');
-            Route::get('data',   [KelasController::class, 'getData'])->name('data');
-            Route::get('{id}',   [KelasController::class, 'show'])->name('show');
-            Route::post('/',     [KelasController::class, 'store'])->name('store');
-            Route::patch('{id}', [KelasController::class, 'update'])->name('update');
-            Route::delete('{id}',[KelasController::class, 'destroy'])->name('destroy');
+            Route::get('/',       [JurusanController::class, 'kelasPage'])->name('page');
+            Route::get('data',    [KelasController::class, 'getData'])->name('data');
+            Route::get('{id}',    [KelasController::class, 'show'])->name('show');
+            Route::post('/',      [KelasController::class, 'store'])->name('store');
+            Route::patch('{id}',  [KelasController::class, 'update'])->name('update');
+            Route::delete('{id}', [KelasController::class, 'destroy'])->name('destroy');
  
             /* Mahasiswa dalam kelas (nested) */
             Route::prefix('{kelasId}/mahasiswa')->name('mahasiswa.')->group(function () {
-                Route::get('/',                   [MahasiswaKelasController::class, 'getMahasiswa'])->name('get');
-                Route::post('/',                  [MahasiswaKelasController::class, 'addMahasiswa'])->name('add');
-                Route::delete('{mahasiswaId}',    [MahasiswaKelasController::class, 'removeMahasiswa'])->name('remove');
+                Route::get('/',                [MahasiswaKelasController::class, 'getMahasiswa'])->name('get');
+                Route::post('/',               [MahasiswaKelasController::class, 'addMahasiswa'])->name('add');
+                Route::delete('{mahasiswaId}', [MahasiswaKelasController::class, 'removeMahasiswa'])->name('remove');
             });
         });
  
         /* ---- JADWAL ---- */
         Route::prefix('jadwal')->name('jadwal.')->group(function () {
-            Route::get('/',      [JurusanController::class, 'jadwalPage'])->name('page');
-            Route::get('data',   [JadwalController::class, 'getData'])->name('data');
-            Route::get('{id}',   [JadwalController::class, 'show'])->name('show');
-            Route::post('/',     [JadwalController::class, 'store'])->name('store');
-            Route::patch('{id}', [JadwalController::class, 'update'])->name('update');
-            Route::delete('{id}',[JadwalController::class, 'destroy'])->name('destroy');
+            Route::get('/',       [JurusanController::class, 'jadwalPage'])->name('page');
+            Route::get('data',    [JadwalController::class, 'getData'])->name('data');
+            Route::get('{id}',    [JadwalController::class, 'show'])->name('show');
+            Route::post('/',      [JadwalController::class, 'store'])->name('store');
+            Route::patch('{id}',  [JadwalController::class, 'update'])->name('update');
+            Route::delete('{id}', [JadwalController::class, 'destroy'])->name('destroy');
         });
  
         /* ---- MISC ---- */
         Route::view('notifikasi', 'jurusan.notifikasi')->name('notifikasi');
         Route::view('profil',     'jurusan.profil')->name('profil');
- 
     });
 
     /*

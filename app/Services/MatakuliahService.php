@@ -7,7 +7,6 @@ use App\Traits\LogsActivityTrait;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 
 class MatakuliahService extends BaseService
 {
@@ -20,20 +19,21 @@ class MatakuliahService extends BaseService
 
     /*
     |--------------------------------------------------------------------------
-    | GET ALL — di-scope otomatis berdasarkan jurusan_id auth user
+    | GET ALL
+    | Scope langsung via jurusan_id di tabel matakuliah
     |--------------------------------------------------------------------------
     */
     public function getAll(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
         $query = Matakuliah::query()
-            ->where('jurusan_id', Auth::user()->jurusan_id);
+            ->where('jurusan_id', auth()->user()->jurusan_id);
 
         if (isset($filters['nama'])) {
-            $query->where('nama', 'like', "%{$filters['nama']}%");
+            $query->where('namaMk', 'like', "%{$filters['nama']}%");
         }
 
         if (isset($filters['kode'])) {
-            $query->where('kode', 'like', "%{$filters['kode']}%");
+            $query->where('kodeMk', 'like', "%{$filters['kode']}%");
         }
 
         if (request()->has('sort_by') && request()->has('sort_direction')) {
@@ -48,6 +48,7 @@ class MatakuliahService extends BaseService
     /*
     |--------------------------------------------------------------------------
     | CREATE
+    | Kolom: namaMk, kodeMk, sks, keterangan, jurusan_id
     |--------------------------------------------------------------------------
     */
     public function create($maker, array $data): Matakuliah
@@ -55,12 +56,15 @@ class MatakuliahService extends BaseService
         DB::beginTransaction();
 
         try {
-            // Otomatis set jurusan_id dari admin yang login
-            $data['jurusan_id'] = $maker->jurusan_id;
+            $matakuliah = Matakuliah::create([
+                'namaMk'     => $data['namaMk'],
+                'kodeMk'     => $data['kodeMk'],
+                'sks'        => $data['sks'],
+                'keterangan' => $data['keterangan'] ?? null,
+                'jurusan_id' => $maker->jurusan_id, // otomatis dari admin yang login
+            ]);
 
-            $matakuliah = Matakuliah::create($data);
-
-            $this->logActivity('CREATE', $matakuliah, "Membuat matakuliah: {$matakuliah->nama}", $maker);
+            $this->logActivity('CREATE', $matakuliah, "Membuat matakuliah: {$matakuliah->namaMk}", $maker);
 
             DB::commit();
             return $matakuliah;
@@ -86,9 +90,15 @@ class MatakuliahService extends BaseService
 
         try {
             $matakuliah = $this->findOrFail($id);
-            $matakuliah->update($data);
 
-            $this->logActivity('UPDATE', $matakuliah, "Mengupdate matakuliah: {$matakuliah->nama}", $maker);
+            $matakuliah->update([
+                'namaMk'     => $data['namaMk']     ?? $matakuliah->namaMk,
+                'kodeMk'     => $data['kodeMk']     ?? $matakuliah->kodeMk,
+                'sks'        => $data['sks']        ?? $matakuliah->sks,
+                'keterangan' => $data['keterangan'] ?? $matakuliah->keterangan,
+            ]);
+
+            $this->logActivity('UPDATE', $matakuliah, "Mengupdate matakuliah: {$matakuliah->namaMk}", $maker);
 
             DB::commit();
             return $matakuliah->fresh();

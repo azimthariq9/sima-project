@@ -16,7 +16,7 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
 
 {{-- ── BREADCRUMB BACK ─────────────────────────────── --}}
 <div style="margin-bottom:16px;">
-    <a href="{{ route('dosen.jadwal.index') }}"
+    <a href="{{ route('dosen.jadwal') }}"
        style="display:inline-flex;align-items:center;gap:8px;
               font-size:13px;color:var(--c-text-3);text-decoration:none;
               transition:color .15s"
@@ -293,6 +293,10 @@ label:has(input[type="radio"]:checked) .status-btn {
 const JADWAL_ID = {{ $jadwal->id }};
 const CSRF      = '{{ csrf_token() }}';
 
+// Buat URL dengan parameter yang benar
+const STORE_KEHADIRAN_URL = '{{ route("dosen.jadwal.kehadiran.store", ["jadwalId" => $jadwal->id]) }}';
+const UPDATE_JAM_URL = '{{ route("dosen.jadwal.jam.update", ["jadwalId" => $jadwal->id]) }}';
+
 /* ── SET ALL STATUS ──────────────────────────────── */
 window.setAllStatus = function (status) {
     document.querySelectorAll(`.status-radio[value="${status}"]`).forEach(r => {
@@ -383,7 +387,8 @@ window.submitKehadiran = function () {
     const btn = event.currentTarget;
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...'; }
 
-    fetch('{{ route("dosen.jadwal.kehadiran.store") }}', {
+    // Gunakan URL yang sudah dibuat
+    fetch(STORE_KEHADIRAN_URL, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': CSRF,
@@ -416,7 +421,8 @@ window.updateJam = function () {
     const jam = document.getElementById('inputJam').value;
     if (!jam) { alert('Jam harus diisi'); return; }
 
-    fetch(`/dosen/jadwal/${JADWAL_ID}/jam`, {
+    // Gunakan URL yang sudah dibuat
+    fetch(UPDATE_JAM_URL, {
         method: 'PATCH',
         headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ jam }),

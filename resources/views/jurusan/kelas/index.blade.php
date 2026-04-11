@@ -161,19 +161,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const form        = document.getElementById('kelasForm');
     const editForm    = document.getElementById('kelasEditForm');
     const addMhsForm  = document.getElementById('addMhsForm');
-    let activeKelasId = null;
+    let activeKelasId   = null;
     let activeKelasNama = '';
-
-    /* ── RENDER KELAS ────────────────────────────────── */
+    let currentPage     = 1;
+ 
     function renderEmpty(msg = 'Tidak ada kelas') {
         tbody.innerHTML = `<tr><td colspan="5" style="padding:24px;text-align:center;color:#94a3b8;">${msg}</td></tr>`;
     }
-
+ 
     function renderKelas(list) {
         tbody.innerHTML = '';
         if (!Array.isArray(list) || !list.length) { renderEmpty(); return; }
         list.forEach(k => {
-            const mhsCount = k.mahasiswa?.length ?? k.mahasiswa_count ?? '-';
+            // mahasiswa_count di-inject oleh withCount('mahasiswa') di KelasService
+            const mhsCount = k.mahasiswa_count ?? '-';
             tbody.innerHTML += `
                 <tr>
                     <td>${k.id ?? '-'}</td>
@@ -184,9 +185,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             ${k.kodeKelas ?? '-'}
                         </span>
                     </td>
-                    <td>
-                        <span class="sima-badge sima-badge--purple">${mhsCount} mahasiswa</span>
-                    </td>
+                    <td><span class="sima-badge sima-badge--purple">${mhsCount} mahasiswa</span></td>
                     <td>
                         <button onclick="viewMahasiswa(${k.id}, '${k.kodeKelas}')"
                                 class="sima-btn sima-btn--outline sima-btn--sm">
@@ -204,18 +203,85 @@ document.addEventListener('DOMContentLoaded', function () {
                 </tr>`;
         });
     }
-
-    /* ── RENDER MAHASISWA KELAS ──────────────────────── */
+ 
+    /* ── PAGINATION ──────────────────────────────────── */
+    function renderPagination(pagination) {
+        let bar = document.getElementById('paginationBar');
+        if (!bar) {
+            // Buat bar jika belum ada di HTML
+            bar = document.createElement('div');
+            bar.id = 'paginationBar';
+            bar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--c-border-soft)';
+            bar.innerHTML = '<span id="paginationInfo" style="font-size:12px;color:var(--c-text-3)"></span><div id="paginationButtons" style="display:flex;gap:6px;"></div>';
+            document.querySelector('.sima-card').appendChild(bar);
+        }
+ 
+        const info    = document.getElementById('paginationInfo');
+        const buttons = document.getElementById('paginationButtons');
+        const from    = ((pagination.current_page - 1) * pagination.per_page) + 1;
+        const to      = Math.min(pagination.current_page * pagination.per_page, pagination.total);
+        info.textContent = `Menampilkan ${from}–${to} dari ${pagination.total} kelas`;
+        buttons.innerHTML = '';
+ 
+        const prev = document.createElement('button');
+        prev.className = 'sima-btn sima-btn--outline sima-btn--sm';
+        prev.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        prev.disabled  = pagination.current_page === 1;
+        prev.onclick   = () => { currentPage = pagination.current_page - 1; loadKelas(); };
+        buttons.appendChild(prev);
+ 
+        const start = Math.max(1, pagination.current_page - 2);
+        const end   = Math.min(pagination.last_page, pagination.current_page + 2);
+        for (let i = start; i <= end; i++) {
+            const btn = document.createElement('button');
+            btn.className = `sima-btn sima-btn--sm ${i === pagination.current_page ? 'sima-btn--blue' : 'sima-btn--outline'}`;
+            btn.textContent = i;
+            btn.onclick = (page => () => { currentPage = page; loadKelas(); })(i);
+            buttons.appendChild(btn);
+        }
+ 
+        const next = document.createElement('button');
+        next.className = 'sima-btn sima-btn--outline sima-btn--sm';
+        next.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        next.disabled  = pagination.current_page === pagination.last_page;
+        next.onclick   = () => { currentPage = pagination.current_page + 1; loadKelas(); };
+        buttons.appendChild(next);
+    }
+ 
+    /* ── LOAD ────────────────────────────────────────── */
+    function loadKelas(search = '', sort = '') {
+        renderEmpty('Memuat data...');
+        let url = "{{ route('jurusan.kelas.data') }}";
+        const p = new URLSearchParams();
+        if (search)      p.append('kode', search);
+        if (sort)        p.append('sort', sort);
+        if (currentPage) p.append('page', currentPage);
+        if (p.toString()) url += '?' + p.toString();
+ 
+        fetch(url)
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    // getData sekarang return items() bukan paginator langsung
+                    renderKelas(res.data);
+                    if (res.pagination) renderPagination(res.pagination);
+                } else {
+                    renderEmpty(res.message);
+                }
+            })
+            .catch(e => renderEmpty('Gagal memuat: ' + e.message));
+    }
+ 
     function renderMahasiswaKelas(data) {
         const tbl  = document.getElementById('mahasiswaKelasTable');
-        const list = data?.mahasiswaKelas ?? data?.mahasiswa ?? [];
+        // Data dari getByKelas: kelas.mahasiswa (belongsToMany)
+        const list = data?.mahasiswa ?? [];
         if (!list.length) {
-            tbl.innerHTML = `<tr><td colspan="5" style="padding:20px;text-align:center;color:#94a3b8;">Belum ada mahasiswa di kelas ini</td></tr>`;
+            tbl.innerHTML = `<tr><td colspan="5" style="padding:20px;text-align:center;color:#94a3b8;">Belum ada mahasiswa</td></tr>`;
             return;
         }
         tbl.innerHTML = '';
-        list.forEach(item => {
-            const m = item.mahasiswa ?? item;
+        list.forEach(m => {
             tbl.innerHTML += `
                 <tr>
                     <td>${m.id ?? '-'}</td>
@@ -231,30 +297,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 </tr>`;
         });
     }
-
-    function extract(res) {
-        if (Array.isArray(res)) return res;
-        if (Array.isArray(res?.data)) return res.data;
-        if (Array.isArray(res?.data?.data)) return res.data.data;
-        return [];
-    }
-
-    /* ── LOAD KELAS ──────────────────────────────────── */
-    function loadKelas(search = '', sort = '') {
-        renderEmpty('Memuat data...');
-        let url = "{{ route('jurusan.kelas.data') }}";
-        const p = new URLSearchParams();
-        if (search) p.append('kode', search);
-        if (sort)   p.append('sort',  sort);
-        if (p.toString()) url += '?' + p.toString();
-
-        fetch(url)
-            .then(r => r.json())
-            .then(res => { if (res.success) renderKelas(extract(res)); else renderEmpty(res.message); })
-            .catch(e => renderEmpty('Gagal memuat: ' + e.message));
-    }
-
-    /* ── VIEW MAHASISWA ──────────────────────────────── */
+ 
+    let timer;
+    searchInput.addEventListener('keyup', function () {
+        clearTimeout(timer);
+        timer = setTimeout(() => { currentPage = 1; loadKelas(this.value, sortInput.value); }, 400);
+    });
+    sortInput.addEventListener('change', function () { currentPage = 1; loadKelas(searchInput.value, this.value); });
+ 
+    document.getElementById('openAddKelasModal').addEventListener('click', () => { modal.style.display = 'flex'; });
+    document.getElementById('openAddMahasiswaModal').addEventListener('click', () => { addMhsModal.style.display = 'flex'; });
+    window.closeModal = () => { modal.style.display = 'none'; editModal.style.display = 'none'; addMhsModal.style.display = 'none'; };
+ 
     window.viewMahasiswa = function (kelasId, kelasKode) {
         activeKelasId   = kelasId;
         activeKelasNama = kelasKode;
@@ -263,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('mahasiswaPanel').style.display = 'block';
         document.getElementById('mahasiswaKelasTable').innerHTML =
             `<tr><td colspan="5" style="padding:20px;text-align:center;color:#94a3b8;">Memuat...</td></tr>`;
-
+ 
         fetch(`/jurusan/kelas/${kelasId}/mahasiswa`, { headers: { 'Accept': 'application/json' } })
             .then(r => r.json())
             .then(res => renderMahasiswaKelas(res.data ?? res))
@@ -272,30 +326,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     `<tr><td colspan="5" style="padding:20px;text-align:center;color:#94a3b8;">Gagal memuat</td></tr>`;
             });
     };
-
+ 
     window.closeMahasiswaPanel = () => {
         document.getElementById('mahasiswaPanel').style.display = 'none';
         activeKelasId = null;
     };
-
-    /* ── SEARCH & SORT ───────────────────────────────── */
-    let timer;
-    searchInput.addEventListener('keyup', function () {
-        clearTimeout(timer);
-        timer = setTimeout(() => loadKelas(this.value, sortInput.value), 400);
-    });
-    sortInput.addEventListener('change', function () { loadKelas(searchInput.value, this.value); });
-
-    /* ── MODAL ───────────────────────────────────────── */
-    document.getElementById('openAddKelasModal').addEventListener('click', () => { modal.style.display = 'flex'; });
-    document.getElementById('openAddMahasiswaModal').addEventListener('click', () => { addMhsModal.style.display = 'flex'; });
-    window.closeModal = () => {
-        modal.style.display = 'none';
-        editModal.style.display = 'none';
-        addMhsModal.style.display = 'none';
-    };
-
-    /* ── STORE KELAS ─────────────────────────────────── */
+ 
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(form).entries());
@@ -306,23 +342,22 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(r => r.json())
         .then(res => {
-            if (res.success) { modal.style.display = 'none'; form.reset(); loadKelas(); }
+            if (res.success) { modal.style.display = 'none'; form.reset(); currentPage = 1; loadKelas(); }
             else alert(res.message || 'Gagal menyimpan');
         });
     });
-
-    /* ── EDIT KELAS ──────────────────────────────────── */
+ 
     window.editKelas = function (id) {
         fetch(`/jurusan/kelas/${id}`, { headers: { 'Accept': 'application/json' } })
         .then(r => r.json())
         .then(res => {
             const k = res.data ?? res;
-            document.getElementById('editKelasId').value    = k.id;
-            document.getElementById('editKodeKelas').value  = k.kodeKelas ?? '';
+            document.getElementById('editKelasId').value   = k.id;
+            document.getElementById('editKodeKelas').value = k.kodeKelas ?? '';
             editModal.style.display = 'flex';
         });
     };
-
+ 
     editForm.addEventListener('submit', function (e) {
         e.preventDefault();
         const id   = document.getElementById('editKelasId').value;
@@ -335,10 +370,9 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(r => r.json())
         .then(res => { if (res.success) { editModal.style.display = 'none'; editForm.reset(); loadKelas(); } else alert(res.message); });
     });
-
-    /* ── DELETE KELAS ────────────────────────────────── */
+ 
     window.deleteKelas = function (id) {
-        if (!confirm('Hapus kelas ini? Semua mahasiswa di kelas akan dilepas.')) return;
+        if (!confirm('Hapus kelas ini?')) return;
         fetch(`/jurusan/kelas/${id}`, {
             method: 'DELETE',
             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
@@ -346,8 +380,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(r => r.json())
         .then(res => { if (res.success) loadKelas(); else alert(res.message); });
     };
-
-    /* ── ADD MAHASISWA KE KELAS ──────────────────────── */
+ 
     addMhsForm.addEventListener('submit', function (e) {
         e.preventDefault();
         const kelasId = document.getElementById('addMhsKelasId').value;
@@ -363,14 +396,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 addMhsModal.style.display = 'none';
                 addMhsForm.reset();
                 window.viewMahasiswa(activeKelasId, activeKelasNama);
-                loadKelas(); // refresh count
+                loadKelas();
             } else alert(res.message);
         });
     });
-
-    /* ── REMOVE MAHASISWA ────────────────────────────── */
+ 
     window.removeMahasiswa = function (kelasId, mahasiswaId) {
-        if (!confirm('Hapus mahasiswa dari kelas ini?')) return;
+        if (!confirm('Hapus mahasiswa dari kelas?')) return;
         fetch(`/jurusan/kelas/${kelasId}/mahasiswa/${mahasiswaId}`, {
             method: 'DELETE',
             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
@@ -381,7 +413,7 @@ document.addEventListener('DOMContentLoaded', function () {
             else alert(res.message);
         });
     };
-
+ 
     loadKelas();
 });
 </script>
