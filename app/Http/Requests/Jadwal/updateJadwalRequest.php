@@ -29,6 +29,7 @@ class updateJadwalRequest extends FormRequest
             'jam' => ['sometimes', 'required', 'string', 'max:20'],
             'ruangan' => ['sometimes', 'required', 'string', 'max:50'],
             'totalSesi' => ['sometimes', 'required', 'integer', 'min:1'],
+            'tahunAjar' => ['sometimes', 'required', 'string', 'max:9'],
         ];
     }
 }

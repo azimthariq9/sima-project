@@ -290,6 +290,7 @@ Route::middleware(['auth', 'check.role:JURUSAN'])
         /* ---- DOSEN ---- */
         Route::prefix('dosen')->name('dosen.')->group(function () {
             Route::get('/',       [JurusanController::class, 'dosenPage'])->name('page');
+            Route::get('dosen/preview', [JurusanController::class, 'previewDosen'])->name('dosen.preview');
             Route::get('data',    [DosenController::class, 'getData'])->name('data');
             Route::get('{id}',    [DosenController::class, 'show'])->name('show');
             Route::post('/',      [DosenController::class, 'store'])->name('store');
@@ -319,6 +320,7 @@ Route::middleware(['auth', 'check.role:JURUSAN'])
         /* ---- MATAKULIAH ---- */
         Route::prefix('matakuliah')->name('matakuliah.')->group(function () {
             Route::get('/',       [JurusanController::class, 'matakuliahPage'])->name('page');
+            Route::get('matakuliah/preview', [JurusanController::class, 'previewMatakuliah'])->name('matakuliah.preview');
             Route::get('data',    [MatakuliahController::class, 'getData'])->name('data');
             Route::get('{id}',    [MatakuliahController::class, 'show'])->name('show');
             Route::post('/',      [MatakuliahController::class, 'store'])->name('store');
@@ -329,6 +331,7 @@ Route::middleware(['auth', 'check.role:JURUSAN'])
         /* ---- KELAS ---- */
         Route::prefix('kelas')->name('kelas.')->group(function () {
             Route::get('/',       [JurusanController::class, 'kelasPage'])->name('page');
+            Route::get('kelas/preview', [JurusanController::class, 'previewKelas'])->name('kelas.preview');
             Route::get('data',    [KelasController::class, 'getData'])->name('data');
             Route::get('{id}',    [KelasController::class, 'show'])->name('show');
             Route::post('/',      [KelasController::class, 'store'])->name('store');

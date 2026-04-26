@@ -83,16 +83,41 @@
 {{-- ── MODAL TAMBAH KELAS ───────────────────────────── --}}
 <div id="kelasModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
      backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#0f172a;width:420px;padding:30px;border-radius:20px;
+    <div style="background:#0f172a;width:440px;padding:30px;border-radius:20px;
                 box-shadow:0 20px 60px rgba(0,0,0,.5);">
         <h2 style="color:white;font-size:20px;margin-bottom:20px;">Tambah Kelas</h2>
         <form id="kelasForm">
             <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Kode Kelas</label>
+                <label style="color:#94a3b8;font-size:12px;display:block;margin-bottom:6px">
+                    Kode Kelas
+                </label>
                 <input type="text" name="kodeKelas"
                        style="width:100%;padding:10px;background:#1e293b;color:white;
-                              border-radius:10px;border:1px solid #334155;"
-                       placeholder="Contoh: TI-3A">
+                              border-radius:10px;border:1px solid #334155;font-family:var(--f-mono)"
+                       placeholder="Contoh: 3KA35">
+            </div>
+            <div style="margin-bottom:15px;">
+                <label style="color:#94a3b8;font-size:12px;display:block;margin-bottom:6px">
+                    Tahun Ajaran
+                </label>
+                <select name="tahunAjar"
+                        style="width:100%;padding:10px;background:#1e293b;color:white;
+                               border-radius:10px;border:1px solid #334155;">
+                    @php
+                        $tahunSekarang = (int) date('Y');
+                        $tahunAjarDefault = date('Y') . '/' . (date('Y') + 1);
+                    @endphp
+                    @for($i = -1; $i <= 10; $i++)
+                        @php
+                            $awal  = $tahunSekarang + $i;
+                            $akhir = $awal + 1;
+                            $val   = "{$awal}/{$akhir}";
+                        @endphp
+                        <option value="{{ $val }}" {{ $val === $tahunAjarDefault ? 'selected' : '' }}>
+                            {{ $val }}
+                        </option>
+                    @endfor
+                </select>
             </div>
             <div style="display:flex;justify-content:space-between;margin-top:20px;">
                 <button type="button" onclick="closeModal()" class="sima-btn sima-btn--gold">Cancel</button>
@@ -105,16 +130,37 @@
 {{-- ── MODAL EDIT KELAS ─────────────────────────────── --}}
 <div id="kelasEditModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
      backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#0f172a;width:420px;padding:30px;border-radius:20px;
+    <div style="background:#0f172a;width:440px;padding:30px;border-radius:20px;
                 box-shadow:0 20px 60px rgba(0,0,0,.5);">
         <h2 style="color:white;font-size:20px;margin-bottom:20px;">Edit Kelas</h2>
         <form id="kelasEditForm">
             <input type="hidden" id="editKelasId">
             <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Kode Kelas</label>
+                <label style="color:#94a3b8;font-size:12px;display:block;margin-bottom:6px">
+                    Kode Kelas
+                </label>
                 <input type="text" name="kodeKelas" id="editKodeKelas"
                        style="width:100%;padding:10px;background:#1e293b;color:white;
-                              border-radius:10px;border:1px solid #334155;">
+                              border-radius:10px;border:1px solid #334155;font-family:var(--f-mono)">
+            </div>
+            <div style="margin-bottom:15px;">
+                <label style="color:#94a3b8;font-size:12px;display:block;margin-bottom:6px">
+                    Tahun Ajaran
+                </label>
+                <select name="tahunAjar" id="editTahunAjar"
+                        style="width:100%;padding:10px;background:#1e293b;color:white;
+                               border-radius:10px;border:1px solid #334155;">
+                    @for($i = -1; $i <= 10; $i++)
+                        @php
+                            $awal  = $tahunSekarang + $i;
+                            $akhir = $awal + 1;
+                            $val   = "{$awal}/{$akhir}";
+                        @endphp
+                        <option value="{{ $val }}" {{ $val === $tahunAjarDefault ? 'selected' : '' }}>
+                            {{ $val }}
+                        </option>
+                    @endfor
+                </select>
             </div>
             <div style="display:flex;justify-content:space-between;margin-top:20px;">
                 <button type="button" onclick="closeModal()" class="sima-btn sima-btn--gold">Cancel</button>
@@ -185,6 +231,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             ${k.kodeKelas ?? '-'}
                         </span>
                     </td>
+                     <td style="font-size:12px;color:var(--c-text-3)">${k.tahunAjar ?? '-'}</td>
                     <td><span class="sima-badge sima-badge--purple">${mhsCount} mahasiswa</span></td>
                     <td>
                         <button onclick="viewMahasiswa(${k.id}, '${k.kodeKelas}')"

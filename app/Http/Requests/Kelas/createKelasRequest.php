@@ -23,6 +23,7 @@ class createKelasRequest extends FormRequest
     {
         return [
             'kodeKelas' => ['required', 'string', 'max:255', 'unique:kelas,kodeKelas'],
+            'tahunAjar' => ['required', 'string', 'max:9'],
         ];
     }
 }

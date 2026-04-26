@@ -29,6 +29,7 @@ class createJadwalRequest extends FormRequest
             'jam' => ['required', 'string', 'max:20'],
             'ruangan' => ['required', 'string', 'max:50'],
             'totalSesi' => ['required', 'integer', 'min:1'],
+            'tahunAjar' => ['required', 'string', 'max:9'],
 
         ];
     }

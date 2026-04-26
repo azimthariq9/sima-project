@@ -74,6 +74,7 @@ class KelasService extends BaseService
         try {
             $kelas = kelas::create([
                 'kodeKelas' => $data['kodeKelas'],
+                'tahunAjar' => $data['tahunAjar'] ??  null,
             ]);
 
             $this->logActivity('CREATE', $kelas, "Membuat kelas: {$kelas->kodeKelas}", $maker);
@@ -106,6 +107,7 @@ class KelasService extends BaseService
             $kelas = $this->findOrFail($id);
             $kelas->update([
                 'kodeKelas' => $data['kodeKelas'] ?? $kelas->kodeKelas,
+                'tahunAjar' => $data['tahunAjar'] ?? $kelas->tahunAjar,
             ]);
 
             $this->logActivity('UPDATE', $kelas, "Mengupdate kelas: {$kelas->kodeKelas}", $maker);
