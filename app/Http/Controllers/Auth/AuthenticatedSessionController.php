@@ -57,6 +57,14 @@ public function store(LoginRequest $request): RedirectResponse
         return redirect()->route('kln.dashboard');
     }
 
+    // ==============================
+    // JURUSAN
+    // ==============================
+    if ($user->role->value === 'jurusan') {
+        flash()->success('Login Succesfully');
+        return redirect()->route('jurusan.dashboard');
+    }
+
     return redirect('/');
 }
     /**

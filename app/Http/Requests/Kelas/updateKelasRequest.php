@@ -25,6 +25,7 @@ class updateKelasRequest extends FormRequest
         return [
             'kodeKelas' => ['sometimes', 'required', 'string', 'max:255', 'unique:kelas,kodeKelas', Rule::unique(kelas::class)->ignore($this->route('kelas')->id)],
             'tahunAjar' => ['sometimes', 'required', 'string', 'max:9'],
+            'jurusan_id' => ['required', 'exists:jurusan,id'],
         ];
     }
 }
