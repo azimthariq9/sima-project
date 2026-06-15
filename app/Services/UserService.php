@@ -189,39 +189,60 @@ class UserService extends BaseService
     public function update($maker, int $id, array $data): User
     {
         DB::beginTransaction();
-        
         try {
-            $user = $this->findOrFail($id);
-            
-            if (isset($data['password']) && $data['password']) {
-                $data['password'] = Hash::make($data['password']);
-            } else {
-                unset($data['password']);
+                $user = $this->findOrFail($id);
+                
+                // Pisahkan data user dan data relasi
+                $userData = [];
+                $relationData = [];
+                
+                // Filter data user (field yang ada di tabel users)
+                $userFields = ['email', 'role', 'status', 'jurusan_id', 'password'];
+                foreach ($userFields as $field) {
+                    if (isset($data[$field])) {
+                        $userData[$field] = $data[$field];
+                    }
+                }
+                
+                // Handle password
+                if (isset($userData['password']) && $userData['password']) {
+                    $userData['password'] = Hash::make($userData['password']);
+                } elseif (isset($userData['password']) && !$userData['password']) {
+                    unset($userData['password']); // Jangan update jika password kosong
+                }
+                
+                // Update user hanya jika ada data user
+                if (!empty($userData)) {
+                    $user->update($userData);
+                }
+                
+                // Handle update relasi mahasiswa
+                if (isset($data['mahasiswa'])) {
+                    $user->mahasiswa()->updateOrCreate(
+                        ['user_id' => $user->id],
+                        $data['mahasiswa']
+                    );
+                }
+                
+                // Handle update relasi dosen
+                if (isset($data['dosen'])) {
+                    $user->dosen()->updateOrCreate(
+                        ['user_id' => $user->id],
+                        $data['dosen'] // Ini hanya berisi ['nama' => 'Marcello Update Test']
+                    );
+                }
+                
+                // $this->NotificationService->sendToUsers($notification_id, [$user->id]);
+
+                $this->logActivity('UPDATE', $user, "Mengupdate akun user {$user->email}", $maker);
+                DB::commit();
+                return $user->fresh(['mahasiswa', 'dosen']);
+                
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Error updating user: ' . $e->getMessage());
+                throw $e;
             }
-            
-            $user->update($data);
-            
-            // Update related record
-            if ($user->role === 'mahasiswa' && isset($data['mahasiswa'])) {
-                $user->mahasiswa()->updateOrCreate(
-                    ['user_id' => $user->id],
-                    $data['mahasiswa']
-                );
-            } elseif ($user->role === 'dosen' && isset($data['dosen'])) {
-                $user->dosen()->updateOrCreate(
-                    ['user_id' => $user->id],
-                    $data['dosen']
-                );
-            }
-            
-            $this->logActivity('UPDATE', $user, "Mengupdate user: {$user->name}", $maker);
-            
-            DB::commit();
-            return $user->fresh(['mahasiswa', 'dosen']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
     }
     
     /**

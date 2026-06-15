@@ -53,6 +53,7 @@ public function store(LoginRequest $request): RedirectResponse
     // KLN
     // ==============================
     if ($user->role->value === 'kln') {
+        flash()->success('Login Succesfully');
         return redirect()->route('kln.dashboard');
     }
 

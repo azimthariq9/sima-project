@@ -24,7 +24,7 @@ class AnnouncementService extends BaseService
     
     public function getAll(array $filters = [], int $perPage = 15):LengthAwarePaginator
     {
-        $query = Announcement::with(['targetRoles', 'createdBy']);
+        $query = Announcement::with(['mahasiswa']);
         
         if (isset($filters['is_published'])) {
             $query->where('is_published', $filters['is_published']);
@@ -35,6 +35,17 @@ class AnnouncementService extends BaseService
         }
         
         return $query->latest()->paginate($perPage);
+    }
+
+    public function getSpecific(int $id)
+    {
+        try {
+            $query = Announcement::with(['mahasiswa']);
+            return $query->findOrFail($id);
+        } catch (\Exception $e) {
+            Log::error('Error get specific announcement: ' . $e->getMessage());
+            throw $e;
+        }
     }
     
     public function create($maker, array $data): Announcement
@@ -54,6 +65,45 @@ class AnnouncementService extends BaseService
             $announcement = parent::create($maker, $announcementData);
             
             // 3. Attach mahasiswa (penerima) - INI SATU-SATUNYA RELASI
+            if (isset($data['mahasiswa_ids']) && is_array($data['mahasiswa_ids'])) {
+                $announcement->mahasiswa()->attach($data['mahasiswa_ids']);
+                
+                Log::info('Mahasiswa attached', [
+                    'announcement_id' => $announcement->id,
+                    'mahasiswa_ids' => $data['mahasiswa_ids']
+                ]);
+            }
+            
+            
+            DB::commit();
+            
+            // Load relasi untuk response
+            return $announcement->load('mahasiswa', 'user');
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating announcement: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function update($maker, int $id, array $data): Announcement
+    {
+        DB::beginTransaction();
+        
+        try {
+            // 1. Data announcement
+            $announcementData = [
+                'user_id' => $maker->id,  // creator
+                'subject' => $data['subject'],
+                'message' => $data['message'],
+                'status' => $data['status'],
+            ];
+            
+            
+            $announcement = parent::update($maker, $id, $announcementData);
+            
+            // // 3. Attach mahasiswa (penerima) - INI SATU-SATUNYA RELASI
             if (isset($data['mahasiswa_ids']) && is_array($data['mahasiswa_ids'])) {
                 $announcement->mahasiswa()->attach($data['mahasiswa_ids']);
                 
@@ -105,7 +155,7 @@ class AnnouncementService extends BaseService
     public function getForMahasiswa(int $id, int $perPage){
         $query = Announcement::with(['user_id', 'createdBy']);
 
-
-
     }
+
+    
 }

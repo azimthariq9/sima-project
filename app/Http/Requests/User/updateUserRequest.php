@@ -8,6 +8,8 @@ use Illuminate\Validation\Rules\Enum;
 use Illuminate\Support\Facades\Auth;
 use App\Enums\Status;
 use App\Enums\Role;
+use App\Models\dosen;
+use App\Models\Mahasiswa;
 use App\Models\User;
 class updateUserRequest extends FormRequest
 {
@@ -16,7 +18,7 @@ class updateUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check() && (auth()->user()->role === Role::KLN || auth()->user()->role === Role::adminJurusan);
+        return auth()->check() && (auth()->user()->role === Role::KLN || auth()->user()->role === Role::JURUSAN);
     }
 
     /**
@@ -26,12 +28,23 @@ class updateUserRequest extends FormRequest
      */
     public function rules(): array
     {
+        $user = $this->route('user'); // Ini akan terisi jika pakai route model binding
         return [
-            'email' => ['sometimes', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($this->route('user')->id)],
-            'password' => ['sometimes', 'string', 'min:8'],
+            'email' => ['sometimes', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
+            'password' => ['sometimes', 'string', 'min:8', 'nullable'],
             'role' => ['sometimes', new Enum(Role::class)],
             'status' => ['sometimes', new Enum(Status::class)],
             'jurusan_id' => ['sometimes', 'exists:jurusan,id'],
+            //mahasiswa
+            'mahasiswa' => ['required_if:role,mahasiswa', 'array'],
+            'mahasiswa.npm' => ['sometimes', 'string', 'max:20', Rule::unique(Mahasiswa::class)->ignore($user->mahasiswa?->id)],
+            'mahasiswa.nama' => ['sometimes', 'string', 'max:255'],
+
+            //dosen
+            'dosen' => ['required_if:role,dosen', 'array'],
+            'dosen.nama' => ['sometimes', 'string', 'max:255'],
+            'dosen.nidn' => ['sometimes', 'string', 'max:255', Rule::unique(dosen::class)->ignore($user->dosen?->id)],
+            'dosen.kodeDos' => ['sometimes','string', 'max:255', Rule::unique(dosen::class)->ignore($user->dosen?->id)],
         ];
     }
 }

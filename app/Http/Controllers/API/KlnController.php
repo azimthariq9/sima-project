@@ -5,6 +5,8 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\ReqDokumen;
 use App\Models\FileDetail;
+use App\Models\User;
+use App\Models\jurusan;
 use Illuminate\Http\Request;
 
 class KlnController extends Controller
@@ -17,8 +19,10 @@ class KlnController extends Controller
     */
 
     public function index()
-    {
+    {   
+        
         return view('kln.dashboard');
+       
     }
 
 
@@ -36,6 +40,7 @@ class KlnController extends Controller
 
         return view('kln.dokumen', compact('requests'));
     }
+
 
 
     /*
@@ -183,6 +188,16 @@ class KlnController extends Controller
     public function updateStatusMahasiswa($id)
     {
         return response()->json(['success' => true]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Announcemet PAGE
+    |--------------------------------------------------------------------------
+    */
+
+    public function announcementPage(){
+        return response()->view('kln.announcement');
     }
 
 }
