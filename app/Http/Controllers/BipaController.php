@@ -65,8 +65,8 @@ class BipaController extends Controller
             ->whereYear('created_at', now()->year)
             ->count();
 
-        $announcements = DB::table('announcements')
-            ->where('role_pengirim', 'bipa')
+        $announcements = DB::table('announcement')
+            ->where('sumber', 'bipa')
             ->orderBy('created_at', 'desc')
             ->limit(3)
             ->get();
@@ -161,8 +161,8 @@ class BipaController extends Controller
 
     public function announcement()
     {
-        $announcements = DB::table('announcements')
-            ->where('role_pengirim', 'bipa')
+        $announcements = DB::table('announcement')
+            ->where('sumber', 'bipa')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 

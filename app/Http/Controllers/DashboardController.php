@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -16,11 +15,7 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $role = strtolower(
-            $user->role instanceof \App\Enums\Role
-                ? $user->role->value
-                : $user->role
-        );
+        $role = strtolower((string) $user->role);
 
         return match($role) {
             'mahasiswa'  => redirect()->route('mahasiswa.dashboard'),

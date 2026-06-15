@@ -5,67 +5,106 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Jadwal;
+use App\Models\Kehadiran;
 
 class DosenController extends Controller
 {
-
     /*
     |--------------------------------------------------------------------------
-    | DASHBOARD DOSEN
+    | DASHBOARD
     |--------------------------------------------------------------------------
     */
     public function dashboard()
     {
-        $user     = Auth::user();
-        $dosen_id = $user->id;
+        $dosen = Auth::user()->dosen;
 
-        $total_kelas = DB::table('jadwal')
-            ->where('dosen_id', $dosen_id)
-            ->count();
+        $hariMap = [
+            'Monday'    => 'Senin',
+            'Tuesday'   => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday'  => 'Kamis',
+            'Friday'    => 'Jumat',
+            'Saturday'  => 'Sabtu',
+            'Sunday'    => 'Minggu',
+        ];
+        $hariId = $hariMap[now()->format('l')] ?? now()->format('l');
 
-        $total_mahasiswa = DB::table('mahasiswa_kelas')->count();
+        $jadwalHariIni = collect();
+        if ($dosen) {
+            $jadwalHariIni = Jadwal::with(['kelas', 'matakuliah'])
+                ->where('dosen_id', $dosen->id)
+                ->where('hari', $hariId)
+                ->get();
+        }
 
-        return view('dosen.dashboard', [
-            'total_kelas'     => $total_kelas,
-            'total_mahasiswa' => $total_mahasiswa,
-        ]);
+        return view('dosen.dashboard', compact('jadwalHariIni', 'hariId'));
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | PROFIL DOSEN
+    | PROFIL
     |--------------------------------------------------------------------------
     */
     public function profil()
     {
-        $user = Auth::user();
-
-        return view('dosen.profil', [
-            'user' => $user,
-        ]);
+        return view('dosen.profil', ['user' => Auth::user()]);
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | JADWAL DOSEN
+    | JADWAL — daftar semua jadwal dosen
     |--------------------------------------------------------------------------
     */
     public function jadwal()
     {
-        $user = Auth::user();
+        $dosen  = Auth::user()->dosen;
 
-        $jadwal = DB::table('jadwal')
-            ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
-            ->select('jadwal.*', 'matakuliah.namaMk as matakuliah')
-            ->where('jadwal.dosen_id', $user->id)
-            ->orderBy('jadwal.hari')
-            ->get();
+        $jadwal = collect();
+        if ($dosen) {
+            $jadwal = Jadwal::with(['kelas', 'matakuliah'])
+                ->where('dosen_id', $dosen->id)
+                ->orderByRaw("CASE hari
+                    WHEN 'Senin'   THEN 1
+                    WHEN 'Selasa'  THEN 2
+                    WHEN 'Rabu'    THEN 3
+                    WHEN 'Kamis'   THEN 4
+                    WHEN 'Jumat'   THEN 5
+                    WHEN 'Sabtu'   THEN 6
+                    ELSE 7 END")
+                ->get();
+        }
 
-        return view('dosen.jadwal', [
-            'jadwal' => $jadwal,
-        ]);
+        return view('dosen.jadwal.index', compact('jadwal'));
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | JADWAL DETAIL — mahasiswa di kelas + form kehadiran
+    |--------------------------------------------------------------------------
+    */
+    public function jadwalDetail($jadwalId)
+    {
+        $dosen  = Auth::user()->dosen;
+
+        $jadwal = Jadwal::with([
+                'kelas.mahasiswa.user',
+                'matakuliah',
+            ])
+            ->where('dosen_id', $dosen->id)
+            ->findOrFail($jadwalId);
+
+        $mahasiswa  = $jadwal->kelas->mahasiswa ?? collect();
+
+        $sesiTerisi = Kehadiran::where('jadwal_id', $jadwalId)
+            ->distinct()
+            ->pluck('sesi')
+            ->toArray();
+
+        return view('dosen.jadwal.detail', compact('jadwal', 'mahasiswa', 'sesiTerisi'));
     }
 
 
@@ -80,9 +119,7 @@ class DosenController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('dosen.announcement', [
-            'announcement' => $data,
-        ]);
+        return view('dosen.announcement', ['announcement' => $data]);
     }
 
 
@@ -100,39 +137,33 @@ class DosenController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('dosen.notifikasi', [
-            'notifikasi' => $notif,
-        ]);
+        return view('dosen.notifikasi', ['notifikasi' => $notif]);
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | ANALYTICS DOSEN — FIXED (was double return before)
+    | ANALYTICS
     |--------------------------------------------------------------------------
     */
     public function analytics()
     {
-        $user     = Auth::user();
-        $dosen_id = $user->id;
+        $dosen_id = Auth::id();
 
-        // ── STATS ─────────────────────────────────────────────────────────────
-        $total_kelas = DB::table('jadwal')
-            ->where('dosen_id', $dosen_id)
-            ->count();
-
+        $total_kelas     = DB::table('jadwal')->where('dosen_id', $dosen_id)->count();
         $total_mahasiswa = DB::table('mahasiswa_kelas')->count();
-
-        $total_absen   = DB::table('attendance_records')->count();
-        $total_session = DB::table('attendances_sessions')->count();
+        $total_absen     = DB::table('attendance_records')->count();
+        $total_session   = DB::table('attendances_sessions')->count();
 
         $rata_kehadiran = $total_session > 0
             ? round(($total_absen / ($total_session * 30)) * 100)
             : 0;
 
-        // ── JADWAL HARI INI ───────────────────────────────────────────────────
-        // translatedFormat('l') → "Sabtu", "Senin", dst.
-        $hari = now()->translatedFormat('l');
+        $hariMap = [
+            'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu', 'Sunday' => 'Minggu',
+        ];
+        $hari = $hariMap[now()->format('l')] ?? now()->format('l');
 
         $jadwal_hari_ini = DB::table('jadwal')
             ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
@@ -141,7 +172,6 @@ class DosenController extends Controller
             ->where('jadwal.hari', $hari)
             ->get();
 
-        // ── SEMUA MATAKULIAH DOSEN (untuk form Start Attendance) ─────────────
         $semua_matakuliah = DB::table('jadwal')
             ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
             ->select('matakuliah.id as course_id', 'matakuliah.namaMk')
@@ -149,15 +179,12 @@ class DosenController extends Controller
             ->groupBy('matakuliah.id', 'matakuliah.namaMk')
             ->get();
 
-        // ── ACTIVE ATTENDANCE (kode absensi yang masih aktif) ─────────────────
-        // INI YANG HILANG SEBELUMNYA — harus sebelum return view()
         $active_attendance = DB::table('attendances_sessions')
             ->where('lecturer_id', $dosen_id)
             ->where('status', 'active')
             ->orderBy('created_at', 'desc')
             ->first();
 
-        // ── DAFTAR MAHASISWA HADIR (live, berdasarkan sesi aktif) ─────────────
         $students_present = collect();
         if ($active_attendance) {
             $students_present = DB::table('attendance_records')
@@ -168,7 +195,6 @@ class DosenController extends Controller
                 ->get();
         }
 
-        // ── HISTORY ABSENSI (5 terakhir + jumlah hadir) ─────────────────────
         $attendance_history = DB::table('attendances_sessions')
             ->join('matakuliah', 'attendances_sessions.course_id', '=', 'matakuliah.id')
             ->select(
@@ -181,12 +207,10 @@ class DosenController extends Controller
             ->limit(5)
             ->get();
 
-        // ── PROGRESS PERTEMUAN ────────────────────────────────────────────────
         $meeting_progress = DB::table('attendances_sessions')
             ->where('lecturer_id', $dosen_id)
             ->count();
 
-        // ── CHART DATA (per pertemuan) ────────────────────────────────────────
         $chart_data = DB::table('attendances_sessions')
             ->select(
                 'meeting_number',
@@ -197,41 +221,29 @@ class DosenController extends Controller
             ->limit(16)
             ->get();
 
-        // ── RETURN VIEW — hanya satu return, semua variabel lengkap ──────────
-        return view('dosen.analytics', [
-            'total_kelas'        => $total_kelas,
-            'total_mahasiswa'    => $total_mahasiswa,
-            'rata_kehadiran'     => $rata_kehadiran,
-            'jadwal_hari_ini'    => $jadwal_hari_ini,
-            'semua_matakuliah'   => $semua_matakuliah,
-            'active_attendance'  => $active_attendance,
-            'students_present'   => $students_present,
-            'attendance_history' => $attendance_history,
-            'meeting_progress'   => $meeting_progress,
-            'chart_data'         => $chart_data,
-        ]);
+        return view('dosen.analytics', compact(
+            'total_kelas', 'total_mahasiswa', 'rata_kehadiran',
+            'jadwal_hari_ini', 'semua_matakuliah', 'active_attendance',
+            'students_present', 'attendance_history', 'meeting_progress', 'chart_data'
+        ));
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | START ABSENSI — GENERATE KODE
+    | START ABSENSI
     |--------------------------------------------------------------------------
     */
     public function startAttendance(Request $request)
     {
         $dosen_id = Auth::id();
+        $code     = strtoupper(substr(md5(uniqid(rand(), true)), 0, 5));
 
-        // Generate kode unik 5 karakter
-        $code = strtoupper(substr(md5(uniqid(rand(), true)), 0, 5));
-
-        // Tutup semua sesi aktif dosen ini dulu
         DB::table('attendances_sessions')
             ->where('lecturer_id', $dosen_id)
             ->where('status', 'active')
             ->update(['status' => 'closed']);
 
-        // Buat sesi baru
         DB::table('attendances_sessions')->insert([
             'course_id'       => $request->course_id,
             'lecturer_id'     => $dosen_id,
@@ -255,14 +267,11 @@ class DosenController extends Controller
     */
     public function closeAttendance(Request $request)
     {
-        $dosen_id = Auth::id();
-
         DB::table('attendances_sessions')
             ->where('id', $request->session_id)
-            ->where('lecturer_id', $dosen_id)
+            ->where('lecturer_id', Auth::id())
             ->update(['status' => 'closed']);
 
         return redirect()->route('dosen.analytics');
     }
-
 }

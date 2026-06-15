@@ -161,7 +161,7 @@ class MahasiswaController extends Controller
         | Pengumuman terbaru (3)
         |----------------------------------------------------------------------
         */
-        $announcements = DB::table('announcements')
+        $announcements = DB::table('announcement')
             ->orderBy('created_at', 'desc')
             ->limit(3)
             ->get();
@@ -581,11 +581,11 @@ class MahasiswaController extends Controller
 
     public function announcement()
     {
-        $announcements = DB::table('announcements')
+        $announcements = DB::table('announcement')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $unreadNotifCount = DB::table('notifikasi')
+        $unreadNotifCount = DB::table('notification_users')
             ->where('user_id', Auth::id())
             ->where('is_read', false)
             ->count();

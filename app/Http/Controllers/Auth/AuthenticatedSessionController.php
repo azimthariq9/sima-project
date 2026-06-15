@@ -29,35 +29,32 @@ public function store(LoginRequest $request): RedirectResponse
     $request->session()->regenerate();
 
     $user = auth()->user();
+    $role = strtolower((string) $user->role);
 
-    // ==============================
-    // MAHASISWA
-    // ==============================
-    if ($user->role->value === 'mahasiswa') {
-
+    if ($role === 'mahasiswa') {
         if (!$user->profile_completed) {
             return redirect()->route('mahasiswa.complete-profile');
         }
-
         return redirect()->route('mahasiswa.dashboard');
     }
 
-    // ==============================
-    // DOSEN
-    // ==============================
-    if ($user->role->value === 'dosen') {
+    if ($role === 'dosen') {
         return redirect()->route('dosen.dashboard');
     }
 
-    // ==============================
-    // KLN
-    // ==============================
-    if ($user->role->value === 'kln') {
-        flash()->success('Login Succesfully');
+    if ($role === 'kln') {
         return redirect()->route('kln.dashboard');
     }
 
-    return redirect('/');
+    if ($role === 'jurusan') {
+        return redirect()->route('jurusan.dashboard');
+    }
+
+    if ($role === 'bipa') {
+        return redirect()->route('bipa.dashboard');
+    }
+
+    return redirect('/dashboard');
 }
     /**
      * Destroy an authenticated session.

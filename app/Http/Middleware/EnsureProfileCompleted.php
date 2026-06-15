@@ -4,28 +4,23 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureProfileCompleted
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-public function handle($request, Closure $next)
-{
-    if (auth()->check()) {
+    public function handle(Request $request, Closure $next): Response
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
 
-        $user = auth()->user();
-
-        if ($user->role->value === 'mahasiswa' && !$user->profile_completed) {
-            if (!$request->routeIs('mahasiswa.complete-profile')) {
-                return redirect()->route('mahasiswa.complete-profile');
+            if ($user->role === 'mahasiswa' && !$user->profile_completed) {
+                if (!$request->routeIs('mahasiswa.complete-profile')) {
+                    return redirect()->route('mahasiswa.complete-profile');
+                }
             }
         }
-    }
 
-    return $next($request);
-}
+        return $next($request);
+    }
 }

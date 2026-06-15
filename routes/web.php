@@ -8,15 +8,11 @@ use App\Http\Controllers\MahasiswaRequestController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\DosenController;
 use App\Http\Controllers\JurusanController;
-use App\Http\Controllers\BipaController;
-use App\Http\Controllers\GunadarmaController;
-use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\API\KlnController;
 use App\Http\Controllers\API\DokumenController;
 use App\Http\Controllers\API\UserController;
-use App\Http\Controllers\MahasiswaController;
-use App\Http\Controllers\API\DosenController;
-use App\Http\Controllers\API\JurusanController;
+use App\Http\Controllers\API\DosenController as ApiDosenController;
+use App\Http\Controllers\API\JurusanController as ApiJurusanController;
 use App\Http\Controllers\API\MatakuliahController;
 use App\Http\Controllers\API\KelasController;
 use App\Http\Controllers\API\MahasiswaKelasController;
@@ -58,7 +54,7 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| MAHASISWA ROUTES (🔥 FIX TOTAL)
+| MAHASISWA ROUTES
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'check.role:MAHASISWA'])
@@ -66,26 +62,20 @@ Route::middleware(['auth', 'check.role:MAHASISWA'])
     ->name('mahasiswa.')
     ->group(function () {
 
-        // ✅ COMPLETE PROFILE
         Route::get('complete-profile',  [MahasiswaController::class, 'completeProfile'])->name('complete-profile');
         Route::post('complete-profile', [MahasiswaController::class, 'storeCompleteProfile'])->name('complete-profile.store');
 
-        // ✅ ROUTE SETELAH PROFILE COMPLETE
         Route::middleware(['profile.completed'])->group(function () {
 
             Route::get('dashboard', [MahasiswaController::class, 'dashboard'])->name('dashboard');
-
-            // 🔥 FIX: PROFIL → PROFILE
             Route::get('profile',   [MahasiswaController::class, 'getProfile'])->name('profile');
             Route::patch('profile', [MahasiswaController::class, 'updateProfile'])->name('profile.update');
 
-            // REQUEST
-            Route::get('request',         [MahasiswaRequestController::class, 'index'])->name('request.index');
-            Route::post('request',        [MahasiswaRequestController::class, 'store'])->name('request.store');
-            Route::get('request/create',  [MahasiswaController::class, 'createRequest'])->name('request.create');
-            Route::post('request/quick',  [MahasiswaController::class, 'storeRequest'])->name('request.quick');
+            Route::get('request',        [MahasiswaRequestController::class, 'index'])->name('request.index');
+            Route::post('request',       [MahasiswaRequestController::class, 'store'])->name('request.store');
+            Route::get('request/create', [MahasiswaController::class, 'createRequest'])->name('request.create');
+            Route::post('request/quick', [MahasiswaController::class, 'storeRequest'])->name('request.quick');
 
-            // DOKUMEN
             Route::prefix('dokumen')->name('dokumen.')->group(function () {
                 Route::get('/',             [DokumenController::class, 'index'])->name('index');
                 Route::post('/',            [DokumenController::class, 'store'])->name('store');
@@ -94,190 +84,60 @@ Route::middleware(['auth', 'check.role:MAHASISWA'])
 
             Route::get('jadwal',       [MahasiswaController::class, 'jadwal'])->name('jadwal');
             Route::get('announcement', [MahasiswaController::class, 'announcement'])->name('announcement');
-            Route::get('ids', [AnnouncementController::class, 'getAllIds'])->name('ids');
-            Route::delete('{id}', [AnnouncementController::class, 'destroy'])->name('destroy');
             Route::get('notifikasi',   [MahasiswaController::class, 'notifikasi'])->name('notifikasi');
             Route::get('analytics',    [MahasiswaController::class, 'analytics'])->name('analytics');
         });
-
-        /* ---- JURUSAN ---- */
-        Route::prefix('jurusan')->name('jurusan.')->group(function () {
-        
-            // Jika ada halaman view khusus management jurusan di KLN, tambahkan di sini:
-            // Route::get('/', [KlnController::class, 'jurusanPage'])->name('page');
-        
-            // AJAX data untuk table
-            Route::get('data', [JurusanController::class, 'getJurusan'])->name('data');
-        
-            // CRUD
-            Route::get('{id}', [JurusanController::class, 'showJurusan'])->name('show');
-            Route::post('/', [JurusanController::class, 'storeJurusan'])->name('store');
-            Route::patch('{id}', [JurusanController::class, 'updateJurusan'])->name('update');
-            Route::delete('{id}', [JurusanController::class, 'destroyJurusan'])->name('destroy');
-        });
-        
     });
 
 /*
 |--------------------------------------------------------------------------
-| =========================
-| ADMIN JURUSAN ROUTES (FINAL FIX)
-| =========================
-|--------------------------------------------------------------------------
-*/
-/*
-|--------------------------------------------------------------------------
-| =========================
 | JURUSAN ROUTES
-| =========================
-| Semua route di sini di-scope otomatis ke jurusan_id dari auth user.
-| Admin jurusan A tidak bisa mengakses data jurusan B.
-| Scope diterapkan di layer Service masing-masing.
 |--------------------------------------------------------------------------
 */
-
-// Route::middleware(['auth', 'check.role:JURUSAN'])
-//     ->prefix('jurusan')
-//     ->name('jurusan.')
-//     ->group(function () {
-
-//         /*
-//         |----------------------------------------------------------------------
-//         | DASHBOARD
-//         |----------------------------------------------------------------------
-//         */
-//         Route::get('dashboard', [JurusanController::class, 'index'])
-//             ->name('dashboard');
-//         Route::view('notifikasi', 'jurusan.notifikasi')->name('notifikasi');
-//         /*
-//         |----------------------------------------------------------------------
-//         | DOSEN
-//         | Page   : JurusanController (return view)
-//         | Data   : DosenController (return JSON)
-//         | Note   : store/update/destroy untuk data model Dosen
-//         |          Create User dosen tetap via UserController
-//         |----------------------------------------------------------------------
-//         */
-//         Route::prefix('dosen')->name('dosen.')->group(function () {
-//             // View page
-//             Route::get('/', [JurusanController::class, 'dosenPage'])->name('page');
-
-//             // AJAX data untuk table
-//             Route::get('data', [DosenController::class, 'getData'])->name('data');
-
-//             // CRUD
-//             Route::get('{id}', [DosenController::class, 'show'])->name('show');
-//             Route::post('/', [DosenController::class, 'store'])->name('store'); // ini sepertinya tidak dipakai
-//             Route::patch('{id}', [DosenController::class, 'update'])->name('update');
-//             Route::delete('{id}', [DosenController::class, 'destroy'])->name('destroy');
-//         });
-
-//         /*
-//         |----------------------------------------------------------------------
-//         | USER DOSEN (Create/manage akun User dengan role dosen)
-//         | Reuse UserController — hanya expose endpoint yang relevan
-//         | untuk admin jurusan (bukan seluruh user management seperti KLN)
-//         |----------------------------------------------------------------------
-//         */
-//         Route::prefix('users')->name('users.')->group(function () {
-//             Route::get('data', [UserController::class, 'getUsers'])->name('data');
-//             Route::get('{id}', [UserController::class, 'showUser'])->name('show');
-//             Route::post('/', [UserController::class, 'store'])->name('store');
-//             Route::patch('{user}', [UserController::class, 'update'])->name('update');
-//             Route::delete('{id}', [UserController::class, 'destroy'])->name('destroy');
-//         });
-
-//         /*
-//         |----------------------------------------------------------------------
-//         | MATAKULIAH
-//         |----------------------------------------------------------------------
-//         */
-//         Route::prefix('matakuliah')->name('matakuliah.')->group(function () {
-//             // View page
-//             Route::get('/', [JurusanController::class, 'matakuliahPage'])->name('page');
-
-//             // AJAX data untuk table
-//             Route::get('data', [MatakuliahController::class, 'getData'])->name('data');
-
-//             // CRUD
-//             Route::get('{id}', [MatakuliahController::class, 'show'])->name('show');
-//             Route::post('/', [MatakuliahController::class, 'store'])->name('store');
-//             Route::patch('{id}', [MatakuliahController::class, 'update'])->name('update');
-//             Route::delete('{id}', [MatakuliahController::class, 'destroy'])->name('destroy');
-//         });
-
-//         /*
-//         |----------------------------------------------------------------------
-//         | KELAS
-//         |----------------------------------------------------------------------
-//         */
-//         Route::prefix('kelas')->name('kelas.')->group(function () {
-//             // View page
-//             Route::get('/', [JurusanController::class, 'kelasPage'])->name('page');
-
-//             // AJAX data untuk table
-//             Route::get('data', [KelasController::class, 'getData'])->name('data');
-
-//             // CRUD
-//             Route::get('{id}', [KelasController::class, 'show'])->name('show');
-//             Route::post('/', [KelasController::class, 'store'])->name('store');
-//             Route::patch('{id}', [KelasController::class, 'update'])->name('update');
-//             Route::delete('{id}', [KelasController::class, 'destroy'])->name('destroy');
-
-//             /*
-//             |------------------------------------------------------------------
-//             | MAHASISWA KELAS (nested di bawah kelas)
-//             | GET  kelas/{id}/mahasiswa  → lihat semua mahasiswa di kelas
-//             | POST kelas/{id}/mahasiswa  → tambah mahasiswa ke kelas
-//             | DELETE kelas/{id}/mahasiswa/{mahasiswaId} → hapus dari kelas
-//             |------------------------------------------------------------------
-//             */
-//             Route::prefix('{kelasId}/mahasiswa')->name('mahasiswa.')->group(function () {
-//                 Route::get('/', [MahasiswaKelasController::class, 'getMahasiswa'])->name('get');
-//                 Route::post('/', [MahasiswaKelasController::class, 'addMahasiswa'])->name('add');
-//                 Route::delete('{mahasiswaId}', [MahasiswaKelasController::class, 'removeMahasiswa'])->name('remove');
-//             });
-//         });
-
-//         /*
-//         |----------------------------------------------------------------------
-//         | JADWAL
-//         |----------------------------------------------------------------------
-//         */
-//         Route::prefix('jadwal')->name('jadwal.')->group(function () {
-//             // View page
-//             Route::get('/', [JurusanController::class, 'jadwalPage'])->name('page');
-
-//             // AJAX data untuk table
-//             Route::get('data', [JadwalController::class, 'getData'])->name('data');
-
-//             // CRUD
-//             Route::get('{id}', [JadwalController::class, 'show'])->name('show');
-//             Route::post('/', [JadwalController::class, 'store'])->name('store');
-//             Route::patch('{id}', [JadwalController::class, 'update'])->name('update');
-//             Route::delete('{id}', [JadwalController::class, 'destroy'])->name('destroy');
-//         });
-
-//     });
 Route::middleware(['auth', 'check.role:JURUSAN'])
     ->prefix('jurusan')
     ->name('jurusan.')
     ->group(function () {
- 
-        Route::get('dashboard', [JurusanController::class, 'index'])->name('dashboard');
- 
-        /* ---- DOSEN ---- */
-        Route::prefix('dosen')->name('dosen.')->group(function () {
-            Route::get('/',       [JurusanController::class, 'dosenPage'])->name('page');
-            Route::get('dosen/preview', [JurusanController::class, 'previewDosen'])->name('dosen.preview');
-            Route::get('data',    [DosenController::class, 'getData'])->name('data');
-            Route::get('{id}',    [DosenController::class, 'show'])->name('show');
-            Route::post('/',      [DosenController::class, 'store'])->name('store');
-            Route::patch('{id}',  [DosenController::class, 'update'])->name('update');
-            Route::delete('{id}', [DosenController::class, 'destroy'])->name('destroy');
+
+        // Halaman konten (via page controller)
+        Route::get('dashboard',    [JurusanController::class, 'dashboard'])->name('dashboard');
+        Route::get('notifikasi',   [JurusanController::class, 'notifikasi'])->name('notifikasi');
+        Route::get('profil',       [JurusanController::class, 'profil'])->name('profil');
+        Route::get('announcement', [JurusanController::class, 'announcement'])->name('announcement');
+
+        // Dokumen
+        Route::prefix('dokumen')->name('dokumen.')->group(function () {
+            Route::get('/',              [JurusanController::class, 'dokumen'])->name('index');
+            Route::get('{id}',           [JurusanController::class, 'showDokumen'])->name('show');
+            Route::post('{id}/upload',   [JurusanController::class, 'uploadDokumen'])->name('upload');
         });
- 
-        /* ---- USER DOSEN (buat akun user role dosen) ---- */
+
+        // Request dokumen
+        Route::prefix('requestDok')->name('request.')->group(function () {
+            Route::get('/',              [JurusanController::class, 'indexReqDocument'])->name('index');
+            Route::get('{id}',           [JurusanController::class, 'showReqDocument'])->name('show');
+            Route::patch('{id}/status',  [JurusanController::class, 'updateReqDokumen'])->name('status');
+            Route::post('{id}/upload',   [JurusanController::class, 'uploadReqDokumen'])->name('upload');
+        });
+
+        // Halaman manajemen (via ApiJurusanController — punya page methods)
+        Route::get('dosen',      [ApiJurusanController::class, 'dosenPage'])->name('dosen.page');
+        Route::get('matakuliah', [ApiJurusanController::class, 'matakuliahPage'])->name('matakuliah.page');
+        Route::get('kelas',      [ApiJurusanController::class, 'kelasPage'])->name('kelas.page');
+        Route::get('jadwal',     [ApiJurusanController::class, 'jadwalPage'])->name('jadwal.page');
+        Route::get('mahasiswa',  [ApiJurusanController::class, 'mahasiswaPage'])->name('mahasiswa.page');
+
+        // AJAX — Dosen
+        Route::prefix('dosen')->name('dosen.')->group(function () {
+            Route::get('data',    [ApiDosenController::class, 'getData'])->name('data');
+            Route::get('preview', [ApiJurusanController::class, 'previewDosen'])->name('preview');
+            Route::get('{id}',    [ApiDosenController::class, 'show'])->name('show');
+            Route::post('/',      [ApiDosenController::class, 'store'])->name('store');
+            Route::patch('{id}',  [ApiDosenController::class, 'update'])->name('update');
+            Route::delete('{id}', [ApiDosenController::class, 'destroy'])->name('destroy');
+        });
+
+        // AJAX — User (akun dosen)
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('data',     [UserController::class, 'getUsers'])->name('data');
             Route::get('{id}',     [UserController::class, 'showUser'])->name('show');
@@ -285,129 +145,76 @@ Route::middleware(['auth', 'check.role:JURUSAN'])
             Route::patch('{user}', [UserController::class, 'update'])->name('update');
             Route::delete('{id}',  [UserController::class, 'destroy'])->name('destroy');
         });
- 
-        /* ---- MAHASISWA ---- */
+
+        // AJAX — Mahasiswa
         Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
-            // View page
-            Route::get('/',    [JurusanController::class, 'mahasiswaPage'])->name('page');
-            // Data AJAX — query User role=mahasiswa, jurusan sama, with('mahasiswa', 'mahasiswa.kelas')
-            Route::get('data', [JurusanController::class, 'getMahasiswaData'])->name('data');
-            // Detail mahasiswa (return user + relasi)
-            Route::get('{id}', [JurusanController::class, 'showMahasiswa'])->name('show');
+            Route::get('data', [ApiJurusanController::class, 'getMahasiswaData'])->name('data');
+            Route::get('{id}', [ApiJurusanController::class, 'showMahasiswa'])->name('show');
         });
- 
-        /* ---- MATAKULIAH ---- */
+
+        // AJAX — Matakuliah
         Route::prefix('matakuliah')->name('matakuliah.')->group(function () {
-            Route::get('/',       [JurusanController::class, 'matakuliahPage'])->name('page');
-            Route::get('matakuliah/preview', [JurusanController::class, 'previewMatakuliah'])->name('matakuliah.preview');
             Route::get('data',    [MatakuliahController::class, 'getData'])->name('data');
+            Route::get('preview', [ApiJurusanController::class, 'previewMatakuliah'])->name('preview');
             Route::get('{id}',    [MatakuliahController::class, 'show'])->name('show');
             Route::post('/',      [MatakuliahController::class, 'store'])->name('store');
             Route::patch('{id}',  [MatakuliahController::class, 'update'])->name('update');
             Route::delete('{id}', [MatakuliahController::class, 'destroy'])->name('destroy');
         });
- 
-        /* ---- KELAS ---- */
+
+        // AJAX — Kelas
         Route::prefix('kelas')->name('kelas.')->group(function () {
-            Route::get('/',       [JurusanController::class, 'kelasPage'])->name('page');
-            Route::get('kelas/preview', [JurusanController::class, 'previewKelas'])->name('kelas.preview');
             Route::get('data',    [KelasController::class, 'getData'])->name('data');
+            Route::get('preview', [ApiJurusanController::class, 'previewKelas'])->name('preview');
             Route::get('{id}',    [KelasController::class, 'show'])->name('show');
             Route::post('/',      [KelasController::class, 'store'])->name('store');
             Route::patch('{id}',  [KelasController::class, 'update'])->name('update');
             Route::delete('{id}', [KelasController::class, 'destroy'])->name('destroy');
- 
-            /* Mahasiswa dalam kelas (nested) */
+
             Route::prefix('{kelasId}/mahasiswa')->name('mahasiswa.')->group(function () {
                 Route::get('/',                [MahasiswaKelasController::class, 'getMahasiswa'])->name('get');
                 Route::post('/',               [MahasiswaKelasController::class, 'addMahasiswa'])->name('add');
                 Route::delete('{mahasiswaId}', [MahasiswaKelasController::class, 'removeMahasiswa'])->name('remove');
             });
         });
- 
-        /* ---- JADWAL ---- */
+
+        // AJAX — Jadwal
         Route::prefix('jadwal')->name('jadwal.')->group(function () {
-            Route::get('/',       [JurusanController::class, 'jadwalPage'])->name('page');
             Route::get('data',    [JadwalController::class, 'getData'])->name('data');
             Route::get('{id}',    [JadwalController::class, 'show'])->name('show');
             Route::post('/',      [JadwalController::class, 'store'])->name('store');
             Route::patch('{id}',  [JadwalController::class, 'update'])->name('update');
             Route::delete('{id}', [JadwalController::class, 'destroy'])->name('destroy');
         });
- 
-        /* ---- MISC ---- */
-        Route::view('notifikasi', 'jurusan.notifikasi')->name('notifikasi');
-        Route::view('profil',     'jurusan.profil')->name('profil');
     });
 
-    /*
+/*
 |--------------------------------------------------------------------------
-| DOSEN ROUTES
+| DOSEN ROUTES (satu group, tidak duplikat)
 |--------------------------------------------------------------------------
 */
- 
 Route::middleware(['auth', 'check.role:DOSEN'])
     ->prefix('dosen')
     ->name('dosen.')
     ->group(function () {
- 
-        /*
-        |----------------------------------------------------------------------
-        | DASHBOARD — jadwal hari ini
-        |----------------------------------------------------------------------
-        */
-        Route::get('dashboard', [DosenController::class, 'dashboard'])
-            ->name('dashboard');
- 
-        /*
-        |----------------------------------------------------------------------
-        | JADWAL & KELAS
-        |----------------------------------------------------------------------
-        */
+
+        Route::get('dashboard',    [DosenController::class, 'dashboard'])->name('dashboard');
+        Route::get('profil',       [DosenController::class, 'profil'])->name('profil');
+        Route::get('announcement', [DosenController::class, 'announcement'])->name('announcement');
+        Route::get('notifikasi',   [DosenController::class, 'notifikasi'])->name('notifikasi');
+        Route::get('analytics',    [DosenController::class, 'analytics'])->name('analytics');
+
+        Route::post('absensi/start', [DosenController::class, 'startAttendance'])->name('absensi.start');
+        Route::post('absensi/close', [DosenController::class, 'closeAttendance'])->name('absensi.close');
+
         Route::prefix('jadwal')->name('jadwal.')->group(function () {
- 
-            // List semua jadwal dosen
-            Route::get('/', [DosenController::class, 'jadwal'])
-                ->name('index');
-
-            // Detail kelas + form kehadiran
-            Route::get('{jadwalId}', [DosenController::class, 'jadwalDetail'])
-                ->name('detail');
- 
-            // Update jam jadwal (dari form di detail page)
-            Route::patch('{jadwalId}/jam', [KehadiranController::class, 'updateJam'])
-                ->name('jam.update');
- 
-            // Store bulk kehadiran
-            Route::post('{jadwalId}/kehadiran', [KehadiranController::class, 'storeBulk'])
-                ->name('kehadiran.store');
- 
-            // Get rekap kehadiran (opsional, untuk AJAX jika dibutuhkan)
-            Route::get('{jadwalId}/kehadiran', [KehadiranController::class, 'getByJadwal'])
-                ->name('kehadiran.get');
+            Route::get('/',                     [DosenController::class, 'jadwal'])->name('index');
+            Route::get('{jadwalId}',            [DosenController::class, 'jadwalDetail'])->name('detail');
+            Route::patch('{jadwalId}/jam',      [KehadiranController::class, 'updateJam'])->name('jam.update');
+            Route::post('{jadwalId}/kehadiran', [KehadiranController::class, 'storeBulk'])->name('kehadiran.store');
+            Route::get('{jadwalId}/kehadiran',  [KehadiranController::class, 'getByJadwal'])->name('kehadiran.get');
         });
- 
-        /*
-        |----------------------------------------------------------------------
-        | MISC
-        |----------------------------------------------------------------------
-        */
-        Route::get('profil',    [DosenController::class, 'profil'])->name('profil');
-        Route::view('notifikasi', 'dosen.notifikasi')->name('notifikasi');
- 
     });
-
-Route::prefix('dosen')->name('dosen.')->middleware(['auth', 'check.role:DOSEN'])->group(function () {
-    Route::get('dashboard',   [DosenController::class, 'dashboard'])->name('dashboard');
-    Route::get('profil',      [DosenController::class, 'profil'])->name('profil');
-    Route::get('jadwal',      [DosenController::class, 'jadwal'])->name('jadwal');
-    Route::get('announcement',[DosenController::class, 'announcement'])->name('announcement');
-    Route::get('notifikasi',  [DosenController::class, 'notifikasi'])->name('notifikasi');
-    Route::get('analytics',   [DosenController::class, 'analytics'])->name('analytics');
-
-    Route::post('absensi/start', [DosenController::class, 'startAttendance'])->name('absensi.start');
-    Route::post('absensi/close', [DosenController::class, 'closeAttendance'])->name('absensi.close');
-});
 
 /*
 |--------------------------------------------------------------------------
@@ -415,104 +222,34 @@ Route::prefix('dosen')->name('dosen.')->middleware(['auth', 'check.role:DOSEN'])
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'check.role:KLN'])
-    ->prefix('kln')->name('kln.')->group(function () {
-
-        Route::get('dashboard', [KlnController::class, 'index'])->name('dashboard');
-        Route::get('profil',    [KlnController::class, 'profil'])->name('profil');
-        Route::get('analytics', [KlnController::class, 'analytics'])->name('analytics');
-
-        // DOKUMEN
-        Route::prefix('dokumen')->name('dokumen.')->group(function () {
-
-            Route::get('/', [DokumenController::class, 'index'])
-                ->name('index');
-
-            Route::post('/', [DokumenController::class, 'store'])
-                ->name('store');
-
-            Route::get('{id}/download', [DokumenController::class, 'download'])
-                ->name('download');
-        });
-
-        Route::view('jadwal', 'mahasiswa.jadwal')->name('jadwal');
-
-        Route::view('announcement', 'mahasiswa.announcement')->name('announcement');
-
-        Route::view('notifikasi', 'mahasiswa.notifikasi')->name('notifikasi');
-
-        Route::get('analytics', [MahasiswaController::class, 'analytics'])
-        ->name('analytics');
-
-    });
-
-
-     Route::patch('users/status/{id}', [KlnController::class, 'updateStatusMahasiswa'])->name('users.status.update')->middleware(['auth','check.role:KLN']);
-
-
-// routes/web.php - TEMPORARY
-Route::get('debug-middleware', function() {
-    $routes = collect(Route::getRoutes())->map(function($route) {
-        return [
-            'uri' => $route->uri(),
-            'name' => $route->getName(),
-            'middleware' => $route->gatherMiddleware(),
-            'action' => $route->getActionName()
-        ];
-    })->filter(function($route) {
-        return str_contains($route['uri'], 'announcement') || 
-               str_contains($route['uri'], 'status');
-    })->values();
-    
-    return response()->json($routes);
-})->middleware('auth');
-
-Route::get('test-role/{role}', function($role) {
-    return response()->json([
-        'user_role' => Auth::user()->role,
-        'required_role' => $role,
-        'can_access' => true
-    ]);
-})->middleware(['auth', 'check.role:KLN']);
-
-
-
-Route::get('test-update', function() {
-    $user = Auth::user();
-    $mahasiswa = \App\Models\Mahasiswa::where('user_id', $user->id)->first();
-    
-    return response()->json([
-        'before' => $mahasiswa,
-        'try_update' => $mahasiswa->update(['nama' => 'marcello']),
-        'after' => $mahasiswa->fresh(),
-    ]);
-})->middleware('auth');
-
-
-
-Route::prefix('dosen')
-    ->name('dosen.')
-    ->middleware(['auth','check.role:DOSEN'])
+    ->prefix('kln')
+    ->name('kln.')
     ->group(function () {
 
-        Route::get('/dashboard', [DosenController::class, 'dashboard'])
-            ->name('dashboard');
+        Route::get('dashboard', [KlnController::class, 'index'])->name('dashboard');
+        Route::view('profil',       'kln.profil')->name('profil');
+        Route::view('jadwal',       'kln.jadwal')->name('jadwal');
+        Route::view('announcement', 'kln.announcement')->name('announcement');
+        Route::view('notifikasi',   'kln.notifikasi')->name('notifikasi');
+        Route::view('analytics',    'kln.analytics')->name('analytics');
 
-        Route::get('/profil', [DosenController::class, 'profil'])
-            ->name('profil');
+        // Jurusan management
+        Route::prefix('jurusan')->name('jurusan.')->group(function () {
+            Route::get('data',    [ApiJurusanController::class, 'getJurusan'])->name('data');
+            Route::get('{id}',    [ApiJurusanController::class, 'showJurusan'])->name('show');
+            Route::post('/',      [ApiJurusanController::class, 'storeJurusan'])->name('store');
+            Route::patch('{id}',  [ApiJurusanController::class, 'updateJurusan'])->name('update');
+            Route::delete('{id}', [ApiJurusanController::class, 'destroyJurusan'])->name('destroy');
+        });
 
-        Route::get('/jadwal', [DosenController::class, 'jadwal'])
-            ->name('jadwal');
+        // Dokumen
+        Route::prefix('dokumen')->name('dokumen.')->group(function () {
+            Route::get('/',             [DokumenController::class, 'index'])->name('index');
+            Route::post('/',            [DokumenController::class, 'store'])->name('store');
+            Route::get('{id}/download', [DokumenController::class, 'download'])->name('download');
+        });
 
-        Route::get('/announcement', [DosenController::class, 'announcement'])
-            ->name('announcement');
-
-        Route::get('/notifikasi', [DosenController::class, 'notifikasi'])
-            ->name('notifikasi');
-
-        Route::get('/analytics', [DosenController::class, 'analytics'])
-            ->name('analytics');
-
-});
-
+        Route::patch('users/status/{id}', [KlnController::class, 'updateStatusMahasiswa'])->name('users.status.update');
+    });
 
 require __DIR__.'/auth.php';

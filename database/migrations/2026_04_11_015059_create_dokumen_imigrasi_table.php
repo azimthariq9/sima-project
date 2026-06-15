@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('dokumen_imigrasi', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('mahasiswa_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('mahasiswa_id')->constrained('mahasiswa')->cascadeOnDelete();
 
             $table->string('passport_number')->nullable();
             $table->date('passport_expired')->nullable();

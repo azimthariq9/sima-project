@@ -6,8 +6,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Enums\Status;
-use App\Enums\Role;
 
 class User extends Authenticatable
 {
@@ -38,43 +36,12 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'role' => Role::class,
-        'status' => Status::class,
-        ];
+        'password'          => 'hashed',
+    ];
     
-    // Accessor untuk mendapatkan role sebagai string
-    public function getRoleStringAttribute(): string
+    public function hasRole(string $role): bool
     {
-        return $this->role instanceof Role ? $this->role->value : $this->role;
-    }
-    
-    // Accessor untuk mendapatkan status_profile sebagai string
-    public function getStatusProfileStringAttribute(): string
-    {
-        return $this->status_profile instanceof Status 
-            ? $this->status_profile->value 
-            : $this->status_profile;
-    }
-    
-    // Mutator untuk role - terima string atau enum
-    public function setRoleAttribute($value)
-    {
-        if ($value instanceof Role) {
-            $this->attributes['role'] = $value->value;
-        } else {
-            $this->attributes['role'] = $value;
-        }
-    }
-    
-    // Mutator untuk status_profile
-    public function setStatusProfileAttribute($value)
-    {
-        if ($value instanceof Status) {
-            $this->attributes['status_profile'] = $value->value;
-        } else {
-            $this->attributes['status_profile'] = $value;
-        }
+        return strtolower($this->role) === strtolower($role);
     }
  
     public function dosen()

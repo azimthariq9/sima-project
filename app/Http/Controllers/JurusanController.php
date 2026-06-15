@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class JurusanController extends Controller
 {
@@ -17,24 +16,27 @@ class JurusanController extends Controller
 
     private function unreadNotif(): int
     {
-        return DB::table('notifikasi')
+        return DB::table('notification_users')
             ->where('user_id', Auth::id())
             ->where('is_read', false)
             ->count();
     }
 
-    /**
-     * Kirim notifikasi ke mahasiswa terkait dokumen.
-     */
     private function kirimNotifMahasiswa(int $userId, string $judul, string $pesan): void
     {
-        DB::table('notifikasi')->insert([
-            'user_id'    => $userId,
+        $notifId = DB::table('notification')->insertGetId([
             'judul'      => $judul,
             'pesan'      => $pesan,
-            'is_read'    => false,
             'created_at' => now(),
             'updated_at' => now(),
+        ]);
+
+        DB::table('notification_users')->insert([
+            'user_id'         => $userId,
+            'notification_id' => $notifId,
+            'is_read'         => false,
+            'created_at'      => now(),
+            'updated_at'      => now(),
         ]);
     }
 
@@ -65,8 +67,8 @@ class JurusanController extends Controller
             ->count();
 
         // Pengumuman terbaru (3)
-        $announcements = DB::table('announcements')
-            ->where('role_pengirim', 'jurusan')
+        $announcements = DB::table('announcement')
+            ->where('sumber', 'jurusan')
             ->orderBy('created_at', 'desc')
             ->limit(3)
             ->get();
@@ -138,14 +140,16 @@ class JurusanController extends Controller
 
     public function notifikasi()
     {
-        DB::table('notifikasi')
+        DB::table('notification_users')
             ->where('user_id', Auth::id())
             ->where('is_read', false)
             ->update(['is_read' => true, 'updated_at' => now()]);
 
-        $notifikasi = DB::table('notifikasi')
-            ->where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc')
+        $notifikasi = DB::table('notification_users')
+            ->join('notification', 'notification_users.notification_id', '=', 'notification.id')
+            ->where('notification_users.user_id', Auth::id())
+            ->select('notification.*', 'notification_users.is_read', 'notification_users.created_at as received_at')
+            ->orderBy('notification_users.created_at', 'desc')
             ->paginate(15);
 
         return view('jurusan.notifikasi', compact('notifikasi'));
@@ -161,8 +165,8 @@ class JurusanController extends Controller
 
     public function announcement()
     {
-        $announcements = DB::table('announcements')
-            ->where('role_pengirim', 'jurusan')
+        $announcements = DB::table('announcement')
+            ->where('sumber', 'jurusan')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -184,8 +188,8 @@ class JurusanController extends Controller
      */
     public function dokumen(Request $request)
     {
-        $search = $request->get('search');
-        $status = $request->get('status');
+        $search = $request->input('search');
+        $status = $request->input('status');
 
         $query = DB::table('dokumen')
             ->join('mahasiswa', 'dokumen.mahasiswa_id', '=', 'mahasiswa.id')
@@ -305,8 +309,8 @@ class JurusanController extends Controller
      */
     public function indexReqDocument(Request $request)
     {
-        $status = $request->get('status');
-        $search = $request->get('search');
+        $status = $request->input('status');
+        $search = $request->input('search');
 
         $query = DB::table('request_dokumen')
             ->join('mahasiswa', 'request_dokumen.mahasiswa_id', '=', 'mahasiswa.id')

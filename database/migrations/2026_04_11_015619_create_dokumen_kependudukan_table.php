@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('dokumen_kependudukan', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('mahasiswa_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('mahasiswa_id')->constrained('mahasiswa')->cascadeOnDelete();
 
             $table->string('nik')->nullable();
             $table->string('kk')->nullable();
