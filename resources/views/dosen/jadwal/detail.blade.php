@@ -16,7 +16,7 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
 
 {{-- ── BREADCRUMB BACK ─────────────────────────────── --}}
 <div style="margin-bottom:16px;">
-    <a href="{{ route('dosen.jadwal') }}"
+    <a href="{{ route('dosen.jadwal.index') }}"
        style="display:inline-flex;align-items:center;gap:8px;
               font-size:13px;color:var(--c-text-3);text-decoration:none;
               transition:color .15s"
