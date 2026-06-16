@@ -28,7 +28,7 @@
     </a>
 
     {{-- JADWAL & KELAS --}}
-    <a href="{{ route('dosen.jadwal') }}"
+    <a href="{{ route('dosen.jadwal.index') }}"
        class="sima-nav__item {{ request()->routeIs('dosen.jadwal.*') ? 'active' : '' }}"
        data-title="Jadwal & Kelas">
         <i class="fas fa-calendar-alt sima-nav__icon"></i>

@@ -11,12 +11,8 @@
         </div>
 
         <div>
-            <div class="sima-sidebar__title">
-                SIMA
-            </div>
-            <div class="sima-sidebar__subtitle">
-                Universitas Gunadarma
-            </div>
+            <div class="sima-sidebar__title">SIMA</div>
+            <div class="sima-sidebar__subtitle">BIPA</div>
         </div>
 
     </div>
@@ -28,37 +24,42 @@
 
     {{-- Dashboard --}}
     <a href="{{ route('bipa.dashboard') }}"
-       class="sima-nav__item {{ request()->routeIs('bipa.dashboard') ? 'active' : '' }}">
+       class="sima-nav__item {{ request()->routeIs('bipa.dashboard') ? 'active' : '' }}"
+       data-title="Dashboard">
         <i class="fas fa-home sima-nav__icon"></i>
-        Dashboard
+        <span>Dashboard</span>
     </a>
 
     {{-- Jadwal --}}
     <a href="{{ route('bipa.jadwal') }}"
-       class="sima-nav__item {{ request()->routeIs('bipa.jadwal') ? 'active' : '' }}">
+       class="sima-nav__item {{ request()->routeIs('bipa.jadwal') ? 'active' : '' }}"
+       data-title="Jadwal">
         <i class="fas fa-clock sima-nav__icon"></i>
-        Jadwal
+        <span>Jadwal</span>
     </a>
 
     {{-- Pengumuman --}}
     <a href="{{ route('bipa.announcement') }}"
-       class="sima-nav__item {{ request()->routeIs('bipa.announcement') ? 'active' : '' }}">
+       class="sima-nav__item {{ request()->routeIs('bipa.announcement') ? 'active' : '' }}"
+       data-title="Pengumuman">
         <i class="fas fa-envelope sima-nav__icon"></i>
-        Pengumuman
+        <span>Pengumuman</span>
     </a>
 
     {{-- Notifikasi --}}
     <a href="{{ route('bipa.notifikasi') }}"
-       class="sima-nav__item {{ request()->routeIs('bipa.notifikasi') ? 'active' : '' }}">
+       class="sima-nav__item {{ request()->routeIs('bipa.notifikasi') ? 'active' : '' }}"
+       data-title="Notifikasi">
         <i class="fas fa-bell sima-nav__icon"></i>
-        Notifikasi
+        <span>Notifikasi</span>
     </a>
 
     {{-- Kehadiran & Nilai --}}
     <a href="{{ route('bipa.analytics') }}"
-       class="sima-nav__item {{ request()->routeIs('bipa.analytics') ? 'active' : '' }}">
+       class="sima-nav__item {{ request()->routeIs('bipa.analytics') ? 'active' : '' }}"
+       data-title="Kehadiran & Nilai">
         <i class="fas fa-check-square sima-nav__icon"></i>
-        Kehadiran & Nilai
+        <span>Kehadiran & Nilai</span>
     </a>
 
 
@@ -95,9 +96,10 @@
         @csrf
         <button type="submit"
                 class="sima-nav__item"
-                style="border:none;background:none;width:100%;">
+                style="border:none;background:none;width:100%;"
+                data-title="Logout">
             <i class="fas fa-power-off sima-nav__icon"></i>
-            Logout
+            <span>Logout</span>
         </button>
     </form>
 

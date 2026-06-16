@@ -342,6 +342,61 @@ body.dark .sima-nav__item.active .sima-nav__icon { color: #ffffff; }
     flex-shrink: 0;
 }
 
+/* ── SIDEBAR HEADER (dosen / jurusan / kln / bipa) ── */
+.sima-sidebar__header {
+    padding: 22px 20px 18px;
+    border-bottom: 1px solid var(--c-border-soft);
+    flex-shrink: 0;
+}
+
+.sima-sidebar__brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.sima-sidebar__logo-wrapper {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--c-accent), var(--c-accent-2));
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(108,143,255,.3);
+}
+
+.sima-sidebar__logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.sima-sidebar__title {
+    font-family: var(--f-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--c-text-1);
+    letter-spacing: -.02em;
+    line-height: 1.1;
+}
+
+.sima-sidebar__subtitle {
+    font-size: 10.5px;
+    color: var(--c-text-3);
+    font-weight: 400;
+    letter-spacing: .01em;
+}
+
+.sima-sidebar.collapsed .sima-sidebar__header {
+    padding: 22px 0 18px;
+}
+
+.sima-sidebar.collapsed .sima-sidebar__brand {
+    justify-content: center;
+}
+
 /* ── TOPBAR ───────────────────────────────────────── */
 .sima-topbar {
     height: 60px;
@@ -1047,7 +1102,7 @@ body.dark .sima-nav__item.active .sima-nav__icon { color: #ffffff; }
     | BUG #7 FIX: // Semua route pakai 'profile' (standard Laravel)
     |--------------------------------------------------------------------------
     */
-    $profilRoute = $prefix . '.profile';
+    $profilRoute = $prefix === 'mahasiswa' ? 'mahasiswa.profile' : $prefix . '.profil';
 
     /*
     |--------------------------------------------------------------------------
@@ -1058,9 +1113,9 @@ body.dark .sima-nav__item.active .sima-nav__icon { color: #ffffff; }
     |--------------------------------------------------------------------------
     */
     $userIdentifier = match($prefix) {
-        'mahasiswa'  => optional(auth()->user()->mahasiswa)->npm    ?? auth()->user()->name,
-        'dosen'      => optional(auth()->user()->dosen)->nip        ?? auth()->user()->name,
-        default      => auth()->user()->name ?? auth()->user()->email,
+        'mahasiswa'  => optional(auth()->user()->mahasiswa)->npm  ?? auth()->user()->email,
+        'dosen'      => optional(auth()->user()->dosen)->nidn     ?? auth()->user()->email,
+        default      => auth()->user()->email,
     };
 
     $userInitial = strtoupper(substr($userIdentifier, 0, 1));
