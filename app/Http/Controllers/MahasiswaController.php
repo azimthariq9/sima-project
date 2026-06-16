@@ -195,7 +195,7 @@ class MahasiswaController extends Controller
         | Notifikasi yang belum dibaca
         |----------------------------------------------------------------------
         */
-        $unreadNotifCount = DB::table('notifikasi')
+        $unreadNotifCount = DB::table('notification_users')
             ->where('user_id', Auth::id())
             ->where('is_read', false)
             ->count();
@@ -369,7 +369,7 @@ class MahasiswaController extends Controller
             ->get()
             ->keyBy('course_id');
 
-        $unreadNotifCount = DB::table('notifikasi')
+        $unreadNotifCount = DB::table('notification_users')
             ->where('user_id', Auth::id())
             ->where('is_read', false)
             ->count();
@@ -432,7 +432,7 @@ class MahasiswaController extends Controller
             ? round(($totalHadir + $totalTelat) / $totalSemua * 100, 1)
             : 0;
 
-        $unreadNotifCount = DB::table('notifikasi')
+        $unreadNotifCount = DB::table('notification_users')
             ->where('user_id', Auth::id())
             ->where('is_read', false)
             ->count();
@@ -480,7 +480,7 @@ class MahasiswaController extends Controller
             ->where('mahasiswa_id', $mahasiswa->id ?? 0)
             ->first();
 
-        $unreadNotifCount = DB::table('notifikasi')
+        $unreadNotifCount = DB::table('notification_users')
             ->where('user_id', Auth::id())
             ->where('is_read', false)
             ->count();
@@ -593,6 +593,11 @@ class MahasiswaController extends Controller
         return view('mahasiswa.announcement', compact('announcements', 'unreadNotifCount'));
     }
 
+    public function announcementShow(int $id)
+    {
+        return redirect()->route('mahasiswa.announcement');
+    }
+
 
     /*
     |==========================================================================
@@ -603,15 +608,16 @@ class MahasiswaController extends Controller
 
     public function notifikasi()
     {
-        // Tandai semua notif sebagai sudah dibaca saat halaman dibuka
-        DB::table('notifikasi')
+        DB::table('notification_users')
             ->where('user_id', Auth::id())
             ->where('is_read', false)
             ->update(['is_read' => true, 'updated_at' => now()]);
 
-        $notifikasi = DB::table('notifikasi')
-            ->where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc')
+        $notifikasi = DB::table('notification_users')
+            ->join('notification', 'notification_users.notification_id', '=', 'notification.id')
+            ->where('notification_users.user_id', Auth::id())
+            ->select('notification.*', 'notification_users.is_read', 'notification_users.created_at as received_at')
+            ->orderBy('notification_users.created_at', 'desc')
             ->paginate(15);
 
         return view('mahasiswa.notifikasi', compact('notifikasi'));
