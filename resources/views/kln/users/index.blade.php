@@ -582,23 +582,31 @@ document.addEventListener('DOMContentLoaded', function () {
        VALIDATION INPUT FORM
     =======================================*/
 
-    function validateForm(data) {
+    function validateForm(data, isEdit = false) {
         const role = data.role;
-        
+
         // Validasi umum
         if (!role) {
             alert('Role harus dipilih');
             return false;
         }
-        
+
         if (!data.email || !data.email.includes('@')) {
             alert('Email tidak valid');
             return false;
         }
-        
-        if (!data.password || data.password.length < 6) {
-            alert('Password minimal 6 karakter');
-            return false;
+
+        if (isEdit) {
+            // Edit: password boleh kosong (tidak diubah), tapi kalau diisi harus >= 6 karakter
+            if (data.password && data.password.length < 6) {
+                alert('Password minimal 6 karakter');
+                return false;
+            }
+        } else {
+            if (!data.password || data.password.length < 6) {
+                alert('Password minimal 6 karakter');
+                return false;
+            }
         }
         
         // Validasi spesifik role

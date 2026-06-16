@@ -4,19 +4,16 @@
 <div @class(['sima-sidebar__header'])>
     <div class="sima-sidebar__brand">
 
-        <div class="sima-sidebar__logo-wrapper">
-            <img src="{{ asset('img/logo.png') }}" 
+        {{-- <div class="sima-sidebar__logo-wrapper" style="width:38px;height:38px;flex-shrink:0;">
+            <img src="{{ asset('img/logo.png') }}"
                  class="sima-sidebar__logo"
-                 alt="Logo Gunadarma">
-        </div>
+                 alt="Logo Gunadarma"
+                 style="width:100%;height:100%;object-fit:contain;">
+        </div> --}}
 
         <div>
-            <div class="sima-sidebar__title">
-                SIMA
-            </div>
-            <div class="sima-sidebar__subtitle">
-                Universitas Gunadarma
-            </div>
+            <div class="sima-sidebar__title">SIMA</div>
+            <div class="sima-sidebar__subtitle">KLN</div>
         </div>
 
     </div>
@@ -37,17 +34,19 @@
     </a>
 
     {{-- Students & Lecturers --}}
-    <a href="#"
-       class="sima-nav__item">
+    <a href="{{ route('kln.students.page') }}"
+       class="sima-nav__item {{ request()->routeIs('kln.students.*') ? 'active' : '' }}"
+       data-title="Students & Lecturers">
         <i class="fas fa-user-tie sima-nav__icon"></i>
-        Students & Lecturers
+        <span>Students & Lecturers</span>
     </a>
 
-     {{-- Request Documents --}}
+    {{-- Request Documents --}}
     <a href="{{ route('kln.dokumen.page') }}"
-       class="sima-nav__item {{ request()->routeIs('kln.dokumen.page') ? 'active' : '' }}">
+       class="sima-nav__item {{ request()->routeIs('kln.dokumen.page') ? 'active' : '' }}"
+       data-title="Request Documents">
         <i class="fas fa-file-alt sima-nav__icon"></i>
-        Request Documents
+        <span>Request Documents</span>
     </a>
 
     {{-- Untuk menu dengan dropdown
@@ -63,35 +62,26 @@
 
     {{-- SCHEDULE DROPDOWN --}}
     @php
-        $scheduleActive = request()->routeIs('kln.schedule');
+        $scheduleActive = request()->routeIs('kln.jadwal.*');
     @endphp
-    <div class="sima-nav__item has-sub {{ $scheduleActive ? 'open active' : '' }}" onclick="toggleNav(this)" data-title="Jadwal">
+    <button class="sima-nav__item has-sub {{ $scheduleActive ? 'open active' : '' }}" onclick="toggleNav(this)" data-title="Jadwal"
+            style="border:none;background:none;width:100%;text-align:left;">
         <i class="fas fa-clock sima-nav__icon"></i>
         <span>Jadwal</span>
         <i class="fas fa-chevron-down sima-nav__chevron"></i>
-    </div>
-
-    {{-- <div class="sima-nav__item has-sub" onclick="toggleNav(this)" data-title="Jadwal">
-        <a href="" class="sima-nav__item {{ $scheduleActive ? 'open active' : '' }}"
-                onclick="toggleNav(this)">
-            <i class="fas fa-clock sima-nav__icon"></i>
-            Schedules
-            <i class="fas fa-chevron-right sima-nav__chevron"></i>
-        </a>
-    </div> --}}
-    
+    </button>
 
     <div class="sima-nav__sub {{ $scheduleActive ? 'open' : '' }}">
-        <a href="{{ route('kln.schedule') }}"
-           class="sima-nav__sub-item {{ $scheduleActive ? 'active' : '' }}">
+        <a href="{{ route('kln.jadwal.bipa') }}"
+           class="sima-nav__sub-item {{ request()->routeIs('kln.jadwal.bipa') ? 'active' : '' }}">
             BIPA
         </a>
-        <a href="{{ route('kln.schedule') }}"
-           class="sima-nav__sub-item">
-            Lectures
+        <a href="{{ route('kln.jadwal.lecturers') }}"
+           class="sima-nav__sub-item {{ request()->routeIs('kln.jadwal.lecturers') ? 'active' : '' }}">
+            Lecturers
         </a>
-        <a href="{{ route('kln.schedule') }}"
-           class="sima-nav__sub-item">
+        <a href="{{ route('kln.jadwal.kln') }}"
+           class="sima-nav__sub-item {{ request()->routeIs('kln.jadwal.kln') ? 'active' : '' }}">
             KLN
         </a>
     </div>
