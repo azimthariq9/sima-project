@@ -8,6 +8,7 @@ use App\Http\Controllers\MahasiswaRequestController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\DosenController;
 use App\Http\Controllers\JurusanController;
+use App\Http\Controllers\BipaController;
 use App\Http\Controllers\API\KlnController;
 use App\Http\Controllers\API\DokumenController;
 use App\Http\Controllers\API\UserController;
@@ -82,10 +83,12 @@ Route::middleware(['auth', 'check.role:MAHASISWA'])
                 Route::get('{id}/download', [DokumenController::class, 'download'])->name('download');
             });
 
-            Route::get('jadwal',       [MahasiswaController::class, 'jadwal'])->name('jadwal');
-            Route::get('announcement', [MahasiswaController::class, 'announcement'])->name('announcement');
-            Route::get('notifikasi',   [MahasiswaController::class, 'notifikasi'])->name('notifikasi');
-            Route::get('analytics',    [MahasiswaController::class, 'analytics'])->name('analytics');
+            Route::get('jadwal',        [MahasiswaController::class, 'jadwal'])->name('jadwal');
+            Route::get('announcement',  [MahasiswaController::class, 'announcement'])->name('announcement');
+            Route::get('announcement/{id}', [MahasiswaController::class, 'announcementShow'])->name('announcement.show');
+            Route::post('absensi/submit',   [MahasiswaController::class, 'submitAbsensi'])->name('absensi.submit');
+            Route::get('notifikasi',    [MahasiswaController::class, 'notifikasi'])->name('notifikasi');
+            Route::get('analytics',     [MahasiswaController::class, 'analytics'])->name('analytics');
         });
     });
 
@@ -228,10 +231,37 @@ Route::middleware(['auth', 'check.role:KLN'])
 
         Route::get('dashboard', [KlnController::class, 'index'])->name('dashboard');
         Route::view('profil',       'kln.profil')->name('profil');
-        Route::view('jadwal',       'kln.jadwal')->name('jadwal');
-        Route::view('announcement', 'kln.announcement')->name('announcement');
+        Route::prefix('jadwal')->name('jadwal.')->group(function () {
+            Route::get('bipa',      [KlnController::class, 'jadwalBipa'])->name('bipa');
+            Route::get('lecturers', [KlnController::class, 'jadwalLecturers'])->name('lecturers');
+            Route::get('kln',       [KlnController::class, 'jadwalKln'])->name('kln');
+            Route::get('kegiatan',  [KlnController::class, 'searchKegiatan'])->name('kegiatan');
+            Route::get('{id}',      [KlnController::class, 'jadwalDetail'])->name('detail')->where('id', '[0-9]+');
+            Route::post('/',        [KlnController::class, 'jadwalStore'])->name('store');
+        });
+        Route::get('announcement', [KlnController::class, 'announcementPage'])->name('announcement');
+        Route::prefix('announcement')->name('announcement.')->group(function () {
+            Route::get('create',                  [KlnController::class, 'createAnnouncementPage'])->name('create');
+            Route::post('/',                      [KlnController::class, 'storeAnnouncement'])->name('store');
+            Route::delete('file/{fileId}',        [KlnController::class, 'destroyAnnouncementFile'])->name('file.destroy');
+            Route::get('{id}/edit',               [KlnController::class, 'editAnnouncementPage'])->name('edit');
+            Route::post('{id}',                   [KlnController::class, 'updateAnnouncement'])->name('update');
+            Route::delete('{id}',                 [KlnController::class, 'destroyAnnouncement'])->name('destroy');
+            Route::get('{annId}/file/{fileId}',   [KlnController::class, 'serveAnnouncementFile'])->name('file');
+        });
         Route::view('notifikasi',   'kln.notifikasi')->name('notifikasi');
         Route::view('analytics',    'kln.analytics')->name('analytics');
+
+        // Users management
+        Route::prefix('users')->name('users.')->group(function () {
+            Route::get('/',       [KlnController::class, 'usersPage'])->name('page');
+            Route::get('data',    [KlnController::class, 'getUsers'])->name('data');
+            Route::get('{id}',    [KlnController::class, 'showUser'])->name('show');
+            Route::post('/',      [KlnController::class, 'storeUser'])->name('store');
+            Route::patch('{id}',  [KlnController::class, 'updateUser'])->name('update');
+            Route::delete('{id}', [KlnController::class, 'destroyUser'])->name('destroy');
+            Route::patch('status/{id}', [KlnController::class, 'updateStatusMahasiswa'])->name('status.update');
+        });
 
         // Jurusan management
         Route::prefix('jurusan')->name('jurusan.')->group(function () {
@@ -242,14 +272,58 @@ Route::middleware(['auth', 'check.role:KLN'])
             Route::delete('{id}', [ApiJurusanController::class, 'destroyJurusan'])->name('destroy');
         });
 
-        // Dokumen
-        Route::prefix('dokumen')->name('dokumen.')->group(function () {
-            Route::get('/',             [DokumenController::class, 'index'])->name('index');
-            Route::post('/',            [DokumenController::class, 'store'])->name('store');
-            Route::get('{id}/download', [DokumenController::class, 'download'])->name('download');
+        // Students & Lecturers
+        Route::prefix('students')->name('students.')->group(function () {
+            Route::get('/',                [KlnController::class, 'studentsPage'])->name('page');
+            Route::get('mahasiswa/{id}',   [KlnController::class, 'mahasiswaDetail'])->name('mahasiswa');
+            Route::get('dosen/{id}',       [KlnController::class, 'dosenDetail'])->name('dosen');
+            Route::get('mahasiswa/{mahasiswaId}/dokumen/{dokumenId}/download', [KlnController::class, 'downloadDokumen'])->name('dokumen.download');
+            Route::get('mahasiswa/{mahasiswaId}/dokumen/{dokumenId}/preview',  [KlnController::class, 'previewDokumen'])->name('dokumen.preview');
+            Route::patch('mahasiswa/{mahasiswaId}/dokumen/{dokumenId}/status', [KlnController::class, 'updateDokumenStatus'])->name('dokumen.status');
         });
 
-        Route::patch('users/status/{id}', [KlnController::class, 'updateStatusMahasiswa'])->name('users.status.update');
+        // Dokumen
+        Route::prefix('dokumen')->name('dokumen.')->group(function () {
+            Route::get('page',            [KlnController::class, 'dokumen'])->name('page');
+            Route::get('/',               [DokumenController::class, 'index'])->name('index');
+            Route::post('/',              [DokumenController::class, 'store'])->name('store');
+            Route::get('{id}',            [KlnController::class, 'show'])->name('show');
+            Route::post('{id}/upload',    [KlnController::class, 'uploadFile'])->name('upload');
+            Route::get('{id}/file',       [KlnController::class, 'downloadFile'])->name('file');
+            Route::get('{id}/download',   [DokumenController::class, 'download'])->name('download');
+            Route::delete('{id}',         [KlnController::class, 'destroy'])->name('destroy');
+        });
+    });
+
+/*
+|--------------------------------------------------------------------------
+| BIPA ROUTES
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'check.role:BIPA'])
+    ->prefix('bipa')
+    ->name('bipa.')
+    ->group(function () {
+
+        Route::get('dashboard',    [BipaController::class, 'dashboard'])->name('dashboard');
+        Route::get('profil',       [BipaController::class, 'profil'])->name('profil');
+        Route::get('notifikasi',   [BipaController::class, 'notifikasi'])->name('notifikasi');
+        Route::get('announcement', [BipaController::class, 'announcement'])->name('announcement');
+        Route::get('analytics',    [BipaController::class, 'analytics'])->name('analytics');
+        Route::get('jadwal',       [BipaController::class, 'jadwal'])->name('jadwal');
+
+        Route::prefix('dokumen')->name('dokumen.')->group(function () {
+            Route::get('/',            [BipaController::class, 'dokumen'])->name('index');
+            Route::get('{id}',         [BipaController::class, 'showDokumen'])->name('show');
+            Route::post('{id}/upload', [BipaController::class, 'uploadDokumen'])->name('upload');
+        });
+
+        Route::prefix('requestDok')->name('request.')->group(function () {
+            Route::get('/',             [BipaController::class, 'indexReqDocument'])->name('index');
+            Route::get('{id}',          [BipaController::class, 'showReqDocument'])->name('show');
+            Route::patch('{id}/status', [BipaController::class, 'updateReqDokumen'])->name('status');
+            Route::post('{id}/upload',  [BipaController::class, 'uploadReqDokumen'])->name('upload');
+        });
     });
 
 require __DIR__.'/auth.php';
