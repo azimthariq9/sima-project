@@ -21,4 +21,7 @@ class jurusan extends Model
     {
         return $this->hasMany(User::class, 'jurusan_id');
     }
+    public function kelas(){
+        return $this->hasMany(Kelas::class,'jurusan_id');
+    }
 }

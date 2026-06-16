@@ -206,11 +206,11 @@ public function previewKelas(Request $request)
     $kelas = \App\Models\kelas::where('kodeKelas', $request->kodeKelas)
         ->where('tahunAjar', $request->tahunAjar)
         ->first();
- 
+
     if (!$kelas) {
         return response()->json(['found' => false]);
     }
- 
+
     return response()->json([
         'found'     => true,
         'id'        => $kelas->id,
@@ -218,7 +218,7 @@ public function previewKelas(Request $request)
         'tahunAjar' => $kelas->tahunAjar,
     ]);
 }
- 
+
 /**
  * Preview matakuliah by kodeMk
  */
@@ -227,11 +227,11 @@ public function previewMatakuliah(Request $request)
     $mk = \App\Models\Matakuliah::where('kodeMk', $request->kodeMk)
         ->where('jurusan_id', auth()->user()->jurusan_id) // scope ke jurusan
         ->first();
- 
+
     if (!$mk) {
         return response()->json(['found' => false]);
     }
- 
+
     return response()->json([
         'found'  => true,
         'id'     => $mk->id,
@@ -239,7 +239,7 @@ public function previewMatakuliah(Request $request)
         'namaMk' => $mk->namaMk,
     ]);
 }
- 
+
 /**
  * Preview dosen by kodeDos atau nidn
  */
@@ -249,11 +249,11 @@ public function previewDosen(Request $request)
         ->orWhere('nidn', $request->kodeDos)
         ->whereHas('user', fn($q) => $q->where('jurusan_id', auth()->user()->jurusan_id))
         ->first();
- 
+
     if (!$dosen) {
         return response()->json(['found' => false]);
     }
- 
+
     return response()->json([
         'found'   => true,
         'id'      => $dosen->id,

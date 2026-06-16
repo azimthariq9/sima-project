@@ -43,7 +43,7 @@ class User extends Authenticatable
     {
         return strtolower($this->role) === strtolower($role);
     }
- 
+
     public function dosen()
     {
         return $this->hasOne(dosen::class, 'user_id', 'id');
