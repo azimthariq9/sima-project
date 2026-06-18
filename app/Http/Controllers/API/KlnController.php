@@ -7,6 +7,7 @@ use App\Models\ReqDokumen;
 use App\Models\FileDetail;
 use App\Models\User;
 use App\Models\jurusan;
+use App\Services\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -359,10 +360,33 @@ class KlnController extends Controller
 
         if (!$exists) return response()->json(['success' => false, 'message' => 'Dokumen tidak ditemukan.'], 404);
 
+        $dokumen = DB::table('dokumen')->where('id', $dokumenId)->first();
+
         DB::table('dokumen')->where('id', $dokumenId)->update([
             'status'     => $request->status,
             'updated_at' => now(),
         ]);
+
+        ActivityLog::record(
+            "Memperbarui status dokumen #{$dokumenId} menjadi {$request->status}",
+            'dokumen',
+            (int) $dokumenId
+        );
+
+        // Auto-trigger notifikasi ke mahasiswa
+        if (in_array($request->status, ['approved', 'rejected'])) {
+            $tipeDkm = $dokumen->tipeDkmn ?? 'Dokumen';
+            if ($request->status === 'approved') {
+                $subj = "Dokumen {$tipeDkm} Diverifikasi";
+                $msg  = "Dokumen {$tipeDkm} Anda telah diverifikasi oleh KLN.";
+            } else {
+                $subj = "Dokumen {$tipeDkm} Ditolak";
+                $msg  = "Dokumen {$tipeDkm} Anda ditolak oleh KLN. Silakan hubungi KLN untuk informasi lebih lanjut.";
+            }
+            try {
+                $this->createNotificationForMahasiswa($subj, $msg, 'document', [(int) $mahasiswaId]);
+            } catch (\Throwable) {}
+        }
 
         return response()->json(['success' => true, 'status' => $request->status]);
     }
@@ -479,7 +503,28 @@ class KlnController extends Controller
             $update['password'] = bcrypt($request->password);
         }
 
+        $userBefore = DB::table('users')->where('id', $id)->first();
         DB::table('users')->where('id', $id)->update($update);
+
+        ActivityLog::record("Memperbarui user #{$id} ({$request->email})", 'users', (int) $id);
+
+        // Auto-trigger: akun mahasiswa baru diaktifkan
+        if ($request->status === 'active'
+            && ($userBefore->status ?? '') !== 'active'
+            && $request->role === 'mahasiswa'
+        ) {
+            $mhs = DB::table('mahasiswa')->where('user_id', $id)->first();
+            if ($mhs) {
+                try {
+                    $this->createNotificationForMahasiswa(
+                        'Akun Anda Telah Diaktifkan',
+                        'Selamat! Akun SIMA Anda telah diaktifkan. Anda sekarang dapat mengakses semua fitur.',
+                        'account',
+                        [$mhs->id]
+                    );
+                } catch (\Throwable) {}
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -568,6 +613,20 @@ class KlnController extends Controller
             }
         }
 
+        ActivityLog::record("Membuat pengumuman: {$request->subject}", 'announcement', $id);
+
+        // Auto-trigger: pengumuman langsung aktif → notifikasi ke semua mahasiswa
+        if ($request->status === 'active') {
+            try {
+                $this->createNotificationForMahasiswa(
+                    'Pengumuman: ' . $request->subject,
+                    \Illuminate\Support\Str::limit(strip_tags($request->message), 200),
+                    'announcement',
+                    []
+                );
+            } catch (\Throwable) {}
+        }
+
         return redirect()->route('kln.announcement')->with('success', 'Pengumuman berhasil dibuat.');
     }
 
@@ -616,6 +675,8 @@ class KlnController extends Controller
             }
         }
 
+        ActivityLog::record("Memperbarui pengumuman: {$request->subject}", 'announcement', $id);
+
         return redirect()->route('kln.announcement')->with('success', 'Pengumuman berhasil diperbarui.');
     }
 
@@ -627,6 +688,8 @@ class KlnController extends Controller
         }
         DB::table('announcement_files')->where('announcement_id', $id)->delete();
         DB::table('announcement')->where('id', $id)->delete();
+
+        ActivityLog::record("Menghapus pengumuman #{$id}", 'announcement', $id);
 
         return response()->json([
             'success' => true,
@@ -657,6 +720,320 @@ class KlnController extends Controller
         return response()->json(['success' => true]);
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | ATTENDANCE — LEVEL 1 (ringkasan per mahasiswa)
+    |--------------------------------------------------------------------------
+    */
+    public function attendancePage(Request $request)
+    {
+        $search = $request->input('q', '');
+
+        $query = DB::table('mahasiswa')
+            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
+            ->leftJoin('jadwal_mahasiswa', 'jadwal_mahasiswa.mahasiswa_id', '=', 'mahasiswa.id')
+            ->select(
+                'mahasiswa.id',
+                'mahasiswa.nama',
+                'mahasiswa.npm',
+                'users.status as user_status',
+                DB::raw("COUNT(DISTINCT jadwal_mahasiswa.jadwal_id) as total_jadwal"),
+                DB::raw("SUM(CASE WHEN jadwal_mahasiswa.status = 'present'     THEN 1 ELSE 0 END) as hadir"),
+                DB::raw("SUM(CASE WHEN jadwal_mahasiswa.status = 'absent'      THEN 1 ELSE 0 END) as absen"),
+                DB::raw("SUM(CASE WHEN jadwal_mahasiswa.status = 'excused'     THEN 1 ELSE 0 END) as izin"),
+                DB::raw("SUM(CASE WHEN jadwal_mahasiswa.status = 'belum hadir' THEN 1 ELSE 0 END) as belum")
+            )
+            ->groupBy('mahasiswa.id', 'mahasiswa.nama', 'mahasiswa.npm', 'users.status')
+            ->orderBy('mahasiswa.nama');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('mahasiswa.nama', 'ilike', "%{$search}%")
+                  ->orWhere('mahasiswa.npm',  'ilike', "%{$search}%");
+            });
+        }
+
+        $attendanceList = $query->get()->map(function ($row) {
+            $berlangsung = $row->hadir + $row->absen + $row->izin;
+            $row->pct    = $berlangsung > 0 ? round($row->hadir / $berlangsung * 100, 1) : null;
+            return $row;
+        });
+
+        $stats = [
+            'total'   => $attendanceList->count(),
+            'below75' => $attendanceList->filter(fn ($r) => $r->pct !== null && $r->pct < 75)->count(),
+            'noData'  => $attendanceList->filter(fn ($r) => $r->pct === null)->count(),
+        ];
+
+        return view('kln.attendance', compact('attendanceList', 'stats', 'search'));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | ATTENDANCE — LEVEL 2 (detail per mahasiswa)
+    |--------------------------------------------------------------------------
+    */
+    public function attendanceDetail(int $id)
+    {
+        $mahasiswa = DB::table('mahasiswa')
+            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
+            ->leftJoin('jurusan', 'users.jurusan_id', '=', 'jurusan.id')
+            ->where('mahasiswa.id', $id)
+            ->select('mahasiswa.*', 'users.email', 'users.status as user_status', 'jurusan.namaJurusan')
+            ->first();
+
+        if (!$mahasiswa) abort(404);
+
+        $jadwalList = DB::table('jadwal_mahasiswa')
+            ->join('jadwal',     'jadwal.id',     '=', 'jadwal_mahasiswa.jadwal_id')
+            ->join('matakuliah', 'matakuliah.id', '=', 'jadwal.matakuliah_id')
+            ->join('kelas',      'kelas.id',      '=', 'jadwal.kelas_id')
+            ->leftJoin('dosen',  'dosen.id',      '=', 'jadwal.dosen_id')
+            ->where('jadwal_mahasiswa.mahasiswa_id', $id)
+            ->select(
+                'jadwal.id as jadwal_id',
+                'jadwal.hari',
+                'jadwal.jam',
+                'jadwal.ruangan',
+                'jadwal.totalSesi',
+                'jadwal.tahunAjar',
+                'matakuliah.namaMk',
+                'matakuliah.kodeMk',
+                'kelas.kodeKelas',
+                'dosen.nama as namaDosen',
+                DB::raw("SUM(CASE WHEN jadwal_mahasiswa.status = 'present'     THEN 1 ELSE 0 END) as hadir"),
+                DB::raw("SUM(CASE WHEN jadwal_mahasiswa.status = 'absent'      THEN 1 ELSE 0 END) as absen"),
+                DB::raw("SUM(CASE WHEN jadwal_mahasiswa.status = 'excused'     THEN 1 ELSE 0 END) as izin"),
+                DB::raw("SUM(CASE WHEN jadwal_mahasiswa.status = 'belum hadir' THEN 1 ELSE 0 END) as belum")
+            )
+            ->groupBy(
+                'jadwal.id', 'jadwal.hari', 'jadwal.jam', 'jadwal.ruangan',
+                'jadwal.totalSesi', 'jadwal.tahunAjar',
+                'matakuliah.namaMk', 'matakuliah.kodeMk',
+                'kelas.kodeKelas', 'dosen.nama'
+            )
+            ->orderBy('matakuliah.namaMk')
+            ->get()
+            ->map(function ($j) {
+                $berlangsung = $j->hadir + $j->absen + $j->izin;
+                $j->pct      = $berlangsung > 0 ? round($j->hadir / $berlangsung * 100, 1) : null;
+                return $j;
+            });
+
+        // Per-sesi records grouped by jadwal_id for accordion
+        $sesiByJadwal = DB::table('jadwal_mahasiswa')
+            ->where('mahasiswa_id', $id)
+            ->select('jadwal_id', 'sesi', 'status', 'tglSesi')
+            ->orderBy('jadwal_id')
+            ->orderBy('sesi')
+            ->get()
+            ->groupBy('jadwal_id');
+
+        $totalHadir       = $jadwalList->sum('hadir');
+        $totalAbsen       = $jadwalList->sum('absen');
+        $totalIzin        = $jadwalList->sum('izin');
+        $totalBelum       = $jadwalList->sum('belum');
+        $totalBerlangsung = $totalHadir + $totalAbsen + $totalIzin;
+        $totalPct         = $totalBerlangsung > 0
+            ? round($totalHadir / $totalBerlangsung * 100, 1)
+            : null;
+
+        return view('kln.attendance.detail', compact(
+            'mahasiswa', 'jadwalList', 'sesiByJadwal',
+            'totalHadir', 'totalAbsen', 'totalIzin', 'totalBelum', 'totalPct'
+        ));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | NOTIFICATION — HELPER
+    | Creates one notification record and distributes to mahasiswa target list.
+    |--------------------------------------------------------------------------
+    */
+    private function createNotificationForMahasiswa(
+        string $subject,
+        string $message,
+        string $type,
+        array $mahasiswaIds   // empty = all mahasiswa
+    ): void {
+        $notifId = DB::table('notification')->insertGetId([
+            'subject'    => $subject,
+            'message'    => $message,
+            'status'     => 'active',
+            'type'       => $type,
+            'sender_id'  => Auth::id(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        if (empty($mahasiswaIds)) {
+            $mahasiswaIds = DB::table('mahasiswa')->pluck('id')->toArray();
+        }
+
+        $rows = array_map(fn ($mId) => [
+            'notification_id' => $notifId,
+            'mahasiswa_id'    => $mId,
+            'is_read'         => false,
+            'created_at'      => now(),
+            'updated_at'      => now(),
+        ], $mahasiswaIds);
+
+        DB::table('notification_mahasiswa')->insert($rows);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | BROADCAST PAGE — KLN kirim notifikasi ke mahasiswa
+    |--------------------------------------------------------------------------
+    */
+    public function broadcastPage()
+    {
+        $mahasiswaList = DB::table('mahasiswa')
+            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
+            ->where('users.status', 'active')
+            ->select('mahasiswa.id', 'mahasiswa.nama', 'mahasiswa.npm')
+            ->orderBy('mahasiswa.nama')
+            ->get();
+
+        $riwayat = DB::table('notification')
+            ->where('sender_id', Auth::id())
+            ->orWhere('type', 'broadcast')
+            ->select(
+                'notification.*',
+                DB::raw('(SELECT COUNT(*) FROM notification_mahasiswa WHERE notification_mahasiswa.notification_id = notification.id) as total_penerima'),
+                DB::raw('(SELECT COUNT(*) FROM notification_mahasiswa WHERE notification_mahasiswa.notification_id = notification.id AND is_read = true) as total_dibaca')
+            )
+            ->orderBy('notification.created_at', 'desc')
+            ->limit(50)
+            ->get();
+
+        return view('kln.broadcast', compact('mahasiswaList', 'riwayat'));
+    }
+
+    public function storeBroadcast(Request $request)
+    {
+        $request->validate([
+            'subject'       => 'required|string|max:255',
+            'message'       => 'required|string',
+            'target'        => 'required|in:all,selected',
+            'mahasiswa_ids' => 'required_if:target,selected|array',
+            'mahasiswa_ids.*' => 'integer|exists:mahasiswa,id',
+        ]);
+
+        $ids = $request->target === 'all' ? [] : $request->mahasiswa_ids;
+        $this->createNotificationForMahasiswa(
+            $request->subject,
+            $request->message,
+            'broadcast',
+            $ids
+        );
+
+        ActivityLog::record('Mengirim broadcast notifikasi: ' . $request->subject, 'notification', null);
+
+        return redirect()->route('kln.broadcast')->with('success', 'Notifikasi berhasil dikirim.');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | NOTIFIKASI — KLN ALERT BOARD (Opsi B: real-time monitoring)
+    |--------------------------------------------------------------------------
+    */
+    public function notifikasiPage()
+    {
+        // Dokumen sudah kadaluwarsa
+        $expiredDokumen = DB::table('dokumen')
+            ->join('mahasiswa', 'dokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->join('users',     'mahasiswa.user_id',    '=', 'users.id')
+            ->leftJoin('jurusan', 'users.jurusan_id',   '=', 'jurusan.id')
+            ->whereNull('dokumen.deleted_at')
+            ->whereNotNull('dokumen.tglKdlwrs')
+            ->whereRaw("dokumen.\"tglKdlwrs\" < CURRENT_DATE")
+            ->select(
+                'dokumen.id as dokumen_id',
+                'dokumen.tipeDkmn',
+                'dokumen.namaDkmn',
+                'dokumen.tglKdlwrs',
+                'mahasiswa.id as mahasiswa_id',
+                'mahasiswa.nama',
+                'mahasiswa.npm',
+                'jurusan.namaJurusan'
+            )
+            ->orderBy('dokumen.tglKdlwrs')
+            ->get();
+
+        // Dokumen hampir kadaluwarsa (≤ 30 hari ke depan)
+        $nearExpiredDokumen = DB::table('dokumen')
+            ->join('mahasiswa', 'dokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->join('users',     'mahasiswa.user_id',    '=', 'users.id')
+            ->leftJoin('jurusan', 'users.jurusan_id',   '=', 'jurusan.id')
+            ->whereNull('dokumen.deleted_at')
+            ->whereNotNull('dokumen.tglKdlwrs')
+            ->whereRaw("dokumen.\"tglKdlwrs\" >= CURRENT_DATE AND dokumen.\"tglKdlwrs\" <= CURRENT_DATE + INTERVAL '30 days'")
+            ->select(
+                'dokumen.id as dokumen_id',
+                'dokumen.tipeDkmn',
+                'dokumen.namaDkmn',
+                'dokumen.tglKdlwrs',
+                'mahasiswa.id as mahasiswa_id',
+                'mahasiswa.nama',
+                'mahasiswa.npm',
+                'jurusan.namaJurusan'
+            )
+            ->orderBy('dokumen.tglKdlwrs')
+            ->get()
+            ->map(function ($row) {
+                $row->sisa_hari = now()->diffInDays(\Carbon\Carbon::parse($row->tglKdlwrs), false);
+                return $row;
+            });
+
+        // Akun mahasiswa nonaktif
+        $inactiveMahasiswa = DB::table('mahasiswa')
+            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
+            ->leftJoin('jurusan', 'users.jurusan_id', '=', 'jurusan.id')
+            ->where('users.status', 'inactive')
+            ->where('users.role', 'mahasiswa')
+            ->select(
+                'mahasiswa.id',
+                'mahasiswa.nama',
+                'mahasiswa.npm',
+                'users.email',
+                'users.id as user_id',
+                'jurusan.namaJurusan'
+            )
+            ->orderBy('mahasiswa.nama')
+            ->get();
+
+        // Request dokumen pending
+        $pendingRequests = DB::table('reqDokumen')
+            ->join('mahasiswa', 'reqDokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->join('users',     'mahasiswa.user_id',       '=', 'users.id')
+            ->leftJoin('jurusan', 'users.jurusan_id',      '=', 'jurusan.id')
+            ->where('reqDokumen.status', 'pending')
+            ->select(
+                'reqDokumen.id',
+                'reqDokumen.tipeDkmn',
+                'reqDokumen.created_at',
+                'mahasiswa.id as mahasiswa_id',
+                'mahasiswa.nama',
+                'mahasiswa.npm',
+                'jurusan.namaJurusan'
+            )
+            ->orderBy('reqDokumen.created_at')
+            ->get();
+
+        $stats = [
+            'expired'     => $expiredDokumen->count(),
+            'nearExpired' => $nearExpiredDokumen->count(),
+            'inactive'    => $inactiveMahasiswa->count(),
+            'pending'     => $pendingRequests->count(),
+        ];
+
+        return view('kln.notifikasi', compact(
+            'expiredDokumen', 'nearExpiredDokumen', 'inactiveMahasiswa',
+            'pendingRequests', 'stats'
+        ));
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -850,6 +1227,9 @@ class KlnController extends Controller
             'created_at'    => now(),
             'updated_at'    => now(),
         ]);
+
+        $mkNama = DB::table('matakuliah')->where('id', $matakuliahId)->value('namaMk');
+        ActivityLog::record("Membuat jadwal: {$mkNama}", 'jadwal', $jadwalId);
 
         return response()->json([
             'success' => true,
