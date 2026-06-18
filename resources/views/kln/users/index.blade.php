@@ -78,6 +78,7 @@
 
                 </table>
         </div>
+        <div id="paginationContainer" style="padding:14px 20px;border-top:1px solid var(--c-border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;"></div>
 
     </div>
 
@@ -314,6 +315,8 @@ document.addEventListener('DOMContentLoaded', function () {
     /* =========================
        USERS TABLE
     ==========================*/
+    let currentPage = 1;
+
     const jurusanMap = {
         @foreach($jurusan as $j)
             {{ $j->id }}: "{{ $j->namaJurusan }}",
@@ -411,36 +414,27 @@ document.addEventListener('DOMContentLoaded', function () {
         return [];
     }
 
-    function loadUsers(search = '', sort = '') {
+    function loadUsers(search = '', sort = '', page = 1) {
+        currentPage = page;
         renderEmpty('Loading...');
-        
+
         let url = "{{ route('kln.users.data') }}";
         let params = new URLSearchParams();
-        
-        if (search) {
-            params.append('email', search);
-        }
-        
-        if (sort) {
-            params.append('sort', sort);
-        }
-        
-        if (params.toString()) {
-            url += '?' + params.toString();
-        }
+
+        if (search) params.append('email', search);
+        if (sort)   params.append('sort', sort);
+        if (page > 1) params.append('page', page);
+
+        if (params.toString()) url += '?' + params.toString();
 
         fetch(url)
             .then(res => res.json())
             .then(response => {
-                console.log('Response from server:', response);
-                
-                // Tampilkan flash message dari response
-                if (response.flash) {
-                    showFlasherNotification(response.flash);
-                }
-                
+                if (response.flash) showFlasherNotification(response.flash);
+
                 if (response.success) {
                     renderUsers(extractUsers(response.data));
+                    renderPagination(response.pagination);
                 } else {
                     renderEmpty(response.message || 'Failed to load data');
                 }
@@ -448,15 +442,61 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(error => {
                 console.error('Error loading users:', error);
                 renderEmpty('Failed to load data: ' + error.message);
-                
-                // Tampilkan error flash
-                showFlasherNotification({
-                    type: 'error',
-                    message: 'Failed to load data: ' + error.message,
-                    theme: 'amazon',
-                    timeout: 5000
-                });
             });
+    }
+
+    function renderPagination(pagination) {
+        const container = document.getElementById('paginationContainer');
+        if (!pagination || pagination.last_page <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+
+        const { current_page, last_page, total, per_page } = pagination;
+        const from = (current_page - 1) * per_page + 1;
+        const to   = Math.min(current_page * per_page, total);
+
+        const baseBtn = 'padding:5px 11px;border-radius:7px;border:1px solid var(--c-border);font-size:13px;font-weight:500;cursor:pointer;';
+
+        function makeBtn(label, page, isActive, isDisabled) {
+            const btn = document.createElement('button');
+            btn.innerHTML = label;
+            btn.style.cssText = baseBtn +
+                (isActive  ? 'background:var(--c-accent);color:#fff;cursor:default;' : 'background:transparent;color:var(--c-text-1);') +
+                (isDisabled ? 'opacity:.4;cursor:default;' : '');
+            if (!isActive && !isDisabled) {
+                btn.addEventListener('click', () => goToPage(page));
+            }
+            return btn;
+        }
+
+        container.innerHTML = '';
+
+        const info = document.createElement('div');
+        info.style.cssText = 'font-size:12px;color:var(--c-text-3);';
+        info.textContent = `Menampilkan ${from}–${to} dari ${total} users`;
+        container.appendChild(info);
+
+        const nav = document.createElement('div');
+        nav.style.cssText = 'display:flex;gap:4px;align-items:center;';
+
+        nav.appendChild(makeBtn('<i class="fas fa-angle-double-left"></i>', 1,           false, current_page === 1));
+        nav.appendChild(makeBtn('<i class="fas fa-angle-left"></i>',        current_page - 1, false, current_page === 1));
+
+        for (let p = Math.max(1, current_page - 2); p <= Math.min(last_page, current_page + 2); p++) {
+            nav.appendChild(makeBtn(p, p, p === current_page, false));
+        }
+
+        nav.appendChild(makeBtn('<i class="fas fa-angle-right"></i>',        current_page + 1, false, current_page === last_page));
+        nav.appendChild(makeBtn('<i class="fas fa-angle-double-right"></i>', last_page,        false, current_page === last_page));
+
+        container.appendChild(nav);
+    }
+
+    function goToPage(page) {
+        const search = searchInput ? searchInput.value : '';
+        const sort   = sortInput   ? sortInput.value   : '';
+        loadUsers(search, sort, page);
     }
 
     // Fungsi untuk menampilkan notifikasi menggunakan PHPFlasher dari JavaScript
@@ -504,35 +544,25 @@ document.addEventListener('DOMContentLoaded', function () {
             clearTimeout(searchTimeout);
             const searchValue = this.value;
             const sortValue = sortInput ? sortInput.value : '';
-            
             searchTimeout = setTimeout(() => {
-                loadUsers(searchValue, sortValue);
-            }, 500); // Debounce 500ms
+                loadUsers(searchValue, sortValue, 1); // reset ke page 1
+            }, 500);
         });
     }
 
-    // Event listener untuk sort
     if (sortInput) {
         sortInput.addEventListener('change', function() {
             const searchValue = searchInput ? searchInput.value : '';
-            const sortValue = this.value;
-            loadUsers(searchValue, sortValue);
+            loadUsers(searchValue, this.value, 1); // reset ke page 1
         });
     }
 
     window.sortBy = function(field) {
         const currentSort = sortInput.value;
-        let newSort = '';
-        
-        if (currentSort === field + '_asc') {
-            newSort = field + '_desc';
-        } else {
-            newSort = field + '_asc';
-        }
-        
+        let newSort = currentSort === field + '_asc' ? field + '_desc' : field + '_asc';
         sortInput.value = newSort;
         const searchValue = searchInput ? searchInput.value : '';
-        loadUsers(searchValue, newSort);
+        loadUsers(searchValue, newSort, 1);
     }
 
     /* =========================

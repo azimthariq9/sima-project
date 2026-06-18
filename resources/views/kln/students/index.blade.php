@@ -99,7 +99,7 @@
                     data-nama="{{ strtolower($m->nama) }}">
                     <td>{{ $idx + 1 }}</td>
                     <td>{{ $m->nama }}</td>
-                    <td><code>{{ $m->identifier ?? '-' }}</code></td>
+                    <td><span style="font-family:var(--f-mono);font-size:13px;">{{ $m->identifier ?? '-' }}</span></td>
                     <td>{{ $m->namaJurusan ?? '-' }}</td>
                     <td><span class="sima-badge {{ $akunBadge }}">{{ $akunLabel }}</span></td>
                     <td>
@@ -169,7 +169,7 @@
                     data-nama="{{ strtolower($d->nama) }}">
                     <td>{{ $idx + 1 }}</td>
                     <td>{{ $d->nama }}</td>
-                    <td><code>{{ $d->identifier ?? '-' }}</code></td>
+<td><span style="font-family:var(--f-mono);font-size:13px;">{{ $d->identifier ?? '-' }}</span></td>
                     <td>{{ $d->namaJurusan ?? '-' }}</td>
                     <td><span class="sima-badge {{ $badgeSts }}">{{ $labelSts }}</span></td>
                     <td>

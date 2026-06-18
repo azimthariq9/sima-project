@@ -23,10 +23,61 @@ class KlnController extends Controller
     */
 
     public function index()
-    {   
-        
-        return view('kln.dashboard');
-       
+    {
+        $today = now()->toDateString();
+
+        // ── Stat cards ────────────────────────────────────────────
+        $totalMahasiswa    = DB::table('mahasiswa')->count();
+        $dokumenPending    = DB::table('reqDokumen')->where('status', 'pending')->count();
+        $dokumenExpired    = DB::table('dokumen')
+            ->whereDate('tglKdlwrs', '<', $today)->count();
+        $absensiHariIni    = DB::table('jadwal_mahasiswa')
+            ->whereDate('tglSesi', $today)->where('status', 'present')->count();
+        $negaraDistinct    = DB::table('mahasiswa')
+            ->whereNotNull('warNeg')->where('warNeg', '<>', '')
+            ->distinct()->count('warNeg');
+        $divalidasiHariIni = DB::table('dokumen')
+            ->whereDate('updated_at', $today)->where('status', 'approved')->count();
+        $jadwalAktif       = DB::table('jadwal')->count();
+
+        // ── Dokumen kritis (expired + ≤30 hari) ──────────────────
+        $dokumenKritis = DB::table('dokumen')
+            ->join('mahasiswa', 'dokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->whereDate('dokumen.tglKdlwrs', '<=', now()->addDays(30)->toDateString())
+            ->select(
+                'mahasiswa.nama',
+                'mahasiswa.warNeg',
+                'dokumen.tipeDkmn',
+                'dokumen.tglKdlwrs',
+                DB::raw("CASE WHEN dokumen.\"tglKdlwrs\" < CURRENT_DATE THEN 'expired' ELSE 'expiring' END as doc_status")
+            )
+            ->orderBy('dokumen.tglKdlwrs')
+            ->limit(10)
+            ->get();
+
+        // ── Sebaran negara ────────────────────────────────────────
+        $sebaranNegara = DB::table('mahasiswa')
+            ->whereNotNull('warNeg')->where('warNeg', '<>', '')
+            ->select('warNeg', DB::raw('COUNT(*) as jumlah'))
+            ->groupBy('warNeg')
+            ->orderByDesc('jumlah')
+            ->limit(7)
+            ->get();
+
+        // ── Antrian validasi (pending reqDokumen) ─────────────────
+        $antrianValidasi = DB::table('reqDokumen')
+            ->join('mahasiswa', 'reqDokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->where('reqDokumen.status', 'pending')
+            ->select('reqDokumen.id', 'mahasiswa.nama', 'reqDokumen.tipeDkmn', 'reqDokumen.created_at')
+            ->orderBy('reqDokumen.created_at')
+            ->limit(5)
+            ->get();
+
+        return view('kln.dashboard', compact(
+            'totalMahasiswa', 'dokumenPending', 'dokumenExpired',
+            'absensiHariIni', 'negaraDistinct', 'divalidasiHariIni', 'jadwalAktif',
+            'dokumenKritis', 'sebaranNegara', 'antrianValidasi'
+        ));
     }
 
 
@@ -441,9 +492,17 @@ class KlnController extends Controller
             $query->orderBy('id', 'asc');
         }
 
+        $paginated = $query->paginate(10);
+
         return response()->json([
-            'success' => true,
-            'data'    => $query->get(),
+            'success'    => true,
+            'data'       => $paginated->items(),
+            'pagination' => [
+                'current_page' => $paginated->currentPage(),
+                'last_page'    => $paginated->lastPage(),
+                'per_page'     => $paginated->perPage(),
+                'total'        => $paginated->total(),
+            ],
         ]);
     }
 
@@ -563,13 +622,20 @@ class KlnController extends Controller
 
     public function announcementPage()
     {
+        $totalAll     = DB::table('announcement')->where('sumber', 'kln')->count();
+        $totalActive  = DB::table('announcement')->where('sumber', 'kln')->where('status', 'active')->count();
+        $totalDraft   = DB::table('announcement')->where('sumber', 'kln')->where('status', 'draft')->count();
+        $totalPenting = DB::table('announcement')->where('sumber', 'kln')->where('is_penting', true)->count();
+
         $announcements = DB::table('announcement')
             ->where('sumber', 'kln')
             ->selectRaw("announcement.*, (SELECT COUNT(*) FROM announcement_files WHERE announcement_files.announcement_id = announcement.id) as file_count")
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10);
 
-        return view('kln.announcement', compact('announcements'));
+        return view('kln.announcement', compact(
+            'announcements', 'totalAll', 'totalActive', 'totalDraft', 'totalPenting'
+        ));
     }
 
     public function createAnnouncementPage()
@@ -891,24 +957,46 @@ class KlnController extends Controller
     {
         $mahasiswaList = DB::table('mahasiswa')
             ->join('users', 'mahasiswa.user_id', '=', 'users.id')
+            ->leftJoin('jurusan', 'users.jurusan_id', '=', 'jurusan.id')
             ->where('users.status', 'active')
-            ->select('mahasiswa.id', 'mahasiswa.nama', 'mahasiswa.npm')
+            ->select(
+                'mahasiswa.id',
+                'mahasiswa.nama',
+                'mahasiswa.npm',
+                'users.jurusan_id',
+                'jurusan.namaJurusan'
+            )
             ->orderBy('mahasiswa.nama')
             ->get();
 
+        // Map mahasiswa_id → kelas_ids (comma-separated) untuk JS filter
+        $mahasiswaKelasMap = DB::table('mahasiswa_kelas')
+            ->select('mahasiswa_id', 'kelas_id')
+            ->get()
+            ->groupBy('mahasiswa_id')
+            ->map(fn($items) => $items->pluck('kelas_id')->join(','));
+
+        $jurusanList = DB::table('jurusan')->orderBy('namaJurusan')->get();
+
+        $kelasList = DB::table('kelas')
+            ->join('mahasiswa_kelas', 'kelas.id', '=', 'mahasiswa_kelas.kelas_id')
+            ->select('kelas.id', 'kelas.kodeKelas', 'kelas.tahunAjar')
+            ->distinct()
+            ->orderBy('kelas.kodeKelas')
+            ->get();
+
         $riwayat = DB::table('notification')
-            ->where('sender_id', Auth::id())
-            ->orWhere('type', 'broadcast')
             ->select(
                 'notification.*',
                 DB::raw('(SELECT COUNT(*) FROM notification_mahasiswa WHERE notification_mahasiswa.notification_id = notification.id) as total_penerima'),
                 DB::raw('(SELECT COUNT(*) FROM notification_mahasiswa WHERE notification_mahasiswa.notification_id = notification.id AND is_read = true) as total_dibaca')
             )
             ->orderBy('notification.created_at', 'desc')
-            ->limit(50)
-            ->get();
+            ->paginate(10);
 
-        return view('kln.broadcast', compact('mahasiswaList', 'riwayat'));
+        return view('kln.broadcast', compact(
+            'mahasiswaList', 'mahasiswaKelasMap', 'jurusanList', 'kelasList', 'riwayat'
+        ));
     }
 
     public function storeBroadcast(Request $request)

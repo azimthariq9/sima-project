@@ -62,21 +62,58 @@
                     {{-- Mahasiswa picker (hidden by default) --}}
                     <div id="mahasiswaPicker" style="display:{{ old('target') === 'selected' ? 'block' : 'none' }};margin-bottom:16px;">
                         <label class="sima-label">Pilih Mahasiswa</label>
-                        <div style="border:1px solid var(--c-border);border-radius:8px;max-height:220px;overflow-y:auto;padding:8px;">
+
+                        {{-- Filter bar --}}
+                        <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+                            <input type="text" id="mhsSearch" class="sima-input sima-input--sm"
+                                   placeholder="Cari nama / NPM…" oninput="filterMhsPicker()"
+                                   style="flex:1;min-width:120px;">
+                            <select id="mhsJurusan" class="sima-input sima-input--sm" onchange="filterMhsPicker()"
+                                    style="flex:1;min-width:120px;">
+                                <option value="">Semua Jurusan</option>
+                                @foreach($jurusanList as $j)
+                                    <option value="{{ $j->id }}">{{ $j->namaJurusan }}</option>
+                                @endforeach
+                            </select>
+                            <select id="mhsKelas" class="sima-input sima-input--sm" onchange="filterMhsPicker()"
+                                    style="flex:1;min-width:110px;">
+                                <option value="">Semua Kelas</option>
+                                @foreach($kelasList as $k)
+                                    <option value="{{ $k->id }}">{{ $k->kodeKelas }}{{ $k->tahunAjar ? ' ('.$k->tahunAjar.')' : '' }}</option>
+                                @endforeach
+                            </select>
+                            <button type="button" onclick="resetMhsFilter()" class="sima-btn sima-btn--outline sima-btn--sm" title="Reset filter">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                        </div>
+
+                        <div id="mhsPickerList" style="border:1px solid var(--c-border);border-radius:8px;max-height:220px;overflow-y:auto;padding:8px;">
                             @forelse($mahasiswaList as $mhs)
-                            <label style="display:flex;align-items:center;gap:8px;padding:5px 6px;cursor:pointer;font-size:13px;border-radius:5px;"
+                            <label class="mhs-item" style="display:flex;align-items:center;gap:8px;padding:5px 6px;cursor:pointer;font-size:13px;border-radius:5px;"
+                                   data-nama="{{ strtolower($mhs->nama . ' ' . $mhs->npm) }}"
+                                   data-jurusan="{{ $mhs->jurusan_id ?? '' }}"
+                                   data-kelas="{{ $mahasiswaKelasMap[$mhs->id] ?? '' }}"
                                    onmouseover="this.style.background='var(--c-bg-2)'"
                                    onmouseout="this.style.background='transparent'">
                                 <input type="checkbox" name="mahasiswa_ids[]" value="{{ $mhs->id }}"
                                        {{ in_array($mhs->id, old('mahasiswa_ids', [])) ? 'checked' : '' }}>
-                                <span>
-                                    <span class="fw-600">{{ $mhs->nama }}</span>
-                                    <code style="font-size:11px;color:var(--c-text-3);margin-left:6px;">{{ $mhs->npm }}</code>
+                                <span style="min-width:0;">
+                                    <span style="font-weight:600;">{{ $mhs->nama }}</span>
+                                    <span style="font-family:var(--f-mono);font-size:11px;color:var(--c-text-3);margin-left:6px;">{{ $mhs->npm }}</span>
+                                    @if($mhs->namaJurusan)
+                                    <span style="font-size:11px;color:var(--c-text-3);margin-left:4px;">· {{ $mhs->namaJurusan }}</span>
+                                    @endif
                                 </span>
                             </label>
                             @empty
                             <div style="padding:10px;font-size:13px;color:var(--c-text-3);">Tidak ada mahasiswa aktif.</div>
                             @endforelse
+                            <div id="mhsEmpty" style="display:none;padding:10px;font-size:13px;color:var(--c-text-3);text-align:center;">
+                                Tidak ada mahasiswa yang cocok.
+                            </div>
+                        </div>
+                        <div style="font-size:11px;color:var(--c-text-3);margin-top:4px;" id="mhsCount">
+                            {{ $mahasiswaList->count() }} mahasiswa aktif
                         </div>
                         @error('mahasiswa_ids')<div style="color:var(--c-red);font-size:12px;margin-top:4px;">{{ $message }}</div>@enderror
                     </div>
@@ -94,7 +131,7 @@
         <div class="sima-card">
             <div class="sima-card__header">
                 <h5 class="sima-card__title">Riwayat Terkirim</h5>
-                <span class="sima-badge sima-badge--blue">{{ $riwayat->count() }}</span>
+                <span class="sima-badge sima-badge--blue">{{ $riwayat->total() }}</span>
             </div>
 
             @forelse($riwayat as $notif)
@@ -145,6 +182,11 @@
                 Belum ada notifikasi yang dikirim.
             </div>
             @endforelse
+            @if($riwayat->hasPages())
+            <div style="padding:14px 24px;border-top:1px solid var(--c-border);">
+                {{ $riwayat->links() }}
+            </div>
+            @endif
         </div>
     </div>
 
@@ -156,6 +198,33 @@
 <script>
 function toggleMahasiswaPicker(val) {
     document.getElementById('mahasiswaPicker').style.display = val === 'selected' ? 'block' : 'none';
+}
+
+function filterMhsPicker() {
+    const q       = document.getElementById('mhsSearch').value.toLowerCase();
+    const jurusan = document.getElementById('mhsJurusan').value;
+    const kelas   = document.getElementById('mhsKelas').value;
+    const items   = document.querySelectorAll('#mhsPickerList .mhs-item');
+    let visible   = 0;
+
+    items.forEach(el => {
+        const matchNama    = !q       || el.dataset.nama.includes(q);
+        const matchJurusan = !jurusan || el.dataset.jurusan === jurusan;
+        const matchKelas   = !kelas   || (el.dataset.kelas && el.dataset.kelas.split(',').includes(kelas));
+        const show         = matchNama && matchJurusan && matchKelas;
+        el.style.display   = show ? '' : 'none';
+        if (show) visible++;
+    });
+
+    document.getElementById('mhsEmpty').style.display = visible === 0 ? '' : 'none';
+    document.getElementById('mhsCount').textContent   = visible + ' mahasiswa ditampilkan';
+}
+
+function resetMhsFilter() {
+    document.getElementById('mhsSearch').value   = '';
+    document.getElementById('mhsJurusan').value  = '';
+    document.getElementById('mhsKelas').value    = '';
+    filterMhsPicker();
 }
 </script>
 @endpush

@@ -12,28 +12,28 @@
         <div class="sima-stat sima-stat--blue">
             <div class="sima-stat__icon sima-stat__icon--blue"><i class="fas fa-bullhorn"></i></div>
             <div class="sima-stat__label">Total</div>
-            <div class="sima-stat__value">{{ $announcements->count() }}</div>
+            <div class="sima-stat__value">{{ $totalAll }}</div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="sima-stat sima-stat--green">
             <div class="sima-stat__icon sima-stat__icon--green"><i class="fas fa-check-circle"></i></div>
             <div class="sima-stat__label">Aktif</div>
-            <div class="sima-stat__value">{{ $announcements->where('status', 'active')->count() }}</div>
+            <div class="sima-stat__value">{{ $totalActive }}</div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="sima-stat sima-stat--amber">
             <div class="sima-stat__icon sima-stat__icon--amber"><i class="fas fa-edit"></i></div>
             <div class="sima-stat__label">Draft</div>
-            <div class="sima-stat__value">{{ $announcements->where('status', 'draft')->count() }}</div>
+            <div class="sima-stat__value">{{ $totalDraft }}</div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="sima-stat sima-stat--red">
             <div class="sima-stat__icon sima-stat__icon--red"><i class="fas fa-exclamation-circle"></i></div>
             <div class="sima-stat__label">Penting</div>
-            <div class="sima-stat__value">{{ $announcements->where('is_penting', true)->count() }}</div>
+            <div class="sima-stat__value">{{ $totalPenting }}</div>
         </div>
     </div>
 </div>
@@ -142,6 +142,11 @@
             </tbody>
         </table>
     </div>
+    @if($announcements->hasPages())
+    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
+        {{ $announcements->links() }}
+    </div>
+    @endif
 </div>
 
 @endsection
