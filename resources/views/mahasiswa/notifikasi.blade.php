@@ -12,7 +12,7 @@
             <div class="sima-card__header">
                 <div>
                     <h5 class="sima-card__title">Semua Notifikasi</h5>
-                    <div class="sima-card__subtitle">{{ $unreadNotif ?? 4 }} belum dibaca</div>
+                    <div class="sima-card__subtitle">{{ $unreadNotifCount ?? 0 }} belum dibaca</div>
                 </div>
                 <button class="sima-btn sima-btn--outline sima-btn--sm" onclick="markAllRead()">
                     <i class="fas fa-check-double"></i> Tandai Semua Dibaca
@@ -20,19 +20,24 @@
             </div>
 
             @php
-            $notifs = $notifications ?? [
-                ['ic'=>'fa-circle-check',       'cl'=>'#059669','bg'=>'#ECFDF5','text'=>'Dokumen <strong>KITAS</strong> telah diverifikasi oleh KLN.','time'=>'Hari ini, 09:14','unread'=>true],
-                ['ic'=>'fa-triangle-exclamation','cl'=>'#D97706','bg'=>'#FFFBEB','text'=>'<strong>KITAS</strong> Anda akan expired dalam <strong>12 hari</strong>. Segera lakukan perpanjangan.','time'=>'Hari ini, 07:00','unread'=>true],
-                ['ic'=>'fa-bullhorn',            'cl'=>'#2563EB','bg'=>'#EFF6FF','text'=>'Pengumuman baru dari <strong>KLN</strong>: Orientasi Semester Genap 2025/2026.','time'=>'Kemarin, 15:30','unread'=>true],
-                ['ic'=>'fa-calendar-check',      'cl'=>'#7C3AED','bg'=>'#F5F3FF','text'=>'Jadwal <strong>UTS Semester Genap</strong> telah dirilis. Periksa jadwal Anda.','time'=>'Kemarin, 10:00','unread'=>true],
-                ['ic'=>'fa-file-alt',            'cl'=>'#0D9488','bg'=>'#F0FDFA','text'=>'Request dokumen <strong>REQ-003</strong> sudah selesai diproses.','time'=>'2 hari lalu','unread'=>false],
-                ['ic'=>'fa-user-check',          'cl'=>'#6c8fff','bg'=>'#eff3ff','text'=>'Profil Anda telah diperbarui dengan sukses.','time'=>'3 hari lalu','unread'=>false],
-            ];
+            // Transform data dari paginator DB ke format array yang dipakai view
+            if (!empty($notifikasi) && $notifikasi->count() > 0) {
+                $notifs = $notifikasi->map(fn($n) => [
+                    'ic'     => 'fa-bell',
+                    'cl'     => '#2563EB',
+                    'bg'     => '#EFF6FF',
+                    'text'   => e($n->subject) . ($n->message ? '<br><span style="font-size:12px;color:var(--c-text-3)">' . e($n->message) . '</span>' : ''),
+                    'time'   => \Carbon\Carbon::parse($n->received_at)->diffForHumans(),
+                    'unread' => !$n->is_read,
+                ]);
+            } else {
+                $notifs = [];
+            }
             @endphp
 
             <div id="notif-list">
-                @foreach($notifs as $n)
-                @php $nr = is_array($n) ? $n : $n->toArray(); @endphp
+                @forelse($notifs as $n)
+                @php $nr = is_array($n) ? $n : (array) $n; @endphp
                 <div style="display:flex;align-items:flex-start;gap:14px;padding:16px 20px;
                             border-bottom:1px solid var(--c-border-soft);
                             background:{{ ($nr['unread'] ?? false) ? 'rgba(108,143,255,.03)' : 'transparent' }};
@@ -50,7 +55,12 @@
                     <div style="width:8px;height:8px;border-radius:50%;background:var(--c-accent);flex-shrink:0;margin-top:6px"></div>
                     @endif
                 </div>
-                @endforeach
+                @empty
+                <div style="padding:40px 0;text-align:center;color:var(--c-text-3)">
+                    <i class="fas fa-bell-slash" style="font-size:28px;margin-bottom:10px;opacity:.3"></i>
+                    <div style="font-size:13px">Belum ada notifikasi</div>
+                </div>
+                @endforelse
             </div>
         </div>
     </div>
