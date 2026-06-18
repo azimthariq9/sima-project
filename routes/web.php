@@ -87,7 +87,8 @@ Route::middleware(['auth', 'check.role:MAHASISWA'])
             Route::get('announcement',  [MahasiswaController::class, 'announcement'])->name('announcement');
             Route::get('announcement/{id}', [MahasiswaController::class, 'announcementShow'])->name('announcement.show');
             Route::post('absensi/submit',   [MahasiswaController::class, 'submitAbsensi'])->name('absensi.submit');
-            Route::get('notifikasi',    [MahasiswaController::class, 'notifikasi'])->name('notifikasi');
+            Route::get('notifikasi',          [MahasiswaController::class, 'notifikasi'])->name('notifikasi');
+            Route::post('notifikasi/mark-read', [MahasiswaController::class, 'markNotifRead'])->name('notifikasi.mark-read');
             Route::get('analytics',     [MahasiswaController::class, 'analytics'])->name('analytics');
         });
     });
@@ -249,7 +250,11 @@ Route::middleware(['auth', 'check.role:KLN'])
             Route::delete('{id}',                 [KlnController::class, 'destroyAnnouncement'])->name('destroy');
             Route::get('{annId}/file/{fileId}',   [KlnController::class, 'serveAnnouncementFile'])->name('file');
         });
-        Route::view('notifikasi',   'kln.notifikasi')->name('notifikasi');
+        Route::get('attendance',      [KlnController::class, 'attendancePage'])->name('attendance');
+        Route::get('attendance/{id}', [KlnController::class, 'attendanceDetail'])->name('attendance.detail');
+        Route::get('notifikasi',  [KlnController::class, 'notifikasiPage'])->name('notifikasi');
+        Route::get('broadcast',   [KlnController::class, 'broadcastPage'])->name('broadcast');
+        Route::post('broadcast',  [KlnController::class, 'storeBroadcast'])->name('broadcast.send');
         Route::view('analytics',    'kln.analytics')->name('analytics');
 
         // Users management

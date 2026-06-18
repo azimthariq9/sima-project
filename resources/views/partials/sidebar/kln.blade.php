@@ -95,16 +95,26 @@
 
 
     {{-- Notification --}}
-    <a href="#"
-       class="sima-nav__item">
+    <a href="{{ route('kln.notifikasi') }}"
+       class="sima-nav__item {{ request()->routeIs('kln.notifikasi') ? 'active' : '' }}"
+       data-title="Notifikasi">
         <i class="fas fa-bell sima-nav__icon"></i>
         <span>Notifikasi</span>
     </a>
 
+    {{-- Broadcast --}}
+    <a href="{{ route('kln.broadcast') }}"
+       class="sima-nav__item {{ request()->routeIs('kln.broadcast*') ? 'active' : '' }}"
+       data-title="Broadcast">
+        <i class="fas fa-bullhorn sima-nav__icon"></i>
+        <span>Broadcast</span>
+    </a>
+
 
     {{-- Details Presence --}}
-    <a href="#"
-       class="sima-nav__item">
+    <a href="{{ route('kln.attendance') }}"
+       class="sima-nav__item {{ request()->routeIs('kln.attendance*') ? 'active' : '' }}"
+       data-title="Daftar Kehadiran">
         <i class="fas fa-check-square sima-nav__icon"></i>
         <span>Daftar Kehadiran</span>
     </a>

@@ -98,13 +98,24 @@
         <span>Pengumuman</span>
     </a>
 
+    @php
+        $__mhs = \Illuminate\Support\Facades\DB::table('mahasiswa')
+            ->where('user_id', auth()->id())
+            ->value('id');
+        $__unread = $__mhs
+            ? \Illuminate\Support\Facades\DB::table('notification_mahasiswa')
+                ->where('mahasiswa_id', $__mhs)
+                ->where('is_read', false)
+                ->count()
+            : 0;
+    @endphp
     <a href="{{ route('mahasiswa.notifikasi') }}"
        class="sima-nav__item {{ request()->routeIs('mahasiswa.notifikasi') ? 'active' : '' }}"
        data-title="Notifikasi">
         <i class="fas fa-bell sima-nav__icon"></i>
         <span>Notifikasi</span>
-        @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
-            <span class="sima-nav__badge">{{ $unreadNotifCount > 9 ? '9+' : $unreadNotifCount }}</span>
+        @if($__unread > 0)
+            <span class="sima-nav__badge">{{ $__unread > 9 ? '9+' : $__unread }}</span>
         @endif
     </a>
 
