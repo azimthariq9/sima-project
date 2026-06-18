@@ -172,25 +172,27 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
 
 </div>
 
-{{-- ═══ ROW 4: ANTRIAN VALIDASI ═══════════════════════════════════════════ --}}
+{{-- ═══ ROW 4: ANTRIAN VALIDASI + REQUEST DOKUMEN ═══════════════════════════ --}}
 <div class="row g-3">
-    <div class="col-12 sima-fade sima-fade--7">
+
+    {{-- ── Antrian Validasi ─────────────────────────────────────── --}}
+    <div class="col-lg-8 sima-fade sima-fade--7">
         <div class="sima-card">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Antrian Validasi</h5>
+                    <h5 class="sima-card__title">Antrian Validasi Dokumen</h5>
                     <div class="sima-card__subtitle">
-                        {{ $antrianValidasi->count() }} request dokumen menunggu
+                        {{ $antrianValidasi->count() }} dokumen menunggu divalidasi
                     </div>
                 </div>
-                <a href="{{ route('kln.dokumen.page') }}" class="sima-btn sima-btn--outline sima-btn--sm">
+                <a href="{{ route('kln.students.page') }}" class="sima-btn sima-btn--outline sima-btn--sm">
                     <i class="fas fa-arrow-right me-1"></i> Semua
                 </a>
             </div>
             @if($antrianValidasi->isEmpty())
             <div class="text-center text-muted py-5" style="font-size:13px;">
                 <i class="fas fa-inbox fa-2x d-block mb-2" style="opacity:.3;"></i>
-                Tidak ada request pending.
+                Tidak ada dokumen menunggu validasi.
             </div>
             @else
             @foreach($antrianValidasi as $i => $q)
@@ -200,12 +202,12 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
                 </div>
                 <div style="flex:1;">
                     <div style="font-size:13px;font-weight:600;">{{ $q->nama }}</div>
-                    <div style="font-size:12px;color:var(--c-text-3);">{{ $q->tipeDkmn }}</div>
+                    <div style="font-size:12px;color:var(--c-text-3);">{{ $q->tipeDkmn }} · {{ $q->namaDkmn }}</div>
                 </div>
                 <div style="font-family:var(--f-mono);font-size:11px;color:var(--c-text-3);">
                     {{ \Carbon\Carbon::parse($q->created_at)->diffForHumans() }}
                 </div>
-                <a href="{{ route('kln.dokumen.page') }}"
+                <a href="{{ route('kln.students.mahasiswa', $q->mahasiswa_id) }}"
                    style="padding:5px 12px;background:rgba(108,143,255,.12);color:var(--c-accent);
                           border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;">
                     Review
@@ -215,6 +217,53 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
             @endif
         </div>
     </div>
+
+    {{-- ── Request Dokumen ──────────────────────────────────────── --}}
+    <div class="col-lg-4 sima-fade sima-fade--8">
+        <div class="sima-card h-100">
+            <div class="sima-card__header">
+                <div>
+                    <h5 class="sima-card__title">Request Dokumen</h5>
+                    <div class="sima-card__subtitle">Permohonan dari mahasiswa</div>
+                </div>
+                <a href="{{ route('kln.dokumen.page') }}" class="sima-btn sima-btn--outline sima-btn--sm">
+                    <i class="fas fa-arrow-right me-1"></i> Semua
+                </a>
+            </div>
+            <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px;">
+                {{-- Stat pending --}}
+                <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;
+                            background:{{ $reqDokumenPending > 0 ? 'rgba(217,119,6,.08)' : 'var(--c-bg-2)' }};
+                            border-radius:10px;border:1px solid {{ $reqDokumenPending > 0 ? 'rgba(217,119,6,.3)' : 'var(--c-border)' }};">
+                    <div style="width:40px;height:40px;border-radius:10px;
+                                background:{{ $reqDokumenPending > 0 ? 'rgba(217,119,6,.15)' : 'var(--c-border)' }};
+                                color:{{ $reqDokumenPending > 0 ? 'var(--c-amber)' : 'var(--c-text-3)' }};
+                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fas fa-file-import"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:22px;font-weight:700;line-height:1.1;">{{ $reqDokumenPending }}</div>
+                        <div style="font-size:12px;color:var(--c-text-3);">Request pending</div>
+                    </div>
+                    @if($reqDokumenPending > 0)
+                    <span class="sima-badge sima-badge--amber ms-auto">
+                        <i class="fas fa-exclamation me-1"></i>Perlu ditangani
+                    </span>
+                    @else
+                    <span class="sima-badge sima-badge--green ms-auto">
+                        <i class="fas fa-check me-1"></i>Semua selesai
+                    </span>
+                    @endif
+                </div>
+                <a href="{{ route('kln.dokumen.page') }}"
+                   class="sima-btn sima-btn--accent"
+                   style="text-align:center;">
+                    <i class="fas fa-folder-open me-2"></i> Kelola Request
+                </a>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 @endsection

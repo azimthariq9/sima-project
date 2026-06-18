@@ -64,19 +64,24 @@ class KlnController extends Controller
             ->limit(7)
             ->get();
 
-        // ── Antrian validasi (pending reqDokumen) ─────────────────
-        $antrianValidasi = DB::table('reqDokumen')
-            ->join('mahasiswa', 'reqDokumen.mahasiswa_id', '=', 'mahasiswa.id')
-            ->where('reqDokumen.status', 'pending')
-            ->select('reqDokumen.id', 'mahasiswa.nama', 'reqDokumen.tipeDkmn', 'reqDokumen.created_at')
-            ->orderBy('reqDokumen.created_at')
+        // ── Antrian validasi (dokumen uploaded, belum divalidasi) ────
+        $antrianValidasi = DB::table('dokumen')
+            ->join('mahasiswa', 'dokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->whereIn('dokumen.status', ['pending', 'active'])
+            ->whereNull('dokumen.deleted_at')
+            ->select('dokumen.id', 'mahasiswa.nama', 'mahasiswa.id as mahasiswa_id',
+                     'dokumen.tipeDkmn', 'dokumen.namaDkmn', 'dokumen.created_at')
+            ->orderBy('dokumen.created_at')
             ->limit(5)
             ->get();
+
+        // ── Request dokumen (mahasiswa minta diterbitkan) ─────────
+        $reqDokumenPending = DB::table('reqDokumen')->where('status', 'pending')->count();
 
         return view('kln.dashboard', compact(
             'totalMahasiswa', 'dokumenPending', 'dokumenExpired',
             'absensiHariIni', 'negaraDistinct', 'divalidasiHariIni', 'jadwalAktif',
-            'dokumenKritis', 'sebaranNegara', 'antrianValidasi'
+            'dokumenKritis', 'sebaranNegara', 'antrianValidasi', 'reqDokumenPending'
         ));
     }
 
