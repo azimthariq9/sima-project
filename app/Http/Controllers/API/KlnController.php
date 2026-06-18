@@ -142,19 +142,46 @@ class KlnController extends Controller
             ->first();
 
         return response()->json([
-            'id'        => $req->id,
-            'mahasiswa' => $req->nama_mahasiswa ?? '-',
-            'npm'       => $req->npm ?? '-',
-            'tipe'      => $req->tipeDkmn ?? '-',
-            'status'    => $req->status ?? '-',
-            'message'   => $req->message ?? '-',
-            'file'      => $file ? [
+            'id'         => $req->id,
+            'mahasiswa'  => $req->nama_mahasiswa ?? '-',
+            'npm'        => $req->npm ?? '-',
+            'tipe'       => $req->tipeDkmn ?? '-',
+            'status'     => $req->status ?? '-',
+            'message'    => $req->message ?? '-',
+            'keterangan' => $req->keterangan ?? null,
+            'file'       => $file ? [
                 'path'     => $file->path,
                 'mimeType' => $file->mimeType,
                 'fileSize' => $file->fileSize,
                 'url'      => route('kln.dokumen.file', $req->id),
             ] : null,
         ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | REJECT REQUEST
+    |--------------------------------------------------------------------------
+    */
+
+    public function rejectDokumen(Request $request, $id)
+    {
+        $request->validate([
+            'keterangan' => 'required|string|max:1000',
+        ]);
+
+        $req = DB::table('reqDokumen')->where('id', $id)->first();
+        if (!$req) {
+            return response()->json(['success' => false, 'message' => 'Request tidak ditemukan.'], 404);
+        }
+
+        DB::table('reqDokumen')->where('id', $id)->update([
+            'status'     => 'rejected',
+            'keterangan' => $request->input('keterangan'),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json(['success' => true]);
     }
 
     /*

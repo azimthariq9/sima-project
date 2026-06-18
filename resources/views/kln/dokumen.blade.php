@@ -140,13 +140,13 @@
 
 {{-- ── MODAL DETAIL ─────────────────────────────────── --}}
 <div id="detailModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;">
-    <div style="background:var(--c-surface);border-radius:var(--radius-lg);width:100%;max-width:520px;box-shadow:var(--shadow-lg);overflow:hidden;margin:16px">
+    <div style="background:var(--c-surface);border-radius:var(--radius-lg);width:100%;max-width:520px;box-shadow:var(--shadow-lg);overflow:hidden;margin:16px;max-height:90vh;overflow-y:auto;">
 
         {{-- Header modal --}}
-        <div style="padding:20px 24px 16px;border-bottom:1px solid var(--c-border-soft);display:flex;align-items:center;justify-content:space-between;">
+        <div style="padding:20px 24px 16px;border-bottom:1px solid var(--c-border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--c-surface);z-index:1;">
             <div>
                 <div style="font-size:15px;font-weight:700;color:var(--c-text-1)">Detail Request Dokumen</div>
-                <div style="font-size:12px;color:var(--c-text-3);margin-top:2px">Upload PDF untuk menyetujui permintaan</div>
+                <div id="modalSubtitle" style="font-size:12px;color:var(--c-text-3);margin-top:2px">Tinjau permintaan dokumen mahasiswa</div>
             </div>
             <button onclick="closeModal()" style="width:32px;height:32px;border:1px solid var(--c-border);border-radius:8px;background:none;cursor:pointer;color:var(--c-text-3);font-size:16px">
                 <i class="fas fa-times"></i>
@@ -155,8 +155,16 @@
 
         {{-- Body modal --}}
         <div style="padding:20px 24px;">
-            <div id="modalContent" style="display:grid;gap:10px;margin-bottom:20px;">
-                {{-- diisi via JS --}}
+
+            {{-- Info grid (diisi via JS) --}}
+            <div id="modalContent" style="display:grid;gap:10px;margin-bottom:20px;"></div>
+
+            {{-- Alasan penolakan (hanya tampil jika rejected) --}}
+            <div id="rejectedInfo" style="display:none;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+                <div style="font-size:11px;font-weight:600;color:var(--c-red);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">
+                    <i class="fas fa-ban me-1"></i>Alasan Penolakan
+                </div>
+                <div id="rejectedReason" style="font-size:13px;color:var(--c-text-2);line-height:1.6;"></div>
             </div>
 
             {{-- File sudah ada (approved) --}}
@@ -181,8 +189,8 @@
                 </div>
             </div>
 
-            {{-- Upload form (hanya tampil kalau belum approved / sedang ganti file) --}}
-            <form id="uploadForm" enctype="multipart/form-data">
+            {{-- Upload form --}}
+            <form id="uploadForm" enctype="multipart/form-data" style="display:none;">
                 @csrf
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
                     <label id="uploadLabel" style="font-size:12px;font-weight:600;color:var(--c-text-2)">
@@ -194,12 +202,41 @@
                     </button>
                 </div>
                 <input type="file" name="file" accept="application/pdf,image/*" class="sima-input" style="margin-bottom:12px">
-                <button type="submit" id="uploadBtn" class="sima-btn sima-btn--full" style="justify-content:center">
-                    <i class="fas fa-upload"></i> Upload & Approve
-                </button>
+                <div style="display:flex;gap:8px;">
+                    <button type="submit" id="uploadBtn" class="sima-btn sima-btn--full" style="justify-content:center">
+                        <i class="fas fa-upload"></i> Upload & Approve
+                    </button>
+                    <button type="button" id="btnShowReject" onclick="showRejectPanel()"
+                            class="sima-btn sima-btn--danger" style="white-space:nowrap;flex-shrink:0;">
+                        <i class="fas fa-ban me-1"></i> Tolak
+                    </button>
+                </div>
             </form>
-        </div>
 
+            {{-- Reject form (muncul setelah klik Tolak) --}}
+            <div id="rejectPanel" style="display:none;">
+                <div style="background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:16px;margin-bottom:12px;">
+                    <label style="font-size:12px;font-weight:600;color:var(--c-red);display:block;margin-bottom:8px;">
+                        <i class="fas fa-ban me-1"></i>Alasan Penolakan <span style="color:var(--c-red)">*</span>
+                    </label>
+                    <textarea id="rejectReason" rows="3" class="sima-input"
+                              placeholder="Jelaskan alasan penolakan request ini..."
+                              style="resize:vertical;margin-bottom:0;"></textarea>
+                    <div id="rejectError" style="display:none;font-size:12px;color:var(--c-red);margin-top:6px;"></div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button type="button" onclick="submitReject()"
+                            id="btnConfirmReject"
+                            class="sima-btn sima-btn--danger sima-btn--full" style="justify-content:center;">
+                        <i class="fas fa-ban me-1"></i> Konfirmasi Tolak
+                    </button>
+                    <button type="button" onclick="cancelReject()" class="sima-btn sima-btn--outline" style="white-space:nowrap;flex-shrink:0;">
+                        Batal
+                    </button>
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>
 
@@ -215,51 +252,68 @@ function showDetail(id) {
     fetch('/kln/dokumen/' + id)
         .then(res => res.json())
         .then(data => {
-            const badgeColor = data.status === 'approved'
-                ? 'var(--c-green)' : (data.status === 'rejected'
-                ? 'var(--c-red)' : 'var(--c-amber)');
+            const statusColor = { approved: 'var(--c-green)', rejected: 'var(--c-red)', pending: 'var(--c-amber)' };
+            const badgeColor  = statusColor[data.status] ?? 'var(--c-text-3)';
 
             document.getElementById('modalContent').innerHTML = `
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                     <div style="background:var(--c-bg);border-radius:10px;padding:12px;">
                         <div style="font-size:11px;color:var(--c-text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Mahasiswa</div>
-                        <div style="font-size:14px;font-weight:600;color:var(--c-text-1);margin-top:4px">${data.mahasiswa ?? '-'}</div>
-                        <div style="font-size:11px;color:var(--c-text-3);margin-top:2px">${data.npm ?? ''}</div>
+                        <div style="font-size:14px;font-weight:600;color:var(--c-text-1);margin-top:4px">${escHtml(data.mahasiswa ?? '-')}</div>
+                        <div style="font-size:11px;color:var(--c-text-3);margin-top:2px">${escHtml(data.npm ?? '')}</div>
                     </div>
                     <div style="background:var(--c-bg);border-radius:10px;padding:12px;">
-                        <div style="font-size:11px;color:var(--c-text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Tipe</div>
-                        <div style="font-size:14px;font-weight:600;color:var(--c-text-1);margin-top:4px">${(data.tipe ?? '-').replace(/_/g,' ')}</div>
+                        <div style="font-size:11px;color:var(--c-text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Tipe Dokumen</div>
+                        <div style="font-size:14px;font-weight:600;color:var(--c-text-1);margin-top:4px">${escHtml((data.tipe ?? '-').replace(/_/g,' '))}</div>
                     </div>
                     <div style="background:var(--c-bg);border-radius:10px;padding:12px;">
                         <div style="font-size:11px;color:var(--c-text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Status</div>
-                        <div style="font-size:14px;font-weight:700;color:${badgeColor};margin-top:4px">${data.status ?? '-'}</div>
+                        <div style="font-size:14px;font-weight:700;color:${badgeColor};margin-top:4px;text-transform:capitalize;">${escHtml(data.status ?? '-')}</div>
                     </div>
                     <div style="background:var(--c-bg);border-radius:10px;padding:12px;">
-                        <div style="font-size:11px;color:var(--c-text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Keterangan</div>
-                        <div style="font-size:13px;color:var(--c-text-2);margin-top:4px">${data.message ?? '-'}</div>
+                        <div style="font-size:11px;color:var(--c-text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Pesan Mahasiswa</div>
+                        <div style="font-size:13px;color:var(--c-text-2);margin-top:4px">${escHtml(data.message ?? '-')}</div>
                     </div>
                 </div>
             `;
 
-            const uploadForm = document.getElementById('uploadForm');
-            const fileInfo   = document.getElementById('fileInfo');
+            // Alasan penolakan (rejected only)
+            const rejectedInfo   = document.getElementById('rejectedInfo');
+            const rejectedReason = document.getElementById('rejectedReason');
+            if (data.status === 'rejected' && data.keterangan) {
+                rejectedReason.textContent = data.keterangan;
+                rejectedInfo.style.display = 'block';
+            } else {
+                rejectedInfo.style.display = 'none';
+            }
 
-            if (data.file) {
-                // Ada file — tampilkan info file, sembunyikan form upload
+            const uploadForm  = document.getElementById('uploadForm');
+            const fileInfo    = document.getElementById('fileInfo');
+            const rejectPanel = document.getElementById('rejectPanel');
+            rejectPanel.style.display = 'none';
+            document.getElementById('rejectReason').value = '';
+            document.getElementById('rejectError').style.display = 'none';
+
+            if (data.status === 'rejected') {
+                // Sudah ditolak — sembunyikan semua action form
+                fileInfo.style.display   = 'none';
+                uploadForm.style.display = 'none';
+                document.getElementById('modalSubtitle').textContent = 'Request ini telah ditolak.';
+            } else if (data.file) {
+                // Ada file / approved — tampilkan info file
                 const fileName   = data.file.path.split('/').pop();
-                const fileSizeKb = data.file.fileSize
-                    ? (data.file.fileSize / 1024).toFixed(1) + ' KB'
-                    : '';
-                document.getElementById('fileName').textContent = fileName;
-                document.getElementById('fileSize').textContent = fileSizeKb;
-                // Pakai route aman (lewat auth middleware), bukan direct storage URL
-                document.getElementById('fileDownload').href    = '/kln/dokumen/' + data.id + '/file';
+                const fileSizeKb = data.file.fileSize ? (data.file.fileSize / 1024).toFixed(1) + ' KB' : '';
+                document.getElementById('fileName').textContent  = fileName;
+                document.getElementById('fileSize').textContent  = fileSizeKb;
+                document.getElementById('fileDownload').href     = '/kln/dokumen/' + data.id + '/file';
                 fileInfo.style.display   = 'block';
                 uploadForm.style.display = 'none';
+                document.getElementById('modalSubtitle').textContent = 'Dokumen sudah diupload.';
             } else {
-                // Belum ada file — tampilkan form upload
+                // Pending — tampilkan form upload + tombol tolak
                 fileInfo.style.display   = 'none';
                 uploadForm.style.display = 'block';
+                document.getElementById('modalSubtitle').textContent = 'Upload PDF untuk menyetujui, atau tolak request.';
             }
 
             document.getElementById('detailModal').style.display = 'flex';
@@ -270,6 +324,8 @@ function showDetail(id) {
 function closeModal() {
     document.getElementById('detailModal').style.display = 'none';
     document.getElementById('uploadForm').reset();
+    document.getElementById('rejectPanel').style.display = 'none';
+    document.getElementById('rejectReason').value = '';
     resetUploadForm();
 }
 
@@ -292,6 +348,72 @@ function resetUploadForm() {
     document.getElementById('uploadLabel').textContent  = 'Upload Dokumen (PDF)';
     document.getElementById('uploadBtn').innerHTML      = '<i class="fas fa-upload"></i> Upload & Approve';
     document.getElementById('batalGanti').style.display = 'none';
+}
+
+/* ── REJECT FLOW ─────────────────────────── */
+function showRejectPanel() {
+    document.getElementById('uploadForm').style.display  = 'none';
+    document.getElementById('rejectPanel').style.display = 'block';
+    document.getElementById('rejectReason').focus();
+}
+
+function cancelReject() {
+    document.getElementById('rejectPanel').style.display = 'none';
+    document.getElementById('uploadForm').style.display  = 'block';
+    document.getElementById('rejectReason').value = '';
+    document.getElementById('rejectError').style.display = 'none';
+}
+
+function submitReject() {
+    const reason = document.getElementById('rejectReason').value.trim();
+    const errEl  = document.getElementById('rejectError');
+
+    if (!reason) {
+        errEl.textContent     = 'Alasan penolakan wajib diisi.';
+        errEl.style.display   = 'block';
+        document.getElementById('rejectReason').focus();
+        return;
+    }
+    errEl.style.display = 'none';
+
+    const btn = document.getElementById('btnConfirmReject');
+    btn.disabled   = true;
+    btn.innerHTML  = '<i class="fas fa-spinner fa-spin me-1"></i> Memproses...';
+
+    fetch('/kln/dokumen/' + currentId + '/reject', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        },
+        body: JSON.stringify({ keterangan: reason }),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // Update badge di tabel
+            const badge = document.getElementById('badge-' + currentId);
+            if (badge) { badge.className = 'sima-badge sima-badge--red'; badge.textContent = 'Rejected'; }
+            const row = document.getElementById('row-' + currentId);
+            if (row) row.dataset.status = 'rejected';
+            closeModal();
+        } else {
+            errEl.textContent   = data.message ?? 'Gagal menolak request.';
+            errEl.style.display = 'block';
+        }
+    })
+    .catch(() => {
+        errEl.textContent   = 'Terjadi kesalahan. Coba lagi.';
+        errEl.style.display = 'block';
+    })
+    .finally(() => {
+        btn.disabled  = false;
+        btn.innerHTML = '<i class="fas fa-ban me-1"></i> Konfirmasi Tolak';
+    });
+}
+
+function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 /* ── UPLOAD ──────────────────────────────── */

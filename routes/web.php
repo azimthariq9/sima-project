@@ -294,6 +294,7 @@ Route::middleware(['auth', 'check.role:KLN'])
             Route::post('/',              [DokumenController::class, 'store'])->name('store');
             Route::get('{id}',            [KlnController::class, 'show'])->name('show');
             Route::post('{id}/upload',    [KlnController::class, 'uploadFile'])->name('upload');
+            Route::post('{id}/reject',    [KlnController::class, 'rejectDokumen'])->name('reject');
             Route::get('{id}/file',       [KlnController::class, 'downloadFile'])->name('file');
             Route::get('{id}/download',   [DokumenController::class, 'download'])->name('download');
             Route::delete('{id}',         [KlnController::class, 'destroy'])->name('destroy');
