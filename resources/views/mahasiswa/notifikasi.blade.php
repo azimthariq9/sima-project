@@ -8,10 +8,10 @@
 
 @php
 $typeConfig = [
-    'document'     => ['ic' => 'fa-file-alt',       'cl' => '#059669', 'bg' => '#ECFDF5', 'label' => 'Dokumen'],
-    'account'      => ['ic' => 'fa-user-check',      'cl' => '#7C3AED', 'bg' => '#F5F3FF', 'label' => 'Akun'],
-    'announcement' => ['ic' => 'fa-bullhorn',         'cl' => '#2563EB', 'bg' => '#EFF6FF', 'label' => 'Pengumuman'],
-    'broadcast'    => ['ic' => 'fa-paper-plane',      'cl' => '#0D9488', 'bg' => '#F0FDFA', 'label' => 'Pesan'],
+    'document'     => ['ic' => 'fa-file-alt',   'cl' => '#059669', 'bg' => '#ECFDF5', 'label' => 'Dokumen'],
+    'account'      => ['ic' => 'fa-user-check',  'cl' => '#7C3AED', 'bg' => '#F5F3FF', 'label' => 'Akun'],
+    'announcement' => ['ic' => 'fa-bullhorn',     'cl' => '#2563EB', 'bg' => '#EFF6FF', 'label' => 'Pengumuman'],
+    'broadcast'    => ['ic' => 'fa-paper-plane',  'cl' => '#0D9488', 'bg' => '#F0FDFA', 'label' => 'Pesan'],
 ];
 @endphp
 
@@ -42,7 +42,7 @@ $typeConfig = [
             <div id="notif-list">
                 @forelse($notifications as $notif)
                 @php
-                    $tc  = $typeConfig[$notif->type] ?? ['ic' => 'fa-bell', 'cl' => '#6c8fff', 'bg' => '#eff3ff', 'label' => 'Info'];
+                    $tc       = $typeConfig[$notif->type] ?? ['ic' => 'fa-bell', 'cl' => '#6c8fff', 'bg' => '#eff3ff', 'label' => 'Info'];
                     $isUnread = !$notif->is_read;
                 @endphp
                 <div style="display:flex;align-items:flex-start;gap:14px;padding:16px 20px;
@@ -101,8 +101,8 @@ $typeConfig = [
             </div>
             <div style="padding:16px 20px;">
                 @php
-                    $total     = $notifications->count();
-                    $byType    = $notifications->groupBy('type');
+                    $total  = $notifications->count();
+                    $byType = $notifications->groupBy('type');
                 @endphp
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--c-border);font-size:13px;">
                     <span style="color:var(--c-text-2);">Total</span>

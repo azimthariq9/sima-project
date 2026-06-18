@@ -41,7 +41,7 @@
         @forelse($announcements ?? [] as $ann)
         <div class="sima-announce" onclick="window.location='{{ route('mahasiswa.announcement.show', $ann->id) }}'">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">
-                <div class="sima-announce__title">{{ $ann->icon ?? '📋' }} {{ $ann->judul }}</div>
+                <div class="sima-announce__title">{{ $ann->subject }}</div>
                 <div style="display:flex;gap:6px;flex-shrink:0;margin-left:10px">
                     <span class="sima-badge sima-badge--{{ $ann->badge_color ?? 'blue' }}">{{ $ann->sumber }}</span>
                     @if($ann->is_penting)
@@ -49,9 +49,9 @@
                     @endif
                 </div>
             </div>
-            <div class="sima-announce__body">{{ Str::limit($ann->isi, 160) }}</div>
+            <div class="sima-announce__body">{{ Str::limit($ann->message, 160) }}</div>
             <div class="sima-announce__meta">
-                <i class="fas fa-clock"></i> {{ $ann->created_at->diffForHumans() }}
+                <i class="fas fa-clock"></i> {{ \Carbon\Carbon::parse($ann->created_at)->diffForHumans() }}
                 <a href="{{ route('mahasiswa.announcement.show', $ann->id) }}"
                    style="margin-left:auto;font-size:12px;color:var(--c-accent);font-weight:600"
                    onclick="event.stopPropagation()">Selengkapnya →</a>

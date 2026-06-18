@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class MahasiswaController extends Controller
 {
@@ -37,8 +38,8 @@ class MahasiswaController extends Controller
     {
         $mahasiswa = $this->getMahasiswa();
 
-        // Jika sudah complete, langsung ke dashboard
-        if ($mahasiswa && $mahasiswa->profile_completed) {
+        // profile_completed ada di tabel users, bukan mahasiswa
+        if (Auth::user()->profile_completed) {
             return redirect()->route('mahasiswa.dashboard');
         }
 
@@ -47,27 +48,47 @@ class MahasiswaController extends Controller
 
     public function storeCompleteProfile(Request $request)
     {
+        $mahasiswa   = $this->getMahasiswa();
+        $mahasiswaId = $mahasiswa->id ?? 0;
+
         $request->validate([
-            'nama'        => 'required|string|max:255',
-            'npm'         => 'required|string|max:20',
-            'warga_negara'=> 'required|string|max:100',
-            'no_whatsapp' => 'required|string|max:20',
-            'alamat_asal' => 'required|string|max:500',
-            'alamat_indo' => 'required|string|max:500',
+            'nama'       => 'required|string|max:255',
+            'npm'        => ['required', 'string', 'max:20', Rule::unique('mahasiswa', 'npm')->ignore($mahasiswaId)],
+            'noWa'       => ['nullable', 'string', 'max:20', Rule::unique('mahasiswa', 'noWa')->ignore($mahasiswaId)],
+            'tglLahir'   => 'nullable|date',
+            'warNeg'     => 'nullable|string|max:100',
+            'alamatAsal' => 'nullable|string|max:500',
+            'alamatIndo' => 'nullable|string|max:500',
+            'password'   => 'nullable|string|min:8|confirmed',
+        ], [
+            'npm.unique' => 'NPM ini sudah digunakan oleh mahasiswa lain.',
+            'noWa.unique' => 'Nomor WhatsApp ini sudah digunakan oleh mahasiswa lain.',
         ]);
 
+        // Update data mahasiswa dengan nama kolom DB yang benar (camelCase)
         DB::table('mahasiswa')
             ->where('user_id', Auth::id())
             ->update([
-                'nama'             => $request->nama,
-                'npm'              => $request->npm,
-                'warga_negara'     => $request->warga_negara,
-                'no_whatsapp'      => $request->no_whatsapp,
-                'alamat_asal'      => $request->alamat_asal,
-                'alamat_indo'      => $request->alamat_indo,
-                'profile_completed'=> true,
-                'updated_at'       => now(),
+                'nama'       => $request->nama,
+                'npm'        => $request->npm,
+                'noWa'       => $request->noWa,
+                'tglLahir'   => $request->tglLahir,
+                'warNeg'     => $request->warNeg,
+                'alamatAsal' => $request->alamatAsal,
+                'alamatIndo' => $request->alamatIndo,
+                'updated_at' => now(),
             ]);
+
+        // profile_completed ada di users, bukan mahasiswa
+        DB::table('users')
+            ->where('id', Auth::id())
+            ->update(['profile_completed' => true, 'updated_at' => now()]);
+
+        if ($request->filled('password')) {
+            DB::table('users')
+                ->where('id', Auth::id())
+                ->update(['password' => bcrypt($request->password), 'updated_at' => now()]);
+        }
 
         return redirect()->route('mahasiswa.dashboard')
             ->with('success', 'Profil berhasil dilengkapi. Selamat datang!');
@@ -83,129 +104,106 @@ class MahasiswaController extends Controller
     public function dashboard()
     {
         $mahasiswa  = $this->getMahasiswa();
-        $student_id = $mahasiswa->id ?? Auth::id();
+        $student_id = $mahasiswa->id ?? null;
 
         /*
         |----------------------------------------------------------------------
-        | Sesi absensi aktif
+        | History 10 kehadiran terakhir (dari jadwal_mahasiswa)
         |----------------------------------------------------------------------
         */
-        $active_attendance = DB::table('attendances_sessions')
-            ->join('matakuliah', 'attendances_sessions.course_id', '=', 'matakuliah.id')
-            ->where('attendances_sessions.status', 'active')
-            ->select(
-                'attendances_sessions.*',
-                'matakuliah.namaMk as matakuliah'
-            )
-            ->orderBy('attendances_sessions.created_at', 'desc')
-            ->first();
+        $history = collect();
+        $totalHadir = 0;
+        $totalTelat = 0;
+        $totalAlpha = 0;
 
-        /*
-        |----------------------------------------------------------------------
-        | Cek sudah absen atau belum
-        |----------------------------------------------------------------------
-        */
-        $sudah_absen = false;
-        if ($active_attendance) {
-            $sudah_absen = DB::table('attendance_records')
-                ->where('attendance_session_id', $active_attendance->id)
-                ->where('student_id', $student_id)
-                ->exists();
+        if ($student_id) {
+            $history = DB::table('jadwal_mahasiswa')
+                ->join('jadwal', 'jadwal_mahasiswa.jadwal_id', '=', 'jadwal.id')
+                ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
+                ->where('jadwal_mahasiswa.mahasiswa_id', $student_id)
+                ->whereIn('jadwal_mahasiswa.status', ['present', 'absent', 'excused'])
+                ->select(
+                    'matakuliah.namaMk',
+                    'jadwal_mahasiswa.sesi as meeting_number',
+                    'jadwal_mahasiswa.status',
+                    'jadwal_mahasiswa.tglSesi as checkin_time'
+                )
+                ->orderByDesc('jadwal_mahasiswa.tglSesi')
+                ->limit(10)
+                ->get();
+
+            $allStatuses = DB::table('jadwal_mahasiswa')
+                ->where('mahasiswa_id', $student_id)
+                ->whereIn('status', ['present', 'absent', 'excused'])
+                ->pluck('status');
+
+            $totalHadir = $allStatuses->filter(fn($s) => $s === 'present')->count();
+            $totalTelat = $allStatuses->filter(fn($s) => $s === 'excused')->count();
+            $totalAlpha = $allStatuses->filter(fn($s) => $s === 'absent')->count();
         }
 
         /*
         |----------------------------------------------------------------------
-        | History 10 absensi terakhir
-        |----------------------------------------------------------------------
-        */
-        $history = DB::table('attendance_records')
-            ->join('attendances_sessions', 'attendance_records.attendance_session_id', '=', 'attendances_sessions.id')
-            ->join('matakuliah', 'attendances_sessions.course_id', '=', 'matakuliah.id')
-            ->where('attendance_records.student_id', $student_id)
-            ->select(
-                'matakuliah.namaMk',
-                'attendances_sessions.meeting_number',
-                'attendance_records.status',
-                'attendance_records.checkin_time'
-            )
-            ->orderBy('attendance_records.checkin_time', 'desc')
-            ->limit(10)
-            ->get();
-
-        /*
-        |----------------------------------------------------------------------
-        | Data chart absensi per pertemuan
-        |----------------------------------------------------------------------
-        */
-        $chart = DB::table('attendance_records')
-            ->join('attendances_sessions', 'attendance_records.attendance_session_id', '=', 'attendances_sessions.id')
-            ->where('attendance_records.student_id', $student_id)
-            ->select(
-                'attendances_sessions.meeting_number',
-                'attendance_records.status'
-            )
-            ->orderBy('attendances_sessions.meeting_number')
-            ->get();
-
-        /*
-        |----------------------------------------------------------------------
-        | Rekap kehadiran
-        |----------------------------------------------------------------------
-        */
-        $totalHadir = $history->where('status', 'present')->count();
-        $totalTelat = $history->where('status', 'late')->count();
-        $totalAlpha = $history->where('status', 'absent')->count();
-
-        /*
-        |----------------------------------------------------------------------
-        | Pengumuman terbaru (3)
+        | Pengumuman terbaru (3) — kolom: subject, message (bukan judul/isi)
         |----------------------------------------------------------------------
         */
         $announcements = DB::table('announcement')
-            ->orderBy('created_at', 'desc')
+            ->where('status', 'active')
+            ->orderByDesc('created_at')
             ->limit(3)
             ->get();
 
         /*
         |----------------------------------------------------------------------
-        | Jadwal hari ini
+        | Jadwal hari ini — kolom jam adalah varchar "09.30 - 11.30"
         |----------------------------------------------------------------------
         */
         $hariIni = now()->locale('id')->translatedFormat('l');
-        $jadwalHariIni = DB::table('jadwal')
-            ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
-            ->join('jadwal_mahasiswa', 'jadwal_mahasiswa.jadwal_id', '=', 'jadwal.id')
-            ->where('jadwal_mahasiswa.mahasiswa_id', $student_id)
-            ->where('jadwal.hari', $hariIni)
-            ->select(
-                'jadwal.id',
-                'jadwal.hari',
-                'jadwal.jam_mulai',
-                'jadwal.jam_selesai',
-                'jadwal.ruangan',
-                'jadwal.jenis',
-                'jadwal.kelas',
-                'matakuliah.namaMk as mata_kuliah'
-            )
-            ->orderBy('jadwal.jam_mulai')
-            ->get();
+        $jadwalHariIni = collect();
+
+        if ($student_id) {
+            $jadwalHariIni = DB::table('jadwal')
+                ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
+                ->join('jadwal_mahasiswa', 'jadwal_mahasiswa.jadwal_id', '=', 'jadwal.id')
+                ->where('jadwal_mahasiswa.mahasiswa_id', $student_id)
+                ->where('jadwal.hari', $hariIni)
+                ->select(
+                    'jadwal.id',
+                    'jadwal.hari',
+                    DB::raw("REPLACE(SPLIT_PART(jadwal.jam, ' - ', 1), '.', ':') as jam_mulai"),
+                    DB::raw("REPLACE(SPLIT_PART(jadwal.jam, ' - ', 2), '.', ':') as jam_selesai"),
+                    'jadwal.ruangan',
+                    DB::raw("CASE WHEN matakuliah.jurusan_id = 1 THEN 'kln' WHEN matakuliah.jurusan_id = 2 THEN 'bipa' ELSE 'kuliah' END as jenis"),
+                    DB::raw('NULL::text as kelas'),
+                    'matakuliah.namaMk as mata_kuliah'
+                )
+                ->orderBy('jadwal.jam')
+                ->get()
+                ->unique('id')
+                ->values();
+        }
 
         /*
         |----------------------------------------------------------------------
         | Notifikasi yang belum dibaca
         |----------------------------------------------------------------------
         */
-        $unreadNotifCount = DB::table('notification_users')
-            ->where('user_id', Auth::id())
-            ->where('is_read', false)
-            ->count();
+        $unreadNotifCount = $student_id
+            ? DB::table('notification_mahasiswa')
+                ->where('mahasiswa_id', $student_id)
+                ->where('is_read', false)
+                ->count()
+            : 0;
+
+        // active_attendance & sudah_absen tidak ada di schema baru, pass null/false
+        $active_attendance = null;
+        $sudah_absen       = false;
 
         return view('mahasiswa.dashboard', compact(
             'mahasiswa',
             'active_attendance',
             'sudah_absen',
             'history',
-            'chart',
             'totalHadir',
             'totalTelat',
             'totalAlpha',
@@ -287,92 +285,103 @@ class MahasiswaController extends Controller
     public function jadwal(Request $request)
     {
         $mahasiswa  = $this->getMahasiswa();
-        $student_id = $mahasiswa->id ?? Auth::id();
+        $student_id = $mahasiswa->id ?? null;
 
-        // BUG FIX: Filter tipe dari query param, default 'semua'
         $tipe = $request->get('tipe', 'semua');
 
         $hariUrutan = [
-            'Senin'  => 1,
-            'Selasa' => 2,
-            'Rabu'   => 3,
-            'Kamis'  => 4,
-            'Jumat'  => 5,
-            'Sabtu'  => 6,
-            'Minggu' => 7,
+            'Senin'  => 1, 'Selasa' => 2, 'Rabu'   => 3,
+            'Kamis'  => 4, 'Jumat'  => 5, 'Sabtu'  => 6, 'Minggu' => 7,
         ];
 
-        /*
-        |----------------------------------------------------------------------
-        | Query jadwal dengan filter tipe
-        |----------------------------------------------------------------------
-        */
-        $query = DB::table('jadwal')
-            ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
-            ->join('jadwal_mahasiswa', 'jadwal_mahasiswa.jadwal_id', '=', 'jadwal.id')
-            ->where('jadwal_mahasiswa.mahasiswa_id', $student_id)
-            ->select(
-                'jadwal.id',
-                'jadwal.hari',
-                'jadwal.jam_mulai',    // BUG FIX: kolom ini sebelumnya tidak diselect
-                'jadwal.jam_selesai',  // BUG FIX: kolom ini sebelumnya tidak diselect
-                'jadwal.ruangan',
-                'jadwal.jenis',
-                'jadwal.kelas',
-                'jadwal.dosen_id',
-                'matakuliah.namaMk as mata_kuliah'
-            );
-
-        if ($tipe !== 'semua') {
-            $query->where('jadwal.jenis', $tipe);
-        }
-
-        $semuaJadwal = $query->get();
-
-        // BUG FIX: $hariIni dari locale Indonesia
         $hariIni = now()->locale('id')->translatedFormat('l');
 
-        // BUG FIX: $hariIniId didefinisikan dari $hariUrutan
-        $hariIniId = $hariUrutan[$hariIni] ?? 1;
+        $todaySchedules  = collect();
+        $weeklySchedules = collect();
+        $attendanceSummary = collect();
+        $totalSesiPerMk    = collect();
 
-        $todaySchedules = $semuaJadwal
-            ->filter(fn($j) => $j->hari === $hariIni)
-            ->values();
+        if ($student_id) {
+            /*
+            |------------------------------------------------------------------
+            | Query jadwal — kolom jam adalah varchar "09.30 - 11.30"
+            | tipe_kelas diturunkan dari matakuliah.jurusan_id
+            |------------------------------------------------------------------
+            */
+            $query = DB::table('jadwal')
+                ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
+                ->join('jadwal_mahasiswa', 'jadwal_mahasiswa.jadwal_id', '=', 'jadwal.id')
+                ->leftJoin('dosen', 'jadwal.dosen_id', '=', 'dosen.id')
+                ->where('jadwal_mahasiswa.mahasiswa_id', $student_id)
+                ->select(
+                    'jadwal.id',
+                    'jadwal.hari',
+                    DB::raw("REPLACE(SPLIT_PART(jadwal.jam, ' - ', 1), '.', ':') as jam_mulai"),
+                    DB::raw("REPLACE(SPLIT_PART(jadwal.jam, ' - ', 2), '.', ':') as jam_selesai"),
+                    'jadwal.ruangan',
+                    DB::raw("CASE WHEN matakuliah.jurusan_id = 1 THEN 'kln' WHEN matakuliah.jurusan_id = 2 THEN 'bipa' ELSE 'perkuliahan' END as tipe_kelas"),
+                    'matakuliah.namaMk as mata_kuliah',
+                    'dosen.nama as dosen'
+                );
 
-        $weeklySchedules = $semuaJadwal
-            ->sortBy(fn($j) => $hariUrutan[$j->hari] ?? 99)
-            ->values();
+            if ($tipe !== 'semua') {
+                if ($tipe === 'kln') {
+                    $query->where('matakuliah.jurusan_id', 1);
+                } elseif ($tipe === 'bipa') {
+                    $query->where('matakuliah.jurusan_id', 2);
+                } else {
+                    // perkuliahan / kuliah
+                    $query->where('matakuliah.jurusan_id', '>', 2);
+                }
+            }
 
-        /*
-        |----------------------------------------------------------------------
-        | Summary kehadiran per mata kuliah
-        |----------------------------------------------------------------------
-        */
-        $attendanceSummary = DB::table('attendance_records')
-            ->join('attendances_sessions', 'attendance_records.attendance_session_id', '=', 'attendances_sessions.id')
-            ->join('matakuliah', 'attendances_sessions.course_id', '=', 'matakuliah.id')
-            ->where('attendance_records.student_id', $student_id)
-            ->select(
-                'matakuliah.namaMk',
-                'attendances_sessions.course_id',
-                DB::raw('COUNT(*) as total_hadir'),
-                DB::raw("SUM(CASE WHEN attendance_records.status='present' THEN 1 ELSE 0 END) as hadir"),
-                DB::raw("SUM(CASE WHEN attendance_records.status='late'    THEN 1 ELSE 0 END) as telat"),
-                DB::raw("SUM(CASE WHEN attendance_records.status='absent'  THEN 1 ELSE 0 END) as alpha")
-            )
-            ->groupBy('matakuliah.namaMk', 'attendances_sessions.course_id')
-            ->get();
+            $semuaJadwal = $query->get()->unique('id')->values();
 
-        $totalSesiPerMk = DB::table('attendances_sessions')
-            ->select('course_id', DB::raw('COUNT(*) as total_sesi'))
-            ->groupBy('course_id')
-            ->get()
-            ->keyBy('course_id');
+            $todaySchedules = $semuaJadwal
+                ->filter(fn($j) => $j->hari === $hariIni)
+                ->values();
 
-        $unreadNotifCount = DB::table('notification_users')
-            ->where('user_id', Auth::id())
-            ->where('is_read', false)
-            ->count();
+            $weeklySchedules = $semuaJadwal
+                ->sortBy(fn($j) => $hariUrutan[$j->hari] ?? 99)
+                ->values();
+
+            /*
+            |------------------------------------------------------------------
+            | Summary kehadiran per mata kuliah (dari jadwal_mahasiswa)
+            |------------------------------------------------------------------
+            */
+            $attendanceSummary = DB::table('jadwal_mahasiswa')
+                ->join('jadwal', 'jadwal_mahasiswa.jadwal_id', '=', 'jadwal.id')
+                ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
+                ->where('jadwal_mahasiswa.mahasiswa_id', $student_id)
+                ->select(
+                    'matakuliah.namaMk',
+                    'matakuliah.id as course_id',
+                    DB::raw("SUM(CASE WHEN jadwal_mahasiswa.status = 'present' THEN 1 ELSE 0 END) as hadir"),
+                    DB::raw("SUM(CASE WHEN jadwal_mahasiswa.status = 'excused' THEN 1 ELSE 0 END) as terlambat"),
+                    DB::raw("SUM(CASE WHEN jadwal_mahasiswa.status = 'absent'  THEN 1 ELSE 0 END) as alpha")
+                )
+                ->groupBy('matakuliah.namaMk', 'matakuliah.id')
+                ->get();
+
+            $totalSesiPerMk = DB::table('jadwal')
+                ->join('jadwal_mahasiswa', 'jadwal_mahasiswa.jadwal_id', '=', 'jadwal.id')
+                ->where('jadwal_mahasiswa.mahasiswa_id', $student_id)
+                ->select(
+                    'jadwal.matakuliah_id as course_id',
+                    DB::raw('MAX(jadwal.totalSesi) as total_sesi')
+                )
+                ->groupBy('jadwal.matakuliah_id')
+                ->get()
+                ->keyBy('course_id');
+        }
+
+        $unreadNotifCount = $student_id
+            ? DB::table('notification_mahasiswa')
+                ->where('mahasiswa_id', $student_id)
+                ->where('is_read', false)
+                ->count()
+            : 0;
 
         return view('mahasiswa.jadwal', [
             'todaySchedules'    => $todaySchedules,
@@ -380,8 +389,7 @@ class MahasiswaController extends Controller
             'attendanceSummary' => $attendanceSummary,
             'totalSesiPerMk'    => $totalSesiPerMk,
             'hariIni'           => $hariIni,
-            'hariIniId'         => $hariIniId, // BUG FIX: sekarang didefinisikan
-            'activeTipe'        => $tipe,       // BUG FIX: sekarang didefinisikan
+            'activeTipe'        => $tipe,
             'unreadNotifCount'  => $unreadNotifCount,
         ]);
     }
@@ -396,46 +404,55 @@ class MahasiswaController extends Controller
     public function analytics()
     {
         $mahasiswa  = $this->getMahasiswa();
-        $student_id = $mahasiswa->id ?? Auth::id();
+        $student_id = $mahasiswa->id ?? null;
 
-        $history = DB::table('attendance_records')
-            ->join('attendances_sessions', 'attendance_records.attendance_session_id', '=', 'attendances_sessions.id')
-            ->join('matakuliah', 'attendances_sessions.course_id', '=', 'matakuliah.id')
-            ->where('attendance_records.student_id', $student_id)
-            ->select(
-                'matakuliah.namaMk',
-                'matakuliah.id as course_id',
-                'attendances_sessions.meeting_number',
-                'attendance_records.status',
-                'attendance_records.checkin_time'
-            )
-            ->orderBy('attendance_records.checkin_time', 'desc')
-            ->get();
+        $history    = collect();
+        $rekapPerMk = collect();
+        $totalHadir = $totalTelat = $totalAlpha = $totalSemua = 0;
+        $persentaseHadir = 0;
 
-        // Rekap per mata kuliah
-        $rekapPerMk = $history->groupBy('namaMk')->map(function ($items) {
-            return [
-                'namaMk'  => $items->first()->namaMk,
-                'hadir'   => $items->where('status', 'present')->count(),
-                'telat'   => $items->where('status', 'late')->count(),
-                'alpha'   => $items->where('status', 'absent')->count(),
-                'total'   => $items->count(),
-            ];
-        })->values();
+        if ($student_id) {
+            $history = DB::table('jadwal_mahasiswa')
+                ->join('jadwal', 'jadwal_mahasiswa.jadwal_id', '=', 'jadwal.id')
+                ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
+                ->where('jadwal_mahasiswa.mahasiswa_id', $student_id)
+                ->whereIn('jadwal_mahasiswa.status', ['present', 'absent', 'excused'])
+                ->select(
+                    'matakuliah.namaMk',
+                    'matakuliah.id as course_id',
+                    'jadwal_mahasiswa.sesi as meeting_number',
+                    'jadwal_mahasiswa.status',
+                    'jadwal_mahasiswa.tglSesi as checkin_time'
+                )
+                ->orderByDesc('jadwal_mahasiswa.tglSesi')
+                ->get();
 
-        $totalHadir  = $history->where('status', 'present')->count();
-        $totalTelat  = $history->where('status', 'late')->count();
-        $totalAlpha  = $history->where('status', 'absent')->count();
-        $totalSemua  = $history->count();
+            $rekapPerMk = $history->groupBy('namaMk')->map(function ($items) {
+                return [
+                    'namaMk' => $items->first()->namaMk,
+                    'hadir'  => $items->where('status', 'present')->count(),
+                    'telat'  => $items->where('status', 'excused')->count(),
+                    'alpha'  => $items->where('status', 'absent')->count(),
+                    'total'  => $items->count(),
+                ];
+            })->values();
 
-        $persentaseHadir = $totalSemua > 0
-            ? round(($totalHadir + $totalTelat) / $totalSemua * 100, 1)
+            $totalHadir = $history->where('status', 'present')->count();
+            $totalTelat = $history->where('status', 'excused')->count();
+            $totalAlpha = $history->where('status', 'absent')->count();
+            $totalSemua = $history->count();
+
+            $persentaseHadir = $totalSemua > 0
+                ? round(($totalHadir + $totalTelat) / $totalSemua * 100, 1)
+                : 0;
+        }
+
+        $unreadNotifCount = $student_id
+            ? DB::table('notification_mahasiswa')
+                ->where('mahasiswa_id', $student_id)
+                ->where('is_read', false)
+                ->count()
             : 0;
-
-        $unreadNotifCount = DB::table('notification_users')
-            ->where('user_id', Auth::id())
-            ->where('is_read', false)
-            ->count();
 
         return view('mahasiswa.analytics', compact(
             'history',
@@ -462,58 +479,55 @@ class MahasiswaController extends Controller
         $user      = Auth::user();
         $mahasiswa = $this->getMahasiswa();
 
-        // 🔥 FIX UTAMA
-        $mahasiswa = \App\Models\Mahasiswa::where('user_id', $user->id)->first();
+        $unreadNotifCount = $mahasiswa
+            ? DB::table('notification_mahasiswa')
+                ->where('mahasiswa_id', $mahasiswa->id)
+                ->where('is_read', false)
+                ->count()
+            : 0;
 
-        // Dokumen keimigrasian
-        $dokumenKitas = DB::table('dokumen_imigrasi')
-            ->where('mahasiswa_id', $mahasiswa->id ?? 0)
-            ->first();
-
-        // Dokumen kependudukan
-        $dokumenKtp = DB::table('dokumen_kependudukan')
-            ->where('mahasiswa_id', $mahasiswa->id ?? 0)
-            ->first();
-
-        // Dokumen asuransi
-        $dokumenAsuransi = DB::table('dokumen_asuransi')
-            ->where('mahasiswa_id', $mahasiswa->id ?? 0)
-            ->first();
-
-        $unreadNotifCount = DB::table('notification_users')
-            ->where('user_id', Auth::id())
-            ->where('is_read', false)
-            ->count();
-
-        // BUG FIX: 'mahasiswa.profil' (bukan 'mahasiswa.profile')
-        return view('mahasiswa.profil', compact(
+        return view('mahasiswa.profile', compact(
             'user',
             'mahasiswa',
-            'dokumenKitas',
-            'dokumenKtp',
-            'dokumenAsuransi',
             'unreadNotifCount'
         ));
     }
 
     public function updateProfile(Request $request)
     {
+        $mahasiswa   = $this->getMahasiswa();
+        $mahasiswaId = $mahasiswa->id ?? 0;
+
         $request->validate([
-            'nama'        => 'required|string|max:255',
-            'no_whatsapp' => 'nullable|string|max:20',
-            'alamat_asal' => 'nullable|string|max:500',
-            'alamat_indo' => 'nullable|string|max:500',
+            'nama'       => 'required|string|max:255',
+            'noWa'       => ['nullable', 'string', 'max:20', Rule::unique('mahasiswa', 'noWa')->ignore($mahasiswaId)],
+            'tglLahir'   => 'nullable|date',
+            'warNeg'     => 'nullable|string|max:100',
+            'alamatAsal' => 'nullable|string|max:500',
+            'alamatIndo' => 'nullable|string|max:500',
+            'password'   => 'nullable|string|min:8|confirmed',
+        ], [
+            'noWa.unique' => 'Nomor WhatsApp ini sudah digunakan oleh mahasiswa lain.',
         ]);
 
+        // Kolom DB menggunakan camelCase sesuai migrasi
         DB::table('mahasiswa')
             ->where('user_id', Auth::id())
             ->update([
-                'nama'        => $request->nama,
-                'no_whatsapp' => $request->no_whatsapp,
-                'alamat_asal' => $request->alamat_asal,
-                'alamat_indo' => $request->alamat_indo,
-                'updated_at'  => now(),
+                'nama'       => $request->nama,
+                'noWa'       => $request->noWa,
+                'tglLahir'   => $request->tglLahir,
+                'warNeg'     => $request->warNeg,
+                'alamatAsal' => $request->alamatAsal,
+                'alamatIndo' => $request->alamatIndo,
+                'updated_at' => now(),
             ]);
+
+        if ($request->filled('password')) {
+            DB::table('users')
+                ->where('id', Auth::id())
+                ->update(['password' => bcrypt($request->password), 'updated_at' => now()]);
+        }
 
         return back()->with('success', 'Profil berhasil diperbarui.');
     }
@@ -585,10 +599,13 @@ class MahasiswaController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $unreadNotifCount = DB::table('notification_users')
-            ->where('user_id', Auth::id())
-            ->where('is_read', false)
-            ->count();
+        $mhsId = DB::table('mahasiswa')->where('user_id', Auth::id())->value('id');
+        $unreadNotifCount = $mhsId
+            ? DB::table('notification_mahasiswa')
+                ->where('mahasiswa_id', $mhsId)
+                ->where('is_read', false)
+                ->count()
+            : 0;
 
         return view('mahasiswa.announcement', compact('announcements', 'unreadNotifCount'));
     }

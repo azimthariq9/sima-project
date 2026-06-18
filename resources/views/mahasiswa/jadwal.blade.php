@@ -237,7 +237,7 @@
 ══════════════════════════════════════ --}}
 <div class="jdw-tabs fade-up">
     @foreach(['semua' => 'Semua', 'perkuliahan' => 'Perkuliahan', 'bipa' => 'BIPA', 'kln' => 'KLN'] as $key => $label)
-        <a href="{{ route('mahasiswa.jadwal', ['type' => $key]) }}"
+        <a href="{{ route('mahasiswa.jadwal', ['tipe' => $key]) }}"
            class="jdw-tab {{ $activeTipe === $key ? 'jdw-tab--active' : '' }}">
             {{ $label }}
         </a>
@@ -414,7 +414,7 @@
                             @foreach($weeklySchedules as $sch)
 
                                 @php
-                                    $isHariIni  = $sch->hari === $hariIniId;
+                                    $isHariIni  = $sch->hari === $hariIni;
                                     $tipeKelas  = $sch->tipe_kelas ?? 'Perkuliahan';
                                     $tipeLower  = strtolower($tipeKelas);
                                     $chipClass  = match($tipeLower) {

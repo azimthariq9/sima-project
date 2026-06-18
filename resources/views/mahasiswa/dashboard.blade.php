@@ -380,17 +380,17 @@
                 <div class="sima-announce"
                      onclick="window.location='{{ route('mahasiswa.announcement') }}'">
                     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-                        <div class="sima-announce__title">{{ $ann->judul }}</div>
+                        <div class="sima-announce__title">{{ $ann->subject }}</div>
                         <span class="sima-badge sima-badge--{{ $src['cls'] }}" style="flex-shrink:0">
                             {{ $src['label'] }}
                         </span>
                     </div>
                     <div class="sima-announce__body">
-                        {{ \Illuminate\Support\Str::limit($ann->isi, 130) }}
+                        {{ \Illuminate\Support\Str::limit($ann->message, 130) }}
                     </div>
                     <div class="sima-announce__meta">
                         <i class="fas fa-clock"></i>
-                        {{ $ann->created_at instanceof \Carbon\Carbon ? $ann->created_at->diffForHumans() : \Carbon\Carbon::parse($ann->created_at)->diffForHumans() }}
+                        {{ \Carbon\Carbon::parse($ann->created_at)->diffForHumans() }}
                         @if(!empty($ann->is_penting))
                             <span class="sima-badge sima-badge--amber"><i class="fas fa-star" style="font-size:8px"></i> Penting</span>
                         @endif
