@@ -9,16 +9,24 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next, $role): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
         if (!Auth::check()) {
             return redirect('/login');
         }
 
-        if (Auth::user()->role !== $role) {
-            abort(403, 'Akses ditolak');
+        if (empty($roles)) {
+            return $next($request);
         }
 
-        return $next($request);
+        $userRole = strtolower((string) Auth::user()->role);
+
+        foreach ($roles as $allowedRole) {
+            if ($userRole === strtolower($allowedRole)) {
+                return $next($request);
+            }
+        }
+
+        abort(403, 'Unauthorized - Required role: ' . implode(', ', $roles));
     }
 }

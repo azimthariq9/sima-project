@@ -17,11 +17,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $guarded = [];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -38,11 +34,38 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts(): array
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password'          => 'hashed',
+    ];
+    
+    public function hasRole(string $role): bool
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return strtolower($this->role) === strtolower($role);
+    }
+
+    public function dosen()
+    {
+        return $this->hasOne(dosen::class, 'user_id', 'id');
+    }
+    public function mahasiswa()
+    {
+        return $this->hasOne(Mahasiswa::class, 'user_id');
+    }
+    public function announcement()
+    {
+        return $this->hasMany(Announcement::class, 'user_id');
+    }
+    public function historyDokumen()
+    {
+        return $this->hasMany(HistoryDokumen::class, 'user_id');
+    }
+    public function notification()
+    {
+        return $this->belongsToMany(Notification::class, 'notification_users', 'user_id', 'notification_id')->withPivot('is_read')->withTimestamps();
+    }
+    public function jurusan()
+    {
+        return $this->belongsTo(jurusan::class, 'jurusan_id');
     }
 }

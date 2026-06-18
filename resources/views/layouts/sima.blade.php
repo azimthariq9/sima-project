@@ -16,7 +16,7 @@
 
 <style>
 /* ═══════════════════════════════════════════════════════
-   SIMA DESIGN SYSTEM — v2.0
+   SIMA DESIGN SYSTEM — v2.1
    ═══════════════════════════════════════════════════════ */
 
 :root {
@@ -30,7 +30,7 @@
     /* Text */
     --c-text-1:  #111827;
     --c-text-2:  #374151;
-    --c-text-3:  #9ca3af;
+    --c-text-3:  #616f86;
     --c-text-4:  #d1d5db;
 
     /* Brand / Accent */
@@ -51,6 +51,9 @@
     --c-purple-lt:#F5F3FF;
     --c-teal:    #0D9488;
     --c-teal-lt: #F0FDFA;
+    --c-navy:    #0D1B2A;
+    --c-navy-lt: #EFF4FF;
+    --c-gold:    #D97706;
 
     /* Sidebar */
     --sidebar-w:    240px;
@@ -86,28 +89,160 @@ html, body {
 }
 
 /* ── LAYOUT SHELL ─────────────────────────────────── */
-.sima-shell {
-    display: flex;
-    min-height: 100vh;
+.sima-shell { display: flex; min-height: 100vh; }
+
+/* ── SIDEBAR COLLAPSE ─────────────────────────────── */
+.sima-sidebar.collapsed { width: 78px; }
+
+.sima-sidebar.collapsed .sima-brand__name,
+.sima-sidebar.collapsed .sima-brand__sub,
+.sima-sidebar.collapsed .sima-sidebar__title,
+.sima-sidebar.collapsed .sima-sidebar__subtitle { display: none; }
+
+.sima-sidebar.collapsed .sima-brand {
+    justify-content: center;
+    padding: 22px 0;
 }
 
-/* ═══════════════════════════════════════════════════
-   SIDEBAR
-   ═══════════════════════════════════════════════════ */
-.sima-sidebar {
-    width: var(--sidebar-w);
-    flex-shrink: 0;
-    background: var(--sidebar-bg);
-    border-right: 1px solid var(--sidebar-border);
+.sima-sidebar.collapsed .sima-brand__logo { margin: 0 auto; }
+
+.sima-sidebar.collapsed .sima-nav__item span:not(.sima-nav__icon) { display: none; }
+
+.sima-sidebar.collapsed .sima-nav__item {
+    justify-content: center;
+    padding: 12px 0;
+}
+
+.sima-sidebar.collapsed .sima-nav__icon {
+    margin: 0;
+    font-size: 20px;
+}
+
+.sima-sidebar.collapsed .sima-nav__chevron,
+.sima-sidebar.collapsed .sima-nav__sub { display: none; }
+
+.sima-sidebar.collapsed .sima-sidebar__foot > *:not(.sima-avatar-wrapper) { display: none; }
+
+.sima-sidebar.collapsed .sima-sidebar__foot {
+    display: flex;
+    justify-content: center;
+    padding: 12px 0;
+}
+
+.sima-sidebar.collapsed .sima-nav__item:hover::after {
+    content: attr(data-title);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1f2937;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    margin-left: 10px;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.sima-sidebar.collapsed .sima-nav__item:hover::before {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-right-color: #1f2937;
+    margin-left: 0;
+}
+
+/* ── MAIN CONTENT ─────────────────────────────────── */
+.sima-main {
+    flex: 1;
+    margin-left: var(--sidebar-w);
     display: flex;
     flex-direction: column;
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    z-index: 200;
-    transition: transform var(--transition);
-    overflow-y: auto;
-    overflow-x: hidden;
+    min-height: 100vh;
+    transition: margin-left 0.25s ease;
 }
+
+.sima-sidebar.collapsed + .sima-main { margin-left: 78px; }
+
+.sima-nav__item {
+    position: relative;
+    overflow: hidden;
+}
+
+.sima-nav__item::after  { display: none; }
+.sima-nav__item:hover::after { left: 100%; }
+
+.sima-nav__item.active {
+    box-shadow: 0 6px 18px rgba(108,143,255,.25);
+}
+
+/* ── DARK MODE OVERRIDES ───────────────────────────── */
+body.dark {
+    --c-bg: #0f172a;
+    --c-surface: #1e293b;
+    --c-text-1: #f1f5f9;
+    --c-text-2: #cbd5e1;
+    --c-border-soft: #334155;
+}
+
+body.dark .sima-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+}
+
+body.dark .sima-topbar {
+    background: #0f172a;
+    border-bottom: 1px solid #334155;
+}
+
+body.dark .sima-sidebar {
+    background: linear-gradient(180deg, #2d1b69 0%, #1e293b 60%, #0f172a 100%);
+}
+
+body.dark .sima-sidebar .sima-nav__item { color: #e2e8f0; }
+
+body.dark .sima-nav__item:hover {
+    background: rgba(108,143,255,0.18);
+    color: #ffffff;
+}
+
+body.dark .sima-nav__item:hover .sima-nav__icon { color: #ffffff; }
+
+body.dark .sima-nav__item.active {
+    background: linear-gradient(135deg, #6c8fff, #a78bfa);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(108,143,255,.35);
+}
+
+body.dark .sima-nav__item.active .sima-nav__icon { color: #ffffff; }
+
+/* ── SIDEBAR BASE ─────────────────────────────────── */
+.sima-sidebar {
+    width: var(--sidebar-w);
+    background: #bbb2fc;
+    border-right: 1px solid var(--sidebar-border);
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.25s ease;
+    z-index: 200;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.sima-brand__logo img {
+    max-width: 100%;
+    height: auto;
+}
+
+.sima-sidebar .sima-nav__item { color: #1f2937; }
 
 /* Brand */
 .sima-brand {
@@ -119,6 +254,7 @@ html, body {
     text-decoration: none;
     flex-shrink: 0;
 }
+
 .sima-brand__logo {
     width: 38px; height: 38px;
     background: linear-gradient(135deg, var(--c-accent), var(--c-accent-2));
@@ -127,8 +263,10 @@ html, body {
     flex-shrink: 0;
     box-shadow: 0 4px 12px rgba(108,143,255,.3);
 }
+
+
 .sima-brand__logo svg { color: white; }
-.sima-brand__text {}
+
 .sima-brand__name {
     font-family: var(--f-display);
     font-size: 16px;
@@ -137,6 +275,7 @@ html, body {
     letter-spacing: -.02em;
     line-height: 1.1;
 }
+
 .sima-brand__sub {
     font-size: 10.5px;
     color: var(--c-text-3);
@@ -145,94 +284,56 @@ html, body {
 }
 
 /* Nav */
-.sima-nav {
-    flex: 1;
-    padding: 12px 10px;
-}
-.sima-nav__label {
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--c-text-4);
-    padding: 10px 10px 6px;
-    margin-top: 6px;
-}
+.sima-nav { padding: 18px 14px; }
+
 .sima-nav__item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 9px 12px;
-    border-radius: var(--radius-sm);
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
     text-decoration: none;
-    color: var(--c-text-2);
-    font-size: 13.5px;
+    font-size: 14px;
     font-weight: 500;
-    transition: background var(--transition), color var(--transition);
-    cursor: pointer;
-    border: none;
-    background: none;
-    width: 100%;
-    text-align: left;
-    margin-bottom: 2px;
+    color: #1f2937;
+    margin-bottom: 6px;
+    transition: all .18s cubic-bezier(.22,1,.36,1);
 }
+
 .sima-nav__item:hover {
-    background: var(--c-bg);
-    color: var(--c-text-1);
+    background: rgba(108,143,255,0.08);
+    transform: translateX(4px);
 }
+
 .sima-nav__item.active {
-    background: var(--c-accent-light);
-    color: var(--c-accent);
+    background: #dcd3f5;
+    color: #4c3bbf;
     font-weight: 600;
 }
-.sima-nav__item.active .sima-nav__icon { color: var(--c-accent); }
-.sima-nav__icon {
-    width: 18px;
-    text-align: center;
-    font-size: 13px;
-    color: var(--c-text-3);
-    flex-shrink: 0;
-    transition: color var(--transition);
-}
-.sima-nav__chevron {
-    margin-left: auto;
-    font-size: 10px;
-    color: var(--c-text-4);
-    transition: transform var(--transition);
-}
-.sima-nav__item.open .sima-nav__chevron { transform: rotate(90deg); }
 
-/* Submenu */
+.sima-nav__icon {
+    width: 20px;
+    font-size: 16px;
+    color: #111827;
+}
+
 .sima-nav__sub {
-    display: none;
-    padding: 2px 0 4px 30px;
+    padding-left: 36px;
+    margin-top: 6px;
 }
-.sima-nav__sub.open { display: block; }
+
 .sima-nav__sub-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 10px;
-    border-radius: var(--radius-sm);
+    display: block;
+    padding: 6px 0;
+    font-size: 13px;
+    color: var(--c-text-2);
     text-decoration: none;
-    color: var(--c-text-3);
-    font-size: 12.5px;
-    font-weight: 400;
-    transition: color var(--transition), background var(--transition);
-    margin-bottom: 1px;
 }
-.sima-nav__sub-item::before {
-    content: '';
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: var(--c-border);
-    flex-shrink: 0;
-    transition: background var(--transition);
-}
-.sima-nav__sub-item:hover { color: var(--c-text-1); background: var(--c-bg); }
-.sima-nav__sub-item:hover::before { background: var(--c-accent); }
+
+.sima-nav__sub-item:hover { color: #4c3bbf; }
 .sima-nav__sub-item.active { color: var(--c-accent); font-weight: 500; }
-.sima-nav__sub-item.active::before { background: var(--c-accent); }
+
+.sima-nav__chevron { margin-left: auto; font-size: 12px; }
 
 /* Sidebar footer */
 .sima-sidebar__foot {
@@ -241,18 +342,62 @@ html, body {
     flex-shrink: 0;
 }
 
-/* ═══════════════════════════════════════════════════
-   MAIN CONTENT
-   ═══════════════════════════════════════════════════ */
-.sima-main {
-    flex: 1;
-    margin-left: var(--sidebar-w);
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+/* ── SIDEBAR HEADER (dosen / jurusan / kln / bipa) ── */
+.sima-sidebar__header {
+    padding: 22px 20px 18px;
+    border-bottom: 1px solid var(--c-border-soft);
+    flex-shrink: 0;
 }
 
-/* Topbar */
+.sima-sidebar__brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.sima-sidebar__logo-wrapper {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--c-accent), var(--c-accent-2));
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(108,143,255,.3);
+}
+
+.sima-sidebar__logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.sima-sidebar__title {
+    font-family: var(--f-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--c-text-1);
+    letter-spacing: -.02em;
+    line-height: 1.1;
+}
+
+.sima-sidebar__subtitle {
+    font-size: 10.5px;
+    color: var(--c-text-3);
+    font-weight: 400;
+    letter-spacing: .01em;
+}
+
+.sima-sidebar.collapsed .sima-sidebar__header {
+    padding: 22px 0 18px;
+}
+
+.sima-sidebar.collapsed .sima-sidebar__brand {
+    justify-content: center;
+}
+
+/* ── TOPBAR ───────────────────────────────────────── */
 .sima-topbar {
     height: 60px;
     background: var(--c-surface);
@@ -266,6 +411,7 @@ html, body {
     z-index: 100;
     box-shadow: var(--shadow-sm);
 }
+
 .sima-topbar__hamburger {
     display: none;
     background: none;
@@ -275,6 +421,7 @@ html, body {
     font-size: 18px;
     padding: 4px;
 }
+
 .sima-topbar__breadcrumb {
     display: flex;
     align-items: center;
@@ -283,17 +430,16 @@ html, body {
     color: var(--c-text-3);
     font-weight: 400;
 }
+
 .sima-topbar__breadcrumb span { color: var(--c-text-2); font-weight: 500; }
-.sima-topbar__section {
-    font-size: 13px;
-    color: var(--c-text-3);
-}
+
 .sima-topbar__right {
     margin-left: auto;
     display: flex;
     align-items: center;
     gap: 8px;
 }
+
 .sima-topbar__icon-btn {
     width: 36px; height: 36px;
     border-radius: 9px;
@@ -307,7 +453,9 @@ html, body {
     position: relative;
     text-decoration: none;
 }
+
 .sima-topbar__icon-btn:hover { background: var(--c-bg); color: var(--c-text-1); }
+
 .sima-notif-badge {
     position: absolute;
     top: -3px; right: -3px;
@@ -320,6 +468,7 @@ html, body {
     display: grid; place-items: center;
     border: 2px solid var(--c-surface);
 }
+
 .sima-user-btn {
     display: flex;
     align-items: center;
@@ -333,18 +482,15 @@ html, body {
     text-decoration: none;
     color: var(--c-text-1);
 }
+
 .sima-user-btn:hover { background: var(--c-bg); }
 
 /* Page content */
-.sima-content {
-    flex: 1;
-    padding: 28px;
-}
+.sima-content { flex: 1; padding: 28px; }
 
 /* Page header */
-.sima-page-header {
-    margin-bottom: 24px;
-}
+.sima-page-header { margin-bottom: 24px; }
+
 .sima-page-title {
     font-family: var(--f-display);
     font-size: 24px;
@@ -353,15 +499,14 @@ html, body {
     letter-spacing: -.025em;
     line-height: 1.15;
 }
+
 .sima-page-subtitle {
     font-size: 14px;
     color: var(--c-text-3);
     margin-top: 4px;
 }
 
-/* ═══════════════════════════════════════════════════
-   CARD COMPONENT
-   ═══════════════════════════════════════════════════ */
+/* ── CARD ─────────────────────────────────────────── */
 .sima-card {
     background: var(--c-surface);
     border: 1px solid var(--c-border-soft);
@@ -369,6 +514,7 @@ html, body {
     box-shadow: var(--shadow-sm);
     overflow: hidden;
 }
+
 .sima-card__header {
     display: flex;
     align-items: center;
@@ -376,6 +522,7 @@ html, body {
     padding: 18px 20px 0;
     gap: 12px;
 }
+
 .sima-card__title {
     font-family: var(--f-display);
     font-size: 15px;
@@ -384,12 +531,14 @@ html, body {
     letter-spacing: -.02em;
     margin: 0;
 }
+
 .sima-card__subtitle {
     font-size: 12px;
     color: var(--c-text-3);
     margin-top: 2px;
     font-weight: 400;
 }
+
 .sima-card__action {
     font-size: 12.5px;
     color: var(--c-accent);
@@ -402,14 +551,11 @@ html, body {
     transition: opacity var(--transition);
     flex-shrink: 0;
 }
-.sima-card__action:hover { opacity: .75; }
-.sima-card__body {
-    padding: 18px 20px;
-}
 
-/* ═══════════════════════════════════════════════════
-   STAT CARD
-   ═══════════════════════════════════════════════════ */
+.sima-card__action:hover { opacity: .75; }
+.sima-card__body { padding: 18px 20px; }
+
+/* ── STAT CARD ────────────────────────────────────── */
 .sima-stat {
     background: var(--c-surface);
     border: 1px solid var(--c-border-soft);
@@ -420,7 +566,9 @@ html, body {
     position: relative;
     overflow: hidden;
 }
+
 .sima-stat:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+
 .sima-stat::before {
     content: '';
     position: absolute;
@@ -428,10 +576,14 @@ html, body {
     height: 3px;
     border-radius: 3px 3px 0 0;
 }
+
 .sima-stat--blue::before  { background: linear-gradient(90deg, var(--c-blue), #60a5fa); }
 .sima-stat--red::before   { background: linear-gradient(90deg, var(--c-red), #f87171); }
 .sima-stat--green::before { background: linear-gradient(90deg, var(--c-green), #34d399); }
 .sima-stat--amber::before { background: linear-gradient(90deg, var(--c-amber), #fbbf24); }
+.sima-stat--navy::before  { background: linear-gradient(90deg, #0D1B2A, #1B3256); }
+.sima-stat--teal::before  { background: linear-gradient(90deg, var(--c-teal), #2dd4bf); }
+.sima-stat--purple::before{ background: linear-gradient(90deg, var(--c-purple), #a78bfa); }
 
 .sima-stat__icon {
     width: 38px; height: 38px;
@@ -440,10 +592,14 @@ html, body {
     font-size: 15px;
     margin-bottom: 12px;
 }
+
 .sima-stat__icon--blue   { background: var(--c-blue-lt);   color: var(--c-blue); }
 .sima-stat__icon--red    { background: var(--c-red-lt);    color: var(--c-red); }
 .sima-stat__icon--green  { background: var(--c-green-lt);  color: var(--c-green); }
 .sima-stat__icon--amber  { background: var(--c-amber-lt);  color: var(--c-amber); }
+.sima-stat__icon--navy   { background: #EFF4FF;            color: #0D1B2A; }
+.sima-stat__icon--teal   { background: var(--c-teal-lt);   color: var(--c-teal); }
+.sima-stat__icon--purple { background: var(--c-purple-lt); color: var(--c-purple); }
 
 .sima-stat__label {
     font-size: 11.5px;
@@ -453,6 +609,7 @@ html, body {
     letter-spacing: .05em;
     margin-bottom: 4px;
 }
+
 .sima-stat__value {
     display: block;
     font-family: var(--f-display);
@@ -463,6 +620,7 @@ html, body {
     line-height: 1;
     margin-bottom: 8px;
 }
+
 .sima-stat__delta {
     font-size: 11.5px;
     display: flex;
@@ -470,13 +628,12 @@ html, body {
     gap: 5px;
     font-weight: 500;
 }
-.sima-stat__delta--flat  { color: var(--c-text-3); }
-.sima-stat__delta--up    { color: var(--c-green); }
-.sima-stat__delta--down  { color: var(--c-red); }
 
-/* ═══════════════════════════════════════════════════
-   BADGES
-   ═══════════════════════════════════════════════════ */
+.sima-stat__delta--flat { color: var(--c-text-3); }
+.sima-stat__delta--up   { color: var(--c-green); }
+.sima-stat__delta--down { color: var(--c-red); }
+
+/* ── BADGES ───────────────────────────────────────── */
 .sima-badge {
     display: inline-flex;
     align-items: center;
@@ -488,6 +645,7 @@ html, body {
     letter-spacing: .02em;
     white-space: nowrap;
 }
+
 .sima-badge--blue   { background: var(--c-blue-lt);   color: var(--c-blue); }
 .sima-badge--green  { background: var(--c-green-lt);  color: var(--c-green); }
 .sima-badge--red    { background: var(--c-red-lt);    color: var(--c-red); }
@@ -496,9 +654,7 @@ html, body {
 .sima-badge--teal   { background: var(--c-teal-lt);   color: var(--c-teal); }
 .sima-badge--grey   { background: var(--c-bg);        color: var(--c-text-3); border: 1px solid var(--c-border); }
 
-/* ═══════════════════════════════════════════════════
-   ALERT
-   ═══════════════════════════════════════════════════ */
+/* ── ALERT ────────────────────────────────────────── */
 .sima-alert {
     display: flex;
     align-items: center;
@@ -510,12 +666,15 @@ html, body {
     line-height: 1.5;
     border: 1px solid transparent;
 }
-.sima-alert--blue   { background: var(--c-blue-lt);   color: #1e40af; border-color: rgba(37,99,235,.15); }
-.sima-alert--green  { background: var(--c-green-lt);  color: #065f46; border-color: rgba(5,150,105,.15); }
-.sima-alert--amber  { background: var(--c-amber-lt);  color: #92400e; border-color: rgba(217,119,6,.2); }
-.sima-alert--red    { background: var(--c-red-lt);    color: #991b1b; border-color: rgba(220,38,38,.15); }
-.sima-alert__icon   { flex-shrink: 0; font-size: 15px; }
-.sima-alert__text   { flex: 1; }
+
+.sima-alert--blue  { background: var(--c-blue-lt);  color: #1e40af; border-color: rgba(37,99,235,.15); }
+.sima-alert--green { background: var(--c-green-lt); color: #065f46; border-color: rgba(5,150,105,.15); }
+.sima-alert--amber { background: var(--c-amber-lt); color: #92400e; border-color: rgba(217,119,6,.2); }
+.sima-alert--red   { background: var(--c-red-lt);   color: #991b1b; border-color: rgba(220,38,38,.15); }
+
+.sima-alert__icon  { flex-shrink: 0; font-size: 15px; }
+.sima-alert__text  { flex: 1; }
+
 .sima-alert__action {
     font-weight: 600;
     font-size: 12.5px;
@@ -529,11 +688,10 @@ html, body {
     transition: opacity var(--transition);
     flex-shrink: 0;
 }
+
 .sima-alert__action:hover { opacity: 1; }
 
-/* ═══════════════════════════════════════════════════
-   SCHEDULE ITEM
-   ═══════════════════════════════════════════════════ */
+/* ── SCHEDULE ITEM ────────────────────────────────── */
 .sima-sch {
     display: flex;
     align-items: center;
@@ -545,7 +703,9 @@ html, body {
     transition: background var(--transition);
     border: 1px solid transparent;
 }
+
 .sima-sch:hover { background: var(--c-bg); border-color: var(--c-border-soft); }
+
 .sima-sch__time {
     font-family: var(--f-mono);
     font-size: 11px;
@@ -554,13 +714,16 @@ html, body {
     flex-shrink: 0;
     width: 86px;
 }
+
 .sima-sch__dot {
     width: 10px; height: 10px;
     border-radius: 50%;
     border: 2px solid;
     flex-shrink: 0;
 }
+
 .sima-sch__info { flex: 1; min-width: 0; }
+
 .sima-sch__title {
     font-size: 13px;
     font-weight: 600;
@@ -569,6 +732,7 @@ html, body {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 .sima-sch__meta {
     font-size: 11.5px;
     color: var(--c-text-3);
@@ -578,9 +742,7 @@ html, body {
     text-overflow: ellipsis;
 }
 
-/* ═══════════════════════════════════════════════════
-   PROGRESS BAR
-   ═══════════════════════════════════════════════════ */
+/* ── PROGRESS ─────────────────────────────────────── */
 .sima-prog {
     height: 6px;
     background: var(--c-bg);
@@ -588,6 +750,7 @@ html, body {
     overflow: hidden;
     border: 1px solid var(--c-border-soft);
 }
+
 .sima-prog__bar {
     height: 100%;
     border-radius: 100px;
@@ -595,28 +758,25 @@ html, body {
     width: 0;
 }
 
-/* ═══════════════════════════════════════════════════
-   TIMELINE
-   ═══════════════════════════════════════════════════ */
-.sima-timeline {
-    list-style: none;
-    padding: 0; margin: 0;
-}
+/* ── TIMELINE ─────────────────────────────────────── */
+.sima-timeline { list-style: none; padding: 0; margin: 0; }
+
 .sima-tl-item {
     display: flex;
     gap: 12px;
     padding-bottom: 16px;
     position: relative;
 }
+
 .sima-tl-item:not(:last-child)::before {
     content: '';
     position: absolute;
     left: 15px;
-    top: 30px;
-    bottom: 0;
+    top: 30px; bottom: 0;
     width: 1px;
     background: var(--c-border-soft);
 }
+
 .sima-tl-dot {
     width: 30px; height: 30px;
     border-radius: 9px;
@@ -624,22 +784,23 @@ html, body {
     font-size: 12px;
     flex-shrink: 0;
 }
+
 .sima-tl-content { flex: 1; padding-top: 4px; }
+
 .sima-tl-title {
     font-size: 13px;
     font-weight: 500;
     color: var(--c-text-1);
     line-height: 1.4;
 }
+
 .sima-tl-time {
     font-size: 11.5px;
     color: var(--c-text-3);
     margin-top: 3px;
 }
 
-/* ═══════════════════════════════════════════════════
-   QUICK ACTIONS
-   ═══════════════════════════════════════════════════ */
+/* ── QUICK ACTIONS ────────────────────────────────── */
 .sima-quick {
     display: flex;
     flex-direction: column;
@@ -654,18 +815,21 @@ html, body {
     text-align: center;
     cursor: pointer;
 }
+
 .sima-quick:hover {
     background: var(--c-surface);
     box-shadow: var(--shadow);
     border-color: var(--c-border);
     transform: translateY(-1px);
 }
+
 .sima-quick__icon {
     width: 38px; height: 38px;
     border-radius: 10px;
     display: grid; place-items: center;
     font-size: 15px;
 }
+
 .sima-quick__label {
     font-size: 11px;
     font-weight: 600;
@@ -673,9 +837,7 @@ html, body {
     line-height: 1.3;
 }
 
-/* ═══════════════════════════════════════════════════
-   AVATAR
-   ═══════════════════════════════════════════════════ */
+/* ── AVATAR ───────────────────────────────────────── */
 .sima-avatar {
     display: grid;
     place-items: center;
@@ -684,11 +846,28 @@ html, body {
     color: white;
     flex-shrink: 0;
     user-select: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #6c8fff, #a78bfa);
+    font-size: 13px;
 }
 
-/* ═══════════════════════════════════════════════════
-   ANNOUNCE ITEM
-   ═══════════════════════════════════════════════════ */
+.sima-avatar-wrapper { position: relative; }
+
+.sima-role-badge {
+    position: absolute;
+    bottom: -4px; right: -6px;
+    background: linear-gradient(135deg,#6c8fff,#a78bfa);
+    color: white;
+    font-size: 8px;
+    padding: 2px 6px;
+    border-radius: 20px;
+    font-weight: 700;
+    letter-spacing: .5px;
+}
+
+/* ── ANNOUNCEMENT ITEM ────────────────────────────── */
 .sima-announce {
     padding: 14px;
     border-radius: var(--radius);
@@ -698,19 +877,23 @@ html, body {
     transition: all var(--transition);
     background: var(--c-surface);
 }
+
 .sima-announce:hover { border-color: var(--c-border); box-shadow: var(--shadow-sm); }
+
 .sima-announce__title {
     font-size: 13.5px;
     font-weight: 600;
     color: var(--c-text-1);
     line-height: 1.4;
 }
+
 .sima-announce__body {
     font-size: 12.5px;
     color: var(--c-text-3);
     line-height: 1.55;
     margin-top: 5px;
 }
+
 .sima-announce__meta {
     display: flex;
     align-items: center;
@@ -721,17 +904,15 @@ html, body {
     flex-wrap: wrap;
 }
 
-/* ═══════════════════════════════════════════════════
-   TABLE
-   ═══════════════════════════════════════════════════ */
+/* ── TABLE ────────────────────────────────────────── */
 .sima-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
 }
-.sima-table thead tr {
-    border-bottom: 1px solid var(--c-border-soft);
-}
+
+.sima-table thead tr { border-bottom: 1px solid var(--c-border-soft); }
+
 .sima-table thead th {
     padding: 10px 20px;
     font-size: 11px;
@@ -742,18 +923,18 @@ html, body {
     text-align: left;
     white-space: nowrap;
 }
+
 .sima-table tbody td {
     padding: 12px 20px;
     border-bottom: 1px solid var(--c-border-soft);
     color: var(--c-text-2);
     vertical-align: middle;
 }
+
 .sima-table tbody tr:last-child td { border-bottom: none; }
 .sima-table tbody tr:hover td { background: var(--c-bg); }
 
-/* ═══════════════════════════════════════════════════
-   BUTTONS
-   ═══════════════════════════════════════════════════ */
+/* ── BUTTONS ──────────────────────────────────────── */
 .sima-btn {
     display: inline-flex;
     align-items: center;
@@ -772,6 +953,7 @@ html, body {
     color: white;
     box-shadow: 0 2px 10px rgba(108,143,255,.25);
 }
+
 .sima-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(108,143,255,.35); color: white; }
 .sima-btn:active { transform: scale(.98); }
 
@@ -781,6 +963,7 @@ html, body {
     box-shadow: none;
     border: 1px solid var(--c-border);
 }
+
 .sima-btn--outline:hover { background: var(--c-bg); color: var(--c-text-1); box-shadow: none; transform: none; }
 
 .sima-btn--gold {
@@ -788,7 +971,16 @@ html, body {
     color: white;
     box-shadow: 0 2px 10px rgba(217,119,6,.25);
 }
+
 .sima-btn--gold:hover { box-shadow: 0 4px 16px rgba(217,119,6,.35); color: white; }
+
+.sima-btn--blue {
+    background: linear-gradient(135deg, #2563EB, #3b82f6);
+    color: white;
+    box-shadow: 0 2px 10px rgba(37,99,235,.25);
+}
+
+.sima-btn--blue:hover { box-shadow: 0 4px 16px rgba(37,99,235,.35); color: white; }
 
 .sima-btn--danger {
     background: linear-gradient(135deg, #ef4444, #dc2626);
@@ -796,16 +988,10 @@ html, body {
     box-shadow: 0 2px 10px rgba(220,38,38,.2);
 }
 
-.sima-btn--sm {
-    padding: 6px 12px;
-    font-size: 12px;
-    border-radius: 7px;
-}
-.sima-btn--full { width: 100%; justify-content: center; }
+.sima-btn--sm    { padding: 6px 12px; font-size: 12px; border-radius: 7px; }
+.sima-btn--full  { width: 100%; justify-content: center; }
 
-/* ═══════════════════════════════════════════════════
-   FORM INPUTS
-   ═══════════════════════════════════════════════════ */
+/* ── FORM INPUTS ──────────────────────────────────── */
 .sima-input {
     width: 100%;
     background: var(--c-surface);
@@ -818,6 +1004,7 @@ html, body {
     outline: none;
     transition: border-color var(--transition), box-shadow var(--transition);
 }
+
 .sima-input:hover { border-color: var(--c-text-4); }
 .sima-input:focus { border-color: var(--c-accent); box-shadow: 0 0 0 3px rgba(108,143,255,.1); }
 .sima-input::placeholder { color: var(--c-text-4); }
@@ -830,9 +1017,7 @@ html, body {
     margin-bottom: 6px;
 }
 
-/* ═══════════════════════════════════════════════════
-   ANIMATIONS
-   ═══════════════════════════════════════════════════ */
+/* ── ANIMATIONS ───────────────────────────────────── */
 .sima-fade { opacity: 0; animation: fadeUp .45s ease forwards; }
 .sima-fade--1 { animation-delay: .05s; }
 .sima-fade--2 { animation-delay: .10s; }
@@ -852,217 +1037,224 @@ html, body {
     50%       { opacity: .4; }
 }
 
-/* ═══════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════ */
+/* ── RESPONSIVE ───────────────────────────────────── */
 @media (max-width: 768px) {
-    .sima-sidebar {
+    .sima-sidebar.collapsed {
         transform: translateX(-100%);
+        width: var(--sidebar-w);
     }
-    .sima-sidebar.open {
+
+    .sima-main { margin-left: 0 !important; }
+
+    .sima-sidebar {
         transform: translateX(0);
-        box-shadow: var(--shadow-md);
+        width: var(--sidebar-w);
+        background: #bbb2fc;
+        border-right: 1px solid var(--sidebar-border);
+        position: fixed;
+        top: 0; left: 0;
+        display: flex;
+        flex-direction: column;
+        transition: width 3s ease;
+        z-index: 200;
+        overflow-x: auto;
+        overflow-y: auto;
     }
-    .sima-main {
-        margin-left: 0;
-    }
-    .sima-topbar__hamburger { display: block; }
-    .sima-content { padding: 16px; }
-    .sima-overlay {
-        display: none;
-        position: fixed; inset: 0;
-        background: rgba(0,0,0,.35);
-        z-index: 150;
-    }
-    .sima-overlay.open { display: block; }
+
+    .sima-topbar__hamburger { display: grid; }
 }
 
-/* ═══════════════════════════════════════════════════
-   SCROLLBAR
-   ═══════════════════════════════════════════════════ */
+/* ── SCROLLBAR ────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--c-text-4); }
 </style>
+
 @stack('head_styles')
 </head>
+
+@php
+    /*
+    |--------------------------------------------------------------------------
+    | BUG #1 FIX: Tambah role baru (gunadarma)
+    | BUG #7 FIX: Semua prefix sudah konsisten dengan route yang ada
+    |--------------------------------------------------------------------------
+    */
+    $role = strtolower(
+        auth()->user()->role instanceof \App\Enums\Role
+            ? auth()->user()->role->value
+            : auth()->user()->role
+    );
+
+    $prefix = match($role) {
+        'kln'        => 'kln',
+        'dosen'      => 'dosen',
+        'bipa'       => 'bipa',
+        'jurusan'    => 'jurusan',
+        'gunadarma'  => 'gunadarma', // BUG #1 FIX: tambah gunadarma
+        default      => 'mahasiswa',
+    };
+
+    /*
+    |--------------------------------------------------------------------------
+    | BUG #2 FIX: Profile route dinamis per role
+    | BUG #7 FIX: // Semua route pakai 'profile' (standard Laravel)
+    |--------------------------------------------------------------------------
+    */
+    $profilRoute = $prefix === 'mahasiswa' ? 'mahasiswa.profile' : $prefix . '.profil';
+
+    /*
+    |--------------------------------------------------------------------------
+    | BUG #3 FIX: User identifier yang tepat per role
+    | Mahasiswa  -> NPM
+    | Dosen      -> NIP (atau nama jika tidak ada relasi dosen)
+    | Lainnya    -> Nama akun
+    |--------------------------------------------------------------------------
+    */
+    $userIdentifier = match($prefix) {
+        'mahasiswa'  => optional(auth()->user()->mahasiswa)->npm  ?? auth()->user()->email,
+        'dosen'      => optional(auth()->user()->dosen)->nidn     ?? auth()->user()->email,
+        default      => auth()->user()->email,
+    };
+
+    $userInitial = strtoupper(substr($userIdentifier, 0, 1));
+@endphp
 
 <body>
 <div class="sima-shell">
 
+    <!-- Mobile overlay -->
+    <div class="sima-overlay" id="overlay" onclick="closeSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:199;"></div>
+
     <!-- ── SIDEBAR ─────────────────────────────── -->
     <aside class="sima-sidebar" id="sidebar">
-
-        <a href="{{ route('mahasiswa.dashboard') }}" class="sima-brand">
-            <div class="sima-brand__logo">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
-                </svg>
-            </div>
-            <div class="sima-brand__text">
-                <div class="sima-brand__name">SIMA</div>
-                <div class="sima-brand__sub">{{ config('app.name', 'Universitas') }}</div>
-            </div>
-        </a>
-
-        <nav class="sima-nav">
-            <div class="sima-nav__label">Menu Utama</div>
-
-            <a href="{{ route('mahasiswa.dashboard') }}"
-               class="sima-nav__item {{ request()->routeIs('mahasiswa.dashboard') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-house"></i></span>
-                Dashboard
-            </a>
-
-            <a href="{{ route('mahasiswa.profil') }}"
-               class="sima-nav__item {{ request()->routeIs('mahasiswa.profil*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-circle-user"></i></span>
-                Biodata / Profil
-            </a>
-
-            <a href="{{ route('mahasiswa.profil.dokumen') }}"
-               class="sima-nav__item {{ request()->routeIs('mahasiswa.profil.dokumen*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-folder-open"></i></span>
-                Dokumen Saya
-            </a>
-
-            <!-- Schedules dropdown -->
-            <button class="sima-nav__item {{ request()->routeIs('mahasiswa.jadwal*') ? 'active open' : '' }}"
-                    onclick="toggleNav(this)">
-                <span class="sima-nav__icon"><i class="fas fa-calendar-days"></i></span>
-                Jadwal
-                <i class="fas fa-chevron-right sima-nav__chevron"></i>
-            </button>
-            <div class="sima-nav__sub {{ request()->routeIs('mahasiswa.jadwal*') ? 'open' : '' }}">
-                <a href="{{ route('mahasiswa.jadwal') }}" class="sima-nav__sub-item {{ request()->routeIs('mahasiswa.jadwal') ? 'active' : '' }}">
-                    Semua Jadwal
-                </a>
-                <a href="{{ route('mahasiswa.jadwal', ['type' => 'bipa']) }}" class="sima-nav__sub-item">BIPA</a>
-                <a href="{{ route('mahasiswa.jadwal', ['type' => 'kuliah']) }}" class="sima-nav__sub-item">Perkuliahan</a>
-                <a href="{{ route('mahasiswa.jadwal', ['type' => 'kln']) }}" class="sima-nav__sub-item">KLN</a>
-            </div>
-
-            <a href="{{ route('mahasiswa.request.index') }}"
-               class="sima-nav__item {{ request()->routeIs('mahasiswa.request*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-file-signature"></i></span>
-                Request Dokumen
-            </a>
-
-            <a href="{{ route('mahasiswa.announcement') }}"
-               class="sima-nav__item {{ request()->routeIs('mahasiswa.announcement*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-bullhorn"></i></span>
-                Pengumuman
-            </a>
-
-            <a href="{{ route('mahasiswa.notifikasi') }}"
-               class="sima-nav__item {{ request()->routeIs('mahasiswa.notifikasi*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-bell"></i></span>
-                Notifikasi
-                @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
-                    <span class="sima-badge sima-badge--red" style="margin-left:auto;font-size:10px;padding:1px 7px;">
-                        {{ $unreadNotifCount }}
-                    </span>
-                @endif
-            </a>
-
-            <a href="{{ route('mahasiswa.analytics') }}"
-               class="sima-nav__item {{ request()->routeIs('mahasiswa.analytics*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-chart-bar"></i></span>
-                Kehadiran & Nilai
-            </a>
-
-            <div class="sima-nav__label">Akun</div>
-
-            <a href="{{ route('profile.edit') }}"
-               class="sima-nav__item {{ request()->routeIs('profile*') ? 'active' : '' }}">
-                <span class="sima-nav__icon"><i class="fas fa-key"></i></span>
-                Ubah Password
-            </a>
-
-        </nav>
-
-        <!-- Sidebar footer — logout -->
-        <div class="sima-sidebar__foot">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="sima-nav__item" style="color:var(--c-red)">
-                    <span class="sima-nav__icon" style="color:var(--c-red)">
-                        <i class="fas fa-right-from-bracket"></i>
-                    </span>
-                    Keluar
-                </button>
-            </form>
-        </div>
-
+        @include('partials.sidebar.' . $prefix)
     </aside>
 
-    <!-- Mobile overlay -->
-    <div class="sima-overlay" id="overlay" onclick="closeSidebar()"></div>
-
     <!-- ── MAIN ───────────────────────────────── -->
-    <div class="sima-main">
+    <div class="sima-main" id="mainContent">
 
         <!-- Topbar -->
         <header class="sima-topbar">
+
             <button class="sima-topbar__hamburger" onclick="openSidebar()">
                 <i class="fas fa-bars"></i>
             </button>
 
             <div class="sima-topbar__breadcrumb">
-                SIMA <i class="fas fa-slash" style="font-size:9px;opacity:.3;margin:0 2px"></i>
-                <span>@yield('page_section', 'Mahasiswa')</span>
+                SIMA
+                <i class="fas fa-slash" style="font-size:9px;opacity:.3;margin:0 2px"></i>
+                <span>@yield('page_section', ucfirst($prefix))</span>
+
+                <button onclick="toggleCollapse(event)"
+                    style="background:none;border:none;margin-left:8px;cursor:pointer;color:var(--c-text-3);">
+                    <i class="fas fa-angle-double-left" id="collapseIcon"></i>
+                </button>
             </div>
 
             <div class="sima-topbar__right">
-                <!-- Notif -->
-                <a href="{{ route('mahasiswa.notifikasi') }}" class="sima-topbar__icon-btn" title="Notifikasi">
+
+                <!-- Notifikasi -->
+                <a href="{{ route($prefix . '.notifikasi') }}"
+                    class="sima-topbar__icon-btn"
+                    title="Notifikasi">
                     <i class="fas fa-bell"></i>
                     @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
                         <span class="sima-notif-badge">{{ $unreadNotifCount }}</span>
                     @endif
                 </a>
 
-                <!-- User -->
-                <div class="sima-user-btn" onclick="window.location='{{ route('mahasiswa.profil') }}'">
-                    <div class="sima-avatar"
-                         style="width:28px;height:28px;border-radius:8px;font-size:11px;background:linear-gradient(135deg,var(--c-accent),var(--c-accent-2))">
-                        {{ strtoupper(substr(auth()->user()->name ?? 'M', 0, 2)) }}
-                    </div>
-                    <span style="font-size:13px;font-weight:600;color:var(--c-text-1)">
-                        {{ auth()->user()->nim ?? '—' }}
-                    </span>
-                    <i class="fas fa-chevron-down" style="font-size:10px;color:var(--c-text-3)"></i>
+                <!-- User Dropdown -->
+                <div class="dropdown">
+                    <button class="sima-user-btn" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="sima-avatar-wrapper">
+                            <div class="sima-avatar">{{ $userInitial }}</div>
+                            <div class="sima-role-badge">{{ strtoupper($prefix) }}</div>
+                        </div>
+                        {{-- BUG #3 FIX: Tampilkan identifier yang sesuai per role --}}
+                        <span style="font-size:13px;font-weight:500;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                            {{ $userIdentifier }}
+                        </span>
+                        <i class="fas fa-chevron-down" style="font-size:11px;"></i>
+                    </button>
+
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border-radius:12px;min-width:200px;">
+                        <li>
+                            {{-- BUG #2 FIX: Route profil dinamis, tidak lagi hardcoded ke dosen.profil --}}
+                            <a class="dropdown-item" href="{{ route($profilRoute) }}">
+                                <i class="fas fa-user me-2"></i> Profil Saya
+                            </a>
+                        </li>
+
+                        <li>
+                            <button class="dropdown-item" onclick="toggleTheme()">
+                                <i class="fas fa-moon me-2"></i> Dark / Light Mode
+                            </button>
+                        </li>
+
+                        <li>
+                            <button class="dropdown-item" onclick="toggleLang()">
+                                <i class="fas fa-language me-2"></i> ID / EN
+                            </button>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="fas fa-power-off me-2"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </header>
 
-        <!-- Content -->
+        <!-- Content Area -->
         <main class="sima-content">
 
             <!-- Page Header -->
             <div class="sima-page-header">
-                <div class="sima-page-title">@yield('page_title', 'Dashboard')</div>
+                <div class="sima-page-title">@yield('page_title', '')</div>
                 <div class="sima-page-subtitle">@yield('page_subtitle', '')</div>
             </div>
 
-            <!-- Flash messages -->
+            <!-- Flash Messages -->
             @if(session('success'))
-            <div class="sima-alert sima-alert--green sima-fade" style="margin-bottom:20px">
+            <div class="sima-alert sima-alert--green sima-fade" style="margin-bottom:20px;">
                 <i class="fas fa-circle-check sima-alert__icon"></i>
                 <div class="sima-alert__text">{{ session('success') }}</div>
             </div>
             @endif
+
             @if(session('error'))
-            <div class="sima-alert sima-alert--red sima-fade" style="margin-bottom:20px">
+            <div class="sima-alert sima-alert--red sima-fade" style="margin-bottom:20px;">
                 <i class="fas fa-circle-xmark sima-alert__icon"></i>
                 <div class="sima-alert__text">{{ session('error') }}</div>
             </div>
             @endif
 
-            @yield('main_content')
-        </main>
+            @if(session('warning'))
+            <div class="sima-alert sima-alert--amber sima-fade" style="margin-bottom:20px;">
+                <i class="fas fa-triangle-exclamation sima-alert__icon"></i>
+                <div class="sima-alert__text">{{ session('warning') }}</div>
+            </div>
+            @endif
 
+            @if(session('info'))
+            <div class="sima-alert sima-alert--blue sima-fade" style="margin-bottom:20px;">
+                <i class="fas fa-circle-info sima-alert__icon"></i>
+                <div class="sima-alert__text">{{ session('info') }}</div>
+            </div>
+            @endif
+
+            @yield('main_content')
+
+        </main>
     </div>
 </div>
 
@@ -1070,19 +1262,26 @@ html, body {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-/* ── Sidebar toggle ─────────────────────────── */
+/* ── Sidebar: open/close (mobile) ───────────────── */
 function openSidebar() {
-    document.getElementById('sidebar').classList.add('open');
-    document.getElementById('overlay').classList.add('open');
+    const sidebar  = document.getElementById('sidebar');
+    const overlay  = document.getElementById('overlay');
+    if (!sidebar || !overlay) return;
+    sidebar.style.transform = 'translateX(0)';
+    overlay.style.display   = 'block';
     document.body.style.overflow = 'hidden';
 }
+
 function closeSidebar() {
-    document.getElementById('sidebar').classList.remove('open');
-    document.getElementById('overlay').classList.remove('open');
+    const sidebar  = document.getElementById('sidebar');
+    const overlay  = document.getElementById('overlay');
+    if (!sidebar || !overlay) return;
+    sidebar.style.transform = '';
+    overlay.style.display   = 'none';
     document.body.style.overflow = '';
 }
 
-/* ── Nav dropdown ───────────────────────────── */
+/* ── Sidebar: nav dropdown ──────────────────────── */
 function toggleNav(btn) {
     const isOpen = btn.classList.contains('open');
     btn.classList.toggle('open', !isOpen);
@@ -1092,14 +1291,34 @@ function toggleNav(btn) {
     }
 }
 
-/* ── Progress bar animation ─────────────────── */
+/* ── Sidebar: collapse/expand ───────────────────── */
+function toggleCollapse(event) {
+    const sidebar = document.getElementById('sidebar');
+    const main    = document.getElementById('mainContent');
+    const icon    = document.getElementById('collapseIcon');
+    if (!sidebar || !main) return;
+
+    sidebar.classList.toggle('collapsed');
+    const isCollapsed = sidebar.classList.contains('collapsed');
+
+    main.style.marginLeft = isCollapsed ? '78px' : '240px';
+    localStorage.setItem('sidebar', isCollapsed ? 'mini' : 'full');
+
+    if (icon) {
+        icon.className = isCollapsed
+            ? 'fas fa-angle-double-right'
+            : 'fas fa-angle-double-left';
+    }
+}
+
+/* ── Progress bar animation ─────────────────────── */
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.sima-prog__bar[data-w]').forEach(function (bar) {
         const pct = bar.getAttribute('data-w');
         setTimeout(() => { bar.style.width = pct + '%'; }, 200);
     });
 
-    /* ── Count-up animation ─────────────────── */
+    /* Count-up animation */
     document.querySelectorAll('[data-count]').forEach(function (el) {
         const target = parseInt(el.getAttribute('data-count'), 10);
         if (isNaN(target)) return;
@@ -1111,10 +1330,46 @@ document.addEventListener('DOMContentLoaded', function () {
             if (cur >= target) clearInterval(timer);
         }, 30);
     });
+
+    /* Restore sidebar state */
+    const sidebar = document.getElementById('sidebar');
+    const main    = document.getElementById('mainContent');
+    const icon    = document.getElementById('collapseIcon');
+
+    if (localStorage.getItem('sidebar') === 'mini') {
+        sidebar.classList.add('collapsed');
+        if (main) main.style.marginLeft = '78px';
+        if (icon) {
+            icon.className = 'fas fa-angle-double-right';
+        }
+    } else {
+        if (main) main.style.marginLeft = '240px';
+    }
+
+    /* Restore dark mode */
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark');
+    }
 });
+
+/* ── Dark Mode ───────────────────────────────────── */
+function toggleTheme() {
+    document.body.classList.toggle('dark');
+    localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+}
+
+/* ── Language toggle (placeholder) ─────────────── */
+function toggleLang() {
+    const current = localStorage.getItem('lang') || 'id';
+    const newLang = current === 'id' ? 'en' : 'id';
+    localStorage.setItem('lang', newLang);
+    // TODO: Implementasi i18n Laravel (accept-language header / session locale)
+    alert('Bahasa diubah ke: ' + newLang.toUpperCase() + '. Reload halaman untuk efek penuh.');
+}
 </script>
 
 @stack('page_js')
 @yield('page_js')
+
 </body>
 </html>
