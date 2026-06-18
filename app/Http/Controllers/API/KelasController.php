@@ -8,6 +8,7 @@ use App\Services\KelasService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Kelas\createKelasRequest;
 use App\Http\Requests\Kelas\updateKelasRequest;
+use App\Services\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -104,6 +105,8 @@ class KelasController extends Controller
             $maker = Auth::user();
             $kelas = $this->kelasService->create($maker, $request->validated());
 
+            ActivityLog::record("Membuat kelas: {$kelas->kodeKelas}", 'kelas', $kelas->id);
+
             return response()->json([
                 'success' => true,
                 'data'    => $kelas,
@@ -136,6 +139,8 @@ class KelasController extends Controller
             $maker   = Auth::user();
             $updated = $this->kelasService->update($maker, $id, $request->validated());
 
+            ActivityLog::record("Memperbarui kelas #{$id}", 'kelas', (int) $id);
+
             return response()->json([
                 'success' => true,
                 'data'    => $updated,
@@ -162,6 +167,8 @@ class KelasController extends Controller
         try {
             $maker = Auth::user();
             $this->kelasService->delete($maker, $id);
+
+            ActivityLog::record("Menghapus kelas #{$id}", 'kelas', (int) $id);
 
             return response()->json([
                 'success' => true,

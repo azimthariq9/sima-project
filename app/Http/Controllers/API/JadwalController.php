@@ -11,6 +11,7 @@ use App\Services\JadwalService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Jadwal\createJadwalRequest;
 use App\Http\Requests\Jadwal\updateJadwalRequest;
+use App\Services\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -129,6 +130,12 @@ class JadwalController extends Controller
                 'totalSesi'     => $request->totalSesi,
             ]);
 
+            ActivityLog::record(
+                "Membuat jadwal: {$request->kodeMk} - {$request->kodeKelas}",
+                'jadwal',
+                $jadwal->id
+            );
+
             return response()->json([
                 'success' => true,
                 'data'    => $jadwal,
@@ -209,6 +216,8 @@ class JadwalController extends Controller
             $maker   = Auth::user();
             $updated = $this->jadwalService->update($maker, $id, $data);
 
+            ActivityLog::record("Memperbarui jadwal #{$id}", 'jadwal', (int) $id);
+
             return response()->json([
                 'success' => true,
                 'data'    => $updated,
@@ -235,6 +244,9 @@ class JadwalController extends Controller
         try {
             $maker = Auth::user();
             $this->jadwalService->delete($maker, $id);
+
+            ActivityLog::record("Menghapus jadwal #{$id}", 'jadwal', (int) $id);
+
             return response()->json([
                 'success' => true,
                 'data'    => [],

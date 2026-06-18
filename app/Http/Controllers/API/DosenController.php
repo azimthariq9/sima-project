@@ -9,6 +9,7 @@ use App\Services\DosenService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dosen\createDosenRequest;
 use App\Http\Requests\Dosen\updateDosenRequest;
+use App\Services\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -217,6 +218,8 @@ class DosenController extends Controller
             $maker = Auth::user();
             $dosen = $this->dosenService->create($maker, $request->validated());
 
+            ActivityLog::record("Membuat data dosen: {$dosen->nama}", 'dosen', $dosen->id);
+
             return response()->json([
                 'success' => true,
                 'data'    => $dosen,
@@ -266,6 +269,8 @@ class DosenController extends Controller
 
             $updated = $this->dosenService->update($maker, $id, $request->validated());
 
+            ActivityLog::record("Memperbarui data dosen #{$id}", 'dosen', (int) $id);
+
             return response()->json([
                 'success' => true,
                 'data'    => $updated,
@@ -307,6 +312,8 @@ class DosenController extends Controller
         try {
             $maker = Auth::user();
             $this->dosenService->delete($maker, $id);
+
+            ActivityLog::record("Menghapus data dosen #{$id}", 'dosen', (int) $id);
 
             return response()->json([
                 'success' => true,

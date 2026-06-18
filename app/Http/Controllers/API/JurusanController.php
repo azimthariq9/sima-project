@@ -9,6 +9,7 @@ use App\Http\Requests\Jurusan\createJurusanRequest;
 use App\Http\Requests\Jurusan\updateJurusanRequest;
 use App\Models\User;
 use App\Enums\Role;
+use App\Services\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -159,6 +160,7 @@ class JurusanController extends Controller
     {
         try {
             $jurusan = $this->jurusanService->create(Auth::user(), $request->validated());
+            ActivityLog::record("Membuat jurusan: {$jurusan->namaJurusan}", 'jurusan', $jurusan->id);
             return response()->json([
                 'success' => true, 'data' => $jurusan,
                 'flash'   => ['type' => 'success', 'message' => 'Jurusan created successfully', 'theme' => 'amazon', 'timeout' => 5000],
@@ -173,6 +175,7 @@ class JurusanController extends Controller
     {
         try {
             $updated = $this->jurusanService->update(Auth::user(), $id, $request->validated());
+            ActivityLog::record("Memperbarui jurusan #{$id}", 'jurusan', (int) $id);
             return response()->json([
                 'success' => true, 'data' => $updated,
                 'flash'   => ['type' => 'success', 'message' => 'Jurusan updated successfully', 'theme' => 'amazon', 'timeout' => 5000],
@@ -187,6 +190,7 @@ class JurusanController extends Controller
     {
         try {
             $this->jurusanService->delete(Auth::user(), $id);
+            ActivityLog::record("Menghapus jurusan #{$id}", 'jurusan', (int) $id);
             return response()->json([
                 'success' => true, 'data' => [],
                 'flash'   => ['type' => 'success', 'message' => 'Jurusan deleted successfully', 'theme' => 'amazon', 'timeout' => 5000],

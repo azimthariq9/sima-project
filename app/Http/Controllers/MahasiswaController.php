@@ -608,18 +608,45 @@ class MahasiswaController extends Controller
 
     public function notifikasi()
     {
-        DB::table('notification_users')
-            ->where('user_id', Auth::id())
+        $mahasiswa = $this->getMahasiswa();
+        if (!$mahasiswa) return redirect()->route('mahasiswa.dashboard');
+
+        // Ambil dulu sebelum mark read — supaya unread bisa di-render
+        $notifications = DB::table('notification_mahasiswa')
+            ->join('notification', 'notification_mahasiswa.notification_id', '=', 'notification.id')
+            ->where('notification_mahasiswa.mahasiswa_id', $mahasiswa->id)
+            ->select(
+                'notification.id',
+                'notification.subject',
+                'notification.message',
+                'notification.type',
+                'notification_mahasiswa.is_read',
+                'notification_mahasiswa.created_at as received_at'
+            )
+            ->orderBy('notification_mahasiswa.created_at', 'desc')
+            ->get();
+
+        $unreadCount = $notifications->where('is_read', false)->count();
+
+        // Mark semua unread → read
+        DB::table('notification_mahasiswa')
+            ->where('mahasiswa_id', $mahasiswa->id)
             ->where('is_read', false)
             ->update(['is_read' => true, 'updated_at' => now()]);
 
-        $notifikasi = DB::table('notification_users')
-            ->join('notification', 'notification_users.notification_id', '=', 'notification.id')
-            ->where('notification_users.user_id', Auth::id())
-            ->select('notification.*', 'notification_users.is_read', 'notification_users.created_at as received_at')
-            ->orderBy('notification_users.created_at', 'desc')
-            ->paginate(15);
+        return view('mahasiswa.notifikasi', compact('notifications', 'unreadCount'));
+    }
 
-        return view('mahasiswa.notifikasi', compact('notifikasi'));
+    public function markNotifRead()
+    {
+        $mahasiswa = $this->getMahasiswa();
+        if (!$mahasiswa) return response()->json(['success' => false], 403);
+
+        DB::table('notification_mahasiswa')
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->where('is_read', false)
+            ->update(['is_read' => true, 'updated_at' => now()]);
+
+        return response()->json(['success' => true]);
     }
 }

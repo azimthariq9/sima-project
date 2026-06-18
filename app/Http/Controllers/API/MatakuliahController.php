@@ -8,6 +8,7 @@ use App\Services\MatakuliahService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Matakuliah\createMatakuliahRequest;
 use App\Http\Requests\Matakuliah\updateMatakuliahRequest;
+use App\Services\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -101,6 +102,8 @@ class MatakuliahController extends Controller
             $maker      = Auth::user();
             $matakuliah = $this->matakuliahService->create($maker, $request->validated());
 
+            ActivityLog::record("Membuat matakuliah: {$matakuliah->namaMk}", 'matakuliah', $matakuliah->id);
+
             return response()->json([
                 'success' => true,
                 'data'    => $matakuliah,
@@ -149,6 +152,8 @@ class MatakuliahController extends Controller
 
             $updated = $this->matakuliahService->update($maker, $id, $request->validated());
 
+            ActivityLog::record("Memperbarui matakuliah #{$id}", 'matakuliah', (int) $id);
+
             return response()->json([
                 'success' => true,
                 'data'    => $updated,
@@ -190,6 +195,8 @@ class MatakuliahController extends Controller
         try {
             $maker = Auth::user();
             $this->matakuliahService->delete($maker, $id);
+
+            ActivityLog::record("Menghapus matakuliah #{$id}", 'matakuliah', (int) $id);
 
             return response()->json([
                 'success' => true,
