@@ -85,7 +85,7 @@
                     }
                 @endphp
                 <tr>
-                    <td>{{ $i + 1 }}</td>
+                    <td>{{ $attendanceList->firstItem() + $loop->index }}</td>
                     <td>
                         <div class="fw-600">{{ $row->nama }}</div>
                         <code style="font-size:11px;color:var(--c-text-3);">{{ $row->npm }}</code>
@@ -146,6 +146,11 @@
             </tbody>
         </table>
     </div>
+    @if($attendanceList->hasPages())
+    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
+        {{ $attendanceList->links('vendor.pagination.sima') }}
+    </div>
+    @endif
 </div>
 
 @endsection

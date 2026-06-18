@@ -92,13 +92,29 @@ class KlnController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function dokumen()
+    public function dokumen(Request $request)
     {
-        $requests = ReqDokumen::with('mahasiswa')
-            ->latest()
-            ->get();
+        $total    = ReqDokumen::count();
+        $pending  = ReqDokumen::where('status', 'pending')->count();
+        $approved = ReqDokumen::where('status', 'approved')->count();
+        $rejected = ReqDokumen::where('status', 'rejected')->count();
 
-        return view('kln.dokumen', compact('requests'));
+        $query = ReqDokumen::with('mahasiswa')->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+        if ($request->filled('search')) {
+            $s = $request->input('search');
+            $query->where(function ($q) use ($s) {
+                $q->whereHas('mahasiswa', fn($mq) => $mq->where('nama', 'ilike', "%{$s}%")
+                    ->orWhere('npm', 'ilike', "%{$s}%"));
+            });
+        }
+
+        $requests = $query->paginate(10)->withQueryString();
+
+        return view('kln.dokumen', compact('requests', 'total', 'pending', 'approved', 'rejected'));
     }
 
 
@@ -257,7 +273,7 @@ class KlnController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function studentsPage()
+    public function studentsPage(Request $request)
     {
         $totalMahasiswa = DB::table('mahasiswa')->count();
         $totalDosen     = DB::table('dosen')->count();
@@ -267,7 +283,11 @@ class KlnController extends Controller
             ->distinct()
             ->count('users.jurusan_id');
 
-        $mahasiswaList = DB::table('mahasiswa')
+        $searchM   = $request->input('search_m', '');
+        $jurusanM  = $request->input('jurusan_m', '');
+        $dokStatus = $request->input('dok_status', '');
+
+        $mhsQuery = DB::table('mahasiswa')
             ->join('users', 'mahasiswa.user_id', '=', 'users.id')
             ->leftJoin('jurusan', 'users.jurusan_id', '=', 'jurusan.id')
             ->leftJoin('dokumen', function ($join) {
@@ -290,10 +310,37 @@ class KlnController extends Controller
             )
             ->groupBy('mahasiswa.id', 'mahasiswa.nama', 'mahasiswa.npm',
                       'jurusan.namaJurusan', 'users.jurusan_id', 'users.status')
-            ->orderBy('mahasiswa.nama')
-            ->get();
+            ->orderBy('mahasiswa.nama');
 
-        $dosenList = DB::table('dosen')
+        if ($searchM) {
+            $mhsQuery->where(function ($q) use ($searchM) {
+                $q->where('mahasiswa.nama', 'ilike', "%{$searchM}%")
+                  ->orWhere('mahasiswa.npm',  'ilike', "%{$searchM}%");
+            });
+        }
+        if ($jurusanM) {
+            $mhsQuery->where('users.jurusan_id', $jurusanM);
+        }
+
+        $mahasiswaList = $mhsQuery->paginate(10, ['*'], 'page_m')->withQueryString();
+
+        if ($dokStatus) {
+            $levelMap = ['expired' => 1, 'warning' => 2, 'aman' => 3];
+            $level = $levelMap[$dokStatus] ?? null;
+            if ($level) {
+                $mahasiswaList = $mhsQuery->havingRaw('MIN(CASE
+                    WHEN dokumen."tglKdlwrs" < CURRENT_DATE THEN 1
+                    WHEN dokumen."tglKdlwrs" <= CURRENT_DATE + INTERVAL \'30 days\' THEN 2
+                    ELSE 3
+                END) = ?', [$level])
+                ->paginate(10, ['*'], 'page_m')->withQueryString();
+            }
+        }
+
+        $searchD  = $request->input('search_d', '');
+        $jurusanD = $request->input('jurusan_d', '');
+
+        $dosQuery = DB::table('dosen')
             ->join('users', 'dosen.user_id', '=', 'users.id')
             ->leftJoin('jurusan', 'users.jurusan_id', '=', 'jurusan.id')
             ->select(
@@ -304,14 +351,23 @@ class KlnController extends Controller
                 'users.jurusan_id',
                 'users.status'
             )
-            ->orderBy('dosen.nama')
-            ->get();
+            ->orderBy('dosen.nama');
+
+        if ($searchD) {
+            $dosQuery->where('dosen.nama', 'ilike', "%{$searchD}%");
+        }
+        if ($jurusanD) {
+            $dosQuery->where('users.jurusan_id', $jurusanD);
+        }
+
+        $dosenList = $dosQuery->paginate(10, ['*'], 'page_d')->withQueryString();
 
         $jurusan = DB::table('jurusan')->orderBy('namaJurusan')->get();
 
         return view('kln.students.index', compact(
             'mahasiswaList', 'dosenList', 'jurusan',
-            'totalMahasiswa', 'totalDosen', 'totalJurusan'
+            'totalMahasiswa', 'totalDosen', 'totalJurusan',
+            'searchM', 'jurusanM', 'dokStatus', 'searchD', 'jurusanD'
         ));
     }
 
@@ -825,17 +881,25 @@ class KlnController extends Controller
             });
         }
 
-        $attendanceList = $query->get()->map(function ($row) {
+        // hitung stats dari full data (tanpa paginate)
+        $allRows = $query->get()->map(function ($row) {
             $berlangsung = $row->hadir + $row->absen + $row->izin;
             $row->pct    = $berlangsung > 0 ? round($row->hadir / $berlangsung * 100, 1) : null;
             return $row;
         });
-
         $stats = [
-            'total'   => $attendanceList->count(),
-            'below75' => $attendanceList->filter(fn ($r) => $r->pct !== null && $r->pct < 75)->count(),
-            'noData'  => $attendanceList->filter(fn ($r) => $r->pct === null)->count(),
+            'total'   => $allRows->count(),
+            'below75' => $allRows->filter(fn ($r) => $r->pct !== null && $r->pct < 75)->count(),
+            'noData'  => $allRows->filter(fn ($r) => $r->pct === null)->count(),
         ];
+
+        // paginate untuk display
+        $attendanceList = $query->paginate(10)->withQueryString();
+        $attendanceList->through(function ($row) {
+            $berlangsung = $row->hadir + $row->absen + $row->izin;
+            $row->pct    = $berlangsung > 0 ? round($row->hadir / $berlangsung * 100, 1) : null;
+            return $row;
+        });
 
         return view('kln.attendance', compact('attendanceList', 'stats', 'search'));
     }
@@ -1032,7 +1096,7 @@ class KlnController extends Controller
     | NOTIFIKASI — KLN ALERT BOARD (Opsi B: real-time monitoring)
     |--------------------------------------------------------------------------
     */
-    public function notifikasiPage()
+    public function notifikasiPage(Request $request)
     {
         // Dokumen sudah kadaluwarsa
         $expiredDokumen = DB::table('dokumen')
@@ -1053,7 +1117,7 @@ class KlnController extends Controller
                 'jurusan.namaJurusan'
             )
             ->orderBy('dokumen.tglKdlwrs')
-            ->get();
+            ->paginate(10, ['*'], 'page_exp')->withQueryString();
 
         // Dokumen hampir kadaluwarsa (≤ 30 hari ke depan)
         $nearExpiredDokumen = DB::table('dokumen')
@@ -1074,11 +1138,12 @@ class KlnController extends Controller
                 'jurusan.namaJurusan'
             )
             ->orderBy('dokumen.tglKdlwrs')
-            ->get()
-            ->map(function ($row) {
-                $row->sisa_hari = now()->diffInDays(\Carbon\Carbon::parse($row->tglKdlwrs), false);
-                return $row;
-            });
+            ->paginate(10, ['*'], 'page_near')->withQueryString();
+
+        $nearExpiredDokumen->through(function ($row) {
+            $row->sisa_hari = now()->diffInDays(\Carbon\Carbon::parse($row->tglKdlwrs), false);
+            return $row;
+        });
 
         // Akun mahasiswa nonaktif
         $inactiveMahasiswa = DB::table('mahasiswa')
@@ -1095,7 +1160,7 @@ class KlnController extends Controller
                 'jurusan.namaJurusan'
             )
             ->orderBy('mahasiswa.nama')
-            ->get();
+            ->paginate(10, ['*'], 'page_inact')->withQueryString();
 
         // Request dokumen pending
         $pendingRequests = DB::table('reqDokumen')
@@ -1113,13 +1178,13 @@ class KlnController extends Controller
                 'jurusan.namaJurusan'
             )
             ->orderBy('reqDokumen.created_at')
-            ->get();
+            ->paginate(10, ['*'], 'page_req')->withQueryString();
 
         $stats = [
-            'expired'     => $expiredDokumen->count(),
-            'nearExpired' => $nearExpiredDokumen->count(),
-            'inactive'    => $inactiveMahasiswa->count(),
-            'pending'     => $pendingRequests->count(),
+            'expired'     => $expiredDokumen->total(),
+            'nearExpired' => $nearExpiredDokumen->total(),
+            'inactive'    => $inactiveMahasiswa->total(),
+            'pending'     => $pendingRequests->total(),
         ];
 
         return view('kln.notifikasi', compact(
@@ -1133,18 +1198,16 @@ class KlnController extends Controller
     | JADWAL — BIPA PAGE (view-only)
     |--------------------------------------------------------------------------
     */
-    public function jadwalBipa()
+    public function jadwalBipa(Request $request)
     {
         $bipaJurusanIds = DB::table('users')
             ->where('role', 'bipa')
             ->whereNotNull('jurusan_id')
-            ->pluck('jurusan_id')
-            ->unique()
-            ->values();
+            ->pluck('jurusan_id')->unique()->values();
 
         $jadwalList = $bipaJurusanIds->isNotEmpty()
-            ? $this->getJadwalByJurusanIds($bipaJurusanIds->toArray())
-            : collect();
+            ? $this->getJadwalByJurusanIds($bipaJurusanIds->toArray(), $request)
+            : $this->emptyPaginator();
 
         return view('kln.jadwal.bipa', compact('jadwalList'));
     }
@@ -1154,18 +1217,16 @@ class KlnController extends Controller
     | JADWAL — LECTURERS PAGE (view-only)
     |--------------------------------------------------------------------------
     */
-    public function jadwalLecturers()
+    public function jadwalLecturers(Request $request)
     {
         $jurusanJurusanIds = DB::table('users')
             ->where('role', 'jurusan')
             ->whereNotNull('jurusan_id')
-            ->pluck('jurusan_id')
-            ->unique()
-            ->values();
+            ->pluck('jurusan_id')->unique()->values();
 
         $jadwalList = $jurusanJurusanIds->isNotEmpty()
-            ? $this->getJadwalByJurusanIds($jurusanJurusanIds->toArray())
-            : collect();
+            ? $this->getJadwalByJurusanIds($jurusanJurusanIds->toArray(), $request)
+            : $this->emptyPaginator();
 
         return view('kln.jadwal.lecturers', compact('jadwalList'));
     }
@@ -1175,18 +1236,16 @@ class KlnController extends Controller
     | JADWAL — KLN PAGE (view + tambah)
     |--------------------------------------------------------------------------
     */
-    public function jadwalKln()
+    public function jadwalKln(Request $request)
     {
         $klnJurusanIds = DB::table('users')
             ->where('role', 'kln')
             ->whereNotNull('jurusan_id')
-            ->pluck('jurusan_id')
-            ->unique()
-            ->values();
+            ->pluck('jurusan_id')->unique()->values();
 
         $jadwalList = $klnJurusanIds->isNotEmpty()
-            ? $this->getJadwalByJurusanIds($klnJurusanIds->toArray())
-            : collect();
+            ? $this->getJadwalByJurusanIds($klnJurusanIds->toArray(), $request)
+            : $this->emptyPaginator();
 
         $kelas = DB::table('kelas')
             ->select('id', 'kodeKelas', 'tahunAjar')
@@ -1336,9 +1395,9 @@ class KlnController extends Controller
     | JADWAL — PRIVATE HELPER
     |--------------------------------------------------------------------------
     */
-    private function getJadwalByJurusanIds(array $jurusanIds): \Illuminate\Support\Collection
+    private function getJadwalByJurusanIds(array $jurusanIds, Request $request)
     {
-        return DB::table('jadwal')
+        $query = DB::table('jadwal')
             ->join('matakuliah',  'jadwal.matakuliah_id', '=', 'matakuliah.id')
             ->join('kelas',       'jadwal.kelas_id',      '=', 'kelas.id')
             ->leftJoin('dosen',   'jadwal.dosen_id',      '=', 'dosen.id')
@@ -1361,8 +1420,25 @@ class KlnController extends Controller
                 WHEN 'Senin'  THEN 1 WHEN 'Selasa' THEN 2 WHEN 'Rabu'   THEN 3
                 WHEN 'Kamis'  THEN 4 WHEN 'Jumat'  THEN 5 WHEN 'Sabtu'  THEN 6
                 ELSE 7 END")
-            ->orderBy('jadwal.jam')
-            ->get();
+            ->orderBy('jadwal.jam');
+
+        if ($request->filled('hari')) {
+            $query->where('jadwal.hari', $request->input('hari'));
+        }
+        if ($request->filled('search')) {
+            $s = $request->input('search');
+            $query->where(function ($q) use ($s) {
+                $q->where('matakuliah.namaMk', 'ilike', "%{$s}%")
+                  ->orWhere('dosen.nama',       'ilike', "%{$s}%");
+            });
+        }
+
+        return $query->paginate(10)->withQueryString();
+    }
+
+    private function emptyPaginator()
+    {
+        return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
     }
 
 }

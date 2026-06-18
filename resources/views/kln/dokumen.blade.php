@@ -7,12 +7,6 @@
 @section('main_content')
 
 {{-- ── STAT CARDS ──────────────────────────────────── --}}
-@php
-    $total    = $requests->count();
-    $pending  = $requests->where('status.value', 'pending')->count()  ?: $requests->filter(fn($r) => ($r->status?->value ?? $r->status) === 'pending')->count();
-    $approved = $requests->filter(fn($r) => ($r->status?->value ?? $r->status) === 'approved')->count();
-    $rejected = $requests->filter(fn($r) => ($r->status?->value ?? $r->status) === 'rejected')->count();
-@endphp
 
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
@@ -53,16 +47,21 @@
             <h5 class="sima-card__title">Daftar Request Dokumen</h5>
             <div class="sima-card__subtitle">Semua permintaan dokumen dari mahasiswa</div>
         </div>
-        <div style="display:flex;gap:10px;align-items:center;">
-            <select id="filterStatus" class="sima-input" style="min-width:140px;" onchange="filterTable()">
+        <form method="GET" action="{{ route('kln.dokumen.page') }}"
+              style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select name="status" class="sima-input" style="min-width:140px;" onchange="this.form.submit()">
                 <option value="">Semua Status</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
+                <option value="pending"  {{ request('status') === 'pending'  ? 'selected' : '' }}>Pending</option>
+                <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
+                <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
             </select>
-            <input id="searchInput" type="text" placeholder="Cari mahasiswa / tipe..."
-                   class="sima-input" style="min-width:220px;" oninput="filterTable()">
-        </div>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari mahasiswa / tipe..."
+                   class="sima-input" style="min-width:200px;">
+            <button type="submit" class="sima-btn sima-btn--outline"><i class="fas fa-search"></i></button>
+            @if(request('status') || request('search'))
+            <a href="{{ route('kln.dokumen.page') }}" class="sima-btn sima-btn--outline"><i class="fas fa-times"></i></a>
+            @endif
+        </form>
     </div>
 
     <div style="overflow-x:auto;padding:8px 0">
@@ -131,6 +130,11 @@
             </tbody>
         </table>
     </div>
+    @if($requests->hasPages())
+    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
+        {{ $requests->links('vendor.pagination.sima') }}
+    </div>
+    @endif
 
 </div>
 
@@ -204,20 +208,6 @@
 @push('page_js')
 <script>
 let currentId = null;
-
-/* ── FILTER / SEARCH ─────────────────────── */
-function filterTable() {
-    const search = document.getElementById('searchInput').value.toLowerCase();
-    const status = document.getElementById('filterStatus').value;
-    document.querySelectorAll('#tableBody tr[id^="row-"]').forEach(row => {
-        const mhs    = row.dataset.mahasiswa ?? '';
-        const tipe   = row.dataset.tipe ?? '';
-        const rowSts = row.dataset.status ?? '';
-        const matchSearch = !search || mhs.includes(search) || tipe.includes(search);
-        const matchStatus = !status || rowSts === status;
-        row.style.display = (matchSearch && matchStatus) ? '' : 'none';
-    });
-}
 
 /* ── DETAIL MODAL ────────────────────────── */
 function showDetail(id) {

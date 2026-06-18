@@ -12,7 +12,7 @@
         <div class="sima-stat sima-stat--green">
             <div class="sima-stat__icon sima-stat__icon--green"><i class="fas fa-calendar-alt"></i></div>
             <div class="sima-stat__label">Total Jadwal</div>
-            <div class="sima-stat__value">{{ $jadwalList->count() }}</div>
+            <div class="sima-stat__value">{{ $jadwalList->total() }}</div>
         </div>
     </div>
 </div>
@@ -21,23 +21,25 @@
 <div class="sima-card">
     <div class="sima-card__header">
         <h5 class="sima-card__title">Jadwal Lecturers</h5>
-        <div style="display:flex;gap:8px;align-items:center;">
-            <select id="filterHari" class="sima-input" style="width:140px;" onchange="filterJadwal()">
+        <form method="GET" action="{{ route('kln.jadwal.lecturers') }}"
+              style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select name="hari" class="sima-input" style="width:140px;" onchange="this.form.submit()">
                 <option value="">Semua Hari</option>
                 @foreach(['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'] as $h)
-                    <option value="{{ $h }}">{{ $h }}</option>
+                    <option value="{{ $h }}" {{ request('hari') === $h ? 'selected' : '' }}>{{ $h }}</option>
                 @endforeach
             </select>
-            <input type="text" id="searchJadwal" class="sima-input" style="width:160px;"
-                   placeholder="Cari matakuliah / dosen..." oninput="filterJadwal()">
-            <button class="sima-btn sima-btn--outline" onclick="resetFilter()">
-                <i class="fas fa-redo"></i>
-            </button>
-        </div>
+            <input type="text" name="search" value="{{ request('search') }}" class="sima-input" style="width:160px;"
+                   placeholder="Cari matakuliah / dosen...">
+            <button type="submit" class="sima-btn sima-btn--outline"><i class="fas fa-search"></i></button>
+            @if(request('hari') || request('search'))
+            <a href="{{ route('kln.jadwal.lecturers') }}" class="sima-btn sima-btn--outline"><i class="fas fa-times"></i></a>
+            @endif
+        </form>
     </div>
 
     <div class="table-responsive">
-        <table class="sima-table" id="tblJadwal">
+        <table class="sima-table">
             <thead>
                 <tr>
                     <th>#</th>
@@ -54,9 +56,8 @@
             </thead>
             <tbody>
                 @forelse($jadwalList as $i => $j)
-                <tr data-hari="{{ $j->hari }}"
-                    data-nama="{{ strtolower(($j->namaMk ?? '') . ' ' . ($j->namaDosen ?? '')) }}">
-                    <td>{{ $i + 1 }}</td>
+                <tr>
+                    <td>{{ $jadwalList->firstItem() + $loop->index }}</td>
                     <td>
                         <div class="fw-600">{{ $j->namaMk ?? '-' }}</div>
                         <code style="font-size:11px;color:var(--c-text-3);">{{ $j->kodeMk }}</code>
@@ -89,31 +90,11 @@
             </tbody>
         </table>
     </div>
-    <div id="emptyMsg" class="text-center text-muted py-4" style="display:none;">
-        Tidak ada data yang cocok.
+    @if($jadwalList->hasPages())
+    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
+        {{ $jadwalList->links('vendor.pagination.sima') }}
     </div>
+    @endif
 </div>
 
 @endsection
-
-@push('page_js')
-<script>
-function filterJadwal() {
-    const hari   = document.getElementById('filterHari').value;
-    const search = document.getElementById('searchJadwal').value.toLowerCase();
-    let visible  = 0;
-    document.querySelectorAll('#tblJadwal tbody tr[data-nama]').forEach(row => {
-        const ok = (!hari   || row.dataset.hari === hari)
-                && (!search || row.dataset.nama.includes(search));
-        row.style.display = ok ? '' : 'none';
-        if (ok) visible++;
-    });
-    document.getElementById('emptyMsg').style.display = visible === 0 ? '' : 'none';
-}
-function resetFilter() {
-    document.getElementById('filterHari').value   = '';
-    document.getElementById('searchJadwal').value = '';
-    filterJadwal();
-}
-</script>
-@endpush
