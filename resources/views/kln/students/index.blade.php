@@ -81,10 +81,10 @@
                 @forelse($mahasiswaList as $idx => $m)
                 @php
                     $docLevel = $m->doc_expiry_level;
-                    if ($docLevel === null) { $docBadge = 'sima-badge--amber'; $docLabel = 'Tidak Ada'; }
-                    elseif ($docLevel == 1) { $docBadge = 'sima-badge--red';   $docLabel = 'Expired'; }
-                    elseif ($docLevel == 2) { $docBadge = 'sima-badge--amber'; $docLabel = 'Warning'; }
-                    else                    { $docBadge = 'sima-badge--green'; $docLabel = 'Aman'; }
+                    if ($docLevel === null)  { $docBadge = ''; $docStyle = 'background:var(--c-border);color:var(--c-text-3);'; $docLabel = 'Tidak Ada'; $docIcon = 'fa-minus-circle'; }
+                    elseif ($docLevel == 1) { $docBadge = 'sima-badge--red';   $docStyle = ''; $docLabel = 'Expired'; $docIcon = 'fa-exclamation-circle'; }
+                    elseif ($docLevel == 2) { $docBadge = 'sima-badge--amber'; $docStyle = ''; $docLabel = 'Warning'; $docIcon = 'fa-exclamation-triangle'; }
+                    else                    { $docBadge = 'sima-badge--green'; $docStyle = ''; $docLabel = 'Aman';    $docIcon = 'fa-check-circle'; }
                     $akunBadge = $m->status === 'active' ? 'sima-badge--green' : 'sima-badge--red';
                     $akunLabel = $m->status === 'active' ? 'Aktif' : 'Nonaktif';
                 @endphp
@@ -95,12 +95,8 @@
                     <td>{{ $m->namaJurusan ?? '-' }}</td>
                     <td><span class="sima-badge {{ $akunBadge }}">{{ $akunLabel }}</span></td>
                     <td>
-                        <span class="sima-badge {{ $docBadge }}">
-                            @if($docLevel == 1)<i class="fas fa-exclamation-circle me-1"></i>
-                            @elseif($docLevel == 2)<i class="fas fa-exclamation-triangle me-1"></i>
-                            @elseif($docLevel == 3)<i class="fas fa-check-circle me-1"></i>
-                            @endif
-                            {{ $docLabel }}
+                        <span class="sima-badge {{ $docBadge }}" style="{{ $docStyle }}">
+                            <i class="fas {{ $docIcon }} me-1"></i>{{ $docLabel }}
                         </span>
                     </td>
                     <td>
