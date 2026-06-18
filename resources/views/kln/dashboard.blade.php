@@ -12,14 +12,14 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
 
 {{-- ═══ ROW 1: STAT CARDS ═══════════════════════════════════════════════ --}}
 <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3 sima-fade sima-fade--1">
+    <div class="col-6 col-md-4 sima-fade sima-fade--1">
         <div class="sima-stat sima-stat--blue">
             <div class="sima-stat__icon sima-stat__icon--blue"><i class="fas fa-users"></i></div>
             <div class="sima-stat__label">Total Mahasiswa</div>
             <div class="sima-stat__value">{{ $totalMahasiswa }}</div>
         </div>
     </div>
-    <div class="col-6 col-md-3 sima-fade sima-fade--2">
+    <div class="col-6 col-md-4 sima-fade sima-fade--2">
         <div class="sima-stat sima-stat--amber">
             <div class="sima-stat__icon sima-stat__icon--amber"><i class="fas fa-file-clock"></i></div>
             <div class="sima-stat__label">Request Pending</div>
@@ -33,7 +33,7 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
             </div>
         </div>
     </div>
-    <div class="col-6 col-md-3 sima-fade sima-fade--3">
+    <div class="col-6 col-md-4 sima-fade sima-fade--3">
         <div class="sima-stat sima-stat--red">
             <div class="sima-stat__icon sima-stat__icon--red"><i class="fas fa-exclamation-triangle"></i></div>
             <div class="sima-stat__label">Dokumen Expired</div>
@@ -51,7 +51,7 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
 
 {{-- ═══ ROW 2: STAT SECONDARY ════════════════════════════════════════════ --}}
 <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3 sima-fade sima-fade--3">
+    <div class="col-6 col-md-6 sima-fade sima-fade--3">
         <div class="sima-stat sima-stat--purple">
             <div class="sima-stat__icon sima-stat__icon--purple"><i class="fas fa-globe"></i></div>
             <div class="sima-stat__label">Negara Asal</div>
@@ -59,33 +59,13 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
             <div class="sima-stat__delta sima-stat__delta--flat">Negara berbeda</div>
         </div>
     </div>
-    <div class="col-6 col-md-3 sima-fade sima-fade--4">
+    <div class="col-6 col-md-6 sima-fade sima-fade--4">
         <div class="sima-stat sima-stat--green">
             <div class="sima-stat__icon sima-stat__icon--green"><i class="fas fa-check-double"></i></div>
             <div class="sima-stat__label">Divalidasi Hari Ini</div>
             <div class="sima-stat__value">{{ $divalidasiHariIni }}</div>
             <div class="sima-stat__delta sima-stat__delta--up">
                 <i class="fas fa-arrow-up"></i> Dokumen disetujui
-            </div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3 sima-fade sima-fade--5">
-        <div class="sima-stat sima-stat--blue">
-            <div class="sima-stat__icon sima-stat__icon--blue"><i class="fas fa-calendar-alt"></i></div>
-            <div class="sima-stat__label">Total Jadwal</div>
-            <div class="sima-stat__value">{{ $jadwalAktif }}</div>
-            <div class="sima-stat__delta sima-stat__delta--flat">Sesi terdaftar</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3 sima-fade sima-fade--6">
-        <div class="sima-stat sima-stat--amber">
-            <div class="sima-stat__icon sima-stat__icon--amber"><i class="fas fa-bell"></i></div>
-            <div class="sima-stat__label">Alert Board</div>
-            <div class="sima-stat__value" style="font-size:14px;margin-top:4px;">
-                <a href="{{ route('kln.notifikasi') }}"
-                   style="color:var(--c-accent);font-weight:600;text-decoration:none;font-size:13px;">
-                    <i class="fas fa-external-link-alt me-1"></i>Buka Monitor
-                </a>
             </div>
         </div>
     </div>
@@ -192,11 +172,9 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
 
 </div>
 
-{{-- ═══ ROW 4: ANTRIAN VALIDASI + AKSI CEPAT ════════════════════════════ --}}
+{{-- ═══ ROW 4: ANTRIAN VALIDASI ═══════════════════════════════════════════ --}}
 <div class="row g-3">
-
-    {{-- ── Antrian Validasi ─────────────────── --}}
-    <div class="col-md-7 sima-fade sima-fade--7">
+    <div class="col-12 sima-fade sima-fade--7">
         <div class="sima-card">
             <div class="sima-card__header">
                 <div>
@@ -237,78 +215,6 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
             @endif
         </div>
     </div>
-
-    {{-- ── Aksi Cepat ───────────────────────── --}}
-    <div class="col-md-5 sima-fade sima-fade--8">
-        <div class="sima-card h-100">
-            <div class="sima-card__header">
-                <h5 class="sima-card__title">Aksi Cepat</h5>
-            </div>
-            <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;">
-                <a href="{{ route('kln.broadcast') }}"
-                   style="display:flex;align-items:center;gap:12px;padding:13px 16px;
-                          border:1px solid var(--c-border);border-radius:10px;text-decoration:none;
-                          color:var(--c-text-1);transition:border-color .13s;font-size:13px;"
-                   onmouseover="this.style.borderColor='var(--c-accent)'"
-                   onmouseout="this.style.borderColor='var(--c-border)'">
-                    <div style="width:36px;height:36px;border-radius:9px;background:rgba(108,143,255,.12);
-                                color:var(--c-accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <i class="fas fa-paper-plane"></i>
-                    </div>
-                    <div>
-                        <div style="font-weight:600;">Kirim Broadcast</div>
-                        <div style="font-size:12px;color:var(--c-text-3);">Notifikasi ke semua / mahasiswa tertentu</div>
-                    </div>
-                </a>
-                <a href="{{ route('kln.announcement.create') }}"
-                   style="display:flex;align-items:center;gap:12px;padding:13px 16px;
-                          border:1px solid var(--c-border);border-radius:10px;text-decoration:none;
-                          color:var(--c-text-1);transition:border-color .13s;font-size:13px;"
-                   onmouseover="this.style.borderColor='var(--c-accent)'"
-                   onmouseout="this.style.borderColor='var(--c-border)'">
-                    <div style="width:36px;height:36px;border-radius:9px;background:rgba(5,150,105,.1);
-                                color:var(--c-green);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <i class="fas fa-bullhorn"></i>
-                    </div>
-                    <div>
-                        <div style="font-weight:600;">Buat Pengumuman</div>
-                        <div style="font-size:12px;color:var(--c-text-3);">Publish pengumuman ke mahasiswa</div>
-                    </div>
-                </a>
-                <a href="{{ route('kln.notifikasi') }}"
-                   style="display:flex;align-items:center;gap:12px;padding:13px 16px;
-                          border:1px solid var(--c-border);border-radius:10px;text-decoration:none;
-                          color:var(--c-text-1);transition:border-color .13s;font-size:13px;"
-                   onmouseover="this.style.borderColor='var(--c-accent)'"
-                   onmouseout="this.style.borderColor='var(--c-border)'">
-                    <div style="width:36px;height:36px;border-radius:9px;background:rgba(220,38,38,.1);
-                                color:var(--c-red);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <i class="fas fa-bell"></i>
-                    </div>
-                    <div>
-                        <div style="font-weight:600;">Alert Board</div>
-                        <div style="font-size:12px;color:var(--c-text-3);">Monitor dokumen & akun bermasalah</div>
-                    </div>
-                </a>
-                <a href="{{ route('kln.users.page') }}"
-                   style="display:flex;align-items:center;gap:12px;padding:13px 16px;
-                          border:1px solid var(--c-border);border-radius:10px;text-decoration:none;
-                          color:var(--c-text-1);transition:border-color .13s;font-size:13px;"
-                   onmouseover="this.style.borderColor='var(--c-accent)'"
-                   onmouseout="this.style.borderColor='var(--c-border)'">
-                    <div style="width:36px;height:36px;border-radius:9px;background:rgba(124,58,237,.1);
-                                color:var(--c-purple);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <i class="fas fa-users-cog"></i>
-                    </div>
-                    <div>
-                        <div style="font-weight:600;">Kelola Users</div>
-                        <div style="font-size:12px;color:var(--c-text-3);">Aktifkan / nonaktifkan akun</div>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </div>
-
 </div>
 
 @endsection

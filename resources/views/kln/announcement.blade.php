@@ -144,7 +144,7 @@
     </div>
     @if($announcements->hasPages())
     <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
-        {{ $announcements->links() }}
+        {{ $announcements->links('vendor.pagination.sima') }}
     </div>
     @endif
 </div>

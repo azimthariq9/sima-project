@@ -184,7 +184,7 @@
             @endforelse
             @if($riwayat->hasPages())
             <div style="padding:14px 24px;border-top:1px solid var(--c-border);">
-                {{ $riwayat->links() }}
+                {{ $riwayat->links('vendor.pagination.sima') }}
             </div>
             @endif
         </div>

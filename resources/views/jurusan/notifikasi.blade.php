@@ -36,7 +36,7 @@
         </div>
         @if ($notifikasi->hasPages())
             <div class="card-footer">
-                {{ $notifikasi->links() }}
+                {{ $notifikasi->links('vendor.pagination.sima') }}
             </div>
         @endif
     </div>
