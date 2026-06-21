@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Enums\tipeDok;
-use App\Enums\status;
+use App\Enums\TipeDok;
+use App\Enums\Status;
+use App\Models\Mahasiswa;
+use App\Models\FileDetail;
 
 class ReqDokumen extends Model
 {
@@ -12,18 +14,18 @@ class ReqDokumen extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'tipeDkmn' => tipeDok::class,
-        'status' => status::class
+        'tipeDkmn' => TipeDok::class,
+        'status' => Status::class
     ];
 
     public function user(){
         return $this->belongsTo(User::class, 'user_id');
     }
     public function mahasiswa(){
-        return $this->belongsTo(mahasiswa::class, 'mahasiswa_id');
+        return $this->belongsTo(Mahasiswa::class, 'mahasiswa_id');
     }
     public function fileDetail(){
-        return $this->hasMany(fileDetail::class, 'reqDokumen_id');
+        return $this->hasMany(FileDetail::class, 'reqDokumen_id');
     }
 }
 

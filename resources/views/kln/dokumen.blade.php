@@ -196,7 +196,7 @@
                     <label id="uploadLabel" style="font-size:12px;font-weight:600;color:var(--c-text-2)">
                         Upload Dokumen (PDF)
                     </label>
-                    <button type="button" id="batalGanti" onclick="batalGanti()"
+                    <button type="button" id="btnBatalGanti" onclick="batalGanti()"
                             style="display:none;font-size:12px;color:var(--c-text-3);background:none;border:none;cursor:pointer;">
                         <i class="fas fa-arrow-left"></i> Batal
                     </button>
@@ -295,10 +295,11 @@ function showDetail(id) {
             document.getElementById('rejectError').style.display = 'none';
 
             if (data.status === 'rejected') {
-                // Sudah ditolak — sembunyikan semua action form
+                // Ditolak — tampilkan upload form agar bisa di-approve ulang, tapi sembunyikan tombol Tolak
                 fileInfo.style.display   = 'none';
-                uploadForm.style.display = 'none';
-                document.getElementById('modalSubtitle').textContent = 'Request ini telah ditolak.';
+                uploadForm.style.display = 'block';
+                document.getElementById('btnShowReject').style.display = 'none';
+                document.getElementById('modalSubtitle').textContent = 'Request sebelumnya ditolak. Upload dokumen untuk menyetujui.';
             } else if (data.file) {
                 // Ada file / approved — tampilkan info file
                 const fileName   = data.file.path.split('/').pop();
@@ -313,6 +314,7 @@ function showDetail(id) {
                 // Pending — tampilkan form upload + tombol tolak
                 fileInfo.style.display   = 'none';
                 uploadForm.style.display = 'block';
+                document.getElementById('btnShowReject').style.display = '';
                 document.getElementById('modalSubtitle').textContent = 'Upload PDF untuk menyetujui, atau tolak request.';
             }
 
@@ -326,6 +328,7 @@ function closeModal() {
     document.getElementById('uploadForm').reset();
     document.getElementById('rejectPanel').style.display = 'none';
     document.getElementById('rejectReason').value = '';
+    document.getElementById('btnShowReject').style.display = '';
     resetUploadForm();
 }
 
@@ -334,7 +337,7 @@ function gantiFile() {
     document.getElementById('uploadForm').style.display = 'block';
     document.getElementById('uploadLabel').textContent  = 'Ganti File (PDF)';
     document.getElementById('uploadBtn').innerHTML      = '<i class="fas fa-rotate"></i> Ganti & Simpan';
-    document.getElementById('batalGanti').style.display = 'inline';
+    document.getElementById('btnBatalGanti').style.display = 'inline';
 }
 
 function batalGanti() {
@@ -347,7 +350,7 @@ function resetUploadForm() {
     document.getElementById('uploadForm').reset();
     document.getElementById('uploadLabel').textContent  = 'Upload Dokumen (PDF)';
     document.getElementById('uploadBtn').innerHTML      = '<i class="fas fa-upload"></i> Upload & Approve';
-    document.getElementById('batalGanti').style.display = 'none';
+    document.getElementById('btnBatalGanti').style.display = 'none';
 }
 
 /* ── REJECT FLOW ─────────────────────────── */

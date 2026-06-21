@@ -4,9 +4,9 @@ namespace App\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
-use App\Enums\penerbit;
-use App\Enums\tipeDok;
-use App\Enums\status;
+use App\Enums\Penerbit;
+use App\Enums\TipeDok;
+use App\Enums\Status;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Dokumen extends Model
@@ -17,9 +17,9 @@ class Dokumen extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'tipeDkmn' => tipeDok::class,
-        'penerbit'=> penerbit::class,
-        'status' => status::class,
+        'tipeDkmn' => TipeDok::class,
+        'penerbit'=> Penerbit::class,
+        'status' => Status::class,
         'tglTerbit' => 'date',
         'tglkdlwrs' => 'date',
     ];

@@ -51,9 +51,10 @@
             </select>
             <select name="dok_status" class="sima-input" style="width:145px;" onchange="this.form.submit()">
                 <option value="">Semua Status Dok</option>
-                <option value="expired" {{ $dokStatus === 'expired' ? 'selected' : '' }}>Expired</option>
-                <option value="warning" {{ $dokStatus === 'warning' ? 'selected' : '' }}>Warning</option>
-                <option value="aman"    {{ $dokStatus === 'aman'    ? 'selected' : '' }}>Aman</option>
+                <option value="belum_ada" {{ $dokStatus === 'belum_ada' ? 'selected' : '' }}>Belum Ada</option>
+                <option value="expired"  {{ $dokStatus === 'expired'  ? 'selected' : '' }}>Expired</option>
+                <option value="warning"  {{ $dokStatus === 'warning'  ? 'selected' : '' }}>Warning</option>
+                <option value="aman"     {{ $dokStatus === 'aman'     ? 'selected' : '' }}>Aman</option>
             </select>
             <input type="text" name="search_m" value="{{ $searchM }}" class="sima-input" style="width:150px;"
                    placeholder="Cari nama / NPM...">
@@ -81,7 +82,7 @@
                 @forelse($mahasiswaList as $idx => $m)
                 @php
                     $docLevel = $m->doc_expiry_level;
-                    if ($docLevel === null)  { $docBadge = ''; $docStyle = 'background:var(--c-border);color:var(--c-text-3);'; $docLabel = 'Tidak Ada'; $docIcon = 'fa-minus-circle'; }
+                    if ($docLevel === null)  { $docBadge = ''; $docStyle = 'background:var(--c-border);color:var(--c-text-3);'; $docLabel = 'Belum Ada'; $docIcon = 'fa-minus-circle'; }
                     elseif ($docLevel == 1) { $docBadge = 'sima-badge--red';   $docStyle = ''; $docLabel = 'Expired'; $docIcon = 'fa-exclamation-circle'; }
                     elseif ($docLevel == 2) { $docBadge = 'sima-badge--amber'; $docStyle = ''; $docLabel = 'Warning'; $docIcon = 'fa-exclamation-triangle'; }
                     else                    { $docBadge = 'sima-badge--green'; $docStyle = ''; $docLabel = 'Aman';    $docIcon = 'fa-check-circle'; }

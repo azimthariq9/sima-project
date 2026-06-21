@@ -116,18 +116,18 @@ class SimaSeeder extends Seeder
         // JADWAL
         // ══════════════════════════════════════════════════════════════
         $jadwalDef = [
-            [$kelBipaA, $mkBipa1, $dosBipa1, 'Senin',  '08:00', 'R.BIPA-01', 16],
-            [$kelBipaA, $mkBipa2, $dosBipa1, 'Rabu',   '10:00', 'R.BIPA-01', 16],
-            [$kelBipaA, $mkBipa3, $dosBipa2, 'Jumat',  '09:00', 'R.BIPA-01', 14],
-            [$kelBipaB, $mkBipa1, $dosBipa2, 'Selasa', '08:00', 'R.BIPA-02', 16],
-            [$kelBipaB, $mkBipa2, $dosBipa3, 'Kamis',  '10:00', 'R.BIPA-02', 16],
-            [$kelTiA,   $mkTi1,  $dosTi1,   'Senin',  '07:30', 'R.LEC-201', 16],
-            [$kelTiA,   $mkTi2,  $dosTi2,   'Kamis',  '09:00', 'R.LEC-202', 16],
-            [$kelTiA,   $mkTi3,  $dosTi3,   'Jumat',  '13:00', 'R.LEC-301', 14],
-            [$kelSiA,   $mkSi1,  $dosSi1,   'Selasa', '10:00', 'R.LEC-101', 16],
-            [$kelSiA,   $mkTi2,  $dosSi2,   'Rabu',   '13:00', 'R.LEC-102', 16],
-            [$kelKlnA,  $mkKln1, $dosKln1,  'Rabu',   '08:00', 'R.KLN-01',  12],
-            [$kelKlnA,  $mkKln2, $dosKln2,  'Jumat',  '13:00', 'R.KLN-01',  14],
+            [$kelBipaA, $mkBipa1, $dosBipa1, 'Senin',  '08.00 - 10.00', 'R.BIPA-01', 16],
+            [$kelBipaA, $mkBipa2, $dosBipa1, 'Rabu',   '10.00 - 12.00', 'R.BIPA-01', 16],
+            [$kelBipaA, $mkBipa3, $dosBipa2, 'Jumat',  '09.00 - 11.00', 'R.BIPA-01', 14],
+            [$kelBipaB, $mkBipa1, $dosBipa2, 'Selasa', '08.00 - 10.00', 'R.BIPA-02', 16],
+            [$kelBipaB, $mkBipa2, $dosBipa3, 'Kamis',  '10.00 - 12.00', 'R.BIPA-02', 16],
+            [$kelTiA,   $mkTi1,  $dosTi1,   'Senin',  '07.30 - 09.30', 'R.LEC-201', 16],
+            [$kelTiA,   $mkTi2,  $dosTi2,   'Kamis',  '09.00 - 11.00', 'R.LEC-202', 16],
+            [$kelTiA,   $mkTi3,  $dosTi3,   'Jumat',  '13.00 - 15.00', 'R.LEC-301', 14],
+            [$kelSiA,   $mkSi1,  $dosSi1,   'Selasa', '10.00 - 12.00', 'R.LEC-101', 16],
+            [$kelSiA,   $mkTi2,  $dosSi2,   'Rabu',   '13.00 - 15.00', 'R.LEC-102', 16],
+            [$kelKlnA,  $mkKln1, $dosKln1,  'Rabu',   '08.00 - 10.00', 'R.KLN-01',  12],
+            [$kelKlnA,  $mkKln2, $dosKln2,  'Jumat',  '13.00 - 15.00', 'R.KLN-01',  14],
         ];
 
         $jadwalIds = [];
@@ -343,8 +343,8 @@ class SimaSeeder extends Seeder
             foreach ($b['targets'] as $i => $npm) {
                 if (!isset($mhs[$npm])) continue;
                 $isRead = ($i / count($b['targets']) * 100) < $b['readPct'];
-                DB::table('notification_mahasiswa')->updateOrInsert(
-                    ['notification_id' => $notifId, 'mahasiswa_id' => $mhs[$npm]['id']],
+                DB::table('notification_users')->updateOrInsert(
+                    ['notification_id' => $notifId, 'user_id' => $mhs[$npm]['uid']],
                     ['is_read' => $isRead, 'created_at' => $now, 'updated_at' => $now]
                 );
             }

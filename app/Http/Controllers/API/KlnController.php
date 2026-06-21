@@ -330,6 +330,7 @@ class KlnController extends Controller
                 'users.jurusan_id',
                 'users.status',
                 DB::raw("MIN(CASE
+                    WHEN dokumen.\"tglKdlwrs\" IS NULL THEN NULL
                     WHEN dokumen.\"tglKdlwrs\" < CURRENT_DATE THEN 1
                     WHEN dokumen.\"tglKdlwrs\" <= CURRENT_DATE + INTERVAL '30 days' THEN 2
                     ELSE 3
@@ -352,15 +353,22 @@ class KlnController extends Controller
         $mahasiswaList = $mhsQuery->paginate(10, ['*'], 'page_m')->withQueryString();
 
         if ($dokStatus) {
-            $levelMap = ['expired' => 1, 'warning' => 2, 'aman' => 3];
-            $level = $levelMap[$dokStatus] ?? null;
-            if ($level) {
-                $mahasiswaList = $mhsQuery->havingRaw('MIN(CASE
+            $caseExpr = 'MIN(CASE
+                    WHEN dokumen."tglKdlwrs" IS NULL THEN NULL
                     WHEN dokumen."tglKdlwrs" < CURRENT_DATE THEN 1
                     WHEN dokumen."tglKdlwrs" <= CURRENT_DATE + INTERVAL \'30 days\' THEN 2
                     ELSE 3
-                END) = ?', [$level])
-                ->paginate(10, ['*'], 'page_m')->withQueryString();
+                END)';
+            if ($dokStatus === 'belum_ada') {
+                $mahasiswaList = $mhsQuery->havingRaw("{$caseExpr} IS NULL")
+                    ->paginate(10, ['*'], 'page_m')->withQueryString();
+            } else {
+                $levelMap = ['expired' => 1, 'warning' => 2, 'aman' => 3];
+                $level = $levelMap[$dokStatus] ?? null;
+                if ($level) {
+                    $mahasiswaList = $mhsQuery->havingRaw("{$caseExpr} = ?", [$level])
+                        ->paginate(10, ['*'], 'page_m')->withQueryString();
+                }
             }
         }
 
