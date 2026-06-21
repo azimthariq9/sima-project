@@ -158,22 +158,23 @@
                     $isLive = $now->between($start, $end);
                 @endphp
                 <div class="sima-sch" onclick="window.location='{{ route('mahasiswa.jadwal') }}'">
-                    <div class="sima-sch__time">{{ \Carbon\Carbon::parse($sch->jam_mulai)->format('H:i') }} – {{ \Carbon\Carbon::parse($sch->jam_selesai)->format('H:i') }}</div>
+                    <div class="sima-sch__time">{{ $sch->jam_mulai }} – {{ $sch->jam_selesai }}</div>
                     <div class="sima-sch__dot" style="border-color:{{ $c['border'] }};background:{{ $c['bg'] }}"></div>
                     <div class="sima-sch__info">
                         <div class="sima-sch__title">{{ $sch->mata_kuliah }}</div>
                         <div class="sima-sch__meta">
                             <i class="fas fa-location-dot" style="font-size:10px"></i> {{ $sch->ruangan }}
-                            @if($sch->kelas) · {{ $sch->kelas }} @endif
+                            @if($sch->dosen) · {{ $sch->dosen }} @endif
                         </div>
                     </div>
+                    @php $tipe = strtolower($sch->tipe_kelas ?? 'perkuliahan'); @endphp
                     @if($isLive)
                     <span class="sima-badge sima-badge--green" style="flex-shrink:0">
                         <i class="fas fa-circle" style="font-size:5px;animation:pulse 1.5s infinite"></i> Live
                     </span>
                     @else
-                    <span class="sima-badge sima-badge--{{ strtolower($sch->jenis ?? 'kuliah') === 'bipa' ? 'teal' : (strtolower($sch->jenis ?? '') === 'kln' ? 'purple' : 'blue') }}" style="flex-shrink:0;font-size:9px">
-                        {{ strtoupper($sch->jenis ?? 'Kuliah') }}
+                    <span class="sima-badge sima-badge--{{ $tipe === 'bipa' ? 'purple' : ($tipe === 'kln' ? 'teal' : 'blue') }}" style="flex-shrink:0;font-size:9px">
+                        {{ strtoupper($tipe) }}
                     </span>
                     @endif
                 </div>
@@ -224,7 +225,7 @@
     </div>
 
     {{-- Riwayat Absensi --}}
-    <div class="col-md-4 sima-fade sima-fade--6">
+    <div class="col-md-7 sima-fade sima-fade--6">
         <div class="sima-card h-100">
             <div class="sima-card__header">
                 <div>
@@ -273,82 +274,6 @@
         </div>
     </div>
 
-    {{-- Aksi Cepat + Profil Mini --}}
-    <div class="col-md-3 sima-fade sima-fade--7">
-
-        {{-- Profil Mini --}}
-        <div class="sima-card" style="margin-bottom:12px">
-            <div class="sima-card__body" style="padding:18px">
-                <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-                    <div class="sima-avatar" style="width:44px;height:44px;border-radius:11px;font-size:16px;
-                         background:linear-gradient(135deg,#2563EB,#7C3AED);flex-shrink:0">
-                        {{ strtoupper(substr(optional($mahasiswa)->nama ?? auth()->user()->name ?? 'M', 0, 2)) }}
-                    </div>
-                    <div style="min-width:0">
-                        <div style="font-size:13px;font-weight:600;color:var(--c-text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-                            {{ optional($mahasiswa)->nama ?? auth()->user()->name }}
-                        </div>
-                        <div style="font-size:10.5px;color:var(--c-text-3)">
-                            {{ optional($mahasiswa)->npm ?? '—' }}
-                        </div>
-                        <div style="margin-top:3px">
-                            <span class="sima-badge sima-badge--blue" style="font-size:9px">
-                                {{ strtoupper(optional($mahasiswa)->warga_negara ?? 'INT') }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <a href="{{ route('mahasiswa.profile') }}"
-                   class="sima-btn sima-btn--outline sima-btn--sm sima-btn--full d-flex justify-content-center">
-                    <i class="fas fa-user-pen"></i> Edit Profil
-                </a>
-            </div>
-        </div>
-
-        {{-- Aksi Cepat --}}
-        <div class="sima-card">
-            <div class="sima-card__header">
-                <h5 class="sima-card__title">Aksi Cepat</h5>
-            </div>
-            <div class="sima-card__body" style="padding:12px">
-                <div class="row g-2">
-                    <div class="col-6">
-                        <a href="{{ route('mahasiswa.request.create') }}" class="sima-quick">
-                            <div class="sima-quick__icon" style="background:#EFF6FF;color:#2563EB">
-                                <i class="fas fa-file-circle-plus"></i>
-                            </div>
-                            <div class="sima-quick__label">Request Dokumen</div>
-                        </a>
-                    </div>
-                    <div class="col-6">
-                        <a href="{{ route('mahasiswa.jadwal') }}" class="sima-quick">
-                            <div class="sima-quick__icon" style="background:#ECFDF5;color:#059669">
-                                <i class="fas fa-calendar-days"></i>
-                            </div>
-                            <div class="sima-quick__label">Lihat Jadwal</div>
-                        </a>
-                    </div>
-                    <div class="col-6">
-                        <a href="{{ route('mahasiswa.analytics') }}" class="sima-quick">
-                            <div class="sima-quick__icon" style="background:#F5F3FF;color:#7C3AED">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="sima-quick__label">Analitik</div>
-                        </a>
-                    </div>
-                    <div class="col-6">
-                        <a href="{{ route('mahasiswa.notifikasi') }}" class="sima-quick">
-                            <div class="sima-quick__icon" style="background:#FFFBEB;color:#D97706">
-                                <i class="fas fa-bell"></i>
-                            </div>
-                            <div class="sima-quick__label">Notifikasi</div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
 </div>
 
 {{-- ═══════════════════════════════════════════════

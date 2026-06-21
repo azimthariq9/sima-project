@@ -1,163 +1,211 @@
 @extends('layouts.sima')
 
-@section('page_title',   'Profil Saya')
+@section('page_title',   'Semua Request')
 @section('page_section', 'Mahasiswa')
-@section('page_subtitle','Biodata dan kelengkapan dokumen Anda')
+@section('page_subtitle','Riwayat permintaan dokumen ke KLN')
 
 @section('main_content')
 
-<div class="row g-3">
+@php
+$statusMap = [
+    'pending'    => ['label' => 'Menunggu',  'cls' => 'blue',  'ico' => 'fa-clock'],
+    'approved'   => ['label' => 'Disetujui', 'cls' => 'green', 'ico' => 'fa-circle-check'],
+    'rejected'   => ['label' => 'Ditolak',   'cls' => 'red',   'ico' => 'fa-circle-xmark'],
+    'processing' => ['label' => 'Diproses',  'cls' => 'amber', 'ico' => 'fa-spinner'],
+];
+@endphp
 
-    {{-- Profile Card --}}
-    <div class="col-md-4 sima-fade">
-        <div class="sima-card">
-            <div class="sima-card__body" style="text-align:center;padding:28px 20px">
-                <div class="sima-avatar" style="width:80px;height:80px;border-radius:20px;font-size:28px;background:linear-gradient(135deg,#2563EB,#7C3AED);margin:0 auto 16px">
-                    {{ strtoupper(substr(auth()->user()->name ?? 'M', 0, 2)) }}
-                </div>
-                <div style="font-family:var(--f-display);font-size:18px;font-weight:700;color:var(--c-text-1);margin-bottom:4px">
-                    {{ auth()->user()->name ?? 'Ahmad Rahimov' }}
-                </div>
-                <div style="font-size:12.5px;color:var(--c-text-3);margin-bottom:12px">
-                    NIM: {{ auth()->user()->nim ?? '50421001' }}
-                </div>
-                <span class="sima-badge sima-badge--green" style="margin-bottom:20px;padding:5px 14px">
-                    <i class="fas fa-circle" style="font-size:6px"></i> Mahasiswa Aktif
-                </span>
-
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px">
-                    <div style="padding:12px;background:var(--c-bg);border-radius:10px;border:1px solid var(--c-border-soft)">
-                        <div style="font-family:var(--f-display);font-size:24px;font-weight:700;color:var(--c-text-1)">{{ $semester ?? 6 }}</div>
-                        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--c-text-3)">Semester</div>
-                    </div>
-                    <div style="padding:12px;background:var(--c-bg);border-radius:10px;border:1px solid var(--c-border-soft)">
-                        <div style="font-family:var(--f-display);font-size:24px;font-weight:700;color:var(--c-text-1)">{{ $ipk ?? '3.72' }}</div>
-                        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--c-text-3)">IPK</div>
-                    </div>
-                </div>
-
-                <div style="margin-top:16px;display:flex;flex-direction:column;gap:6px">
-                    <a href="{{ route('profile.edit') }}" class="sima-btn sima-btn--outline sima-btn--sm sima-btn--full">
-                        <i class="fas fa-pen"></i> Edit Profil
-                    </a>
-                </div>
-            </div>
+<div class="sima-card sima-fade">
+    <div class="sima-card__header">
+        <div>
+            <h5 class="sima-card__title">Riwayat Request Dokumen</h5>
+            <div class="sima-card__subtitle">Semua permintaan dokumen yang pernah diajukan</div>
         </div>
-
-        {{-- Contact info --}}
-        <div class="sima-card" style="margin-top:12px">
-            <div class="sima-card__header"><h5 class="sima-card__title">Kontak</h5></div>
-            <div class="sima-card__body">
-                @foreach([
-                    ['fas fa-envelope','Email',auth()->user()->email ?? 'ahmad@mail.com'],
-                    ['fas fa-phone','No. HP','+62 812 3456 7890'],
-                    ['fas fa-flag','Kewarganegaraan','Uzbekistan 🇺🇿'],
-                    ['fas fa-map-marker-alt','Alamat','Jl. Margonda No. 45, Depok'],
-                ] as [$icon,$label,$val])
-                <div style="display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--c-border-soft)">
-                    <div style="width:30px;height:30px;border-radius:8px;background:var(--c-bg);display:flex;align-items:center;justify-content:center;color:var(--c-accent);font-size:12px;flex-shrink:0">
-                        <i class="{{ $icon }}"></i>
-                    </div>
-                    <div>
-                        <div style="font-size:11px;color:var(--c-text-3);font-weight:500">{{ $label }}</div>
-                        <div style="font-size:13px;color:var(--c-text-1);font-weight:500;margin-top:1px">{{ $val }}</div>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
+        <a href="{{ route('mahasiswa.request.create') }}" class="sima-btn sima-btn--sm">
+            <i class="fas fa-plus"></i> Request Baru
+        </a>
     </div>
 
-    {{-- Biodata + Dokumen --}}
-    <div class="col-md-8 sima-fade sima-fade--1">
-
-        {{-- Biodata --}}
-        <div class="sima-card" style="margin-bottom:12px">
-            <div class="sima-card__header">
-                <div>
-                    <h5 class="sima-card__title">Biodata Akademik</h5>
-                    <div class="sima-card__subtitle">Informasi resmi terdaftar di universitas</div>
-                </div>
-                <a href="{{ route('profile.edit') }}" class="sima-card__action"><i class="fas fa-pen"></i> Edit</a>
-            </div>
-            <div class="sima-card__body">
-                <div class="row g-3">
-                    @foreach([
-                        ['Nama Lengkap', auth()->user()->name ?? 'Ahmad Rahimov'],
-                        ['NIM', auth()->user()->nim ?? '50421001'],
-                        ['Program Studi','Teknik Informatika'],
-                        ['Fakultas','Ilmu Komputer'],
-                        ['Jenjang','S1'],
-                        ['Tahun Masuk','2022'],
-                        ['Status','Aktif'],
-                        ['Pembimbing','Dr. Siti Rahayu, M.T.'],
-                    ] as [$label, $val])
-                    <div class="col-md-6">
-                        <div style="padding:12px;background:var(--c-bg);border-radius:10px;border:1px solid var(--c-border-soft)">
-                            <div style="font-size:11px;color:var(--c-text-3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">{{ $label }}</div>
-                            <div style="font-size:14px;font-weight:600;color:var(--c-text-1)">{{ $val }}</div>
-                        </div>
-                    </div>
+    @if($requests->isEmpty())
+        <div class="sima-card__body" style="text-align:center;padding:48px 20px;color:var(--c-text-3)">
+            <i class="fas fa-inbox" style="font-size:36px;margin-bottom:12px;display:block;opacity:.35"></i>
+            <div style="font-size:14px;font-weight:500">Belum ada request yang diajukan</div>
+            <div style="font-size:12.5px;margin-top:4px">Ajukan permintaan dokumen pertama Anda ke KLN</div>
+            <a href="{{ route('mahasiswa.request.create') }}" class="sima-btn sima-btn--sm" style="margin-top:16px">
+                <i class="fas fa-paper-plane"></i> Ajukan Request
+            </a>
+        </div>
+    @else
+        <div class="sima-card__body" style="padding:0">
+            <table class="sima-table">
+                <thead>
+                    <tr>
+                        <th style="width:90px">Kode</th>
+                        <th>Jenis Dokumen</th>
+                        <th>Keperluan</th>
+                        <th style="width:110px">Tanggal</th>
+                        <th style="width:110px">Status</th>
+                        <th style="width:80px"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($requests as $req)
+                    @php
+                        $st   = $req->status ?? 'pending';
+                        $info = $statusMap[$st] ?? $statusMap['pending'];
+                        $code = 'REQ-' . str_pad($req->id, 3, '0', STR_PAD_LEFT);
+                        $nama = str_replace('_', ' ', $req->namaDkmn ?? $req->tipeDkmn ?? '-');
+                        $tgl  = \Carbon\Carbon::parse($req->created_at)->format('d M Y');
+                    @endphp
+                    <tr>
+                        <td><span style="font-family:var(--f-mono);font-size:11.5px;color:var(--c-text-3)">{{ $code }}</span></td>
+                        <td style="font-weight:600;font-size:13.5px">{{ $nama }}</td>
+                        <td style="font-size:12.5px;color:var(--c-text-2);max-width:220px">
+                            <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ $req->message }}">
+                                {{ $req->message }}
+                            </div>
+                        </td>
+                        <td style="font-size:12px;color:var(--c-text-3)">{{ $tgl }}</td>
+                        <td>
+                            <span class="sima-badge sima-badge--{{ $info['cls'] }}">
+                                <i class="fas {{ $info['ico'] }}"></i> {{ $info['label'] }}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="sima-btn sima-btn--sm sima-btn--outline btn-detail"
+                                    data-id="{{ $req->id }}"
+                                    data-code="{{ $code }}"
+                                    data-nama="{{ $nama }}"
+                                    data-tgl="{{ $tgl }}"
+                                    data-status="{{ $st }}"
+                                    data-status-label="{{ $info['label'] }}"
+                                    data-status-cls="{{ $info['cls'] }}"
+                                    data-keterangan="{{ $req->keterangan ?? '' }}"
+                                    data-has-file="{{ $req->has_file ? '1' : '0' }}"
+                                    data-message="{{ $req->message ?? '' }}"
+                                    style="font-size:11.5px;padding:4px 10px">
+                                <i class="fas fa-eye"></i> Detail
+                            </button>
+                        </td>
+                    </tr>
                     @endforeach
-                </div>
+                </tbody>
+            </table>
+        </div>
+    @endif
+</div>
+
+{{-- ── MODAL DETAIL ─────────────────────────────────────────── --}}
+<div id="detailModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:18px;width:100%;max-width:500px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden">
+
+        {{-- Header --}}
+        <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
+            <div>
+                <div id="dm-code" style="font-family:var(--f-mono);font-size:11.5px;color:var(--c-text-3);margin-bottom:3px"></div>
+                <div id="dm-nama" style="font-size:16px;font-weight:700;color:var(--c-text-1)"></div>
             </div>
+            <button onclick="closeDetail()" style="width:32px;height:32px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;color:#64748b;font-size:14px">
+                <i class="fas fa-xmark"></i>
+            </button>
         </div>
 
-        {{-- Dokumen --}}
-        <div class="sima-card">
-            <div class="sima-card__header">
-                <div>
-                    <h5 class="sima-card__title">Dokumen Saya</h5>
-                    <div class="sima-card__subtitle">Status kelengkapan dokumen resmi</div>
+        {{-- Body --}}
+        <div style="padding:20px 24px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+                <div style="padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #f1f5f9">
+                    <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px">Tanggal</div>
+                    <div id="dm-tgl" style="font-size:13.5px;font-weight:600;color:#1e293b"></div>
                 </div>
-                <a href="{{ route('mahasiswa.request.create') }}" class="sima-btn sima-btn--sm">
-                    <i class="fas fa-plus"></i> Upload
+                <div style="padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #f1f5f9">
+                    <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:6px">Status</div>
+                    <div id="dm-status"></div>
+                </div>
+            </div>
+
+            <div style="margin-bottom:14px">
+                <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:6px">Keperluan</div>
+                <div id="dm-message" style="font-size:13px;color:#334155;background:#f8fafc;border-radius:10px;padding:12px;border:1px solid #f1f5f9;line-height:1.55"></div>
+            </div>
+
+            {{-- Rejection reason --}}
+            <div id="dm-reject-box" style="display:none;margin-bottom:14px">
+                <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#ef4444;margin-bottom:6px">
+                    <i class="fas fa-circle-xmark"></i> Alasan Penolakan
+                </div>
+                <div id="dm-keterangan" style="font-size:13px;color:#7f1d1d;background:#fef2f2;border-radius:10px;padding:12px;border:1px solid rgba(220,38,38,.15);line-height:1.55"></div>
+            </div>
+
+            {{-- File from KLN --}}
+            <div id="dm-file-box" style="display:none;margin-bottom:14px">
+                <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#059669;margin-bottom:6px">
+                    <i class="fas fa-file-circle-check"></i> Dokumen dari KLN
+                </div>
+                <a id="dm-file-link" href="#" target="_blank"
+                   style="display:flex;align-items:center;gap:10px;padding:12px;background:#ecfdf5;border:1px solid rgba(5,150,105,.2);border-radius:10px;color:#065f46;text-decoration:none;font-size:13px;font-weight:500">
+                    <i class="fas fa-file-arrow-down" style="font-size:18px;color:#059669"></i>
+                    <span>Unduh dokumen yang dikirim KLN</span>
+                    <i class="fas fa-arrow-down" style="margin-left:auto;font-size:11px;opacity:.6"></i>
                 </a>
             </div>
-            <div class="sima-card__body" style="padding:0">
-                @php
-                $docs = $documents ?? [
-                    ['name'=>'Paspor','status'=>'valid','exp'=>'12 Jan 2028','icon'=>'fa-passport','note'=>'Sesuai'],
-                    ['name'=>'KITAS','status'=>'expiring','exp'=>'03 Mar 2026','icon'=>'fa-id-card','note'=>'Segera perpanjang'],
-                    ['name'=>'Surat Keterangan Aktif','status'=>'pending','exp'=>'Menunggu','icon'=>'fa-file-signature','note'=>'Proses KLN'],
-                    ['name'=>'Asuransi Kesehatan','status'=>'valid','exp'=>'30 Jun 2026','icon'=>'fa-heart-pulse','note'=>'Sesuai'],
-                    ['name'=>'SKCK','status'=>'expired','exp'=>'15 Jan 2026','icon'=>'fa-shield-halved','note'=>'Perlu diperbarui'],
-                ];
-                $sm = ['valid'=>['label'=>'Valid','cls'=>'green','ico'=>'fa-circle-check'],'expiring'=>['label'=>'Segera Expired','cls'=>'amber','ico'=>'fa-circle-exclamation'],'pending'=>['label'=>'Pending','cls'=>'blue','ico'=>'fa-clock'],'expired'=>['label'=>'Expired','cls'=>'red','ico'=>'fa-circle-xmark']];
-                @endphp
-                <table class="sima-table">
-                    <thead><tr><th>Dokumen</th><th>Berlaku s/d</th><th>Keterangan</th><th>Status</th><th></th></tr></thead>
-                    <tbody>
-                        @foreach($docs as $doc)
-                        @php $s=is_array($doc)?$doc:$doc->toArray();$st=$s['status'];$info=$sm[$st]??$sm['pending']; @endphp
-                        <tr>
-                            <td>
-                                <div style="display:flex;align-items:center;gap:10px">
-                                    <div style="width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;
-                                         background:{{ $st==='valid'?'#ECFDF5':($st==='expired'?'#FEF2F2':($st==='expiring'?'#FFFBEB':'#EFF6FF')) }};
-                                         color:{{ $st==='valid'?'#059669':($st==='expired'?'#DC2626':($st==='expiring'?'#D97706':'#2563EB')) }}">
-                                        <i class="fas {{ $s['icon']??'fa-file' }}"></i>
-                                    </div>
-                                    <span style="font-weight:500;font-size:13.5px">{{ $s['name'] }}</span>
-                                </div>
-                            </td>
-                            <td style="font-family:var(--f-mono);font-size:12px;color:var(--c-text-3)">{{ $s['exp'] }}</td>
-                            <td style="font-size:12.5px;color:var(--c-text-3)">{{ $s['note']??'-' }}</td>
-                            <td><span class="sima-badge sima-badge--{{ $info['cls'] }}"><i class="fas {{ $info['ico'] }}"></i> {{ $info['label'] }}</span></td>
-                            <td>
-                                @if($st==='expired'||$st==='expiring')
-                                <a href="{{ route('mahasiswa.request.create') }}" class="sima-btn sima-btn--sm sima-btn--gold" style="font-size:11px;padding:4px 10px"><i class="fas fa-rotate"></i> Perbarui</a>
-                                @elseif($st==='valid')
-                                <button class="sima-btn sima-btn--sm sima-btn--outline" style="font-size:11px;padding:4px 10px"><i class="fas fa-eye"></i> Lihat</button>
-                                @endif
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
         </div>
 
+        {{-- Footer --}}
+        <div style="padding:14px 24px 20px;display:flex;gap:8px">
+            <a href="{{ route('mahasiswa.request.create') }}" class="sima-btn sima-btn--sm" id="dm-btn-ulang" style="display:none">
+                <i class="fas fa-rotate-right"></i> Ajukan Ulang
+            </a>
+            <button onclick="closeDetail()" class="sima-btn sima-btn--sm sima-btn--outline">
+                <i class="fas fa-xmark"></i> Tutup
+            </button>
+        </div>
     </div>
 </div>
+
+@endsection
+
+@section('page_js')
+<script>
+document.querySelectorAll('.btn-detail').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const d = this.dataset;
+        document.getElementById('dm-code').textContent    = d.code;
+        document.getElementById('dm-nama').textContent    = d.nama;
+        document.getElementById('dm-tgl').textContent     = d.tgl;
+        document.getElementById('dm-message').textContent = d.message;
+
+        const clsMap = { blue:'#1e40af', green:'#065f46', red:'#991b1b', amber:'#92400e' };
+        const bgMap  = { blue:'#eff6ff', green:'#ecfdf5', red:'#fef2f2', amber:'#fffbeb' };
+        document.getElementById('dm-status').innerHTML =
+            `<span style="font-size:12.5px;font-weight:600;padding:4px 12px;border-radius:100px;background:${bgMap[d.statusCls]||'#f1f5f9'};color:${clsMap[d.statusCls]||'#334155'}">${d.statusLabel}</span>`;
+
+        const rejectBox = document.getElementById('dm-reject-box');
+        if (d.status === 'rejected' && d.keterangan) {
+            document.getElementById('dm-keterangan').textContent = d.keterangan;
+            rejectBox.style.display = 'block';
+        } else {
+            rejectBox.style.display = 'none';
+        }
+
+        const fileBox = document.getElementById('dm-file-box');
+        if (d.hasFile === '1') {
+            document.getElementById('dm-file-link').href = `/mahasiswa/request/${d.id}/file`;
+            fileBox.style.display = 'block';
+        } else {
+            fileBox.style.display = 'none';
+        }
+
+        document.getElementById('dm-btn-ulang').style.display = d.status === 'rejected' ? 'inline-flex' : 'none';
+        document.getElementById('detailModal').style.display = 'flex';
+    });
+});
+
+function closeDetail() {
+    document.getElementById('detailModal').style.display = 'none';
+}
+
+document.getElementById('detailModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDetail();
+});
+</script>
 @endsection

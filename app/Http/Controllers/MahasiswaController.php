@@ -164,8 +164,10 @@ class MahasiswaController extends Controller
         if ($student_id) {
             $jadwalHariIni = DB::table('jadwal')
                 ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
-                ->join('jadwal_mahasiswa', 'jadwal_mahasiswa.jadwal_id', '=', 'jadwal.id')
-                ->where('jadwal_mahasiswa.mahasiswa_id', $student_id)
+                ->join('kelas', 'jadwal.kelas_id', '=', 'kelas.id')
+                ->join('mahasiswa_kelas', 'mahasiswa_kelas.kelas_id', '=', 'kelas.id')
+                ->leftJoin('dosen', 'jadwal.dosen_id', '=', 'dosen.id')
+                ->where('mahasiswa_kelas.mahasiswa_id', $student_id)
                 ->where('jadwal.hari', $hariIni)
                 ->select(
                     'jadwal.id',
@@ -173,9 +175,9 @@ class MahasiswaController extends Controller
                     DB::raw("REPLACE(SPLIT_PART(jadwal.jam, ' - ', 1), '.', ':') as jam_mulai"),
                     DB::raw("REPLACE(SPLIT_PART(jadwal.jam, ' - ', 2), '.', ':') as jam_selesai"),
                     'jadwal.ruangan',
-                    DB::raw("CASE WHEN matakuliah.jurusan_id = 1 THEN 'kln' WHEN matakuliah.jurusan_id = 2 THEN 'bipa' ELSE 'kuliah' END as jenis"),
-                    DB::raw('NULL::text as kelas'),
-                    'matakuliah.namaMk as mata_kuliah'
+                    DB::raw("CASE WHEN matakuliah.jurusan_id = 1 THEN 'kln' WHEN matakuliah.jurusan_id = 2 THEN 'bipa' ELSE 'perkuliahan' END as tipe_kelas"),
+                    'matakuliah.namaMk as mata_kuliah',
+                    'dosen.nama as dosen'
                 )
                 ->orderBy('jadwal.jam')
                 ->get()
@@ -188,12 +190,7 @@ class MahasiswaController extends Controller
         | Notifikasi yang belum dibaca
         |----------------------------------------------------------------------
         */
-        $unreadNotifCount = $student_id
-            ? DB::table('notification_mahasiswa')
-                ->where('mahasiswa_id', $student_id)
-                ->where('is_read', false)
-                ->count()
-            : 0;
+        $unreadNotifCount = $this->unreadNotifCount();
 
         // active_attendance & sudah_absen tidak ada di schema baru, pass null/false
         $active_attendance = null;
@@ -287,8 +284,6 @@ class MahasiswaController extends Controller
         $mahasiswa  = $this->getMahasiswa();
         $student_id = $mahasiswa->id ?? null;
 
-        $tipe = $request->get('tipe', 'semua');
-
         $hariUrutan = [
             'Senin'  => 1, 'Selasa' => 2, 'Rabu'   => 3,
             'Kamis'  => 4, 'Jumat'  => 5, 'Sabtu'  => 6, 'Minggu' => 7,
@@ -302,17 +297,12 @@ class MahasiswaController extends Controller
         $totalSesiPerMk    = collect();
 
         if ($student_id) {
-            /*
-            |------------------------------------------------------------------
-            | Query jadwal — kolom jam adalah varchar "09.30 - 11.30"
-            | tipe_kelas diturunkan dari matakuliah.jurusan_id
-            |------------------------------------------------------------------
-            */
-            $query = DB::table('jadwal')
+            $semuaJadwal = DB::table('jadwal')
                 ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
-                ->join('jadwal_mahasiswa', 'jadwal_mahasiswa.jadwal_id', '=', 'jadwal.id')
+                ->join('kelas', 'jadwal.kelas_id', '=', 'kelas.id')
+                ->join('mahasiswa_kelas', 'mahasiswa_kelas.kelas_id', '=', 'kelas.id')
                 ->leftJoin('dosen', 'jadwal.dosen_id', '=', 'dosen.id')
-                ->where('jadwal_mahasiswa.mahasiswa_id', $student_id)
+                ->where('mahasiswa_kelas.mahasiswa_id', $student_id)
                 ->select(
                     'jadwal.id',
                     'jadwal.hari',
@@ -322,20 +312,8 @@ class MahasiswaController extends Controller
                     DB::raw("CASE WHEN matakuliah.jurusan_id = 1 THEN 'kln' WHEN matakuliah.jurusan_id = 2 THEN 'bipa' ELSE 'perkuliahan' END as tipe_kelas"),
                     'matakuliah.namaMk as mata_kuliah',
                     'dosen.nama as dosen'
-                );
-
-            if ($tipe !== 'semua') {
-                if ($tipe === 'kln') {
-                    $query->where('matakuliah.jurusan_id', 1);
-                } elseif ($tipe === 'bipa') {
-                    $query->where('matakuliah.jurusan_id', 2);
-                } else {
-                    // perkuliahan / kuliah
-                    $query->where('matakuliah.jurusan_id', '>', 2);
-                }
-            }
-
-            $semuaJadwal = $query->get()->unique('id')->values();
+                )
+                ->get()->unique('id')->values();
 
             $todaySchedules = $semuaJadwal
                 ->filter(fn($j) => $j->hari === $hariIni)
@@ -365,23 +343,19 @@ class MahasiswaController extends Controller
                 ->get();
 
             $totalSesiPerMk = DB::table('jadwal')
-                ->join('jadwal_mahasiswa', 'jadwal_mahasiswa.jadwal_id', '=', 'jadwal.id')
-                ->where('jadwal_mahasiswa.mahasiswa_id', $student_id)
+                ->join('kelas', 'jadwal.kelas_id', '=', 'kelas.id')
+                ->join('mahasiswa_kelas', 'mahasiswa_kelas.kelas_id', '=', 'kelas.id')
+                ->where('mahasiswa_kelas.mahasiswa_id', $student_id)
                 ->select(
                     'jadwal.matakuliah_id as course_id',
-                    DB::raw('MAX(jadwal.totalSesi) as total_sesi')
+                    DB::raw('MAX(jadwal."totalSesi") as total_sesi')
                 )
                 ->groupBy('jadwal.matakuliah_id')
                 ->get()
                 ->keyBy('course_id');
         }
 
-        $unreadNotifCount = $student_id
-            ? DB::table('notification_mahasiswa')
-                ->where('mahasiswa_id', $student_id)
-                ->where('is_read', false)
-                ->count()
-            : 0;
+        $unreadNotifCount = $this->unreadNotifCount();
 
         return view('mahasiswa.jadwal', [
             'todaySchedules'    => $todaySchedules,
@@ -389,7 +363,6 @@ class MahasiswaController extends Controller
             'attendanceSummary' => $attendanceSummary,
             'totalSesiPerMk'    => $totalSesiPerMk,
             'hariIni'           => $hariIni,
-            'activeTipe'        => $tipe,
             'unreadNotifCount'  => $unreadNotifCount,
         ]);
     }
@@ -447,12 +420,7 @@ class MahasiswaController extends Controller
                 : 0;
         }
 
-        $unreadNotifCount = $student_id
-            ? DB::table('notification_mahasiswa')
-                ->where('mahasiswa_id', $student_id)
-                ->where('is_read', false)
-                ->count()
-            : 0;
+        $unreadNotifCount = $this->unreadNotifCount();
 
         return view('mahasiswa.analytics', compact(
             'history',
@@ -467,11 +435,123 @@ class MahasiswaController extends Controller
     }
 
 
+    public function kehadiran(Request $request)
+    {
+        $mahasiswa  = $this->getMahasiswa();
+        $student_id = $mahasiswa->id ?? null;
+        $tipe       = $request->input('tipe', 'semua');
+
+        $kelas = collect();
+
+        if ($student_id) {
+            // kelas tidak punya matakuliah_id — harus lewat jadwal
+            $query = DB::table('mahasiswa_kelas')
+                ->join('kelas', 'mahasiswa_kelas.kelas_id', '=', 'kelas.id')
+                ->join('jadwal', 'jadwal.kelas_id', '=', 'kelas.id')
+                ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
+                ->leftJoin('dosen', 'jadwal.dosen_id', '=', 'dosen.id')
+                ->leftJoin('jadwal_mahasiswa', function ($join) use ($student_id) {
+                    $join->on('jadwal_mahasiswa.jadwal_id', '=', 'jadwal.id')
+                         ->where('jadwal_mahasiswa.mahasiswa_id', $student_id);
+                })
+                ->where('mahasiswa_kelas.mahasiswa_id', $student_id)
+                ->groupBy(
+                    'kelas.id',
+                    DB::raw('kelas."kodeKelas"'),
+                    DB::raw('matakuliah."namaMk"'),
+                    'matakuliah.jurusan_id'
+                )
+                ->selectRaw('
+                    kelas.id as kelas_id,
+                    kelas."kodeKelas",
+                    matakuliah."namaMk",
+                    matakuliah.jurusan_id,
+                    CASE WHEN matakuliah.jurusan_id = 1 THEN \'kln\'
+                         WHEN matakuliah.jurusan_id = 2 THEN \'bipa\'
+                         ELSE \'perkuliahan\' END as tipe_kelas,
+                    MIN(dosen.nama) as dosen,
+                    MAX(jadwal."totalSesi") as total_sesi,
+                    SUM(CASE WHEN jadwal_mahasiswa.status = \'present\' THEN 1 ELSE 0 END) as hadir,
+                    SUM(CASE WHEN jadwal_mahasiswa.status = \'excused\' THEN 1 ELSE 0 END) as izin,
+                    SUM(CASE WHEN jadwal_mahasiswa.status = \'absent\'  THEN 1 ELSE 0 END) as absen
+                ');
+
+            if ($tipe !== 'semua') {
+                $jurusanId = match($tipe) {
+                    'kln'  => 1, 'bipa' => 2, default => null,
+                };
+                if ($jurusanId) {
+                    $query->where('matakuliah.jurusan_id', $jurusanId);
+                } else {
+                    $query->where('matakuliah.jurusan_id', '>', 2);
+                }
+            }
+
+            $kelas = $query->get();
+        }
+
+        $unreadNotifCount = $this->unreadNotifCount();
+
+        return view('mahasiswa.kehadiran.index', compact('kelas', 'tipe', 'unreadNotifCount'));
+    }
+
+    public function kehadiranDetail(int $kelasId)
+    {
+        $mahasiswa  = $this->getMahasiswa();
+        $student_id = $mahasiswa->id ?? null;
+
+        abort_if(!$student_id, 403);
+
+        $kelasInfo = DB::table('mahasiswa_kelas')
+            ->join('kelas', 'mahasiswa_kelas.kelas_id', '=', 'kelas.id')
+            ->join('jadwal', 'jadwal.kelas_id', '=', 'kelas.id')
+            ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
+            ->leftJoin('dosen', 'jadwal.dosen_id', '=', 'dosen.id')
+            ->where('mahasiswa_kelas.mahasiswa_id', $student_id)
+            ->where('kelas.id', $kelasId)
+            ->groupBy(
+                'kelas.id',
+                DB::raw('kelas."kodeKelas"'),
+                DB::raw('matakuliah."namaMk"'),
+                'matakuliah.jurusan_id'
+            )
+            ->selectRaw('
+                kelas.id as kelas_id,
+                kelas."kodeKelas",
+                matakuliah."namaMk",
+                matakuliah.jurusan_id,
+                MIN(dosen.nama) as dosen,
+                MAX(jadwal."totalSesi") as total_sesi
+            ')
+            ->first();
+
+        abort_if(!$kelasInfo, 403);
+
+        $sesiList = DB::table('jadwal_mahasiswa')
+            ->join('jadwal', 'jadwal_mahasiswa.jadwal_id', '=', 'jadwal.id')
+            ->where('jadwal.kelas_id', $kelasId)
+            ->where('jadwal_mahasiswa.mahasiswa_id', $student_id)
+            ->selectRaw('
+                jadwal_mahasiswa.sesi,
+                jadwal_mahasiswa.status,
+                jadwal_mahasiswa."tglSesi",
+                jadwal.hari,
+                jadwal.jam,
+                jadwal.ruangan
+            ')
+            ->orderBy('jadwal_mahasiswa.sesi')
+            ->get();
+
+        $unreadNotifCount = $this->unreadNotifCount();
+
+        return view('mahasiswa.kehadiran.detail', compact('kelasInfo', 'sesiList', 'unreadNotifCount'));
+    }
+
+
     /*
     |==========================================================================
     | PROFIL
     |==========================================================================
-    | BUG FIX: View sebelumnya 'mahasiswa.profile', diseragamkan ke 'mahasiswa.profil'
     */
 
     public function getProfile()
@@ -479,12 +559,7 @@ class MahasiswaController extends Controller
         $user      = Auth::user();
         $mahasiswa = $this->getMahasiswa();
 
-        $unreadNotifCount = $mahasiswa
-            ? DB::table('notification_mahasiswa')
-                ->where('mahasiswa_id', $mahasiswa->id)
-                ->where('is_read', false)
-                ->count()
-            : 0;
+        $unreadNotifCount = $this->unreadNotifCount();
 
         return view('mahasiswa.profile', compact(
             'user',
@@ -539,23 +614,125 @@ class MahasiswaController extends Controller
     |==========================================================================
     */
 
-    public function createRequest()
+    public function dokumenPage()
     {
-        // Jenis dokumen yang bisa di-request sesuai spek
-        $jenisDokumen = [
-            'kln'       => ['Surat Keterangan Aktif', 'Surat Rekomendasi', 'Surat Sponsor'],
-            'jurusan'   => ['Transkrip Nilai', 'Surat Keterangan Lulus', 'KRS'],
-            'bipa'      => ['Sertifikat BIPA', 'Laporan Kemajuan Bahasa'],
-            'gunadarma' => ['Surat Domisili Kampus', 'Kartu Mahasiswa'],
-        ];
+        $mahasiswa   = $this->getMahasiswa();
+        $mahasiswaId = $mahasiswa->id ?? 0;
 
-        $riwayat = DB::table('request_dokumen')
-            ->where('mahasiswa_id', $this->getMahasiswa()->id ?? 0)
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
+        $dokumen = DB::table('dokumen')
+            ->where('mahasiswa_id', $mahasiswaId)
+            ->whereNull('deleted_at')
+            ->orderByDesc('created_at')
             ->get();
 
-        return view('mahasiswa.request.create', compact('jenisDokumen', 'riwayat'));
+        $recentRequests = DB::table('reqDokumen')
+            ->where('mahasiswa_id', $mahasiswaId)
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get()
+            ->map(fn($r) => [
+                'code'   => 'REQ-' . str_pad($r->id, 3, '0', STR_PAD_LEFT),
+                'name'   => str_replace('_', ' ', $r->namaDkmn ?? $r->tipeDkmn ?? '-'),
+                'status' => $r->status,
+                'date'   => \Carbon\Carbon::parse($r->created_at)->format('d M Y'),
+            ]);
+
+        $unreadNotifCount = $this->unreadNotifCount();
+
+        return view('mahasiswa.dokumen.index', compact('dokumen', 'recentRequests', 'unreadNotifCount'));
+    }
+
+    public function storeDokumen(Request $request)
+    {
+        $request->validate([
+            'tipeDkmn'  => 'required|string',
+            'noDkmn'    => 'required|string|max:100',
+            'tglTerbit' => 'required|date',
+            'tglKdlwrs' => 'required|date|after:tglTerbit',
+            'penerbit'  => 'required|string|max:200',
+            'file'      => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ], [
+            'tglKdlwrs.after' => 'Tanggal berlaku harus setelah tanggal terbit.',
+        ]);
+
+        $mahasiswa = $this->getMahasiswa();
+        if (!$mahasiswa) {
+            return back()->with('error', 'Profil mahasiswa tidak ditemukan.');
+        }
+
+        $namaDkmn = str_replace('_', ' ', $request->tipeDkmn);
+
+        $dokumenId = DB::table('dokumen')->insertGetId([
+            'mahasiswa_id' => $mahasiswa->id,
+            'tipeDkmn'     => $request->tipeDkmn,
+            'namaDkmn'     => $namaDkmn,
+            'penerbit'     => $request->penerbit,
+            'noDkmn'       => $request->noDkmn,
+            'tglTerbit'    => $request->tglTerbit,
+            'tglKdlwrs'    => $request->tglKdlwrs,
+            'status'       => 'sedang diproses',
+            'created_at'   => now(),
+            'updated_at'   => now(),
+        ]);
+
+        if ($request->hasFile('file')) {
+            $path = $request->file('file')->store('dokumen', 'local');
+            DB::table('fileDetail')->insert([
+                'dokumen_id' => $dokumenId,
+                'path'       => $path,
+                'mimeType'   => $request->file('file')->getClientMimeType(),
+                'fileSize'   => $request->file('file')->getSize(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return redirect()->route('mahasiswa.dokumen.index')
+            ->with('success', 'Dokumen berhasil diupload. KLN akan segera memverifikasi.');
+    }
+
+    public function downloadDokumen(int $id)
+    {
+        $mahasiswa = $this->getMahasiswa();
+        $dok = DB::table('dokumen')
+            ->where('id', $id)
+            ->where('mahasiswa_id', $mahasiswa->id ?? 0)
+            ->whereNull('deleted_at')
+            ->first();
+
+        abort_if(!$dok, 403);
+
+        $file = DB::table('fileDetail')
+            ->where('dokumen_id', $id)
+            ->orderByDesc('created_at')
+            ->first();
+
+        abort_if(!$file, 404, 'File tidak tersedia.');
+
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $storage */
+        $storage = Storage::disk('local');
+        abort_if(!$storage->exists($file->path), 404, 'File tidak ditemukan di server.');
+
+        return $storage->download($file->path, basename($file->path));
+    }
+
+    public function createRequest()
+    {
+        $mahasiswaId = $this->getMahasiswa()->id ?? 0;
+
+        $recentRequests = DB::table('reqDokumen')
+            ->where('mahasiswa_id', $mahasiswaId)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(fn($r) => [
+                'code'   => 'REQ-' . str_pad($r->id, 3, '0', STR_PAD_LEFT),
+                'name'   => str_replace('_', ' ', $r->namaDkmn),
+                'status' => $r->status,
+                'date'   => \Carbon\Carbon::parse($r->created_at)->format('d M Y'),
+            ]);
+
+        return view('mahasiswa.request.create', compact('recentRequests'));
     }
 
     // BUG FIX: Route mahasiswa.request.quick (bukan duplikat mahasiswa.request.store)
@@ -599,20 +776,52 @@ class MahasiswaController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $mhsId = DB::table('mahasiswa')->where('user_id', Auth::id())->value('id');
-        $unreadNotifCount = $mhsId
-            ? DB::table('notification_mahasiswa')
-                ->where('mahasiswa_id', $mhsId)
-                ->where('is_read', false)
-                ->count()
-            : 0;
+        $unreadNotifCount = $this->unreadNotifCount();
 
         return view('mahasiswa.announcement', compact('announcements', 'unreadNotifCount'));
     }
 
     public function announcementShow(int $id)
     {
-        return redirect()->route('mahasiswa.announcement');
+        $ann = DB::table('announcement')
+            ->where('id', $id)
+            ->where('status', 'active')
+            ->first();
+
+        abort_if(!$ann, 404);
+
+        $files = DB::table('announcement_files')
+            ->where('announcement_id', $id)
+            ->selectRaw('id, announcement_id, path, "originalName", "mimeType", size')
+            ->get();
+
+        $author = DB::table('users')
+            ->where('id', $ann->user_id)
+            ->value('email');
+
+        $unreadNotifCount = $this->unreadNotifCount();
+
+        return view('mahasiswa.announcement-show', compact('ann', 'files', 'author', 'unreadNotifCount'));
+    }
+
+    public function announcementFile(int $id, int $fileId)
+    {
+        $file = DB::table('announcement_files')
+            ->where('id', $fileId)
+            ->where('announcement_id', $id)
+            ->selectRaw('id, path, "originalName", "mimeType", size')
+            ->first();
+
+        abort_if(!$file, 404);
+
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $storage */
+        $storage = Storage::disk('local');
+
+        if (!$storage->exists($file->path)) {
+            abort(404, 'File tidak ditemukan.');
+        }
+
+        return $storage->download($file->path, $file->originalName ?? basename($file->path));
     }
 
 
@@ -628,7 +837,6 @@ class MahasiswaController extends Controller
         $mahasiswa = $this->getMahasiswa();
         if (!$mahasiswa) return redirect()->route('mahasiswa.dashboard');
 
-        // Ambil dulu sebelum mark read — supaya unread bisa di-render
         $notifications = DB::table('notification_mahasiswa')
             ->join('notification', 'notification_mahasiswa.notification_id', '=', 'notification.id')
             ->where('notification_mahasiswa.mahasiswa_id', $mahasiswa->id)
@@ -645,7 +853,6 @@ class MahasiswaController extends Controller
 
         $unreadCount = $notifications->where('is_read', false)->count();
 
-        // Mark semua unread → read
         DB::table('notification_mahasiswa')
             ->where('mahasiswa_id', $mahasiswa->id)
             ->where('is_read', false)
@@ -657,13 +864,38 @@ class MahasiswaController extends Controller
     public function markNotifRead()
     {
         $mahasiswa = $this->getMahasiswa();
-        if (!$mahasiswa) return response()->json(['success' => false], 403);
+        if (!$mahasiswa) return redirect()->route('mahasiswa.notifikasi');
 
         DB::table('notification_mahasiswa')
             ->where('mahasiswa_id', $mahasiswa->id)
             ->where('is_read', false)
             ->update(['is_read' => true, 'updated_at' => now()]);
 
-        return response()->json(['success' => true]);
+        return redirect()->route('mahasiswa.notifikasi');
+    }
+
+    public function markOneNotifRead(int $notifId)
+    {
+        $mahasiswa = $this->getMahasiswa();
+        if (!$mahasiswa) return redirect()->route('mahasiswa.notifikasi');
+
+        DB::table('notification_mahasiswa')
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->where('notification_id', $notifId)
+            ->where('is_read', false)
+            ->update(['is_read' => true, 'updated_at' => now()]);
+
+        return redirect()->route('mahasiswa.notifikasi');
+    }
+
+    private function unreadNotifCount(): int
+    {
+        $mahasiswa = $this->getMahasiswa();
+        if (!$mahasiswa) return 0;
+
+        return DB::table('notification_mahasiswa')
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->where('is_read', false)
+            ->count();
     }
 }

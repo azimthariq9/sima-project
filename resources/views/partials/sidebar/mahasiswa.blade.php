@@ -38,34 +38,15 @@
     {{-- Group: Akademik --}}
     <div class="sima-nav__group-label" style="margin-top:8px">Akademik</div>
 
-    {{-- Schedules dropdown --}}
-    @php $scheduleActive = request()->routeIs('mahasiswa.jadwal*'); @endphp
-
-    <button class="sima-nav__item {{ $scheduleActive ? 'active' : '' }}"
-            onclick="toggleNav(this)"
-            data-title="Jadwal">
+    <a href="{{ route('mahasiswa.jadwal') }}"
+       class="sima-nav__item {{ request()->routeIs('mahasiswa.jadwal') ? 'active' : '' }}"
+       data-title="Jadwal">
         <i class="fas fa-calendar-days sima-nav__icon"></i>
         <span>Jadwal</span>
-        <i class="fas fa-chevron-right sima-nav__chevron" style="transition:transform .2s;{{ $scheduleActive ? 'transform:rotate(90deg)' : '' }}"></i>
-    </button>
+    </a>
 
-    <div class="sima-nav__sub {{ $scheduleActive ? 'open' : '' }}">
-        <a href="{{ route('mahasiswa.jadwal', ['tipe' => 'bipa']) }}"
-           class="sima-nav__sub-item {{ request()->is('*jadwal*') && request()->get('tipe') === 'bipa' ? 'active' : '' }}">
-            <i class="fas fa-language" style="width:14px;margin-right:6px;font-size:11px"></i> BIPA
-        </a>
-        <a href="{{ route('mahasiswa.jadwal', ['tipe' => 'kuliah']) }}"
-           class="sima-nav__sub-item {{ request()->is('*jadwal*') && request()->get('tipe') === 'kuliah' ? 'active' : '' }}">
-            <i class="fas fa-book-open" style="width:14px;margin-right:6px;font-size:11px"></i> Perkuliahan
-        </a>
-        <a href="{{ route('mahasiswa.jadwal', ['tipe' => 'kln']) }}"
-           class="sima-nav__sub-item {{ request()->is('*jadwal*') && request()->get('tipe') === 'kln' ? 'active' : '' }}">
-            <i class="fas fa-globe" style="width:14px;margin-right:6px;font-size:11px"></i> KLN
-        </a>
-    </div>
-
-    <a href="#"
-       class="sima-nav__item {{ request()->routeIs('mahasiswa.absensi*') ? 'active' : '' }}"
+    <a href="{{ route('mahasiswa.kehadiran') }}"
+       class="sima-nav__item {{ request()->routeIs('mahasiswa.kehadiran*') ? 'active' : '' }}"
        data-title="Kehadiran">
         <i class="fas fa-clipboard-check sima-nav__icon"></i>
         <span>Detail Kehadiran</span>
@@ -81,8 +62,8 @@
     {{-- Group: Dokumen --}}
     <div class="sima-nav__group-label" style="margin-top:8px">Dokumen</div>
 
-    <a href="{{ route('mahasiswa.request.create') }}"
-       class="sima-nav__item {{ request()->routeIs('mahasiswa.request.*') ? 'active' : '' }}"
+    <a href="{{ route('mahasiswa.dokumen.index') }}"
+       class="sima-nav__item {{ request()->routeIs('mahasiswa.dokumen.*') || request()->routeIs('mahasiswa.request.*') ? 'active' : '' }}"
        data-title="Dokumen">
         <i class="fas fa-folder-open sima-nav__icon"></i>
         <span>Dokumen &amp; Request</span>
@@ -99,12 +80,12 @@
     </a>
 
     @php
-        $__mhs = \Illuminate\Support\Facades\DB::table('mahasiswa')
+        $__mhsId = \Illuminate\Support\Facades\DB::table('mahasiswa')
             ->where('user_id', auth()->id())
             ->value('id');
-        $__unread = $__mhs
+        $__unread = $__mhsId
             ? \Illuminate\Support\Facades\DB::table('notification_mahasiswa')
-                ->where('mahasiswa_id', $__mhs)
+                ->where('mahasiswa_id', $__mhsId)
                 ->where('is_read', false)
                 ->count()
             : 0;
@@ -123,28 +104,16 @@
 
 {{-- ── FOOTER ──────────────────────────────────── --}}
 <div class="sima-sidebar__foot">
-    {{-- User mini info --}}
-    <div class="sima-sidebar__user">
-        <div class="sima-avatar" style="width:32px;height:32px;border-radius:8px;font-size:11px;flex-shrink:0">
-            {{ strtoupper(substr($userIdentifier ?? auth()->user()->name ?? 'M', 0, 1)) }}
-        </div>
-        <div style="min-width:0;flex:1">
-            <div style="font-size:12px;font-weight:600;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-                {{ auth()->user()->name ?? 'Mahasiswa' }}
-            </div>
-            <div style="font-size:10.5px;color:#6b7280">
-                {{ optional($mahasiswa ?? null, fn($m) => $m->npm) ?? auth()->user()->email }}
-            </div>
-        </div>
-        {{-- Logout --}}
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" title="Logout"
-                style="width:30px;height:30px;border:1px solid rgba(0,0,0,.1);border-radius:7px;background:rgba(220,38,38,.06);color:#dc2626;display:grid;place-items:center;cursor:pointer;font-size:12px;flex-shrink:0;transition:all .15s">
-                <i class="fas fa-power-off"></i>
-            </button>
-        </form>
-    </div>
+    <form method="POST" action="{{ route('logout') }}" style="width:100%">
+        @csrf
+        <button type="submit"
+                style="width:100%;padding:9px 14px;border:1px solid rgba(220,38,38,.2);border-radius:10px;background:rgba(220,38,38,.06);color:#dc2626;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s"
+                onmouseover="this.style.background='rgba(220,38,38,.12)'"
+                onmouseout="this.style.background='rgba(220,38,38,.06)'">
+            <i class="fas fa-power-off"></i>
+            <span class="sima-sidebar-label">Logout</span>
+        </button>
+    </form>
 </div>
 
 {{-- ── EXTRA STYLES FOR SIDEBAR ───────────────── --}}
@@ -176,15 +145,6 @@
 .sima-nav__sub.open { display: block !important; }
 .sima-nav__sub      { display: none; }
 
-.sima-sidebar__user {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    padding: 8px 10px;
-    background: rgba(108,143,255,.07);
-    border-radius: 12px;
-}
-
 /* Collapse state — hide group labels */
 .sima-sidebar.collapsed .sima-nav__group-label { display: none; }
 .sima-sidebar.collapsed .sima-nav__badge {
@@ -193,7 +153,6 @@
     min-width: 14px; height: 14px;
     font-size: 8px;
 }
-.sima-sidebar.collapsed .sima-sidebar__user > *:not(.sima-avatar) { display: none; }
 .sima-sidebar.collapsed .sima-sidebar__foot { justify-content: center; }
-.sima-sidebar.collapsed .sima-sidebar__user { justify-content: center; padding: 8px; }
+.sima-sidebar.collapsed .sima-sidebar__foot .sima-sidebar-label { display: none; }
 </style>

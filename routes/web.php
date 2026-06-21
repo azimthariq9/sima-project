@@ -72,24 +72,29 @@ Route::middleware(['auth', 'check.role:MAHASISWA'])
             Route::get('profile',   [MahasiswaController::class, 'getProfile'])->name('profile');
             Route::patch('profile', [MahasiswaController::class, 'updateProfile'])->name('profile.update');
 
-            Route::get('request',        [MahasiswaRequestController::class, 'index'])->name('request.index');
-            Route::post('request',       [MahasiswaRequestController::class, 'store'])->name('request.store');
-            Route::get('request/create', [MahasiswaController::class, 'createRequest'])->name('request.create');
-            Route::post('request/quick', [MahasiswaController::class, 'storeRequest'])->name('request.quick');
+            Route::get('request',             [MahasiswaRequestController::class, 'index'])->name('request.index');
+            Route::post('request',            [MahasiswaRequestController::class, 'store'])->name('request.store');
+            Route::get('request/create',      [MahasiswaController::class, 'createRequest'])->name('request.create');
+            Route::post('request/quick',      [MahasiswaController::class, 'storeRequest'])->name('request.quick');
+            Route::get('request/{id}/file',   [MahasiswaRequestController::class, 'downloadFile'])->name('request.file');
 
             Route::prefix('dokumen')->name('dokumen.')->group(function () {
-                Route::get('/',             [DokumenController::class, 'index'])->name('index');
-                Route::post('/',            [DokumenController::class, 'store'])->name('store');
-                Route::get('{id}/download', [DokumenController::class, 'download'])->name('download');
+                Route::get('/',             [MahasiswaController::class, 'dokumenPage'])->name('index');
+                Route::post('/',            [MahasiswaController::class, 'storeDokumen'])->name('store');
+                Route::get('{id}/download', [MahasiswaController::class, 'downloadDokumen'])->name('download');
             });
 
             Route::get('jadwal',        [MahasiswaController::class, 'jadwal'])->name('jadwal');
-            Route::get('announcement',  [MahasiswaController::class, 'announcement'])->name('announcement');
-            Route::get('announcement/{id}', [MahasiswaController::class, 'announcementShow'])->name('announcement.show');
+            Route::get('announcement',              [MahasiswaController::class, 'announcement'])->name('announcement');
+            Route::get('announcement/{id}',         [MahasiswaController::class, 'announcementShow'])->name('announcement.show');
+            Route::get('announcement/{id}/file/{fileId}', [MahasiswaController::class, 'announcementFile'])->name('announcement.file');
             Route::post('absensi/submit',   [MahasiswaController::class, 'submitAbsensi'])->name('absensi.submit');
             Route::get('notifikasi',          [MahasiswaController::class, 'notifikasi'])->name('notifikasi');
-            Route::post('notifikasi/mark-read', [MahasiswaController::class, 'markNotifRead'])->name('notifikasi.mark-read');
-            Route::get('analytics',     [MahasiswaController::class, 'analytics'])->name('analytics');
+            Route::post('notifikasi/mark-read',      [MahasiswaController::class, 'markNotifRead'])->name('notifikasi.mark-read');
+            Route::post('notifikasi/{id}/mark-read', [MahasiswaController::class, 'markOneNotifRead'])->name('notifikasi.mark-one');
+            Route::get('analytics',          [MahasiswaController::class, 'analytics'])->name('analytics');
+            Route::get('kehadiran',          [MahasiswaController::class, 'kehadiran'])->name('kehadiran');
+            Route::get('kehadiran/{kelasId}',[MahasiswaController::class, 'kehadiranDetail'])->name('kehadiran.detail');
         });
     });
 

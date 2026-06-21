@@ -6,6 +6,15 @@
 
 @section('main_content')
 
+@if($errors->any())
+<div style="background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.2);border-radius:10px;padding:14px 18px;margin-bottom:16px">
+    <div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:6px"><i class="fas fa-circle-exclamation"></i> Periksa isian berikut:</div>
+    @foreach($errors->all() as $error)
+        <div style="font-size:12.5px;color:#b91c1c;margin-top:3px">· {{ $error }}</div>
+    @endforeach
+</div>
+@endif
+
 <div class="row g-3">
 
     <div class="col-md-7 sima-fade">
@@ -61,49 +70,6 @@
                             <i class="fas fa-exclamation-circle"></i> {{ $message }}
                         </div>
                     @enderror
-                </div>
-
-
-                <div style="margin-bottom:18px">
-                    <label class="sima-label">Tanggal Dibutuhkan</label>
-                    <input type="date"
-                        name="tanggal_dibutuhkan"
-                        class="sima-input"
-                        value="{{ old('tanggal_dibutuhkan') }}"
-                        min="{{ now()->addDay()->format('Y-m-d') }}">
-                </div>
-
-
-                <div style="margin-bottom:18px">
-                    <label class="sima-label">Upload Dokumen Pendukung</label>
-
-                    <div style="border:2px dashed var(--c-border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s;background:var(--c-bg)"
-                        onclick="document.getElementById('file-upload').click()"
-                        ondragover="this.style.borderColor='var(--c-accent)'"
-                        ondragleave="this.style.borderColor='var(--c-border)'">
-
-                        <i class="fas fa-cloud-arrow-up"
-                        style="font-size:28px;color:var(--c-text-4);margin-bottom:8px;display:block"></i>
-
-                        <div style="font-size:13.5px;color:var(--c-text-2);font-weight:500">
-                            Drag & drop atau klik untuk upload
-                        </div>
-
-                        <div style="font-size:12px;color:var(--c-text-3);margin-top:4px">
-                            PDF, JPG, PNG — max 5MB
-                        </div>
-                    </div>
-
-                    <input type="file"
-                        id="file-upload"
-                        name="file_pendukung[]"
-                        multiple
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        style="display:none"
-                        onchange="showFiles(this)">
-
-                    <div id="file-list"
-                        style="margin-top:8px;font-size:12.5px;color:var(--c-text-3)"></div>
                 </div>
 
 
@@ -172,17 +138,3 @@
 
 @endsection
 
-@section('page_js')
-<script>
-function showFiles(input) {
-    const list = document.getElementById('file-list');
-    list.innerHTML = '';
-    Array.from(input.files).forEach(file => {
-        const item = document.createElement('div');
-        item.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--c-bg);border-radius:7px;margin-bottom:4px;border:1px solid var(--c-border-soft)';
-        item.innerHTML = `<i class="fas fa-file" style="color:var(--c-accent)"></i> <span style="flex:1;color:var(--c-text-2)">${file.name}</span> <span style="color:var(--c-text-3)">${(file.size/1024).toFixed(0)} KB</span>`;
-        list.appendChild(item);
-    });
-}
-</script>
-@endsection

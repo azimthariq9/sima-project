@@ -53,7 +53,7 @@ $typeConfig = [
                     <div style="width:38px;height:38px;border-radius:11px;
                                 background:{{ $tc['bg'] }};color:{{ $tc['cl'] }};
                                 display:flex;align-items:center;justify-content:center;
-                                font-size:14px;flex-shrink:0;">
+                                font-size:14px;flex-shrink:0;margin-top:2px;">
                         <i class="fas {{ $tc['ic'] }}"></i>
                     </div>
 
@@ -68,19 +68,30 @@ $typeConfig = [
                                 {{ $notif->subject }}
                             </span>
                         </div>
-                        <div style="font-size:13px;color:var(--c-text-2);line-height:1.5;margin-bottom:5px;">
+                        <div style="font-size:13px;color:var(--c-text-2);line-height:1.5;margin-bottom:6px;">
                             {{ $notif->message }}
                         </div>
-                        <div style="font-family:var(--f-mono);font-size:11px;color:var(--c-text-3);">
-                            <i class="fas fa-clock" style="font-size:10px;"></i>
-                            {{ \Carbon\Carbon::parse($notif->received_at)->diffForHumans() }}
-                            &middot; {{ \Carbon\Carbon::parse($notif->received_at)->isoFormat('D MMM YYYY, HH:mm') }}
+                        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                            <div style="font-family:var(--f-mono);font-size:11px;color:var(--c-text-3);">
+                                <i class="fas fa-clock" style="font-size:10px;"></i>
+                                {{ \Carbon\Carbon::parse($notif->received_at)->diffForHumans() }}
+                                &middot; {{ \Carbon\Carbon::parse($notif->received_at)->isoFormat('D MMM YYYY, HH:mm') }}
+                            </div>
+                            @if($isUnread)
+                            <form method="POST" action="{{ route('mahasiswa.notifikasi.mark-one', $notif->id) }}" style="margin:0">
+                                @csrf
+                                <button type="submit"
+                                        style="font-size:11px;font-weight:600;color:var(--c-accent);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px;">
+                                    Tandai dibaca
+                                </button>
+                            </form>
+                            @endif
                         </div>
                     </div>
 
                     {{-- Unread dot --}}
                     @if($isUnread)
-                    <div style="width:8px;height:8px;border-radius:50%;background:var(--c-accent);flex-shrink:0;margin-top:6px;"></div>
+                    <div style="width:8px;height:8px;border-radius:50%;background:var(--c-accent);flex-shrink:0;margin-top:8px;"></div>
                     @endif
                 </div>
                 @empty
