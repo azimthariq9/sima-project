@@ -773,6 +773,7 @@ class MahasiswaController extends Controller
     public function announcement()
     {
         $announcements = DB::table('announcement')
+            ->where('status', 'active')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
