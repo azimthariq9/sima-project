@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('namaDkmn');
             $table->string('penerbit');
             $table->string('noDkmn');
-            $table->date('tglterbit');
+            $table->date('tglTerbit');
             $table->date('tglKdlwrs');
             $table->string('status')->default('sedang diproses');
             $table->string('path');

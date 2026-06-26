@@ -50,7 +50,7 @@ class SimaSeeder extends Seeder
         // ══════════════════════════════════════════════════════════════
         $klnUserId = $oc('users', ['email' => 'kln.demo@seed.test'], [
             'role' => 'kln', 'password' => Hash::make('password'),
-            'status' => 'active', 'profile_completed' => true,
+            'status' => 'active', 'profile_completed' => true, 'is_has_password' => true,
         ]);
 
         // ══════════════════════════════════════════════════════════════
@@ -73,7 +73,7 @@ class SimaSeeder extends Seeder
         foreach ($dosenDef as $d) {
             $uid = $oc('users', ['email' => $d['email']], [
                 'role' => 'dosen', 'password' => Hash::make('password'),
-                'status' => 'active', 'profile_completed' => true,
+                'status' => 'active', 'profile_completed' => true, 'is_has_password' => true,
                 'jurusan_id' => $d['jur'],
             ]);
             // cek apakah sudah ada dosen untuk user ini
@@ -166,7 +166,7 @@ class SimaSeeder extends Seeder
         foreach ($mhsDef as $m) {
             $uid = $oc('users', ['email' => $m['email']], [
                 'role' => 'mahasiswa', 'password' => Hash::make('password'),
-                'status' => 'active', 'profile_completed' => true,
+                'status' => 'active', 'profile_completed' => true, 'is_has_password' => true,
                 'jurusan_id' => $m['jur'],
             ]);
             $mid = DB::table('mahasiswa')->where('user_id', $uid)->value('id')
