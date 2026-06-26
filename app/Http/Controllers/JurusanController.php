@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class JurusanController extends Controller
 {
@@ -14,6 +15,11 @@ class JurusanController extends Controller
     |==========================================================================
     */
 
+    private function jurusanId(): int
+    {
+        return Auth::user()->jurusan_id;
+    }
+
     private function unreadNotif(): int
     {
         return DB::table('notification_users')
@@ -22,63 +28,123 @@ class JurusanController extends Controller
             ->count();
     }
 
+    /** Kirim notif ke mahasiswa via notification_mahasiswa (bukan notification_users) */
     private function kirimNotifMahasiswa(int $userId, string $judul, string $pesan): void
     {
         $notifId = DB::table('notification')->insertGetId([
             'subject'    => $judul,
             'message'    => $pesan,
+            'type'       => 'document',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
-        DB::table('notification_users')->insert([
-            'user_id'         => $userId,
-            'notification_id' => $notifId,
-            'is_read'         => false,
-            'created_at'      => now(),
-            'updated_at'      => now(),
-        ]);
+        $mahasiswaId = DB::table('mahasiswa')->where('user_id', $userId)->value('id');
+
+        if ($mahasiswaId) {
+            DB::table('notification_mahasiswa')->insert([
+                'notification_id' => $notifId,
+                'mahasiswa_id'    => $mahasiswaId,
+                'is_read'         => false,
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ]);
+        }
     }
 
 
     /*
     |==========================================================================
     | DASHBOARD
-    | Route: GET jurusan/dashboard -> jurusan.dashboard
     |==========================================================================
     */
 
     public function dashboard()
     {
-        $totalMahasiswa  = DB::table('mahasiswa')->count();
-        $jadwalAktif     = DB::table('jadwal')->count();
-        $totalMatakuliah = DB::table('matakuliah')->count();
-        $totalDosen      = DB::table('dosen')->count();
+        $jid = $this->jurusanId();
+
+        $totalMahasiswa = DB::table('mahasiswa')
+            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
+            ->where('users.jurusan_id', $jid)
+            ->count();
+
+        $totalMatakuliah = DB::table('matakuliah')
+            ->where('jurusan_id', $jid)
+            ->count();
+
+        $totalDosen = DB::table('dosen')
+            ->join('users', 'dosen.user_id', '=', 'users.id')
+            ->where('users.jurusan_id', $jid)
+            ->count();
+
+        $jadwalAktif = DB::table('jadwal')
+            ->join('dosen', 'jadwal.dosen_id', '=', 'dosen.id')
+            ->join('users', 'dosen.user_id', '=', 'users.id')
+            ->where('users.jurusan_id', $jid)
+            ->count();
 
         $pendingRequest = DB::table('reqDokumen')
-            ->where('status', 'pending')
+            ->join('mahasiswa', 'reqDokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
+            ->where('users.jurusan_id', $jid)
+            ->where('reqDokumen.status', 'pending')
             ->count();
 
         $announcements = DB::table('announcement')
+            ->where('status', 'active')
             ->where('sumber', 'jurusan')
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc('is_penting')
+            ->orderByDesc('created_at')
             ->limit(3)
             ->get();
 
         $requestTerbaru = DB::table('reqDokumen')
             ->join('mahasiswa', 'reqDokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
+            ->where('users.jurusan_id', $jid)
             ->select('reqDokumen.*', 'mahasiswa.nama as nama_mahasiswa', 'mahasiswa.npm')
-            ->orderBy('reqDokumen.created_at', 'desc')
+            ->orderByDesc('reqDokumen.created_at')
             ->limit(5)
             ->get();
 
-        $hariIni = now()->locale('id')->translatedFormat('l');
+        $hariMap = [
+            'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu', 'Sunday' => 'Minggu',
+        ];
+        $hariIni = $hariMap[now()->format('l')] ?? now()->format('l');
+
         $jadwalHariIni = DB::table('jadwal')
+            ->join('dosen', 'jadwal.dosen_id', '=', 'dosen.id')
+            ->join('users', 'dosen.user_id', '=', 'users.id')
             ->leftJoin('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
-            ->leftJoin('dosen', 'jadwal.dosen_id', '=', 'dosen.id')
+            ->leftJoin('kelas', 'jadwal.kelas_id', '=', 'kelas.id')
+            ->where('users.jurusan_id', $jid)
             ->where('jadwal.hari', $hariIni)
-            ->select('jadwal.*', 'matakuliah.namaMk as nama_matkul', 'dosen.nama as nama_dosen')
+            ->select(
+                'jadwal.*',
+                'matakuliah.namaMk as nama_matkul',
+                'dosen.nama as nama_dosen',
+                'kelas.kodeKelas'
+            )
             ->orderBy('jadwal.jam')
+            ->get();
+
+        $jadwalMingguIni = DB::table('jadwal')
+            ->join('dosen', 'jadwal.dosen_id', '=', 'dosen.id')
+            ->join('users', 'dosen.user_id', '=', 'users.id')
+            ->leftJoin('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
+            ->leftJoin('kelas', 'jadwal.kelas_id', '=', 'kelas.id')
+            ->where('users.jurusan_id', $jid)
+            ->orderByRaw("CASE jadwal.hari
+                WHEN 'Senin'   THEN 1
+                WHEN 'Selasa'  THEN 2
+                WHEN 'Rabu'    THEN 3
+                WHEN 'Kamis'   THEN 4
+                WHEN 'Jumat'   THEN 5
+                WHEN 'Sabtu'   THEN 6
+                ELSE 7 END, jadwal.jam")
+            ->select('jadwal.*', 'matakuliah.namaMk as nama_matkul', 'dosen.nama as nama_dosen', 'kelas.kodeKelas as kode_kelas')
+            ->limit(10)
             ->get();
 
         $unreadNotifCount = $this->unreadNotif();
@@ -86,7 +152,7 @@ class JurusanController extends Controller
         return view('jurusan.dashboard', compact(
             'totalMahasiswa', 'jadwalAktif', 'totalMatakuliah', 'totalDosen',
             'pendingRequest', 'announcements', 'requestTerbaru', 'jadwalHariIni',
-            'unreadNotifCount'
+            'jadwalMingguIni', 'unreadNotifCount'
         ));
     }
 
@@ -94,21 +160,35 @@ class JurusanController extends Controller
     /*
     |==========================================================================
     | PROFIL
-    | Route: GET jurusan/profil -> jurusan.profil
     |==========================================================================
     */
 
     public function profil()
     {
-        return redirect()->route('jurusan.dashboard')
-            ->with('info', 'Halaman profil sedang dalam pengembangan.');
+        return view('jurusan.profil', ['user' => auth()->user()]);
+    }
+
+    public function updateProfil(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        $user = auth()->user();
+
+        if ($request->filled('password')) {
+            \Illuminate\Support\Facades\DB::table('users')
+                ->where('id', $user->id)
+                ->update(['password' => bcrypt($request->password)]);
+        }
+
+        return redirect()->route('jurusan.profil')->with('success', 'Password berhasil diperbarui.');
     }
 
 
     /*
     |==========================================================================
     | NOTIFIKASI
-    | Route: GET jurusan/notifikasi -> jurusan.notifikasi
     |==========================================================================
     */
 
@@ -123,85 +203,362 @@ class JurusanController extends Controller
             ->join('notification', 'notification_users.notification_id', '=', 'notification.id')
             ->where('notification_users.user_id', Auth::id())
             ->select('notification.*', 'notification_users.is_read', 'notification_users.created_at as received_at')
-            ->orderBy('notification_users.created_at', 'desc')
-            ->paginate(15);
+            ->orderByDesc('notification_users.created_at')
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('jurusan.notifikasi', compact('notifikasi'));
+        $unreadNotifCount = 0;
+
+        return view('jurusan.notifikasi', compact('notifikasi', 'unreadNotifCount'));
     }
 
 
     /*
     |==========================================================================
-    | ANNOUNCEMENT
-    | Route: GET jurusan/announcement -> jurusan.announcement
+    | ANNOUNCEMENT — CRUD
     |==========================================================================
     */
 
-    public function announcement()
+    public function announcement(Request $request)
     {
-        return redirect()->route('jurusan.dashboard')
-            ->with('info', 'Halaman announcement sedang dalam pengembangan.');
+        $search = $request->input('search', '');
+        $filter = $request->input('filter', '');
+
+        $query = DB::table('announcement')
+            ->where('sumber', 'jurusan')
+            ->whereIn('status', ['active', 'inactive']);
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('subject', 'ilike', "%{$search}%")
+                  ->orWhere('message', 'ilike', "%{$search}%");
+            });
+        }
+
+        if ($filter === 'penting') {
+            $query->where('is_penting', true);
+        } elseif ($filter === 'active') {
+            $query->where('status', 'active');
+        } elseif ($filter === 'inactive') {
+            $query->where('status', 'inactive');
+        }
+
+        $announcements = $query
+            ->orderByDesc('is_penting')
+            ->orderByDesc('created_at')
+            ->paginate(10)
+            ->withQueryString();
+
+        $unreadNotifCount = $this->unreadNotif();
+
+        return view('jurusan.announcement.index', compact('announcements', 'unreadNotifCount', 'search', 'filter'));
+    }
+
+    public function storeAnnouncement(Request $request)
+    {
+        $request->validate([
+            'subject'    => 'required|string|max:200',
+            'message'    => 'required|string',
+            'is_penting' => 'nullable|boolean',
+        ]);
+
+        DB::table('announcement')->insert([
+            'subject'    => $request->subject,
+            'message'    => $request->message,
+            'status'     => 'active',
+            'is_penting' => $request->boolean('is_penting'),
+            'sumber'     => 'jurusan',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('jurusan.announcement.index')->with('success', 'Pengumuman berhasil dibuat.');
+    }
+
+    public function editAnnouncement(int $id)
+    {
+        $ann = DB::table('announcement')
+            ->where('id', $id)
+            ->where('sumber', 'jurusan')
+            ->first();
+
+        abort_if(!$ann, 404);
+
+        return response()->json($ann);
+    }
+
+    public function updateAnnouncement(Request $request, int $id)
+    {
+        $request->validate([
+            'subject'    => 'required|string|max:200',
+            'message'    => 'required|string',
+            'is_penting' => 'nullable|boolean',
+            'status'     => 'required|in:active,inactive',
+        ]);
+
+        DB::table('announcement')
+            ->where('id', $id)
+            ->where('sumber', 'jurusan')
+            ->update([
+                'subject'    => $request->subject,
+                'message'    => $request->message,
+                'is_penting' => $request->boolean('is_penting'),
+                'status'     => $request->status,
+                'updated_at' => now(),
+            ]);
+
+        return redirect()->route('jurusan.announcement.index')->with('success', 'Pengumuman berhasil diperbarui.');
+    }
+
+    public function destroyAnnouncement(int $id)
+    {
+        DB::table('announcement')
+            ->where('id', $id)
+            ->where('sumber', 'jurusan')
+            ->update(['status' => 'deleted', 'updated_at' => now()]);
+
+        return redirect()->route('jurusan.announcement.index')->with('success', 'Pengumuman berhasil dihapus.');
     }
 
 
     /*
     |==========================================================================
-    | DOKUMEN
+    | DOKUMEN — daftar dokumen mahasiswa di jurusan ini
     |==========================================================================
     */
 
-    /**
-     * Daftar semua dokumen yang pernah diupload oleh jurusan.
-     * Route: GET jurusan/dokumen -> jurusan.dokumen.index
-     */
     public function dokumen(Request $request)
     {
-        return redirect()->route('jurusan.dashboard')
-            ->with('info', 'Halaman dokumen sedang dalam pengembangan.');
+        $jid    = $this->jurusanId();
+        $search = $request->input('search', '');
+        $filter = $request->input('filter', '');
+
+        $query = DB::table('dokumen')
+            ->join('mahasiswa', 'dokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
+            ->where('users.jurusan_id', $jid)
+            ->whereNull('dokumen.deleted_at');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('mahasiswa.nama', 'ilike', "%{$search}%")
+                  ->orWhere('mahasiswa.npm', 'ilike', "%{$search}%")
+                  ->orWhere('dokumen.namaDkmn', 'ilike', "%{$search}%")
+                  ->orWhere('dokumen.noDkmn', 'ilike', "%{$search}%");
+            });
+        }
+
+        if ($filter) {
+            $query->where('dokumen.status', $filter);
+        }
+
+        $dokumen = $query
+            ->select('dokumen.*', 'mahasiswa.nama as nama_mahasiswa', 'mahasiswa.npm')
+            ->orderByDesc('dokumen.created_at')
+            ->paginate(15)
+            ->withQueryString();
+
+        $unreadNotifCount = $this->unreadNotif();
+
+        return view('jurusan.dokumen.index', compact('dokumen', 'unreadNotifCount', 'search', 'filter'));
     }
 
-    /**
-     * Detail satu dokumen.
-     * Route: GET jurusan/dokumen/{id} -> jurusan.dokumen.show
-     */
     public function showDokumen(int $id)
     {
-        $dokumen = DB::table('dokumen')
+        $jid = $this->jurusanId();
+
+        $dok = DB::table('dokumen')
             ->join('mahasiswa', 'dokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
             ->where('dokumen.id', $id)
+            ->where('users.jurusan_id', $jid)
+            ->whereNull('dokumen.deleted_at')
             ->select('dokumen.*', 'mahasiswa.nama as nama_mahasiswa', 'mahasiswa.npm')
             ->first();
 
-        if (!$dokumen) {
-            return back()->with('error', 'Dokumen tidak ditemukan.');
-        }
+        abort_if(!$dok, 404);
 
-        return response()->json($dokumen);
+        return response()->json($dok);
     }
 
-    /**
-     * Upload / update file dokumen ke mahasiswa.
-     * Route: POST jurusan/dokumen/{id}/upload -> jurusan.dokumen.upload
-     */
+    public function serveDokumen(int $id)
+    {
+        $jid = $this->jurusanId();
+
+        $dok = DB::table('dokumen')
+            ->join('mahasiswa', 'dokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
+            ->where('dokumen.id', $id)
+            ->where('users.jurusan_id', $jid)
+            ->whereNull('dokumen.deleted_at')
+            ->select('dokumen.id')
+            ->first();
+
+        abort_if(!$dok, 403);
+
+        $file = DB::table('fileDetail')
+            ->where('dokumen_id', $id)
+            ->orderByDesc('created_at')
+            ->first();
+
+        abort_if(!$file, 404, 'File tidak tersedia.');
+
+        $storage = Storage::disk('local');
+        abort_if(!$storage->exists($file->path), 404, 'File tidak ditemukan.');
+
+        return $storage->download($file->path, basename($file->path));
+    }
+
+    public function updateStatusDokumen(Request $request, int $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,approved,rejected',
+        ]);
+
+        $jid = $this->jurusanId();
+
+        $dok = DB::table('dokumen')
+            ->join('mahasiswa', 'dokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
+            ->where('dokumen.id', $id)
+            ->where('users.jurusan_id', $jid)
+            ->whereNull('dokumen.deleted_at')
+            ->select('dokumen.*', 'users.id as user_id', 'mahasiswa.nama as nama_mahasiswa')
+            ->first();
+
+        abort_if(!$dok, 403);
+
+        DB::table('dokumen')
+            ->where('id', $id)
+            ->update(['status' => $request->status, 'updated_at' => now()]);
+
+        $pesanMap = [
+            'approved' => "Dokumen '{$dok->namaDkmn}' Anda telah diverifikasi oleh Jurusan.",
+            'rejected' => "Dokumen '{$dok->namaDkmn}' Anda ditolak oleh Jurusan. Silakan upload ulang.",
+        ];
+
+        if (isset($pesanMap[$request->status])) {
+            $this->kirimNotifMahasiswa($dok->user_id, 'Verifikasi Dokumen', $pesanMap[$request->status]);
+        }
+
+        return back()->with('success', 'Status dokumen berhasil diperbarui.');
+    }
+
+
+    /*
+    |==========================================================================
+    | REQUEST DOKUMEN
+    |==========================================================================
+    */
+
+    public function indexReqDocument(Request $request)
+    {
+        $jid    = $this->jurusanId();
+        $search = $request->input('search', '');
+        $filter = $request->input('filter', '');
+
+        $query = DB::table('reqDokumen')
+            ->join('mahasiswa', 'reqDokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
+            ->where('users.jurusan_id', $jid);
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('mahasiswa.nama', 'ilike', "%{$search}%")
+                  ->orWhere('mahasiswa.npm', 'ilike', "%{$search}%")
+                  ->orWhere('reqDokumen.tipeDkmn', 'ilike', "%{$search}%");
+            });
+        }
+
+        if ($filter) {
+            $query->where('reqDokumen.status', $filter);
+        }
+
+        $requests = $query
+            ->select('reqDokumen.*', 'mahasiswa.nama as nama_mahasiswa', 'mahasiswa.npm')
+            ->orderByDesc('reqDokumen.created_at')
+            ->paginate(15)
+            ->withQueryString();
+
+        $unreadNotifCount = $this->unreadNotif();
+
+        return view('jurusan.request.index', compact('requests', 'unreadNotifCount', 'search', 'filter'));
+    }
+
+    public function showReqDocument(int $id)
+    {
+        $jid = $this->jurusanId();
+
+        $req = DB::table('reqDokumen')
+            ->join('mahasiswa', 'reqDokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
+            ->where('reqDokumen.id', $id)
+            ->where('users.jurusan_id', $jid)
+            ->select('reqDokumen.*', 'mahasiswa.nama as nama_mahasiswa', 'mahasiswa.npm')
+            ->first();
+
+        abort_if(!$req, 404);
+
+        return response()->json($req);
+    }
+
+    public function updateReqDokumen(Request $request, int $id)
+    {
+        $request->validate([
+            'status'  => 'required|in:pending,approved,rejected',
+            'message' => 'nullable|string|max:500',
+        ]);
+
+        $jid = $this->jurusanId();
+
+        $req = DB::table('reqDokumen')
+            ->join('mahasiswa', 'reqDokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
+            ->where('reqDokumen.id', $id)
+            ->where('users.jurusan_id', $jid)
+            ->select('reqDokumen.*', 'users.id as user_id', 'mahasiswa.nama as nama_mahasiswa')
+            ->first();
+
+        abort_if(!$req, 403);
+
+        $updateData = ['status' => $request->status, 'updated_at' => now()];
+        if ($request->filled('message')) {
+            $updateData['keterangan'] = $request->message;
+        }
+
+        DB::table('reqDokumen')->where('id', $id)->update($updateData);
+
+        $pesanNotif = match($request->status) {
+            'approved' => "Permintaan dokumen '{$req->tipeDkmn}' Anda telah disetujui. Silakan unduh.",
+            'rejected' => "Permintaan dokumen '{$req->tipeDkmn}' tidak dapat diproses." . ($request->message ? " Alasan: {$request->message}" : ''),
+            default    => "Status permintaan dokumen Anda telah diperbarui.",
+        };
+
+        $this->kirimNotifMahasiswa($req->user_id, 'Update Request Dokumen', $pesanNotif);
+
+        return back()->with('success', 'Status request berhasil diperbarui.');
+    }
+
     public function uploadDokumen(Request $request, int $id)
     {
         $request->validate([
             'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
+        $jid = $this->jurusanId();
+
         $req = DB::table('reqDokumen')
             ->join('mahasiswa', 'reqDokumen.mahasiswa_id', '=', 'mahasiswa.id')
             ->join('users', 'mahasiswa.user_id', '=', 'users.id')
             ->where('reqDokumen.id', $id)
+            ->where('users.jurusan_id', $jid)
             ->select('reqDokumen.*', 'mahasiswa.nama as nama_mahasiswa', 'users.id as user_id')
             ->first();
 
-        if (!$req) {
-            return back()->with('error', 'Request dokumen tidak ditemukan.');
-        }
+        abort_if(!$req, 403);
 
         $file = $request->file('file');
-        $path = $file->store('dokumen/jurusan/' . $req->mahasiswa_id, 'public');
+        $path = $file->store('dokumen/jurusan/' . $req->mahasiswa_id, 'local');
 
         DB::table('fileDetail')->insert([
             'reqDokumen_id' => $id,
@@ -214,98 +571,17 @@ class JurusanController extends Controller
 
         DB::table('reqDokumen')
             ->where('id', $id)
-            ->update(['status' => 'selesai', 'updated_at' => now()]);
+            ->update(['status' => 'approved', 'updated_at' => now()]);
 
         $this->kirimNotifMahasiswa(
             $req->user_id,
             'Dokumen Jurusan Siap',
-            "Dokumen '{$req->namaDkmn}' dari Jurusan sudah siap. Silakan unduh di menu Dokumen."
+            "Dokumen '{$req->tipeDkmn}' dari Jurusan sudah siap. Silakan unduh di menu Request."
         );
 
         return back()->with('success', 'Dokumen berhasil diupload dan mahasiswa telah diberitahu.');
     }
 
-
-    /*
-    |==========================================================================
-    | REQUEST DOKUMEN
-    |==========================================================================
-    */
-
-    /**
-     * Daftar semua request dokumen yang masuk ke jurusan.
-     * Route: GET jurusan/requestDok -> jurusan.request.index
-     */
-    public function indexReqDocument(Request $request)
-    {
-        return redirect()->route('jurusan.dashboard')
-            ->with('info', 'Halaman request dokumen sedang dalam pengembangan.');
-    }
-
-    /**
-     * Detail satu request dokumen.
-     * Route: GET jurusan/requestDok/{id} -> jurusan.request.show
-     */
-    public function showReqDocument(int $id)
-    {
-        $req = DB::table('reqDokumen')
-            ->join('mahasiswa', 'reqDokumen.mahasiswa_id', '=', 'mahasiswa.id')
-            ->where('reqDokumen.id', $id)
-            ->select('reqDokumen.*', 'mahasiswa.nama as nama_mahasiswa', 'mahasiswa.npm')
-            ->first();
-
-        if (!$req) {
-            return response()->json(['error' => 'Request tidak ditemukan.'], 404);
-        }
-
-        return response()->json($req);
-    }
-
-    /**
-     * Update status request (pending -> diproses -> selesai / ditolak).
-     * Route: PATCH jurusan/requestDok/{id}/status -> jurusan.request.status
-     */
-    public function updateReqDokumen(Request $request, int $id)
-    {
-        $request->validate([
-            'status'  => 'required|in:pending,diproses,selesai,ditolak',
-            'message' => 'nullable|string|max:500',
-        ]);
-
-        $req = DB::table('reqDokumen')
-            ->join('mahasiswa', 'reqDokumen.mahasiswa_id', '=', 'mahasiswa.id')
-            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
-            ->where('reqDokumen.id', $id)
-            ->select('reqDokumen.*', 'users.id as user_id', 'mahasiswa.nama as nama_mahasiswa')
-            ->first();
-
-        if (!$req) {
-            return back()->with('error', 'Request tidak ditemukan.');
-        }
-
-        $updateData = ['status' => $request->status, 'updated_at' => now()];
-        if ($request->filled('message')) {
-            $updateData['message'] = $request->message;
-        }
-
-        DB::table('reqDokumen')->where('id', $id)->update($updateData);
-
-        $pesanNotif = match($request->status) {
-            'diproses' => "Permintaan dokumen '{$req->namaDkmn}' Anda sedang diproses oleh Jurusan.",
-            'selesai'  => "Dokumen '{$req->namaDkmn}' dari Jurusan sudah selesai. Silakan unduh.",
-            'ditolak'  => "Permintaan dokumen '{$req->namaDkmn}' tidak dapat diproses." . ($request->message ? " Alasan: {$request->message}" : ''),
-            default    => "Status permintaan dokumen Anda telah diperbarui.",
-        };
-
-        $this->kirimNotifMahasiswa($req->user_id, 'Update Dokumen Jurusan', $pesanNotif);
-
-        return back()->with('success', 'Status request berhasil diperbarui.');
-    }
-
-    /**
-     * Upload dokumen langsung dari halaman request.
-     * Route: POST jurusan/requestDok/{id}/upload -> jurusan.request.upload
-     */
     public function uploadReqDokumen(Request $request, int $id)
     {
         return $this->uploadDokumen($request, $id);

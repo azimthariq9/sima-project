@@ -1,7 +1,3 @@
-{{-- ============================================================
-   FILE 1: jurusan/kelas/index.blade.php
-   Kelas hanya punya field: kodeKelas
-   ============================================================ --}}
 @extends('layouts.sima')
 
 @section('page_title',    'Kelas')
@@ -10,186 +6,227 @@
 
 @section('main_content')
 
-<div class="sima-card">
+@php
+$tahunSekarang    = (int) date('Y');
+$tahunAjarDefault = date('Y').'/'.(date('Y')+1);
+$tahunAjarList    = [];
+for ($i = -1; $i <= 10; $i++) {
+    $a = $tahunSekarang + $i;
+    $tahunAjarList[] = "{$a}/".($a+1);
+}
+@endphp
+
+<div class="sima-card sima-fade">
     <div class="sima-card__header">
-        <div><h5 class="sima-card__title">Daftar Kelas</h5></div>
         <div>
-            <select id="sortInput" class="sima-input" style="min-width:150px;">
-                <option value="">Sort By</option>
-                <option value="kodeKelas_asc">Kode (A-Z)</option>
-                <option value="kodeKelas_desc">Kode (Z-A)</option>
-                <option value="id_asc">ID (Ascending)</option>
-                <option value="id_desc">ID (Descending)</option>
-            </select>
+            <h5 class="sima-card__title">Daftar Kelas</h5>
+            <div class="sima-card__subtitle">Total {{ $kelas->total() }} kelas</div>
         </div>
-        <div style="display:flex;gap:12px;">
-            <input id="searchInput" type="text" placeholder="Cari kode kelas..."
-                   class="sima-input">
-            <button id="openAddKelasModal" class="sima-btn sima-btn--blue">
-                <i class="fas fa-plus"></i> Tambah Kelas
+        <button type="button" id="btnTambah" class="sima-btn sima-btn--sm">
+            <i class="fas fa-plus"></i> Tambah Kelas
+        </button>
+    </div>
+
+    {{-- Filter --}}
+    <div style="padding:12px 20px;border-bottom:1px solid var(--c-border-soft)">
+        <form method="GET" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <input type="text" name="search" value="{{ $search }}" placeholder="Cari kode kelas…"
+                   class="sima-input" style="width:240px;font-size:13px">
+            <button type="submit" class="sima-btn sima-btn--sm sima-btn--outline">
+                <i class="fas fa-search"></i> Cari
             </button>
+            @if($search)
+                <a href="{{ route('jurusan.kelas.page') }}" class="sima-btn sima-btn--sm sima-btn--outline">
+                    <i class="fas fa-xmark"></i> Reset
+                </a>
+            @endif
+        </form>
+    </div>
+
+    @if($kelas->isEmpty())
+        <div class="sima-card__body" style="text-align:center;padding:48px 20px;color:var(--c-text-3)">
+            <i class="fas fa-door-open" style="font-size:36px;opacity:.3;display:block;margin-bottom:12px"></i>
+            <div style="font-size:14px;font-weight:500;color:var(--c-text-2)">
+                {{ $search ? 'Tidak ada kelas yang cocok' : 'Belum ada kelas' }}
+            </div>
         </div>
-    </div>
-    <div style="overflow-x:auto">
-        <table class="sima-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>KODE KELAS</th>
-                    <th>JUMLAH MAHASISWA</th>
-                    <th>MAHASISWA</th>
-                    <th>AKSI</th>
-                </tr>
-            </thead>
-            <tbody id="kelasTable"></tbody>
-        </table>
-    </div>
+    @else
+        <div style="overflow-x:auto">
+            <table class="sima-table">
+                <thead>
+                    <tr>
+                        <th style="width:40px">#</th>
+                        <th>Kode Kelas</th>
+                        <th>Tahun Ajaran</th>
+                        <th style="width:130px">Mahasiswa</th>
+                        <th style="width:140px"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($kelas as $k)
+                    <tr>
+                        <td style="color:var(--c-text-3);font-size:12px">
+                            {{ $kelas->firstItem() + $loop->index }}
+                        </td>
+                        <td>
+                            <span style="font-family:var(--f-mono);font-size:13px;font-weight:700;
+                                         background:var(--c-teal-lt);color:var(--c-teal);
+                                         padding:4px 10px;border-radius:6px">
+                                {{ $k->kodeKelas }}
+                            </span>
+                        </td>
+                        <td style="font-size:12.5px;color:var(--c-text-2)">{{ $k->tahunAjar ?? '—' }}</td>
+                        <td>
+                            <span class="sima-badge sima-badge--purple" style="font-size:11px">
+                                {{ $k->mahasiswa_count ?? 0 }} mahasiswa
+                            </span>
+                        </td>
+                        <td>
+                            <div style="display:flex;gap:6px">
+                                <button type="button" class="sima-btn sima-btn--sm sima-btn--outline btn-view-mhs"
+                                        data-id="{{ $k->id }}" data-kode="{{ $k->kodeKelas }}"
+                                        style="font-size:11.5px;padding:4px 10px">
+                                    <i class="fas fa-users"></i>
+                                </button>
+                                <button type="button" class="sima-btn sima-btn--sm sima-btn--outline btn-edit-kelas"
+                                        data-id="{{ $k->id }}"
+                                        style="font-size:11.5px;padding:4px 10px">
+                                    <i class="fas fa-pencil"></i>
+                                </button>
+                                <button type="button" class="sima-btn sima-btn--sm btn-del-kelas"
+                                        data-id="{{ $k->id }}" data-kode="{{ $k->kodeKelas }}"
+                                        style="font-size:11.5px;padding:4px 10px;background:rgba(220,38,38,.08);color:#dc2626;border:1px solid rgba(220,38,38,.2)">
+                                    <i class="fas fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <div style="padding:14px 20px">
+            {{ $kelas->links('vendor.pagination.sima') }}
+        </div>
+    @endif
 </div>
 
-{{-- ── PANEL MAHASISWA KELAS ─────────────────────────── --}}
-<div id="mahasiswaPanel" style="display:none;margin-top:20px;">
-    <div class="sima-card">
+{{-- Mahasiswa Panel --}}
+<div id="mahasiswaPanel" style="display:none;margin-top:20px">
+    <div class="sima-card sima-fade">
         <div class="sima-card__header">
             <div>
-                <h5 class="sima-card__title" id="panelKelasTitle">Mahasiswa Kelas</h5>
+                <h5 class="sima-card__title" id="panelTitle">Mahasiswa Kelas</h5>
                 <div class="sima-card__subtitle">Daftar mahasiswa terdaftar</div>
             </div>
-            <div style="display:flex;gap:8px;">
-                <button id="openAddMahasiswaModal" class="sima-btn sima-btn--blue sima-btn--sm">
+            <div style="display:flex;gap:8px">
+                <button type="button" id="btnAddMhs" class="sima-btn sima-btn--sm">
                     <i class="fas fa-user-plus"></i> Tambah Mahasiswa
                 </button>
-                <button onclick="closeMahasiswaPanel()" class="sima-btn sima-btn--outline sima-btn--sm">
-                    <i class="fas fa-times"></i> Tutup
+                <button type="button" onclick="closeMhsPanel()" class="sima-btn sima-btn--sm sima-btn--outline">
+                    <i class="fas fa-xmark"></i> Tutup
                 </button>
             </div>
         </div>
         <div style="overflow-x:auto">
             <table class="sima-table">
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>NPM</th>
-                        <th>NAMA MAHASISWA</th>
-                        <th>EMAIL</th>
-                        <th>AKSI</th>
-                    </tr>
+                    <tr><th>#</th><th>NPM</th><th>Nama</th><th>Email</th><th style="width:80px"></th></tr>
                 </thead>
-                <tbody id="mahasiswaKelasTable"></tbody>
+                <tbody id="mhsPanelTbody">
+                    <tr><td colspan="5" style="padding:24px;text-align:center;color:var(--c-text-3)">Pilih kelas untuk melihat mahasiswa</td></tr>
+                </tbody>
             </table>
         </div>
     </div>
 </div>
 
-{{-- ── MODAL TAMBAH KELAS ───────────────────────────── --}}
-<div id="kelasModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
-     backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#0f172a;width:440px;padding:30px;border-radius:20px;
-                box-shadow:0 20px 60px rgba(0,0,0,.5);">
-        <h2 style="color:white;font-size:20px;margin-bottom:20px;">Tambah Kelas</h2>
-        <form id="kelasForm">
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;font-size:12px;display:block;margin-bottom:6px">
-                    Kode Kelas
-                </label>
-                <input type="text" name="kodeKelas"
-                       style="width:100%;padding:10px;background:#1e293b;color:white;
-                              border-radius:10px;border:1px solid #334155;font-family:var(--f-mono)"
-                       placeholder="Contoh: 3KA35">
-            </div>
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;font-size:12px;display:block;margin-bottom:6px">
-                    Tahun Ajaran
-                </label>
-                <select name="tahunAjar"
-                        style="width:100%;padding:10px;background:#1e293b;color:white;
-                               border-radius:10px;border:1px solid #334155;">
-                    @php
-                        $tahunSekarang = (int) date('Y');
-                        $tahunAjarDefault = date('Y') . '/' . (date('Y') + 1);
-                    @endphp
-                    @for($i = -1; $i <= 10; $i++)
-                        @php
-                            $awal  = $tahunSekarang + $i;
-                            $akhir = $awal + 1;
-                            $val   = "{$awal}/{$akhir}";
-                        @endphp
-                        <option value="{{ $val }}" {{ $val === $tahunAjarDefault ? 'selected' : '' }}>
-                            {{ $val }}
-                        </option>
-                    @endfor
-                </select>
-            </div>
-            <div style="display:flex;justify-content:space-between;margin-top:20px;">
-                <button type="button" onclick="closeModal()" class="sima-btn sima-btn--gold">Cancel</button>
-                <button type="submit" class="sima-btn sima-btn--blue">Simpan</button>
-            </div>
-        </form>
+
+{{-- MODAL TAMBAH KELAS --}}
+<div id="modalTambah" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:18px;width:100%;max-width:420px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+        <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:15px;font-weight:700;color:#1e293b">Tambah Kelas</div>
+            <button type="button" onclick="closeModals()" style="width:32px;height:32px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;color:#64748b"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div style="padding:20px 24px">
+            <form id="formTambah">
+                <div style="margin-bottom:14px">
+                    <label class="sima-label">Kode Kelas <span style="color:var(--c-red)">*</span></label>
+                    <input type="text" name="kodeKelas" class="sima-input" required placeholder="Contoh: 3KA35" style="font-family:var(--f-mono)">
+                </div>
+                <div style="margin-bottom:18px">
+                    <label class="sima-label">Tahun Ajaran</label>
+                    <select name="tahunAjar" class="sima-input">
+                        @foreach($tahunAjarList as $ta)
+                            <option value="{{ $ta }}" {{ $ta === $tahunAjarDefault ? 'selected' : '' }}>{{ $ta }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div id="tambahErr" style="display:none;font-size:12.5px;color:#dc2626;margin-bottom:12px;padding:10px;background:#fef2f2;border-radius:8px"></div>
+                <div style="display:flex;gap:8px">
+                    <button type="submit" class="sima-btn"><i class="fas fa-plus"></i> Simpan</button>
+                    <button type="button" onclick="closeModals()" class="sima-btn sima-btn--outline">Batal</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-{{-- ── MODAL EDIT KELAS ─────────────────────────────── --}}
-<div id="kelasEditModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
-     backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#0f172a;width:440px;padding:30px;border-radius:20px;
-                box-shadow:0 20px 60px rgba(0,0,0,.5);">
-        <h2 style="color:white;font-size:20px;margin-bottom:20px;">Edit Kelas</h2>
-        <form id="kelasEditForm">
-            <input type="hidden" id="editKelasId">
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;font-size:12px;display:block;margin-bottom:6px">
-                    Kode Kelas
-                </label>
-                <input type="text" name="kodeKelas" id="editKodeKelas"
-                       style="width:100%;padding:10px;background:#1e293b;color:white;
-                              border-radius:10px;border:1px solid #334155;font-family:var(--f-mono)">
-            </div>
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;font-size:12px;display:block;margin-bottom:6px">
-                    Tahun Ajaran
-                </label>
-                <select name="tahunAjar" id="editTahunAjar"
-                        style="width:100%;padding:10px;background:#1e293b;color:white;
-                               border-radius:10px;border:1px solid #334155;">
-                    @for($i = -1; $i <= 10; $i++)
-                        @php
-                            $awal  = $tahunSekarang + $i;
-                            $akhir = $awal + 1;
-                            $val   = "{$awal}/{$akhir}";
-                        @endphp
-                        <option value="{{ $val }}" {{ $val === $tahunAjarDefault ? 'selected' : '' }}>
-                            {{ $val }}
-                        </option>
-                    @endfor
-                </select>
-            </div>
-            <div style="display:flex;justify-content:space-between;margin-top:20px;">
-                <button type="button" onclick="closeModal()" class="sima-btn sima-btn--gold">Cancel</button>
-                <button type="submit" class="sima-btn sima-btn--blue">Update</button>
-            </div>
-        </form>
+{{-- MODAL EDIT KELAS --}}
+<div id="modalEdit" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:18px;width:100%;max-width:420px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+        <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:15px;font-weight:700;color:#1e293b">Edit Kelas</div>
+            <button type="button" onclick="closeModals()" style="width:32px;height:32px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;color:#64748b"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div style="padding:20px 24px">
+            <form id="formEdit">
+                <input type="hidden" id="editId">
+                <div style="margin-bottom:14px">
+                    <label class="sima-label">Kode Kelas <span style="color:var(--c-red)">*</span></label>
+                    <input type="text" name="kodeKelas" id="editKodeKelas" class="sima-input" required style="font-family:var(--f-mono)">
+                </div>
+                <div style="margin-bottom:18px">
+                    <label class="sima-label">Tahun Ajaran</label>
+                    <select name="tahunAjar" id="editTahunAjar" class="sima-input">
+                        @foreach($tahunAjarList as $ta)
+                            <option value="{{ $ta }}" {{ $ta === $tahunAjarDefault ? 'selected' : '' }}>{{ $ta }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div id="editErr" style="display:none;font-size:12.5px;color:#dc2626;margin-bottom:12px;padding:10px;background:#fef2f2;border-radius:8px"></div>
+                <div style="display:flex;gap:8px">
+                    <button type="submit" class="sima-btn"><i class="fas fa-save"></i> Simpan</button>
+                    <button type="button" onclick="closeModals()" class="sima-btn sima-btn--outline">Batal</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-{{-- ── MODAL TAMBAH MAHASISWA KE KELAS ─────────────── --}}
-<div id="addMhsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
-     backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#0f172a;width:420px;padding:30px;border-radius:20px;
-                box-shadow:0 20px 60px rgba(0,0,0,.5);">
-        <h2 style="color:white;font-size:20px;margin-bottom:20px;">Tambah Mahasiswa ke Kelas</h2>
-        <form id="addMhsForm">
-            <input type="hidden" id="addMhsKelasId">
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">ID Mahasiswa</label>
-                <input type="number" name="mahasiswa_id" id="addMhsMhsId"
-                       style="width:100%;padding:10px;background:#1e293b;color:white;
-                              border-radius:10px;border:1px solid #334155;"
-                       placeholder="Masukkan ID mahasiswa">
-            </div>
-            <div style="display:flex;justify-content:space-between;margin-top:20px;">
-                <button type="button" onclick="closeModal()" class="sima-btn sima-btn--gold">Cancel</button>
-                <button type="submit" class="sima-btn sima-btn--blue">Tambahkan</button>
-            </div>
-        </form>
+{{-- MODAL TAMBAH MAHASISWA --}}
+<div id="modalAddMhs" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:18px;width:100%;max-width:380px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+        <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:15px;font-weight:700;color:#1e293b">Tambah Mahasiswa ke Kelas</div>
+            <button type="button" onclick="closeModals()" style="width:32px;height:32px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;color:#64748b"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div style="padding:20px 24px">
+            <form id="formAddMhs">
+                <input type="hidden" id="addMhsKelasId">
+                <div style="margin-bottom:18px">
+                    <label class="sima-label">ID Mahasiswa <span style="color:var(--c-red)">*</span></label>
+                    <input type="number" name="mahasiswa_id" id="addMhsId" class="sima-input" required placeholder="ID mahasiswa">
+                </div>
+                <div id="addMhsErr" style="display:none;font-size:12.5px;color:#dc2626;margin-bottom:12px;padding:10px;background:#fef2f2;border-radius:8px"></div>
+                <div style="display:flex;gap:8px">
+                    <button type="submit" class="sima-btn"><i class="fas fa-user-plus"></i> Tambahkan</button>
+                    <button type="button" onclick="closeModals()" class="sima-btn sima-btn--outline">Batal</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -197,271 +234,171 @@
 
 @section('page_js')
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const tbody       = document.getElementById('kelasTable');
-    const searchInput = document.getElementById('searchInput');
-    const sortInput   = document.getElementById('sortInput');
-    const modal       = document.getElementById('kelasModal');
-    const editModal   = document.getElementById('kelasEditModal');
-    const addMhsModal = document.getElementById('addMhsModal');
-    const form        = document.getElementById('kelasForm');
-    const editForm    = document.getElementById('kelasEditForm');
-    const addMhsForm  = document.getElementById('addMhsForm');
-    let activeKelasId   = null;
-    let activeKelasNama = '';
-    let currentPage     = 1;
- 
-    function renderEmpty(msg = 'Tidak ada kelas') {
-        tbody.innerHTML = `<tr><td colspan="5" style="padding:24px;text-align:center;color:#94a3b8;">${msg}</td></tr>`;
-    }
- 
-    function renderKelas(list) {
-        tbody.innerHTML = '';
-        if (!Array.isArray(list) || !list.length) { renderEmpty(); return; }
-        list.forEach(k => {
-            // mahasiswa_count di-inject oleh withCount('mahasiswa') di KelasService
-            const mhsCount = k.mahasiswa_count ?? '-';
-            tbody.innerHTML += `
-                <tr>
-                    <td>${k.id ?? '-'}</td>
-                    <td>
-                        <span style="font-family:var(--f-mono);font-size:13px;font-weight:600;
-                                     background:var(--c-teal-lt);color:var(--c-teal);
-                                     padding:4px 10px;border-radius:6px">
-                            ${k.kodeKelas ?? '-'}
-                        </span>
-                    </td>
-                     <td style="font-size:12px;color:var(--c-text-3)">${k.tahunAjar ?? '-'}</td>
-                    <td><span class="sima-badge sima-badge--purple">${mhsCount} mahasiswa</span></td>
-                    <td>
-                        <button onclick="viewMahasiswa(${k.id}, '${k.kodeKelas}')"
-                                class="sima-btn sima-btn--outline sima-btn--sm">
-                            <i class="fas fa-users"></i> Lihat
-                        </button>
-                    </td>
-                    <td>
-                        <button onclick="editKelas(${k.id})" class="sima-btn sima-btn--blue sima-btn--sm">
-                            <i class="fas fa-pen"></i> Edit
-                        </button>
-                        <button onclick="deleteKelas(${k.id})" class="sima-btn sima-btn--danger sima-btn--sm">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>`;
-        });
-    }
- 
-    /* ── PAGINATION ──────────────────────────────────── */
-    function renderPagination(pagination) {
-        let bar = document.getElementById('paginationBar');
-        if (!bar) {
-            // Buat bar jika belum ada di HTML
-            bar = document.createElement('div');
-            bar.id = 'paginationBar';
-            bar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--c-border-soft)';
-            bar.innerHTML = '<span id="paginationInfo" style="font-size:12px;color:var(--c-text-3)"></span><div id="paginationButtons" style="display:flex;gap:6px;"></div>';
-            document.querySelector('.sima-card').appendChild(bar);
-        }
- 
-        const info    = document.getElementById('paginationInfo');
-        const buttons = document.getElementById('paginationButtons');
-        const from    = ((pagination.current_page - 1) * pagination.per_page) + 1;
-        const to      = Math.min(pagination.current_page * pagination.per_page, pagination.total);
-        info.textContent = `Menampilkan ${from}–${to} dari ${pagination.total} kelas`;
-        buttons.innerHTML = '';
- 
-        const prev = document.createElement('button');
-        prev.className = 'sima-btn sima-btn--outline sima-btn--sm';
-        prev.innerHTML = '<i class="fas fa-chevron-left"></i>';
-        prev.disabled  = pagination.current_page === 1;
-        prev.onclick   = () => { currentPage = pagination.current_page - 1; loadKelas(); };
-        buttons.appendChild(prev);
- 
-        const start = Math.max(1, pagination.current_page - 2);
-        const end   = Math.min(pagination.last_page, pagination.current_page + 2);
-        for (let i = start; i <= end; i++) {
-            const btn = document.createElement('button');
-            btn.className = `sima-btn sima-btn--sm ${i === pagination.current_page ? 'sima-btn--blue' : 'sima-btn--outline'}`;
-            btn.textContent = i;
-            btn.onclick = (page => () => { currentPage = page; loadKelas(); })(i);
-            buttons.appendChild(btn);
-        }
- 
-        const next = document.createElement('button');
-        next.className = 'sima-btn sima-btn--outline sima-btn--sm';
-        next.innerHTML = '<i class="fas fa-chevron-right"></i>';
-        next.disabled  = pagination.current_page === pagination.last_page;
-        next.onclick   = () => { currentPage = pagination.current_page + 1; loadKelas(); };
-        buttons.appendChild(next);
-    }
- 
-    /* ── LOAD ────────────────────────────────────────── */
-    function loadKelas(search = '', sort = '') {
-        renderEmpty('Memuat data...');
-        let url = "{{ route('jurusan.kelas.data') }}";
-        const p = new URLSearchParams();
-        if (search)      p.append('kode', search);
-        if (sort)        p.append('sort', sort);
-        if (currentPage) p.append('page', currentPage);
-        if (p.toString()) url += '?' + p.toString();
- 
-        fetch(url)
-            .then(r => r.json())
-            .then(res => {
-                if (res.success) {
-                    // getData sekarang return items() bukan paginator langsung
-                    renderKelas(res.data);
-                    if (res.pagination) renderPagination(res.pagination);
-                } else {
-                    renderEmpty(res.message);
-                }
-            })
-            .catch(e => renderEmpty('Gagal memuat: ' + e.message));
-    }
- 
-    function renderMahasiswaKelas(data) {
-        const tbl  = document.getElementById('mahasiswaKelasTable');
-        // Data dari getByKelas: kelas.mahasiswa (belongsToMany)
-        const list = data?.mahasiswa ?? [];
-        if (!list.length) {
-            tbl.innerHTML = `<tr><td colspan="5" style="padding:20px;text-align:center;color:#94a3b8;">Belum ada mahasiswa</td></tr>`;
-            return;
-        }
-        tbl.innerHTML = '';
-        list.forEach(m => {
-            tbl.innerHTML += `
-                <tr>
-                    <td>${m.id ?? '-'}</td>
-                    <td style="font-family:var(--f-mono)">${m.npm ?? '-'}</td>
-                    <td style="font-weight:500">${m.nama ?? '-'}</td>
-                    <td>${m.user?.email ?? '-'}</td>
-                    <td>
-                        <button onclick="removeMahasiswa(${activeKelasId}, ${m.id})"
-                                class="sima-btn sima-btn--danger sima-btn--sm">
-                            <i class="fas fa-user-minus"></i>
-                        </button>
-                    </td>
-                </tr>`;
-        });
-    }
- 
-    let timer;
-    searchInput.addEventListener('keyup', function () {
-        clearTimeout(timer);
-        timer = setTimeout(() => { currentPage = 1; loadKelas(this.value, sortInput.value); }, 400);
-    });
-    sortInput.addEventListener('change', function () { currentPage = 1; loadKelas(searchInput.value, this.value); });
- 
-    document.getElementById('openAddKelasModal').addEventListener('click', () => { modal.style.display = 'flex'; });
-    document.getElementById('openAddMahasiswaModal').addEventListener('click', () => { addMhsModal.style.display = 'flex'; });
-    window.closeModal = () => { modal.style.display = 'none'; editModal.style.display = 'none'; addMhsModal.style.display = 'none'; };
- 
-    window.viewMahasiswa = function (kelasId, kelasKode) {
-        activeKelasId   = kelasId;
-        activeKelasNama = kelasKode;
-        document.getElementById('panelKelasTitle').textContent = `Mahasiswa — Kelas ${kelasKode}`;
-        document.getElementById('addMhsKelasId').value = kelasId;
-        document.getElementById('mahasiswaPanel').style.display = 'block';
-        document.getElementById('mahasiswaKelasTable').innerHTML =
-            `<tr><td colspan="5" style="padding:20px;text-align:center;color:#94a3b8;">Memuat...</td></tr>`;
- 
-        fetch(`/jurusan/kelas/${kelasId}/mahasiswa`, { headers: { 'Accept': 'application/json' } })
-            .then(r => r.json())
-            .then(res => renderMahasiswaKelas(res.data ?? res))
-            .catch(() => {
-                document.getElementById('mahasiswaKelasTable').innerHTML =
-                    `<tr><td colspan="5" style="padding:20px;text-align:center;color:#94a3b8;">Gagal memuat</td></tr>`;
-            });
-    };
- 
-    window.closeMahasiswaPanel = () => {
-        document.getElementById('mahasiswaPanel').style.display = 'none';
-        activeKelasId = null;
-    };
- 
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const data = Object.fromEntries(new FormData(form).entries());
-        fetch("{{ route('jurusan.kelas.store') }}", {
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify(data)
-        })
-        .then(r => r.json())
-        .then(res => {
-            if (res.success) { modal.style.display = 'none'; form.reset(); currentPage = 1; loadKelas(); }
-            else alert(res.message || 'Gagal menyimpan');
-        });
-    });
- 
-    window.editKelas = function (id) {
-        fetch(`/jurusan/kelas/${id}`, { headers: { 'Accept': 'application/json' } })
+const CSRF = '{{ csrf_token() }}';
+let activeKelasId   = null;
+let activeKelasKode = '';
+
+['modalTambah','modalEdit','modalAddMhs'].forEach(id => {
+    document.getElementById(id).addEventListener('click', function(e) { if (e.target === this) closeModals(); });
+});
+function closeModals() {
+    document.getElementById('modalTambah').style.display  = 'none';
+    document.getElementById('modalEdit').style.display    = 'none';
+    document.getElementById('modalAddMhs').style.display  = 'none';
+}
+function closeMhsPanel() {
+    document.getElementById('mahasiswaPanel').style.display = 'none';
+    activeKelasId = null;
+}
+
+/* ─── Tambah kelas ─── */
+document.getElementById('btnTambah').addEventListener('click', function() {
+    document.getElementById('formTambah').reset();
+    document.getElementById('tambahErr').style.display = 'none';
+    document.getElementById('modalTambah').style.display = 'flex';
+});
+document.getElementById('formTambah').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const errDiv = document.getElementById('tambahErr');
+    errDiv.style.display = 'none';
+    const btn = this.querySelector('[type=submit]'); btn.disabled = true;
+    fetch('{{ route("jurusan.kelas.store") }}', {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(new FormData(this))),
+    })
+    .then(r => r.json())
+    .then(res => { if (res.success) window.location.reload(); else { errDiv.textContent = res.message || 'Gagal'; errDiv.style.display = 'block'; } })
+    .catch(err => { errDiv.textContent = err.message; errDiv.style.display = 'block'; })
+    .finally(() => { btn.disabled = false; });
+});
+
+/* ─── Edit kelas ─── */
+document.querySelectorAll('.btn-edit-kelas').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const id = this.dataset.id;
+        document.getElementById('editErr').style.display = 'none';
+        fetch(`/jurusan/kelas/${id}`, { headers: { Accept: 'application/json' } })
         .then(r => r.json())
         .then(res => {
             const k = res.data ?? res;
-            document.getElementById('editKelasId').value   = k.id;
-            document.getElementById('editKodeKelas').value = k.kodeKelas ?? '';
-            editModal.style.display = 'flex';
-        });
-    };
- 
-    editForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const id   = document.getElementById('editKelasId').value;
-        const data = Object.fromEntries(new FormData(editForm).entries());
-        fetch(`/jurusan/kelas/${id}`, {
-            method: 'PATCH',
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify(data)
-        })
-        .then(r => r.json())
-        .then(res => { if (res.success) { editModal.style.display = 'none'; editForm.reset(); loadKelas(); } else alert(res.message); });
-    });
- 
-    window.deleteKelas = function (id) {
-        if (!confirm('Hapus kelas ini?')) return;
-        fetch(`/jurusan/kelas/${id}`, {
-            method: 'DELETE',
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
-        })
-        .then(r => r.json())
-        .then(res => { if (res.success) loadKelas(); else alert(res.message); });
-    };
- 
-    addMhsForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const kelasId = document.getElementById('addMhsKelasId').value;
-        const data    = { mahasiswa_id: parseInt(document.getElementById('addMhsMhsId').value) };
-        fetch(`/jurusan/kelas/${kelasId}/mahasiswa`, {
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify(data)
-        })
-        .then(r => r.json())
-        .then(res => {
-            if (res.success) {
-                addMhsModal.style.display = 'none';
-                addMhsForm.reset();
-                window.viewMahasiswa(activeKelasId, activeKelasNama);
-                loadKelas();
-            } else alert(res.message);
+            document.getElementById('editId').value          = k.id;
+            document.getElementById('editKodeKelas').value   = k.kodeKelas ?? '';
+            document.getElementById('editTahunAjar').value   = k.tahunAjar ?? '';
+            document.getElementById('modalEdit').style.display = 'flex';
         });
     });
- 
-    window.removeMahasiswa = function (kelasId, mahasiswaId) {
-        if (!confirm('Hapus mahasiswa dari kelas?')) return;
-        fetch(`/jurusan/kelas/${kelasId}/mahasiswa/${mahasiswaId}`, {
-            method: 'DELETE',
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
-        })
-        .then(r => r.json())
-        .then(res => {
-            if (res.success) { window.viewMahasiswa(kelasId, activeKelasNama); loadKelas(); }
-            else alert(res.message);
-        });
-    };
- 
-    loadKelas();
 });
+document.getElementById('formEdit').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const errDiv = document.getElementById('editErr');
+    errDiv.style.display = 'none';
+    const id = document.getElementById('editId').value;
+    const btn = this.querySelector('[type=submit]'); btn.disabled = true;
+    fetch(`/jurusan/kelas/${id}`, {
+        method: 'PATCH',
+        headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(new FormData(this))),
+    })
+    .then(r => r.json())
+    .then(res => { if (res.success) window.location.reload(); else { errDiv.textContent = res.message || 'Gagal'; errDiv.style.display = 'block'; } })
+    .catch(err => { errDiv.textContent = err.message; errDiv.style.display = 'block'; })
+    .finally(() => { btn.disabled = false; });
+});
+
+/* ─── Hapus kelas ─── */
+document.querySelectorAll('.btn-del-kelas').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const id = this.dataset.id; const kode = this.dataset.kode;
+        if (!confirm(`Hapus kelas "${kode}"?`)) return;
+        fetch(`/jurusan/kelas/${id}`, {
+            method: 'DELETE',
+            headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+        })
+        .then(r => r.json())
+        .then(res => { if (res.success) window.location.reload(); else alert(res.message); });
+    });
+});
+
+/* ─── Lihat mahasiswa kelas ─── */
+function loadMhsKelas() {
+    document.getElementById('mhsPanelTbody').innerHTML =
+        '<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--c-text-3)">Memuat…</td></tr>';
+    fetch(`/jurusan/kelas/${activeKelasId}/mahasiswa`, { headers: { Accept: 'application/json' } })
+    .then(r => r.json())
+    .then(res => {
+        const list = res.data?.mahasiswa ?? res.mahasiswa ?? [];
+        const tbody = document.getElementById('mhsPanelTbody');
+        if (!list.length) {
+            tbody.innerHTML = '<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--c-text-3)">Belum ada mahasiswa</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        list.forEach((m, i) => {
+            tbody.innerHTML += `<tr>
+                <td style="color:var(--c-text-3);font-size:12px">${i+1}</td>
+                <td style="font-family:var(--f-mono);font-size:12px">${m.npm ?? '—'}</td>
+                <td style="font-weight:600">${m.nama ?? '—'}</td>
+                <td style="font-size:12.5px;color:var(--c-text-2)">${m.user?.email ?? '—'}</td>
+                <td>
+                    <button type="button" class="sima-btn sima-btn--sm"
+                            onclick="removeMhs(${activeKelasId},${m.id})"
+                            style="font-size:11px;padding:4px 10px;background:rgba(220,38,38,.08);color:#dc2626;border:1px solid rgba(220,38,38,.2)">
+                        <i class="fas fa-user-minus"></i>
+                    </button>
+                </td>
+            </tr>`;
+        });
+    })
+    .catch(() => {
+        document.getElementById('mhsPanelTbody').innerHTML =
+            '<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--c-text-3)">Gagal memuat</td></tr>';
+    });
+}
+
+document.querySelectorAll('.btn-view-mhs').forEach(btn => {
+    btn.addEventListener('click', function() {
+        activeKelasId   = this.dataset.id;
+        activeKelasKode = this.dataset.kode;
+        document.getElementById('panelTitle').textContent = `Mahasiswa — Kelas ${activeKelasKode}`;
+        document.getElementById('addMhsKelasId').value    = activeKelasId;
+        document.getElementById('mahasiswaPanel').style.display = 'block';
+        loadMhsKelas();
+    });
+});
+
+/* ─── Tambah mahasiswa ke kelas ─── */
+document.getElementById('btnAddMhs').addEventListener('click', function() {
+    if (!activeKelasId) { alert('Pilih kelas terlebih dahulu'); return; }
+    document.getElementById('formAddMhs').reset();
+    document.getElementById('addMhsErr').style.display = 'none';
+    document.getElementById('modalAddMhs').style.display = 'flex';
+});
+document.getElementById('formAddMhs').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const errDiv = document.getElementById('addMhsErr');
+    errDiv.style.display = 'none';
+    const btn = this.querySelector('[type=submit]'); btn.disabled = true;
+    fetch(`/jurusan/kelas/${activeKelasId}/mahasiswa`, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ mahasiswa_id: parseInt(document.getElementById('addMhsId').value) }),
+    })
+    .then(r => r.json())
+    .then(res => { if (res.success) { closeModals(); loadMhsKelas(); } else { errDiv.textContent = res.message || 'Gagal'; errDiv.style.display = 'block'; } })
+    .catch(err => { errDiv.textContent = err.message; errDiv.style.display = 'block'; })
+    .finally(() => { btn.disabled = false; });
+});
+
+/* ─── Hapus mahasiswa dari kelas ─── */
+function removeMhs(kelasId, mhsId) {
+    if (!confirm('Hapus mahasiswa dari kelas ini?')) return;
+    fetch(`/jurusan/kelas/${kelasId}/mahasiswa/${mhsId}`, {
+        method: 'DELETE',
+        headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+    })
+    .then(r => r.json())
+    .then(res => { if (res.success) loadMhsKelas(); else alert(res.message); });
+}
 </script>
 @endsection

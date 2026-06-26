@@ -2,85 +2,157 @@
 
 @section('page_title',    'Mahasiswa')
 @section('page_section',  'ADMIN JURUSAN')
-@section('page_subtitle', 'Data mahasiswa di jurusan Anda beserta informasi kelas')
+@section('page_subtitle', 'Data mahasiswa di jurusan Anda')
 
 @section('main_content')
 
-<div class="sima-card">
+<div class="sima-card sima-fade">
     <div class="sima-card__header">
-        <div><h5 class="sima-card__title">Daftar Mahasiswa</h5></div>
-        <div style="display:flex;gap:12px;">
-            <input id="searchInput" type="text" placeholder="Cari nama / NPM / email..."
-                   class="sima-input" style="min-width:220px;">
+        <div>
+            <h5 class="sima-card__title">Daftar Mahasiswa</h5>
+            <div class="sima-card__subtitle">Total {{ $mahasiswa->total() }} mahasiswa</div>
         </div>
     </div>
-    <div style="overflow-x:auto">
-        <table class="sima-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>NPM</th>
-                    <th>NAMA</th>
-                    <th>EMAIL</th>
-                    <th>STATUS AKUN</th>
-                    <th>KELAS</th>
-                    <th>AKSI</th>
-                </tr>
-            </thead>
-            <tbody id="mahasiswaTable"></tbody>
-        </table>
+
+    {{-- Filter bar --}}
+    <div style="padding:12px 20px;border-bottom:1px solid var(--c-border-soft)">
+        <form method="GET" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama / NPM / email…"
+                   class="sima-input" style="width:280px;font-size:13px">
+            <button type="submit" class="sima-btn sima-btn--sm sima-btn--outline">
+                <i class="fas fa-search"></i> Cari
+            </button>
+            @if($search)
+                <a href="{{ route('jurusan.mahasiswa.page') }}" class="sima-btn sima-btn--sm sima-btn--outline">
+                    <i class="fas fa-xmark"></i> Reset
+                </a>
+            @endif
+        </form>
     </div>
-    {{-- Pagination --}}
-    <div id="paginationBar" style="display:flex;align-items:center;justify-content:space-between;
-         padding:14px 20px;border-top:1px solid var(--c-border-soft)">
-        <span id="paginationInfo" style="font-size:12px;color:var(--c-text-3)"></span>
-        <div id="paginationButtons" style="display:flex;gap:6px;"></div>
-    </div>
+
+    @if($mahasiswa->isEmpty())
+        <div class="sima-card__body" style="text-align:center;padding:48px 20px;color:var(--c-text-3)">
+            <i class="fas fa-user-slash" style="font-size:36px;opacity:.3;display:block;margin-bottom:12px"></i>
+            <div style="font-size:14px;font-weight:500;color:var(--c-text-2)">
+                {{ $search ? 'Tidak ada mahasiswa yang cocok' : 'Belum ada mahasiswa terdaftar' }}
+            </div>
+        </div>
+    @else
+        <div style="overflow-x:auto">
+            <table class="sima-table">
+                <thead>
+                    <tr>
+                        <th style="width:40px">#</th>
+                        <th>Mahasiswa</th>
+                        <th>Email</th>
+                        <th>Kelas</th>
+                        <th style="width:110px">Status</th>
+                        <th style="width:70px"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($mahasiswa as $u)
+                    @php
+                        $mhs = $u->mahasiswa;
+                        $klsList = $mhs && $mhs->kelas ? $mhs->kelas->pluck('kodeKelas')->join(', ') : '—';
+                    @endphp
+                    <tr>
+                        <td style="color:var(--c-text-3);font-size:12px">
+                            {{ $mahasiswa->firstItem() + $loop->index }}
+                        </td>
+                        <td>
+                            <div style="font-weight:600;font-size:13.5px">{{ $mhs->nama ?? '(Belum lengkap)' }}</div>
+                            <div style="font-family:var(--f-mono);font-size:11.5px;color:var(--c-text-3)">
+                                {{ $mhs->npm ?? '—' }}
+                            </div>
+                        </td>
+                        <td style="font-size:12.5px;color:var(--c-text-2)">{{ $u->email }}</td>
+                        <td style="font-size:12.5px">{{ $klsList }}</td>
+                        <td>
+                            @php
+                                $stMap = [
+                                    'active'   => ['cls'=>'sima-badge--green', 'label'=>'Aktif'],
+                                    'inactive' => ['cls'=>'sima-badge--grey',  'label'=>'Nonaktif'],
+                                    'pending'  => ['cls'=>'sima-badge--blue',  'label'=>'Pending'],
+                                ];
+                                $st = $stMap[$u->status] ?? ['cls'=>'sima-badge--grey', 'label'=>$u->status];
+                            @endphp
+                            <span class="sima-badge {{ $st['cls'] }}" style="font-size:11px">{{ $st['label'] }}</span>
+                        </td>
+                        <td>
+                            <button type="button" class="sima-btn sima-btn--sm sima-btn--outline btn-detail"
+                                    data-mhs="{{ json_encode([
+                                        'nama'     => $mhs->nama ?? '—',
+                                        'npm'      => $mhs->npm ?? '—',
+                                        'email'    => $u->email,
+                                        'noWa'     => $mhs->noWa ?? '—',
+                                        'tglLahir' => $mhs->tglLahir ?? '—',
+                                        'warNeg'   => $mhs->warNeg ?? '—',
+                                        'status'   => $u->status,
+                                        'kelas'    => $klsList,
+                                    ]) }}"
+                                    style="font-size:11.5px;padding:4px 10px">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <div style="padding:14px 20px">
+            {{ $mahasiswa->links('vendor.pagination.sima') }}
+        </div>
+    @endif
 </div>
 
-{{-- ── MODAL DETAIL MAHASISWA ───────────────────────── --}}
-<div id="detailModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
-     backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#0f172a;width:600px;max-height:90vh;overflow:auto;
-                padding:30px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.5);">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-            <h2 style="color:white;font-size:20px;margin:0;">Detail Mahasiswa</h2>
-            <button onclick="closeModal()"
-                    style="background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">
-                <i class="fas fa-times"></i>
+
+{{-- ── MODAL DETAIL MAHASISWA (SIMA light theme) ─── --}}
+<div id="detailModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:18px;width:100%;max-width:480px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden">
+
+        <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
+            <div>
+                <div id="dm-nama" style="font-size:16px;font-weight:700;color:var(--c-text-1)"></div>
+                <div id="dm-npm" style="font-family:var(--f-mono);font-size:12px;color:var(--c-text-3);margin-top:2px"></div>
+            </div>
+            <button onclick="document.getElementById('detailModal').style.display='none'"
+                    style="width:32px;height:32px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;color:#64748b">
+                <i class="fas fa-xmark"></i>
             </button>
         </div>
 
-        <div style="background:#1e293b;border-radius:12px;padding:16px;margin-bottom:16px;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div>
-                    <div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Nama</div>
-                    <div id="detailNama" style="color:white;font-weight:500"></div>
+        <div style="padding:20px 24px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+                <div style="padding:11px;background:#f8fafc;border-radius:10px;border:1px solid #f1f5f9">
+                    <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px">Email</div>
+                    <div id="dm-email" style="font-size:12.5px;font-weight:500;color:#1e293b;word-break:break-all"></div>
                 </div>
-                <div>
-                    <div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">NPM</div>
-                    <div id="detailNpm" style="color:white;font-family:var(--f-mono)"></div>
+                <div style="padding:11px;background:#f8fafc;border-radius:10px;border:1px solid #f1f5f9">
+                    <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px">WhatsApp</div>
+                    <div id="dm-noWa" style="font-size:12.5px;font-weight:500;color:#1e293b"></div>
                 </div>
-                <div>
-                    <div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Email</div>
-                    <div id="detailEmail" style="color:white"></div>
+                <div style="padding:11px;background:#f8fafc;border-radius:10px;border:1px solid #f1f5f9">
+                    <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px">Tgl Lahir</div>
+                    <div id="dm-tglLahir" style="font-size:12.5px;font-weight:500;color:#1e293b"></div>
                 </div>
-                <div>
-                    <div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Status</div>
-                    <div id="detailStatus"></div>
+                <div style="padding:11px;background:#f8fafc;border-radius:10px;border:1px solid #f1f5f9">
+                    <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px">Kebangsaan</div>
+                    <div id="dm-warNeg" style="font-size:12.5px;font-weight:500;color:#1e293b"></div>
                 </div>
             </div>
-        </div>
-
-        <div style="font-size:13px;color:#94a3b8;font-weight:600;margin-bottom:10px;">
-            <i class="fas fa-door-open"></i> Kelas Terdaftar
-        </div>
-        <div id="detailKelas">
-            <div style="color:#64748b;text-align:center;padding:16px;">Memuat...</div>
-        </div>
-
-        <div style="margin-top:20px;text-align:right;">
-            <button onclick="closeModal()" class="sima-btn sima-btn--gold">Tutup</button>
+            <div style="padding:11px;background:#f8fafc;border-radius:10px;border:1px solid #f1f5f9;margin-bottom:14px">
+                <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px">Kelas yang Diikuti</div>
+                <div id="dm-kelas" style="font-size:12.5px;font-weight:500;color:#1e293b"></div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+                <div id="dm-status"></div>
+                <button onclick="document.getElementById('detailModal').style.display='none'"
+                        class="sima-btn sima-btn--sm sima-btn--outline">
+                    <i class="fas fa-xmark"></i> Tutup
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -89,201 +161,32 @@
 
 @section('page_js')
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const tbody       = document.getElementById('mahasiswaTable');
-    const searchInput = document.getElementById('searchInput');
-    const detailModal = document.getElementById('detailModal');
-    let currentPage   = 1;
+document.getElementById('detailModal').addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+});
 
-    /* ── RENDER ──────────────────────────────────────── */
-    function renderEmpty(msg = 'Tidak ada data mahasiswa') {
-        tbody.innerHTML = `<tr><td colspan="7" style="padding:24px;text-align:center;color:#94a3b8;">${msg}</td></tr>`;
-    }
+document.querySelectorAll('.btn-detail').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const d = JSON.parse(this.dataset.mhs);
+        document.getElementById('dm-nama').textContent    = d.nama;
+        document.getElementById('dm-npm').textContent     = 'NPM: ' + d.npm;
+        document.getElementById('dm-email').textContent   = d.email;
+        document.getElementById('dm-noWa').textContent    = d.noWa;
+        document.getElementById('dm-tglLahir').textContent = d.tglLahir;
+        document.getElementById('dm-warNeg').textContent  = d.warNeg;
+        document.getElementById('dm-kelas').textContent   = d.kelas;
 
-    function renderMahasiswa(list) {
-        tbody.innerHTML = '';
-        if (!Array.isArray(list) || !list.length) { renderEmpty(); return; }
+        const stMap = {
+            active:   {bg:'#ecfdf5',color:'#065f46',label:'Aktif'},
+            inactive: {bg:'#f8fafc',color:'#475569',label:'Nonaktif'},
+            pending:  {bg:'#eff6ff',color:'#1e40af',label:'Pending'},
+        };
+        const st = stMap[d.status] || stMap.inactive;
+        document.getElementById('dm-status').innerHTML =
+            `<span style="font-size:12.5px;font-weight:600;padding:4px 12px;border-radius:100px;background:${st.bg};color:${st.color}">${st.label}</span>`;
 
-        list.forEach(user => {
-            // user adalah model User dengan relasi mahasiswa di dalamnya
-            const mhs         = user.mahasiswa ?? {};
-            const statusColor = user.status === 'active' ? '#22c55e' : '#eab308';
-            const statusBg    = user.status === 'active' ? 'rgba(34,197,94,0.15)' : 'rgba(234,179,8,0.15)';
-            // Kelas dari relasi mahasiswa.kelas (array)
-            const kelasList   = mhs.kelas ?? [];
-            const kelasHtml   = kelasList.length
-                ? kelasList.map(k =>
-                    `<span style="background:var(--c-teal-lt);color:var(--c-teal);
-                                  padding:2px 7px;border-radius:5px;font-size:11px;
-                                  font-family:var(--f-mono);margin-right:4px">${k.kodeKelas}</span>`
-                  ).join('')
-                : '<span style="color:var(--c-text-3);font-size:12px">—</span>';
-
-            tbody.innerHTML += `
-                <tr>
-                    <td>${user.id ?? '-'}</td>
-                    <td style="font-family:var(--f-mono);font-size:12px">${mhs.npm ?? '-'}</td>
-                    <td style="font-weight:500">
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <div class="sima-avatar"
-                                 style="width:28px;height:28px;font-size:10px;border-radius:8px;
-                                        background:linear-gradient(135deg,var(--c-accent),var(--c-accent-2))">
-                                ${(mhs.nama ?? user.email ?? 'X').charAt(0).toUpperCase()}
-                            </div>
-                            ${mhs.nama ?? '-'}
-                        </div>
-                    </td>
-                    <td style="font-size:12px;color:var(--c-text-2)">${user.email ?? '-'}</td>
-                    <td>
-                        <span style="background:${statusBg};color:${statusColor};
-                                     padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600">
-                            ${user.status ?? '-'}
-                        </span>
-                    </td>
-                    <td>${kelasHtml}</td>
-                    <td>
-                        <button onclick="showDetail(${user.id})" class="sima-btn sima-btn--blue sima-btn--sm">
-                            <i class="fas fa-eye"></i> Detail
-                        </button>
-                    </td>
-                </tr>`;
-        });
-    }
-
-    /* ── PAGINATION ──────────────────────────────────── */
-    function renderPagination(pagination) {
-        const info    = document.getElementById('paginationInfo');
-        const buttons = document.getElementById('paginationButtons');
-
-        const from = ((pagination.current_page - 1) * pagination.per_page) + 1;
-        const to   = Math.min(pagination.current_page * pagination.per_page, pagination.total);
-        info.textContent = `Menampilkan ${from}–${to} dari ${pagination.total} mahasiswa`;
-
-        buttons.innerHTML = '';
-
-        // Prev
-        const prev = document.createElement('button');
-        prev.className = 'sima-btn sima-btn--outline sima-btn--sm';
-        prev.innerHTML = '<i class="fas fa-chevron-left"></i>';
-        prev.disabled  = pagination.current_page === 1;
-        prev.onclick   = () => { currentPage = pagination.current_page - 1; loadMahasiswa(); };
-        buttons.appendChild(prev);
-
-        // Page numbers (max 5 ditampilkan)
-        const start = Math.max(1, pagination.current_page - 2);
-        const end   = Math.min(pagination.last_page, pagination.current_page + 2);
-        for (let i = start; i <= end; i++) {
-            const btn     = document.createElement('button');
-            btn.className = `sima-btn sima-btn--sm ${i === pagination.current_page ? 'sima-btn--blue' : 'sima-btn--outline'}`;
-            btn.textContent = i;
-            btn.onclick   = (page => () => { currentPage = page; loadMahasiswa(); })(i);
-            buttons.appendChild(btn);
-        }
-
-        // Next
-        const next = document.createElement('button');
-        next.className = 'sima-btn sima-btn--outline sima-btn--sm';
-        next.innerHTML = '<i class="fas fa-chevron-right"></i>';
-        next.disabled  = pagination.current_page === pagination.last_page;
-        next.onclick   = () => { currentPage = pagination.current_page + 1; loadMahasiswa(); };
-        buttons.appendChild(next);
-    }
-
-    /* ── LOAD ────────────────────────────────────────── */
-    function loadMahasiswa(search = '') {
-        renderEmpty('Memuat data...');
-        let url = "{{ route('jurusan.mahasiswa.data') }}";
-        const p = new URLSearchParams();
-        if (search)      p.append('search',   search);
-        if (currentPage) p.append('page',     currentPage);
-        if (p.toString()) url += '?' + p.toString();
-
-        fetch(url)
-            .then(r => r.json())
-            .then(res => {
-                if (res.success) {
-                    renderMahasiswa(res.data);
-                    if (res.pagination) renderPagination(res.pagination);
-                } else {
-                    renderEmpty(res.message);
-                }
-            })
-            .catch(e => renderEmpty('Gagal memuat: ' + e.message));
-    }
-
-    /* ── SEARCH ──────────────────────────────────────── */
-    let timer;
-    searchInput.addEventListener('keyup', function () {
-        clearTimeout(timer);
-        const val = this.value;
-        timer = setTimeout(() => { currentPage = 1; loadMahasiswa(val); }, 400);
+        document.getElementById('detailModal').style.display = 'flex';
     });
-
-    /* ── DETAIL MODAL ────────────────────────────────── */
-    window.showDetail = function (userId) {
-        document.getElementById('detailNama').textContent  = '';
-        document.getElementById('detailNpm').textContent   = '';
-        document.getElementById('detailEmail').textContent = '';
-        document.getElementById('detailStatus').innerHTML  = '';
-        document.getElementById('detailKelas').innerHTML   =
-            '<div style="color:#64748b;text-align:center;padding:16px;">Memuat...</div>';
-        detailModal.style.display = 'flex';
-
-        fetch(`/jurusan/mahasiswa/${userId}`, { headers: { 'Accept': 'application/json' } })
-        .then(r => r.json())
-        .then(res => {
-            const user        = res.data ?? res;
-            const mhs         = user.mahasiswa ?? {};
-            const statusColor = user.status === 'active' ? '#22c55e' : '#eab308';
-            const statusBg    = user.status === 'active' ? 'rgba(34,197,94,0.15)' : 'rgba(234,179,8,0.15)';
-
-            document.getElementById('detailNama').textContent  = mhs.nama ?? '-';
-            document.getElementById('detailNpm').textContent   = mhs.npm  ?? '-';
-            document.getElementById('detailEmail').textContent = user.email ?? '-';
-            document.getElementById('detailStatus').innerHTML  = `
-                <span style="background:${statusBg};color:${statusColor};
-                             padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600">
-                    ${user.status ?? '-'}
-                </span>`;
-
-            // Kelas dari mahasiswa.kelas (relasi belongsToMany)
-            const kelasList = mhs.kelas ?? [];
-            if (!kelasList.length) {
-                document.getElementById('detailKelas').innerHTML =
-                    '<div style="color:#64748b;padding:12px;text-align:center;">Belum terdaftar di kelas manapun</div>';
-                return;
-            }
-
-            let html = '<div style="display:flex;flex-direction:column;gap:8px;">';
-            kelasList.forEach(k => {
-                // Jadwal di kelas ini (dari relasi kelas.jadwal)
-                const jadwalList = k.jadwal ?? [];
-                const jadwalInfo = jadwalList.map(j =>
-                    `<span style="font-size:11px;color:#64748b">${j.hari} ${j.jam} — ${j.matakuliah?.namaMk ?? ''}</span>`
-                ).join('<br>');
-
-                html += `
-                    <div style="background:#1e293b;border-radius:10px;padding:12px 14px;">
-                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:${jadwalInfo ? '8px' : '0'}">
-                            <span style="background:rgba(13,148,136,.15);color:#0d9488;
-                                         padding:3px 8px;border-radius:6px;font-size:11px;
-                                         font-family:var(--f-mono)">${k.kodeKelas ?? '-'}</span>
-                        </div>
-                        ${jadwalInfo ? `<div style="padding-left:4px">${jadwalInfo}</div>` : ''}
-                    </div>`;
-            });
-            html += '</div>';
-            document.getElementById('detailKelas').innerHTML = html;
-        })
-        .catch(() => {
-            document.getElementById('detailKelas').innerHTML =
-                '<div style="color:#ef4444;text-align:center;padding:16px;">Gagal memuat detail</div>';
-        });
-    };
-
-    window.closeModal = () => { detailModal.style.display = 'none'; };
-
-    loadMahasiswa();
 });
 </script>
 @endsection
