@@ -167,10 +167,31 @@ html, body { min-height:100%;background:var(--bg);font-family:'Plus Jakarta Sans
             <span data-t="status">Sistem aktif</span>
         </div>
 
-        <div class="form-title" data-t="title">Masuk ke akun Anda</div>
-        <div class="form-sub" data-t="subtitle">Selamat datang kembali di portal SIMA</div>
+        {{-- Mode toggle tabs --}}
+        <div style="display:flex;background:rgba(255,255,255,.04);border:1px solid var(--card-b);border-radius:10px;padding:3px;margin-bottom:20px;gap:3px">
+            <button type="button" id="tabPassword" onclick="setMode('password')"
+                    style="flex:1;padding:7px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;
+                           background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 2px 8px rgba(108,143,255,.3)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;margin-right:5px;vertical-align:middle"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span data-t="tab-pw">Login Password</span>
+            </button>
+            <button type="button" id="tabOtp" onclick="setMode('otp')"
+                    style="flex:1;padding:7px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;
+                           background:transparent;color:var(--muted)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;margin-right:5px;vertical-align:middle"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7.5L22 7"/></svg>
+                <span data-t="tab-otp">Login OTP</span>
+            </button>
+        </div>
 
-        <form method="POST" action="{{ route('login') }}">
+        {{-- HINT untuk OTP mode --}}
+        <div id="otpHint" style="display:none;background:rgba(108,143,255,.08);border:1px solid rgba(108,143,255,.15);
+                border-radius:10px;padding:10px 13px;margin-bottom:16px;font-size:12.5px;color:var(--muted-lt);line-height:1.5">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" style="display:inline;margin-right:4px;vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span data-t="otp-hint">Untuk akun yang dibuat tanpa password. Kode OTP akan dikirim ke email Anda.</span>
+        </div>
+
+        {{-- FORM PASSWORD --}}
+        <form id="formPassword" method="POST" action="{{ route('login') }}">
             @csrf
 
             <div class="field">
@@ -179,9 +200,8 @@ html, body { min-height:100%;background:var(--bg);font-family:'Plus Jakarta Sans
                     <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7.5L22 7"/>
                     </svg>
-                    <input type="email" id="email" name="email" value="{{ old('email') }}"
-                           id="email-inp" placeholder="email@instansi.ac.id"
-                           autocomplete="email" required>
+                    <input type="email" name="email" value="{{ old('email') }}"
+                           placeholder="email@instansi.ac.id" autocomplete="email" required>
                 </div>
             </div>
 
@@ -212,8 +232,25 @@ html, body { min-height:100%;background:var(--bg);font-family:'Plus Jakarta Sans
             <button type="submit" class="btn" data-t="submit">Masuk</button>
         </form>
 
+        {{-- FORM OTP --}}
+        <form id="formOtp" method="POST" action="{{ route('otp.send') }}" style="display:none">
+            @csrf
+
+            <div class="field">
+                <label data-t="lbl-email-otp">Email</label>
+                <div class="iw">
+                    <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7.5L22 7"/>
+                    </svg>
+                    <input type="email" name="email" placeholder="email@instansi.ac.id" autocomplete="email" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn" data-t="submit-otp">Kirim Kode OTP</button>
+        </form>
+
         @if ($errors->any())
-            <div class="err">
+            <div class="err" style="margin-top:14px">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                 </svg>
@@ -221,7 +258,7 @@ html, body { min-height:100%;background:var(--bg);font-family:'Plus Jakarta Sans
             </div>
         @endif
 
-        <div class="card-foot">
+        <div class="card-foot" style="margin-top:16px">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
@@ -240,24 +277,34 @@ const translations = {
         subtitle:   'Selamat datang kembali di portal SIMA',
         'lbl-email':'Email',
         'lbl-pw':   'Password',
-        remember:   'Ingat saya',
-        forgot:     'Lupa password?',
-        submit:     'Masuk',
-        secure:     'Koneksi <strong>terenkripsi & aman</strong>',
-        'ph-email': 'email@instansi.ac.id',
+        remember:       'Ingat saya',
+        forgot:         'Lupa password?',
+        submit:         'Masuk',
+        'submit-otp':   'Kirim Kode OTP',
+        secure:         'Koneksi <strong>terenkripsi & aman</strong>',
+        'ph-email':     'email@instansi.ac.id',
+        'tab-pw':       'Login Password',
+        'tab-otp':      'Login OTP',
+        'lbl-email-otp':'Email',
+        'otp-hint':     'Untuk akun yang dibuat tanpa password. Kode OTP akan dikirim ke email Anda.',
     },
     en: {
-        tagline:    'Foreign Student Information System',
-        status:     'System online',
-        title:      'Sign in to your account',
-        subtitle:   'Welcome back to the SIMA portal',
-        'lbl-email':'Email',
-        'lbl-pw':   'Password',
-        remember:   'Remember me',
-        forgot:     'Forgot password?',
-        submit:     'Sign In',
-        secure:     'Connection is <strong>encrypted & secure</strong>',
-        'ph-email': 'email@institution.ac.id',
+        tagline:        'Foreign Student Information System',
+        status:         'System online',
+        title:          'Sign in to your account',
+        subtitle:       'Welcome back to the SIMA portal',
+        'lbl-email':    'Email',
+        'lbl-pw':       'Password',
+        remember:       'Remember me',
+        forgot:         'Forgot password?',
+        submit:         'Sign In',
+        'submit-otp':   'Send OTP Code',
+        secure:         'Connection is <strong>encrypted & secure</strong>',
+        'ph-email':     'email@institution.ac.id',
+        'tab-pw':       'Password Login',
+        'tab-otp':      'OTP Login',
+        'lbl-email-otp':'Email',
+        'otp-hint':     'For accounts created without a password. An OTP code will be sent to your email.',
     }
 };
 
@@ -283,6 +330,44 @@ function setLang(lang) {
 
     const emailInp = document.getElementById('email');
     setTimeout(() => { emailInp.placeholder = t['ph-email']; }, 130);
+}
+
+let currentMode = 'password';
+
+function setMode(mode) {
+    currentMode = mode;
+    const isOtp = mode === 'otp';
+
+    // Toggle tab styles
+    const tabPw  = document.getElementById('tabPassword');
+    const tabOtp = document.getElementById('tabOtp');
+    const active = 'background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 2px 8px rgba(108,143,255,.3)';
+    const inactive = 'background:transparent;color:var(--muted)';
+
+    tabPw.style.cssText  = tabPw.style.cssText.replace(/background[^;]+;color[^;]+;(box-shadow[^;]+;)?/, '') + (isOtp ? inactive : active);
+    tabOtp.style.cssText = tabOtp.style.cssText.replace(/background[^;]+;color[^;]+;(box-shadow[^;]+;)?/, '') + (isOtp ? active : inactive);
+
+    // Simpler approach — set directly
+    if (isOtp) {
+        tabPw.style.background  = 'transparent';
+        tabPw.style.color       = 'var(--muted)';
+        tabPw.style.boxShadow   = 'none';
+        tabOtp.style.background = 'linear-gradient(135deg,var(--accent),var(--accent-2))';
+        tabOtp.style.color      = '#fff';
+        tabOtp.style.boxShadow  = '0 2px 8px rgba(108,143,255,.3)';
+    } else {
+        tabOtp.style.background = 'transparent';
+        tabOtp.style.color      = 'var(--muted)';
+        tabOtp.style.boxShadow  = 'none';
+        tabPw.style.background  = 'linear-gradient(135deg,var(--accent),var(--accent-2))';
+        tabPw.style.color       = '#fff';
+        tabPw.style.boxShadow   = '0 2px 8px rgba(108,143,255,.3)';
+    }
+
+    // Toggle forms & hint
+    document.getElementById('formPassword').style.display = isOtp ? 'none' : 'block';
+    document.getElementById('formOtp').style.display      = isOtp ? 'block' : 'none';
+    document.getElementById('otpHint').style.display      = isOtp ? 'block' : 'none';
 }
 
 function togglePw() {
