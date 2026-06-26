@@ -261,6 +261,68 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
     </div>
 </div>
 
+{{-- ── RIWAYAT SESI ─────────────────────────────────── --}}
+<div class="sima-card mt-3">
+    <div class="sima-card__header">
+        <div>
+            <h5 class="sima-card__title">Riwayat Sesi</h5>
+            <div class="sima-card__subtitle">Sesi yang sudah diinput — klik Detail untuk lihat &amp; edit kehadiran</div>
+        </div>
+    </div>
+    <div class="sima-card__body" style="padding:0">
+
+        @if($riwayatSesi->isEmpty())
+            <div style="padding:48px;text-align:center;color:var(--c-text-3)">
+                <i class="fas fa-clipboard-list" style="font-size:32px;margin-bottom:12px;display:block;opacity:.4"></i>
+                <div style="font-size:13px">Belum ada sesi yang diinput</div>
+            </div>
+        @else
+            <table class="sima-table">
+                <thead>
+                    <tr>
+                        <th style="width:80px">SESI</th>
+                        <th>TANGGAL</th>
+                        <th style="width:180px">KEHADIRAN</th>
+                        <th style="width:100px">AKSI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($riwayatSesi as $row)
+                    @php
+                        $pct = $row->total > 0 ? round(($row->hadir / $row->total) * 100) : 0;
+                        $barColor = $pct >= 80 ? 'var(--c-green)' : ($pct >= 60 ? 'var(--c-amber)' : 'var(--c-red)');
+                    @endphp
+                    <tr>
+                        <td>
+                            <span class="sima-badge sima-badge--blue">Sesi {{ $row->sesi }}</span>
+                        </td>
+                        <td style="font-size:13px;color:var(--c-text-1)">
+                            {{ $row->tglSesi ? \Carbon\Carbon::parse($row->tglSesi)->translatedFormat('d M Y') : '-' }}
+                        </td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <div style="flex:1;height:6px;background:var(--c-border);border-radius:99px;overflow:hidden">
+                                    <div style="height:100%;width:{{ $pct }}%;background:{{ $barColor }};border-radius:99px"></div>
+                                </div>
+                                <span style="font-size:12px;font-family:var(--f-mono);color:var(--c-text-2);white-space:nowrap">
+                                    {{ $row->hadir }}/{{ $row->total }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{{ route('dosen.jadwal.sesi.detail', ['jadwalId' => $jadwal->id, 'sesi' => $row->sesi]) }}"
+                               class="sima-btn sima-btn--outline sima-btn--sm">
+                                <i class="fas fa-eye"></i> Detail
+                            </a>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+    </div>
+</div>
+
 @endsection
 
 @section('page_js')

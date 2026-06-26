@@ -49,7 +49,28 @@ class DosenController extends Controller
     */
     public function profil()
     {
-        return view('dosen.profil', ['user' => Auth::user()]);
+        return view('dosen.profil');
+    }
+
+    public function updateProfil(Request $request)
+    {
+        $request->validate([
+            'nama'     => 'required|string|max:100',
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        $user  = Auth::user();
+        $dosen = $user->dosen;
+
+        if ($dosen) {
+            $dosen->update(['nama' => $request->nama]);
+        }
+
+        if ($request->filled('password')) {
+            $user->update(['password' => bcrypt($request->password)]);
+        }
+
+        return redirect()->route('dosen.profil')->with('success', 'Profil berhasil diperbarui.');
     }
 
 
@@ -104,7 +125,48 @@ class DosenController extends Controller
             ->pluck('sesi')
             ->toArray();
 
-        return view('dosen.jadwal.detail', compact('jadwal', 'mahasiswa', 'sesiTerisi'));
+        $riwayatSesi = DB::table('jadwal_mahasiswa')
+            ->where('jadwal_id', $jadwalId)
+            ->select(
+                'sesi',
+                'tglSesi',
+                DB::raw('COUNT(*) as total'),
+                DB::raw("COUNT(*) FILTER (WHERE status = 'present') as hadir")
+            )
+            ->groupBy('sesi', 'tglSesi')
+            ->orderBy('sesi')
+            ->get();
+
+        return view('dosen.jadwal.detail', compact('jadwal', 'mahasiswa', 'sesiTerisi', 'riwayatSesi'));
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | JADWAL SESI DETAIL — edit kehadiran per sesi
+    |--------------------------------------------------------------------------
+    */
+    public function jadwalSesiDetail($jadwalId, $sesi)
+    {
+        $dosen = Auth::user()->dosen;
+
+        $jadwal = Jadwal::with([
+                'kelas.mahasiswa.user',
+                'matakuliah',
+            ])
+            ->where('dosen_id', $dosen->id)
+            ->findOrFail($jadwalId);
+
+        $mahasiswa = $jadwal->kelas->mahasiswa ?? collect();
+
+        $kehadiranSesi = Kehadiran::where('jadwal_id', $jadwalId)
+            ->where('sesi', $sesi)
+            ->get()
+            ->keyBy('mahasiswa_id');
+
+        $tglSesi = optional($kehadiranSesi->first())->tglSesi;
+
+        return view('dosen.jadwal.sesi', compact('jadwal', 'mahasiswa', 'sesi', 'kehadiranSesi', 'tglSesi'));
     }
 
 
@@ -115,11 +177,19 @@ class DosenController extends Controller
     */
     public function announcement()
     {
-        $data = DB::table('announcement')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $announcements = DB::table('announcement')
+            ->where('status', 'active')
+            ->orderByDesc('is_penting')
+            ->orderByDesc('created_at')
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('dosen.announcement', ['announcement' => $data]);
+        $unreadNotifCount = DB::table('notification_users')
+            ->where('user_id', Auth::id())
+            ->where('is_read', false)
+            ->count();
+
+        return view('dosen.announcement', compact('announcements', 'unreadNotifCount'));
     }
 
 
@@ -132,146 +202,120 @@ class DosenController extends Controller
     {
         $user = Auth::user();
 
-        $notif = DB::table('notification_users')
+        // Mark all as read
+        DB::table('notification_users')
             ->where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->where('is_read', false)
+            ->update(['is_read' => true, 'updated_at' => now()]);
 
-        return view('dosen.notifikasi', ['notifikasi' => $notif]);
+        $notif = DB::table('notification_users')
+            ->join('notification', 'notification_users.notification_id', '=', 'notification.id')
+            ->where('notification_users.user_id', $user->id)
+            ->select(
+                'notification.id',
+                'notification.subject',
+                'notification.message',
+                'notification.type',
+                'notification_users.is_read',
+                'notification_users.created_at as received_at'
+            )
+            ->orderByDesc('notification_users.created_at')
+            ->paginate(15)
+            ->withQueryString();
+
+        $unreadNotifCount = 0;
+
+        return view('dosen.notifikasi', compact('notif', 'unreadNotifCount'));
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | ANALYTICS
+    | ANALYTICS — ringkasan statistik kehadiran dari jadwal_mahasiswa
     |--------------------------------------------------------------------------
     */
     public function analytics()
     {
-        $dosen_id = Auth::id();
+        $dosen   = Auth::user()->dosen;
+        $dosenId = $dosen->id ?? null;
 
-        $total_kelas     = DB::table('jadwal')->where('dosen_id', $dosen_id)->count();
-        $total_mahasiswa = DB::table('mahasiswa_kelas')->count();
-        $total_absen     = DB::table('attendance_records')->count();
-        $total_session   = DB::table('attendances_sessions')->count();
+        $totalKelas      = 0;
+        $totalMahasiswa  = 0;
+        $totalSesiTerisi = 0;
+        $rekapPerKelas   = collect();
 
-        $rata_kehadiran = $total_session > 0
-            ? round(($total_absen / ($total_session * 30)) * 100)
-            : 0;
+        if ($dosenId) {
+            $totalKelas = DB::table('jadwal')
+                ->where('dosen_id', $dosenId)
+                ->count();
 
-        $hariMap = [
-            'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu',
-            'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu', 'Sunday' => 'Minggu',
-        ];
-        $hari = $hariMap[now()->format('l')] ?? now()->format('l');
+            $totalMahasiswa = DB::table('mahasiswa_kelas')
+                ->join('jadwal', 'mahasiswa_kelas.kelas_id', '=', 'jadwal.kelas_id')
+                ->where('jadwal.dosen_id', $dosenId)
+                ->distinct('mahasiswa_kelas.mahasiswa_id')
+                ->count('mahasiswa_kelas.mahasiswa_id');
 
-        $jadwal_hari_ini = DB::table('jadwal')
-            ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
-            ->select('jadwal.*', 'matakuliah.namaMk as matakuliah')
-            ->where('jadwal.dosen_id', $dosen_id)
-            ->where('jadwal.hari', $hari)
-            ->get();
+            // Sesi unik yang sudah punya data kehadiran
+            $totalSesiTerisi = DB::table('jadwal_mahasiswa')
+                ->join('jadwal', 'jadwal_mahasiswa.jadwal_id', '=', 'jadwal.id')
+                ->where('jadwal.dosen_id', $dosenId)
+                ->select('jadwal_mahasiswa.jadwal_id', 'jadwal_mahasiswa.sesi')
+                ->distinct()
+                ->get()
+                ->count();
 
-        $semua_matakuliah = DB::table('jadwal')
-            ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
-            ->select('matakuliah.id as course_id', 'matakuliah.namaMk')
-            ->where('jadwal.dosen_id', $dosen_id)
-            ->groupBy('matakuliah.id', 'matakuliah.namaMk')
-            ->get();
-
-        $active_attendance = DB::table('attendances_sessions')
-            ->where('lecturer_id', $dosen_id)
-            ->where('status', 'active')
-            ->orderBy('created_at', 'desc')
-            ->first();
-
-        $students_present = collect();
-        if ($active_attendance) {
-            $students_present = DB::table('attendance_records')
-                ->join('mahasiswa', 'attendance_records.student_id', '=', 'mahasiswa.id')
-                ->select('mahasiswa.nama', 'attendance_records.checkin_time', 'attendance_records.status')
-                ->where('attendance_records.attendance_session_id', $active_attendance->id)
-                ->orderBy('attendance_records.checkin_time', 'asc')
+            $rekapPerKelas = DB::table('jadwal')
+                ->join('kelas', 'jadwal.kelas_id', '=', 'kelas.id')
+                ->join('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
+                ->leftJoin('jadwal_mahasiswa', 'jadwal_mahasiswa.jadwal_id', '=', 'jadwal.id')
+                ->where('jadwal.dosen_id', $dosenId)
+                ->groupBy(
+                    'jadwal.id', 'kelas.kodeKelas', 'matakuliah.namaMk',
+                    'jadwal.totalSesi', 'jadwal.hari', 'jadwal.jam'
+                )
+                ->selectRaw('
+                    jadwal.id,
+                    kelas."kodeKelas",
+                    matakuliah."namaMk",
+                    jadwal."totalSesi",
+                    jadwal.hari,
+                    jadwal.jam,
+                    COUNT(DISTINCT jadwal_mahasiswa.mahasiswa_id)
+                        FILTER (WHERE jadwal_mahasiswa.status IS NOT NULL) as total_mahasiswa,
+                    COUNT(DISTINCT jadwal_mahasiswa.sesi)
+                        FILTER (WHERE jadwal_mahasiswa.status IN (\'present\', \'absent\', \'excused\')) as sesi_terisi,
+                    ROUND(
+                        100.0 * COUNT(*) FILTER (WHERE jadwal_mahasiswa.status = \'present\') /
+                        NULLIF(COUNT(*) FILTER (WHERE jadwal_mahasiswa.status IN (\'present\', \'absent\', \'excused\')), 0),
+                    1) as pct_hadir
+                ')
                 ->get();
         }
 
-        $attendance_history = DB::table('attendances_sessions')
-            ->join('matakuliah', 'attendances_sessions.course_id', '=', 'matakuliah.id')
-            ->select(
-                'attendances_sessions.*',
-                'matakuliah.namaMk as matakuliah',
-                DB::raw('(SELECT COUNT(*) FROM attendance_records WHERE attendance_session_id = attendances_sessions.id) as total_hadir')
-            )
-            ->where('attendances_sessions.lecturer_id', $dosen_id)
-            ->orderBy('attendances_sessions.created_at', 'desc')
-            ->limit(5)
-            ->get();
-
-        $meeting_progress = DB::table('attendances_sessions')
-            ->where('lecturer_id', $dosen_id)
+        $unreadNotifCount = DB::table('notification_users')
+            ->where('user_id', Auth::id())
+            ->where('is_read', false)
             ->count();
 
-        $chart_data = DB::table('attendances_sessions')
-            ->select(
-                'meeting_number',
-                DB::raw('(SELECT COUNT(*) FROM attendance_records WHERE attendance_session_id = attendances_sessions.id) as hadir')
-            )
-            ->where('lecturer_id', $dosen_id)
-            ->orderBy('meeting_number', 'asc')
-            ->limit(16)
-            ->get();
-
         return view('dosen.analytics', compact(
-            'total_kelas', 'total_mahasiswa', 'rata_kehadiran',
-            'jadwal_hari_ini', 'semua_matakuliah', 'active_attendance',
-            'students_present', 'attendance_history', 'meeting_progress', 'chart_data'
+            'totalKelas', 'totalMahasiswa', 'totalSesiTerisi',
+            'rekapPerKelas', 'unreadNotifCount'
         ));
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | START ABSENSI
+    | START / CLOSE ABSENSI — fitur lama dihapus, redirect saja
     |--------------------------------------------------------------------------
     */
     public function startAttendance(Request $request)
     {
-        $dosen_id = Auth::id();
-        $code     = strtoupper(substr(md5(uniqid(rand(), true)), 0, 5));
-
-        DB::table('attendances_sessions')
-            ->where('lecturer_id', $dosen_id)
-            ->where('status', 'active')
-            ->update(['status' => 'closed']);
-
-        DB::table('attendances_sessions')->insert([
-            'course_id'       => $request->course_id,
-            'lecturer_id'     => $dosen_id,
-            'meeting_number'  => $request->meeting_number ?? 1,
-            'attendance_code' => $code,
-            'date'            => now()->toDateString(),
-            'start_time'      => now(),
-            'end_time'        => now()->addMinutes(15),
-            'status'          => 'active',
-            'created_at'      => now(),
-        ]);
-
         return redirect()->route('dosen.analytics');
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | CLOSE ABSENSI
-    |--------------------------------------------------------------------------
-    */
     public function closeAttendance(Request $request)
     {
-        DB::table('attendances_sessions')
-            ->where('id', $request->session_id)
-            ->where('lecturer_id', Auth::id())
-            ->update(['status' => 'closed']);
-
         return redirect()->route('dosen.analytics');
     }
 }

@@ -66,6 +66,14 @@ class DosenService extends BaseService
                 'kodeDos'  => $data['kodeDos']  ?? null,
             ]);
 
+            // Saat jurusan membuat dosen baru, pastikan user dosen
+            // ter-scope ke jurusan yang sama dengan pembuatnya
+            if (!empty($data['user_id']) && auth()->user()->jurusan_id) {
+                DB::table('users')
+                    ->where('id', $data['user_id'])
+                    ->update(['jurusan_id' => auth()->user()->jurusan_id]);
+            }
+
             $this->logActivity('CREATE', $dosen, "Membuat data dosen: {$dosen->nama}", $maker);
 
             DB::commit();

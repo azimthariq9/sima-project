@@ -399,7 +399,7 @@ return [
     ],
     [
         'text' => 'Post Announcement',
-        'route' => 'jurusan.announcement',
+        'route' => 'jurusan.announcement.index',
         'icon' => 'fas fa-bullhorn',
         'can'  => 'jurusan',
     ],
