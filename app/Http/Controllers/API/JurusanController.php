@@ -8,9 +8,11 @@ use App\Services\JurusanService;
 use App\Http\Requests\Jurusan\createJurusanRequest;
 use App\Http\Requests\Jurusan\updateJurusanRequest;
 use App\Models\User;
+use App\Models\dosen;
 use App\Enums\Role;
 use App\Services\ActivityLog;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class JurusanController extends Controller
@@ -22,14 +24,161 @@ class JurusanController extends Controller
         $this->jurusanService = $jurusanService;
     }
 
-    /* ── PAGE METHODS (return view) ─────────────────── */
+    /* ── PAGE METHODS (return view dengan data server-side) ─────────────────── */
 
-    public function index()         { return view('jurusan.dashboard'); }
-    public function dosenPage()     { return view('jurusan.dosen.index'); }
-    public function matakuliahPage(){ return view('jurusan.matakuliah.index'); }
-    public function kelasPage()     { return view('jurusan.kelas.index'); }
-    public function jadwalPage()    { return view('jurusan.jadwal.index'); }
-    public function mahasiswaPage() { return view('jurusan.mahasiswa.index'); }
+    private function unreadNotif(): int
+    {
+        return DB::table('notification_users')
+            ->where('user_id', Auth::id())
+            ->where('is_read', false)
+            ->count();
+    }
+
+    public function index() { return view('jurusan.dashboard'); }
+
+    public function profil()
+    {
+        return view('jurusan.profil', ['user' => Auth::user()]);
+    }
+
+    public function updateProfil(Request $request)
+    {
+        $request->validate([
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        $user = Auth::user();
+
+        if ($request->filled('password')) {
+            DB::table('users')->where('id', $user->id)->update(['password' => bcrypt($request->password)]);
+        }
+
+        return redirect()->route('jurusan.profil')->with('success', 'Password berhasil diperbarui.');
+    }
+
+    public function mahasiswaPage(Request $request)
+    {
+        $jid    = Auth::user()->jurusan_id;
+        $search = $request->input('search', '');
+
+        $query = User::where('role', 'mahasiswa')
+            ->where('jurusan_id', $jid)
+            ->with(['mahasiswa', 'mahasiswa.kelas']);
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('email', 'ilike', "%{$search}%")
+                  ->orWhereHas('mahasiswa', function ($m) use ($search) {
+                      $m->where('nama', 'ilike', "%{$search}%")
+                        ->orWhere('npm',  'ilike', "%{$search}%");
+                  });
+            });
+        }
+
+        $mahasiswa        = $query->latest()->paginate(15)->withQueryString();
+        $unreadNotifCount = $this->unreadNotif();
+
+        return view('jurusan.mahasiswa.index', compact('mahasiswa', 'search', 'unreadNotifCount'));
+    }
+
+    public function dosenPage(Request $request)
+    {
+        $jid    = Auth::user()->jurusan_id;
+        $search = $request->input('search', '');
+
+        $query = dosen::with('user')
+            ->whereHas('user', function ($q) use ($jid) {
+                $q->where('jurusan_id', $jid);
+            });
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama',    'ilike', "%{$search}%")
+                  ->orWhere('nidn',   'ilike', "%{$search}%")
+                  ->orWhere('kodeDos','ilike', "%{$search}%");
+            });
+        }
+
+        $dosens           = $query->latest()->paginate(15)->withQueryString();
+        $unreadNotifCount = $this->unreadNotif();
+
+        return view('jurusan.dosen.index', compact('dosens', 'search', 'unreadNotifCount'));
+    }
+
+    public function matakuliahPage(Request $request)
+    {
+        $jid    = Auth::user()->jurusan_id;
+        $search = $request->input('search', '');
+
+        $query = DB::table('matakuliah')->where('jurusan_id', $jid);
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('namaMk', 'ilike', "%{$search}%")
+                  ->orWhere('kodeMk', 'ilike', "%{$search}%");
+            });
+        }
+        $matakuliah       = $query->orderByDesc('created_at')->paginate(15)->withQueryString();
+        $unreadNotifCount = $this->unreadNotif();
+
+        return view('jurusan.matakuliah.index', compact('matakuliah', 'search', 'unreadNotifCount'));
+    }
+
+    public function kelasPage(Request $request)
+    {
+        $jid    = Auth::user()->jurusan_id;
+        $search = $request->input('search', '');
+
+        $query = DB::table('kelas')
+            ->join('jurusan', 'kelas.jurusan_id', '=', 'jurusan.id')
+            ->where('kelas.jurusan_id', $jid);
+        if ($search) {
+            $query->where('kelas.kodeKelas', 'ilike', "%{$search}%");
+        }
+        $kelas = $query
+            ->selectRaw('kelas.*, jurusan."namaJurusan", (SELECT COUNT(*) FROM mahasiswa_kelas mk WHERE mk.kelas_id = kelas.id) as mahasiswa_count')
+            ->orderByDesc('kelas.created_at')
+            ->paginate(15)->withQueryString();
+        $unreadNotifCount = $this->unreadNotif();
+
+        return view('jurusan.kelas.index', compact('kelas', 'search', 'unreadNotifCount'));
+    }
+
+    public function jadwalPage(Request $request)
+    {
+        $jid    = Auth::user()->jurusan_id;
+        $search = $request->input('search', '');
+
+        $query = DB::table('jadwal')
+            ->join('dosen as d', 'jadwal.dosen_id', '=', 'd.id')
+            ->join('users as u', 'd.user_id', '=', 'u.id')
+            ->leftJoin('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
+            ->leftJoin('kelas', 'jadwal.kelas_id', '=', 'kelas.id')
+            ->where('u.jurusan_id', $jid);
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('matakuliah.namaMk', 'ilike', "%{$search}%")
+                  ->orWhere('d.nama', 'ilike', "%{$search}%")
+                  ->orWhere('kelas.kodeKelas', 'ilike', "%{$search}%");
+            });
+        }
+
+        $jadwal = $query->select(
+                'jadwal.*',
+                'matakuliah.namaMk as nama_matkul',
+                'd.nama as nama_dosen',
+                'kelas.kodeKelas'
+            )
+            ->orderByRaw("CASE jadwal.hari
+                WHEN 'Senin'   THEN 1 WHEN 'Selasa'  THEN 2 WHEN 'Rabu'    THEN 3
+                WHEN 'Kamis'   THEN 4 WHEN 'Jumat'   THEN 5 WHEN 'Sabtu'   THEN 6
+                ELSE 7 END, jadwal.jam")
+            ->paginate(15)->withQueryString();
+
+        $unreadNotifCount = $this->unreadNotif();
+
+        return view('jurusan.jadwal.index', compact('jadwal', 'search', 'unreadNotifCount'));
+    }
 
     /*
     |--------------------------------------------------------------------------

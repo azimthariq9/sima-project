@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
 @section('page_title',    'Profil Saya')
-@section('page_section',  'KERJA SAMA LUAR NEGERI')
-@section('page_subtitle', 'Informasi akun KLN')
+@section('page_section',  'ADMIN JURUSAN')
+@section('page_subtitle', 'Informasi akun — ' . (auth()->user()->jurusan->namaJurusan ?? 'Jurusan'))
 
 @section('main_content')
 
@@ -27,11 +27,11 @@
                             display:flex;align-items:center;justify-content:center;
                             font-size:28px;font-weight:700;color:#fff;margin-bottom:16px;
                             box-shadow:0 4px 16px rgba(var(--c-accent-rgb),.25)">
-                    {{ strtoupper(substr($user->nama ?? $user->email, 0, 1)) }}
+                    {{ strtoupper(substr($user->email, 0, 1)) }}
                 </div>
 
                 <div style="font-size:17px;font-weight:700;color:var(--c-text-1);margin-bottom:4px">
-                    {{ $user->nama ?? 'Admin KLN' }}
+                    {{ $user->jurusan->namaJurusan ?? 'Admin Jurusan' }}
                 </div>
                 <div style="font-size:12px;color:var(--c-text-3);margin-bottom:14px">
                     {{ $user->email }}
@@ -45,14 +45,14 @@
                 <div style="margin-top:20px;width:100%;border-top:1px solid var(--c-border);padding-top:16px;
                             display:flex;flex-direction:column;gap:10px;text-align:left">
                     <div style="display:flex;justify-content:space-between;font-size:12.5px">
-                        <span style="color:var(--c-text-3)"><i class="fas fa-shield-halved me-1"></i> Role</span>
-                        <span style="font-family:var(--f-mono);font-weight:600;color:var(--c-text-1);text-transform:uppercase">{{ $user->role }}</span>
+                        <span style="color:var(--c-text-3)"><i class="fas fa-university me-1"></i> Jurusan</span>
+                        <span style="font-weight:600;color:var(--c-text-1);text-align:right;max-width:130px">
+                            {{ $user->jurusan->namaJurusan ?? '—' }}
+                        </span>
                     </div>
                     <div style="display:flex;justify-content:space-between;font-size:12.5px">
-                        <span style="color:var(--c-text-3)"><i class="fas fa-key me-1"></i> Login</span>
-                        <span style="font-weight:600;color:var(--c-text-1)">
-                            {{ $user->is_has_password ? 'Password' : 'OTP Email' }}
-                        </span>
+                        <span style="color:var(--c-text-3)"><i class="fas fa-shield-halved me-1"></i> Role</span>
+                        <span style="font-family:var(--f-mono);font-weight:600;color:var(--c-text-1);text-transform:uppercase">{{ $user->role }}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;font-size:12.5px">
                         <span style="color:var(--c-text-3)"><i class="fas fa-calendar me-1"></i> Bergabung</span>
@@ -86,17 +86,17 @@
                 </div>
                 @endif
 
-                <form method="POST" action="{{ route('kln.profil.update') }}">
+                <form method="POST" action="{{ route('jurusan.profil.update') }}">
                     @csrf
                     @method('PATCH')
 
-                    {{-- Info email (readonly) --}}
+                    {{-- Email readonly --}}
                     <div style="margin-bottom:16px">
                         <label class="sima-label">Email</label>
                         <input type="email" value="{{ $user->email }}" class="sima-input"
                                disabled style="background:var(--c-bg);color:var(--c-text-3)">
                         <div style="font-size:11.5px;color:var(--c-text-3);margin-top:5px">
-                            <i class="fas fa-info-circle"></i> Email tidak dapat diubah. Hubungi administrator sistem jika perlu.
+                            <i class="fas fa-info-circle"></i> Email tidak dapat diubah. Hubungi KLN jika perlu.
                         </div>
                     </div>
 
