@@ -146,82 +146,39 @@
 
             @endif
 
-        </div>
-
 </div>
-
-
-{{-- ══════════════════════════════════════
-     RINGKASAN KEHADIRAN PER MATA KULIAH
-══════════════════════════════════════ --}}
+{{-- RINGKASAN KEHADIRAN PER MATA KULIAH --}}
 @if($attendanceSummary->isNotEmpty())
 
 <div class="sima-card mt-3 fade-up fade-up--3">
-
-    <div class="sima-card__header d-flex justify-content-between align-items-center">
+    <div class="sima-card__header">
         <h5 class="sima-card__title mb-0">
-            <span style="margin-right:6px">📊</span> Kehadiran per Mata Kuliah
+            <i class="fas fa-chart-bar" style="margin-right:6px;color:var(--c-accent)"></i> Kehadiran per Mata Kuliah
         </h5>
     </div>
-
     <div class="sima-card__body">
-
         @foreach($attendanceSummary as $att)
-
             @php
-                $totalSesi  = $totalSesiPerMk[$att->course_id]->total_sesi ?? 1;
-                $hadir      = $att->hadir ?? 0;
-                $pct        = $totalSesi > 0 ? round(($hadir / $totalSesi) * 100) : 0;
-                $barColor   = $pct >= 75 ? '#22c55e' : ($pct >= 50 ? '#f59e0b' : '#ef4444');
+                $totalSesi = $totalSesiPerMk[$att->course_id]->total_sesi ?? 1;
+                $hadir     = $att->hadir ?? 0;
+                $pct       = $totalSesi > 0 ? round(($hadir / $totalSesi) * 100) : 0;
+                $barColor  = $pct >= 75 ? '#22c55e' : ($pct >= 50 ? '#f59e0b' : '#ef4444');
             @endphp
-
             <div class="att-row">
-
                 <div style="min-width:140px">
                     <div class="att-mk">{{ $att->namaMk ?? '-' }}</div>
                     <div style="font-size:11.5px;color:var(--c-text-3)">
                         {{ $hadir }} hadir
-                        @if(($att->terlambat ?? 0) > 0)
-                            · {{ $att->terlambat }} terlambat
-                        @endif
+                        @if(($att->terlambat ?? 0) > 0) · {{ $att->terlambat }} terlambat @endif
                         · {{ $totalSesi }} sesi
                     </div>
                 </div>
-
                 <div class="att-bar-wrap">
                     <div class="att-bar-fill" style="width:{{ $pct }}%;background:{{ $barColor }}"></div>
                 </div>
-
                 <div class="att-pct" style="color:{{ $barColor }}">{{ $pct }}%</div>
-
             </div>
-
         @endforeach
-
-    </div>
-
-</div>
-
-@endif
-
-
-{{-- ══════════════════════════════════════
-     INFO TAMBAHAN: Tidak ada data
-══════════════════════════════════════ --}}
-@if($weeklySchedules->isEmpty() && $todaySchedules->isEmpty())
-
-<div class="sima-card mt-3 fade-up fade-up--4">
-    <div class="sima-card__body">
-        <div class="jdw-empty">
-            <div class="jdw-empty__icon">📋</div>
-            <div style="font-size:14px;font-weight:600;color:var(--c-text-1);margin-bottom:6px">
-                Belum ada jadwal terdaftar
-            </div>
-            <div class="jdw-empty__text">
-                Jadwal akan muncul setelah admin mendaftarkan kamu ke kelas.
-                Hubungi KLN jika ada pertanyaan.
-            </div>
-        </div>
     </div>
 </div>
 
