@@ -83,212 +83,240 @@
     </div>
 
     
-<div id="userModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); z-index:9999; align-items:center; justify-content:center;">
-    
-    <div style="background:#0f172a; width:600px; max-height:90vh; overflow:auto; padding:30px; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,.5);">
+<div id="userModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); backdrop-filter:blur(4px); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; width:600px; max-height:90vh; overflow:auto; border-radius:18px; box-shadow:0 20px 60px rgba(0,0,0,.2);">
 
-        <h2 style="color:white; font-size:20px; margin-bottom:20px;">Create New User</h2>
+        <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:15px;font-weight:700;color:#1e293b">Tambah User Baru</div>
+            <button type="button" onclick="closeModal()" style="width:32px;height:32px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;color:#64748b">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
 
+        <div style="padding:20px 24px">
         <form id="userForm">
-            {{-- @csrf --}}
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Role</label>
-                <select name="role" id="roleSelect" onchange="handleRoleChange()" 
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                    <option value="">Select Role</option>
-                    <option value="bipa">BIPA</option>
-                    <option value="kln">KLN</option>
-                    <option value="mahasiswa">Mahasiswa</option>
-                    <option value="dosen">Dosen</option>
-                </select>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+                <div>
+                    <label class="sima-label">Role <span style="color:var(--c-red)">*</span></label>
+                    <select name="role" id="roleSelect" onchange="handleRoleChange()" class="sima-input">
+                        <option value="">Pilih Role</option>
+                        <option value="bipa">BIPA</option>
+                        <option value="kln">KLN</option>
+                        <option value="jurusan">Jurusan</option>
+                        <option value="mahasiswa">Mahasiswa</option>
+                        <option value="dosen">Dosen</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="sima-label">Status</label>
+                    <select name="status" class="sima-input">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
             </div>
 
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Email</label>
-                <input type="email" name="email"
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
+            <div style="margin-bottom:14px">
+                <label class="sima-label">Email <span style="color:var(--c-red)">*</span></label>
+                <input type="email" name="email" class="sima-input" placeholder="email@instansi.ac.id">
             </div>
 
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Password</label>
-                <input type="password" name="password"
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
+            <div style="margin-bottom:14px">
+                <label class="sima-label">Password
+                    <span style="font-weight:400;color:var(--c-text-3);font-size:11.5px">(opsional — kosongkan untuk akun login via OTP)</span>
+                </label>
+                <input type="password" name="password" class="sima-input" placeholder="Min. 6 karakter, atau kosongkan">
             </div>
 
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Status</label>
-                <select name="status"
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
-            </div>
-
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Jurusan</label>
-                <select name="jurusan_id" id="jurusan_id" onchange="handleRoleChange()" 
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                    <option value="">Select Jurusan</option>
-                    @foreach ( $jurusan as $j)
+            <div style="margin-bottom:14px">
+                <label class="sima-label">Jurusan</label>
+                <select name="jurusan_id" id="jurusan_id" onchange="handleRoleChange()" class="sima-input">
+                    <option value="">Pilih Jurusan</option>
+                    @foreach($jurusan as $j)
                         <option value="{{ $j->id }}">{{ $j->namaJurusan }}</option>
                     @endforeach
                 </select>
-                {{-- <input type="number" name="jurusan_id"
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;"> --}}
             </div>
 
             <!-- MAHASISWA SECTION -->
-            <div id="mahasiswaSection" style="display:none;">
-
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">NPM</label>
-                    <input type="text" name="mahasiswa[npm]"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
+            <div id="mahasiswaSection" style="display:none;background:#f8fafc;border-radius:12px;padding:14px;margin-bottom:14px;border:1px solid #e2e8f0">
+                <div style="font-size:12.5px;font-weight:700;color:#1e293b;margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em">
+                    <i class="fas fa-user-graduate" style="margin-right:4px"></i> Data Mahasiswa
                 </div>
-
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">Nama Mahasiswa</label>
-                    <input type="text" name="mahasiswa[nama]"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
+                <div style="margin-bottom:12px">
+                    <label class="sima-label">NPM
+                        <span style="font-weight:400;color:var(--c-text-3);font-size:11.5px">(kosongkan untuk auto-generate)</span>
+                    </label>
+                    <div style="display:flex;gap:8px">
+                        <input type="text" name="mahasiswa[npm]" id="npmInput" class="sima-input" placeholder="Auto-generate jika kosong">
+                        <button type="button" id="btnGenerateNpm" onclick="generateNpm()"
+                            style="white-space:nowrap;padding:8px 14px;border:1px solid var(--c-border);border-radius:8px;background:#f1f5f9;color:#475569;font-size:12.5px;cursor:pointer;font-weight:600">
+                            <i class="fas fa-dice"></i> Generate
+                        </button>
+                    </div>
                 </div>
-
+                <div>
+                    <label class="sima-label">Nama Mahasiswa <span style="color:var(--c-red)">*</span></label>
+                    <input type="text" name="mahasiswa[nama]" class="sima-input" placeholder="Nama lengkap">
+                </div>
+                <div style="margin-top:12px">
+                    <label class="sima-label">Tipe Mahasiswa</label>
+                    <select name="mahasiswa[tipeMahasiswa]" class="sima-input">
+                        <option value="">— Pilih Tipe —</option>
+                        <option value="Beasiswa TIAS">Beasiswa TIAS</option>
+                        <option value="Beasiswa KNB">Beasiswa KNB</option>
+                        <option value="Beasiswa Gunadarma">Beasiswa Gunadarma</option>
+                        <option value="Internasional Mandiri">Internasional Mandiri</option>
+                        <option value="Short Course (3 Bulan)">Short Course (3 Bulan)</option>
+                    </select>
+                </div>
             </div>
 
             <!-- DOSEN SECTION -->
-            <div id="dosenSection" style="display:none;">
-
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">Nama Dosen</label>
-                    <input type="text" name="dosen[nama]"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
+            <div id="dosenSection" style="display:none;background:#f8fafc;border-radius:12px;padding:14px;margin-bottom:14px;border:1px solid #e2e8f0">
+                <div style="font-size:12.5px;font-weight:700;color:#1e293b;margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em">
+                    <i class="fas fa-chalkboard-teacher" style="margin-right:4px"></i> Data Dosen
                 </div>
-
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">NIDN</label>
-                    <input type="text" name="dosen[nidn]"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
+                <div style="margin-bottom:12px">
+                    <label class="sima-label">Nama Dosen <span style="color:var(--c-red)">*</span></label>
+                    <input type="text" name="dosen[nama]" class="sima-input" placeholder="Nama lengkap">
                 </div>
-
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">Kode Dosen</label>
-                    <input type="text" name="dosen[kodeDos]"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                    <div>
+                        <label class="sima-label">NIDN</label>
+                        <input type="text" name="dosen[nidn]" class="sima-input" placeholder="Nomor Induk">
+                    </div>
+                    <div>
+                        <label class="sima-label">Kode Dosen</label>
+                        <input type="text" name="dosen[kodeDos]" class="sima-input" placeholder="Kode">
+                    </div>
                 </div>
-
             </div>
 
-            <div style="display:flex; justify-content:space-between; margin-top:20px;">
-                <button type="button" onclick="closeModal()" 
-                    class="sima-btn sima-btn--gold">
-                    Cancel
-                </button>
+            <div id="createErr" style="display:none;font-size:12.5px;color:#dc2626;margin-bottom:12px;padding:10px;background:#fef2f2;border-radius:8px"></div>
 
-                <button
-                    class="sima-btn sima-btn--blue">
-                    Save
-                </button>
+            <div style="display:flex;gap:8px;margin-top:4px">
+                <button type="submit" class="sima-btn"><i class="fas fa-plus"></i> Simpan</button>
+                <button type="button" onclick="closeModal()" class="sima-btn sima-btn--outline">Batal</button>
             </div>
-
         </form>
+        </div>
     </div>
 </div>
-<div id="userEdit" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); z-index:9999; align-items:center; justify-content:center;">
-    <div style="background:#0f172a; width:600px; max-height:90vh; overflow:auto; padding:30px; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,.5);">
+<div id="userEdit" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); backdrop-filter:blur(4px); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; width:600px; max-height:90vh; overflow:auto; border-radius:18px; box-shadow:0 20px 60px rgba(0,0,0,.2);">
 
-        <h2 style="color:white; font-size:20px; margin-bottom:20px;">Edit User</h2>
+        <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:15px;font-weight:700;color:#1e293b">Edit User</div>
+            <button type="button" onclick="closeModal()" style="width:32px;height:32px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;color:#64748b">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
+
+        <div style="padding:20px 24px">
         <form id="userEditForm">
             <input type="hidden" id="editUserId" name="id">
-            
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Role</label>
-                <select name="role" id="editRoleSelect" onchange="handleEditRoleChange()" 
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                    <option value="">Select Role</option>
-                    <option value="bipa">BIPA</option>
-                    <option value="kln">KLN</option>
-                    <option value="jurusan">Jurusan</option>
-                    <option value="mahasiswa">Mahasiswa</option>
-                    <option value="dosen">Dosen</option>
-                </select>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+                <div>
+                    <label class="sima-label">Role</label>
+                    <select name="role" id="editRoleSelect" onchange="handleEditRoleChange()" class="sima-input">
+                        <option value="">Pilih Role</option>
+                        <option value="bipa">BIPA</option>
+                        <option value="kln">KLN</option>
+                        <option value="jurusan">Jurusan</option>
+                        <option value="mahasiswa">Mahasiswa</option>
+                        <option value="dosen">Dosen</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="sima-label">Status</label>
+                    <select name="status" id="editStatus" class="sima-input">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
             </div>
 
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Email</label>
-                <input type="email" name="email" id="editEmail"
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
+            <div style="margin-bottom:14px">
+                <label class="sima-label">Email</label>
+                <input type="email" name="email" id="editEmail" class="sima-input">
             </div>
 
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Password (Kosongkan jika tidak diubah)</label>
-                <input type="password" name="password" id="editPassword"
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
+            <div style="margin-bottom:14px">
+                <label class="sima-label">Password
+                    <span style="font-weight:400;color:var(--c-text-3);font-size:11.5px">(kosongkan jika tidak diubah)</span>
+                </label>
+                <input type="password" name="password" id="editPassword" class="sima-input" placeholder="Min. 6 karakter">
             </div>
 
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Status</label>
-                <select name="status" id="editStatus"
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
-            </div>
-
-            <div style="margin-bottom:15px;">
-                <label style="color:#94a3b8;">Jurusan</label>
-                <select name="jurusan_id" id="editJurusanId" onchange="handleEditRoleChange()"
-                    style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
-                    <option value="">Select Jurusan</option>
-                    @foreach ( $jurusan as $j)
+            <div style="margin-bottom:14px">
+                <label class="sima-label">Jurusan</label>
+                <select name="jurusan_id" id="editJurusanId" onchange="handleEditRoleChange()" class="sima-input">
+                    <option value="">Pilih Jurusan</option>
+                    @foreach($jurusan as $j)
                         <option value="{{ $j->id }}">{{ $j->namaJurusan }}</option>
                     @endforeach
                 </select>
             </div>
 
             <!-- MAHASISWA SECTION EDIT -->
-            <div id="editMahasiswaSection" style="display:none;">
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">NPM</label>
-                    <input type="text" name="mahasiswa[npm]" id="editMahasiswaNpm"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
+            <div id="editMahasiswaSection" style="display:none;background:#f8fafc;border-radius:12px;padding:14px;margin-bottom:14px;border:1px solid #e2e8f0">
+                <div style="font-size:12.5px;font-weight:700;color:#1e293b;margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em">
+                    <i class="fas fa-user-graduate" style="margin-right:4px"></i> Data Mahasiswa
                 </div>
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">Nama Mahasiswa</label>
-                    <input type="text" name="mahasiswa[nama]" id="editMahasiswaNama"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
+                <div style="margin-bottom:12px">
+                    <label class="sima-label">NPM</label>
+                    <input type="text" name="mahasiswa[npm]" id="editMahasiswaNpm" class="sima-input">
+                </div>
+                <div style="margin-bottom:12px">
+                    <label class="sima-label">Nama Mahasiswa</label>
+                    <input type="text" name="mahasiswa[nama]" id="editMahasiswaNama" class="sima-input">
+                </div>
+                <div>
+                    <label class="sima-label">Tipe Mahasiswa</label>
+                    <select name="mahasiswa[tipeMahasiswa]" id="editMahasiswaTipe" class="sima-input">
+                        <option value="">— Pilih Tipe —</option>
+                        <option value="Beasiswa TIAS">Beasiswa TIAS</option>
+                        <option value="Beasiswa KNB">Beasiswa KNB</option>
+                        <option value="Beasiswa Gunadarma">Beasiswa Gunadarma</option>
+                        <option value="Internasional Mandiri">Internasional Mandiri</option>
+                        <option value="Short Course (3 Bulan)">Short Course (3 Bulan)</option>
+                    </select>
                 </div>
             </div>
 
             <!-- DOSEN SECTION EDIT -->
-            <div id="editDosenSection" style="display:none;">
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">Nama Dosen</label>
-                    <input type="text" name="dosen[nama]" id="editDosenNama"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
+            <div id="editDosenSection" style="display:none;background:#f8fafc;border-radius:12px;padding:14px;margin-bottom:14px;border:1px solid #e2e8f0">
+                <div style="font-size:12.5px;font-weight:700;color:#1e293b;margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em">
+                    <i class="fas fa-chalkboard-teacher" style="margin-right:4px"></i> Data Dosen
                 </div>
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">NIDN</label>
-                    <input type="text" name="dosen[nidn]" id="editDosenNidn"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
+                <div style="margin-bottom:12px">
+                    <label class="sima-label">Nama Dosen</label>
+                    <input type="text" name="dosen[nama]" id="editDosenNama" class="sima-input">
                 </div>
-                <div style="margin-bottom:15px;">
-                    <label style="color:#94a3b8;">Kode Dosen</label>
-                    <input type="text" name="dosen[kodeDos]" id="editDosenKode"
-                        style="width:100%; padding:10px; background:#1e293b; color:white; border-radius:10px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                    <div>
+                        <label class="sima-label">NIDN</label>
+                        <input type="text" name="dosen[nidn]" id="editDosenNidn" class="sima-input">
+                    </div>
+                    <div>
+                        <label class="sima-label">Kode Dosen</label>
+                        <input type="text" name="dosen[kodeDos]" id="editDosenKode" class="sima-input">
+                    </div>
                 </div>
             </div>
 
-            <div style="display:flex; justify-content:space-between; margin-top:20px;">
-                <button type="button" onclick="closeModal()" 
-                class="sima-btn sima-btn--gold">
-                    Cancel
-                </button>
-                <button 
-                    type="submit" 
-                    class="sima-btn sima-btn--blue">
-                    Update
-                </button>
+            <div id="editErr" style="display:none;font-size:12.5px;color:#dc2626;margin-bottom:12px;padding:10px;background:#fef2f2;border-radius:8px"></div>
+
+            <div style="display:flex;gap:8px;margin-top:4px">
+                <button type="submit" class="sima-btn"><i class="fas fa-save"></i> Update</button>
+                <button type="button" onclick="closeModal()" class="sima-btn sima-btn--outline">Batal</button>
             </div>
         </form>
+        </div>
     </div>
 </div>
 
@@ -615,62 +643,54 @@ document.addEventListener('DOMContentLoaded', function () {
     function validateForm(data, isEdit = false) {
         const role = data.role;
 
-        // Validasi umum
-        if (!role) {
-            alert('Role harus dipilih');
+        if (!role) { alert('Role harus dipilih'); return false; }
+        if (!data.email || !data.email.includes('@')) { alert('Email tidak valid'); return false; }
+
+        // Password: opsional di create (akun OTP), opsional di edit (berarti tidak diubah)
+        if (data.password && data.password.length < 6) {
+            alert('Password minimal 6 karakter');
             return false;
         }
 
-        if (!data.email || !data.email.includes('@')) {
-            alert('Email tidak valid');
-            return false;
-        }
-
-        if (isEdit) {
-            // Edit: password boleh kosong (tidak diubah), tapi kalau diisi harus >= 6 karakter
-            if (data.password && data.password.length < 6) {
-                alert('Password minimal 6 karakter');
-                return false;
-            }
-        } else {
-            if (!data.password || data.password.length < 6) {
-                alert('Password minimal 6 karakter');
-                return false;
-            }
-        }
-        
-        // Validasi spesifik role
         if (role === 'mahasiswa') {
-            if (!data.mahasiswa?.npm) {
-                alert('NPM harus diisi');
-                return false;
-            }
-            if (!data.mahasiswa?.nama) {
-                alert('Nama mahasiswa harus diisi');
-                return false;
-            }
-            if (!data.jurusan_id) {
-                alert('Jurusan harus dipilih');
-                return false;
-            }
+            // NPM boleh kosong — server akan auto-generate
+            if (!data.mahasiswa?.nama) { alert('Nama mahasiswa harus diisi'); return false; }
+            if (!data.jurusan_id) { alert('Jurusan harus dipilih'); return false; }
         }
-        
+
         if (role === 'dosen') {
-            if (!data.dosen?.nama) {
-                alert('Nama dosen harus diisi');
-                return false;
-            }
-            if (!data.dosen?.nidn) {
-                alert('NIDN harus diisi');
-                return false;
-            }
-            if (!data.jurusan_id) {
-                alert('Jurusan harus dipilih');
-                return false;
-            }
+            if (!data.dosen?.nama) { alert('Nama dosen harus diisi'); return false; }
+            if (!data.jurusan_id) { alert('Jurusan harus dipilih'); return false; }
         }
-        
+
         return true;
+    }
+
+    /* =========================
+       GENERATE NPM
+    ==========================*/
+    window.generateNpm = function() {
+        const jurusanId = document.getElementById('jurusan_id').value;
+        if (!jurusanId) { alert('Pilih jurusan terlebih dahulu'); return; }
+
+        const btn = document.getElementById('btnGenerateNpm');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        fetch(`{{ route('kln.users.generate-npm') }}?jurusan_id=${jurusanId}`)
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    document.getElementById('npmInput').value = res.npm;
+                } else {
+                    alert(res.message || 'Gagal generate NPM');
+                }
+            })
+            .catch(err => alert('Error: ' + err.message))
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-dice"></i> Generate';
+            });
     }
 
     /* ====================================
@@ -695,8 +715,9 @@ document.addEventListener('DOMContentLoaded', function () {
         // Data spesifik role
         if (role === 'mahasiswa') {
             data.mahasiswa = {
-                npm: formData.get('mahasiswa[npm]'),
-                nama: formData.get('mahasiswa[nama]')
+                npm:            formData.get('mahasiswa[npm]'),
+                nama:           formData.get('mahasiswa[nama]'),
+                tipeMahasiswa:  formData.get('mahasiswa[tipeMahasiswa]'),
             };
         }
         
@@ -716,65 +737,44 @@ document.addEventListener('DOMContentLoaded', function () {
     ==========================*/
     form.addEventListener('submit', function(e) {
         e.preventDefault();
+        const errDiv = document.getElementById('createErr');
+        errDiv.style.display = 'none';
 
         const formData = new FormData(form);
         const data = buildUserData(formData);
-        
-        if (!validateForm(data)){
-            return;
-        }
-        console.log('Filtered data to send:', data); // DEBUG
+        if (!validateForm(data)) return;
+
+        const btn = form.querySelector('[type=submit]'); btn.disabled = true;
 
         fetch("{{ route('kln.users.store') }}", {
             method: "POST",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
+            headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}", "Content-Type": "application/json", "Accept": "application/json" },
             body: JSON.stringify(data)
         })
         .then(async res => {
-            if (!res.ok) {
-                const text = await res.text();
-                console.log('Error response:', text);
-                try {
-                    return JSON.parse(text);
-                } catch {
-                    throw new Error(`HTTP ${res.status}: ${text.substring(0, 200)}`);
-                }
-            }
-            return res.json();
+            const text = await res.text();
+            try { return JSON.parse(text); } catch { throw new Error(`HTTP ${res.status}`); }
         })
         .then(response => {
             if (response.success) {
                 modal.style.display = 'none';
-                // Tampilkan flash message dari response
-                if (response.flash) {
-                    showFlasherNotification(response.flash);
-                }
-                
-                if (response.success) {
-                    renderUsers(extractUsers(response.data));
-                }// Debounce 500ms
+                if (response.flash) showFlasherNotification(response.flash);
                 form.reset();
                 loadUsers();
             } else {
-                // Tampilkan error dengan lebih baik
-                let errorMsg = response.message || "Validation failed";
+                let msg = response.message || 'Validasi gagal';
                 if (response.errors) {
-                    errorMsg += "\n\n" + Object.entries(response.errors)
-                        .map(([field, errors]) => `${field}: ${errors.join(', ')}`)
-                        .join('\n');
+                    msg += ': ' + Object.values(response.errors).flat().join(', ');
                 }
-                alert(errorMsg);
-                console.log(response.errors);
+                errDiv.textContent = msg;
+                errDiv.style.display = 'block';
             }
         })
         .catch(error => {
-            console.error('Fetch Error:', error);
-            alert("Server error: " + error.message);
-        });
+            errDiv.textContent = 'Server error: ' + error.message;
+            errDiv.style.display = 'block';
+        })
+        .finally(() => { btn.disabled = false; });
     });
 
     /* =========================
@@ -818,8 +818,9 @@ document.addEventListener('DOMContentLoaded', function () {
             
             // Handle role-specific fields
             if (user.role === 'mahasiswa' && user.mahasiswa) {
-                document.getElementById('editMahasiswaNpm').value = user.mahasiswa.npm || '';
-                document.getElementById('editMahasiswaNama').value = user.mahasiswa.nama|| '';
+                document.getElementById('editMahasiswaNpm').value   = user.mahasiswa.npm  || '';
+                document.getElementById('editMahasiswaNama').value  = user.mahasiswa.nama || '';
+                document.getElementById('editMahasiswaTipe').value  = user.mahasiswa.tipeMahasiswa || '';
                 document.getElementById('editMahasiswaSection').style.display = 'block';
             } else {
                 document.getElementById('editMahasiswaSection').style.display = 'none';
@@ -846,66 +847,47 @@ document.addEventListener('DOMContentLoaded', function () {
     // Handle Edit Form Submit
     editForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        
+        const errDiv = document.getElementById('editErr');
+        errDiv.style.display = 'none';
+
         const userId = document.getElementById('editUserId').value;
-        console.log('user Id: ', userId);
         const formData = new FormData(editForm);
         const data = buildUserData(formData, true);
         const url = `/kln/users/${userId}`;
-        
-        if (!validateForm(data, true)) {
-            return;
-        }
+
+        if (!validateForm(data, true)) return;
+
+        const btn = editForm.querySelector('[type=submit]'); btn.disabled = true;
 
         fetch(url, {
             method: "PATCH",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
+            headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}", "Content-Type": "application/json", "Accept": "application/json" },
             body: JSON.stringify(data)
         })
         .then(async res => {
-            if (!res.ok) {
-                const text = await res.text();
-                
-                try {
-                    return JSON.parse(text);
-                } catch {
-                    throw new Error(`HTTP ${res.status}`);
-                }
-            }
-            console.log('response', res);
-            return res.json();
+            const text = await res.text();
+            try { return JSON.parse(text); } catch { throw new Error(`HTTP ${res.status}`); }
         })
         .then(response => {
             if (response.success) {
                 editModal.style.display = 'none';
-                // Tampilkan flash message dari response
-                if (response.flash) {
-                    showFlasherNotification(response.flash);
-                }
-                if (response.success) {
-                    renderUsers(extractUsers(response.data));
-                }// Debounce 500ms
-
+                if (response.flash) showFlasherNotification(response.flash);
                 editForm.reset();
                 loadUsers();
             } else {
-                let errorMsg = response.message || "Update failed";
+                let msg = response.message || 'Update gagal';
                 if (response.errors) {
-                    errorMsg += "\n\n" + Object.entries(response.errors)
-                        .map(([field, errors]) => `${field}: ${errors.join(', ')}`)
-                        .join('\n');
+                    msg += ': ' + Object.values(response.errors).flat().join(', ');
                 }
-                alert(errorMsg);
+                errDiv.textContent = msg;
+                errDiv.style.display = 'block';
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert("Server error: " + error.message);
-        });
+            errDiv.textContent = 'Server error: ' + error.message;
+            errDiv.style.display = 'block';
+        })
+        .finally(() => { btn.disabled = false; });
     });
 
     /* =========================

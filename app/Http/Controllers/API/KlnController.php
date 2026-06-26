@@ -313,31 +313,34 @@ class KlnController extends Controller
         $searchM   = $request->input('search_m', '');
         $jurusanM  = $request->input('jurusan_m', '');
         $dokStatus = $request->input('dok_status', '');
+        $tipeMhs   = $request->input('tipe_m', '');
 
         $mhsQuery = DB::table('mahasiswa')
             ->join('users', 'mahasiswa.user_id', '=', 'users.id')
             ->leftJoin('jurusan', 'users.jurusan_id', '=', 'jurusan.id')
             ->leftJoin('dokumen', function ($join) {
                 $join->on('dokumen.mahasiswa_id', '=', 'mahasiswa.id')
-                     ->whereNull('dokumen.deleted_at')
-                     ->whereNotNull('dokumen.tglKdlwrs');
+                     ->whereNull('dokumen.deleted_at');
             })
             ->select(
                 'mahasiswa.id',
                 'mahasiswa.nama',
                 'mahasiswa.npm as identifier',
+                'mahasiswa.tipeMahasiswa',
                 'jurusan.namaJurusan',
                 'users.jurusan_id',
                 'users.status',
                 DB::raw("MIN(CASE
-                    WHEN dokumen.\"tglKdlwrs\" IS NULL THEN NULL
-                    WHEN dokumen.\"tglKdlwrs\" < CURRENT_DATE THEN 1
-                    WHEN dokumen.\"tglKdlwrs\" <= CURRENT_DATE + INTERVAL '30 days' THEN 2
-                    ELSE 3
+                    WHEN dokumen.\"tglKdlwrs\" IS NOT NULL AND dokumen.\"tglKdlwrs\" < CURRENT_DATE THEN 1
+                    WHEN dokumen.status = 'pending' THEN 2
+                    WHEN dokumen.\"tglKdlwrs\" IS NOT NULL AND dokumen.\"tglKdlwrs\" <= CURRENT_DATE + INTERVAL '30 days' THEN 3
+                    WHEN dokumen.\"tglKdlwrs\" IS NOT NULL THEN 4
+                    ELSE NULL
                 END) as doc_expiry_level")
             )
             ->groupBy('mahasiswa.id', 'mahasiswa.nama', 'mahasiswa.npm',
-                      'jurusan.namaJurusan', 'users.jurusan_id', 'users.status')
+                      'mahasiswa.tipeMahasiswa', 'jurusan.namaJurusan',
+                      'users.jurusan_id', 'users.status')
             ->orderBy('mahasiswa.nama');
 
         if ($searchM) {
@@ -349,21 +352,25 @@ class KlnController extends Controller
         if ($jurusanM) {
             $mhsQuery->where('users.jurusan_id', $jurusanM);
         }
+        if ($tipeMhs) {
+            $mhsQuery->where('mahasiswa.tipeMahasiswa', $tipeMhs);
+        }
 
         $mahasiswaList = $mhsQuery->paginate(10, ['*'], 'page_m')->withQueryString();
 
         if ($dokStatus) {
             $caseExpr = 'MIN(CASE
-                    WHEN dokumen."tglKdlwrs" IS NULL THEN NULL
-                    WHEN dokumen."tglKdlwrs" < CURRENT_DATE THEN 1
-                    WHEN dokumen."tglKdlwrs" <= CURRENT_DATE + INTERVAL \'30 days\' THEN 2
-                    ELSE 3
+                    WHEN dokumen."tglKdlwrs" IS NOT NULL AND dokumen."tglKdlwrs" < CURRENT_DATE THEN 1
+                    WHEN dokumen.status = \'pending\' THEN 2
+                    WHEN dokumen."tglKdlwrs" IS NOT NULL AND dokumen."tglKdlwrs" <= CURRENT_DATE + INTERVAL \'30 days\' THEN 3
+                    WHEN dokumen."tglKdlwrs" IS NOT NULL THEN 4
+                    ELSE NULL
                 END)';
             if ($dokStatus === 'belum_ada') {
                 $mahasiswaList = $mhsQuery->havingRaw("{$caseExpr} IS NULL")
                     ->paginate(10, ['*'], 'page_m')->withQueryString();
             } else {
-                $levelMap = ['expired' => 1, 'warning' => 2, 'aman' => 3];
+                $levelMap = ['expired' => 1, 'pending' => 2, 'warning' => 3, 'aman' => 4];
                 $level = $levelMap[$dokStatus] ?? null;
                 if ($level) {
                     $mahasiswaList = $mhsQuery->havingRaw("{$caseExpr} = ?", [$level])
@@ -402,7 +409,7 @@ class KlnController extends Controller
         return view('kln.students.index', compact(
             'mahasiswaList', 'dosenList', 'jurusan',
             'totalMahasiswa', 'totalDosen', 'totalJurusan',
-            'searchM', 'jurusanM', 'dokStatus', 'searchD', 'jurusanD'
+            'searchM', 'jurusanM', 'dokStatus', 'tipeMhs', 'searchD', 'jurusanD'
         ));
     }
 
@@ -556,6 +563,33 @@ class KlnController extends Controller
     |--------------------------------------------------------------------------
     */
 
+    public function profilPage()
+    {
+        return view('kln.profil', ['user' => Auth::user()]);
+    }
+
+    public function updateProfil(Request $request)
+    {
+        $request->validate([
+            'nama'     => 'nullable|string|max:100',
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        $user = Auth::user();
+
+        if ($request->filled('nama')) {
+            DB::table('users')->where('id', $user->id)->update(['nama' => $request->nama]);
+        }
+
+        if ($request->filled('password')) {
+            DB::table('users')->where('id', $user->id)->update(['password' => bcrypt($request->password)]);
+        }
+
+        ActivityLog::record('Memperbarui profil KLN', 'users', $user->id);
+
+        return redirect()->route('kln.profil')->with('success', 'Profil berhasil diperbarui.');
+    }
+
     public function usersPage()
     {
         $jurusan = DB::table('jurusan')->orderBy('namaJurusan')->get();
@@ -610,7 +644,105 @@ class KlnController extends Controller
 
     public function storeUser(Request $request)
     {
-        return response()->json(['success' => true]);
+        $rules = [
+            'email'  => 'required|email|unique:users,email',
+            'role'   => 'required|in:kln,jurusan,dosen,mahasiswa,bipa',
+            'status' => 'required|in:active,inactive,pending',
+        ];
+
+        // Password opsional — jika kosong → is_has_password = false (login via OTP)
+        if ($request->filled('password')) {
+            $rules['password'] = 'string|min:6';
+        }
+
+        if ($request->role === 'mahasiswa') {
+            $rules['jurusan_id']    = 'required|exists:jurusan,id';
+            $rules['mahasiswa.nama'] = 'required|string|max:100';
+            // npm opsional — generate otomatis jika kosong
+        }
+
+        if ($request->role === 'dosen') {
+            $rules['jurusan_id']  = 'required|exists:jurusan,id';
+            $rules['dosen.nama']  = 'required|string|max:100';
+        }
+
+        $request->validate($rules);
+
+        DB::beginTransaction();
+        try {
+            $hasPassword = $request->filled('password');
+
+            $userId = DB::table('users')->insertGetId([
+                'email'           => $request->email,
+                'password'        => $hasPassword ? bcrypt($request->password) : null,
+                'is_has_password' => $hasPassword,
+                'role'            => $request->role,
+                'status'          => $request->status,
+                'jurusan_id'      => $request->jurusan_id ?: null,
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ]);
+
+            // Buat biodata mahasiswa
+            if ($request->role === 'mahasiswa') {
+                $mhs    = $request->input('mahasiswa', []);
+                $npm    = $mhs['npm'] ?? null;
+
+                // Auto-generate NPM jika kosong
+                if (!$npm && $request->jurusan_id) {
+                    $today     = now()->format('dmY');
+                    $prefix    = $request->jurusan_id . $today;
+                    $count     = DB::table('mahasiswa')->where('npm', 'like', $prefix . '%')->count();
+                    $npm       = $prefix . str_pad($count + 1, 2, '0', STR_PAD_LEFT);
+                }
+
+                DB::table('mahasiswa')->insert([
+                    'user_id'         => $userId,
+                    'nama'            => $mhs['nama'] ?? null,
+                    'npm'             => $npm,
+                    'tipeMahasiswa'   => $mhs['tipeMahasiswa'] ?? null,
+                    'created_at'      => now(),
+                    'updated_at'      => now(),
+                ]);
+            }
+
+            // Buat biodata dosen
+            if ($request->role === 'dosen') {
+                $dos = $request->input('dosen', []);
+                DB::table('dosen')->insert([
+                    'user_id'    => $userId,
+                    'nama'       => $dos['nama']    ?? null,
+                    'nidn'       => $dos['nidn']    ?? null,
+                    'kodeDos'    => $dos['kodeDos'] ?? null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                // Set jurusan_id pada user dosen (sesuai J7)
+                if ($request->jurusan_id) {
+                    DB::table('users')->where('id', $userId)->update(['jurusan_id' => $request->jurusan_id]);
+                }
+            }
+
+            DB::commit();
+
+            ActivityLog::record("Membuat user baru: {$request->email} ({$request->role})", 'users', $userId);
+
+            $user = User::with(['mahasiswa', 'dosen'])->find($userId);
+
+            return response()->json([
+                'success' => true,
+                'data'    => $user,
+                'flash'   => ['type' => 'success', 'message' => 'User berhasil dibuat.'],
+            ], 201);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /*
@@ -621,9 +753,37 @@ class KlnController extends Controller
 
     public function showUser($id)
     {
-        $user = \App\Models\User::findOrFail($id);
+        $user = User::with(['mahasiswa', 'dosen'])->findOrFail($id);
 
         return response()->json($user);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | GENERATE NPM
+    | Format: {jurusan_id}{ddmmYYYY}{increment 2 digit}
+    | Contoh: 50212202621  →  jurusan_id=5, tgl=02122026, increment=21
+    |--------------------------------------------------------------------------
+    */
+    public function generateNpm(Request $request)
+    {
+        $jurusanId = $request->input('jurusan_id');
+        if (!$jurusanId) {
+            return response()->json(['success' => false, 'message' => 'jurusan_id wajib diisi'], 422);
+        }
+
+        $today  = now()->format('dmY'); // ddmmYYYY, contoh: 26062026
+        $prefix = $jurusanId . $today;
+
+        // Hitung mahasiswa dengan NPM berawalan prefix ini
+        $count = DB::table('mahasiswa')
+            ->where('npm', 'like', $prefix . '%')
+            ->count();
+
+        $increment = str_pad($count + 1, 2, '0', STR_PAD_LEFT);
+        $npm       = $prefix . $increment;
+
+        return response()->json(['success' => true, 'npm' => $npm]);
     }
 
     /*
@@ -661,6 +821,18 @@ class KlnController extends Controller
         $userBefore = DB::table('users')->where('id', $id)->first();
         DB::table('users')->where('id', $id)->update($update);
 
+        // Update mahasiswa data if role is mahasiswa
+        if ($request->role === 'mahasiswa') {
+            $mhs = $request->input('mahasiswa', []);
+            $mhsUpdate = ['updated_at' => now()];
+            if (isset($mhs['nama']) && $mhs['nama'])            $mhsUpdate['nama']          = $mhs['nama'];
+            if (isset($mhs['npm'])  && $mhs['npm'])             $mhsUpdate['npm']           = $mhs['npm'];
+            if (array_key_exists('tipeMahasiswa', $mhs))        $mhsUpdate['tipeMahasiswa'] = $mhs['tipeMahasiswa'] ?: null;
+            if (!empty($mhsUpdate)) {
+                DB::table('mahasiswa')->where('user_id', $id)->update($mhsUpdate);
+            }
+        }
+
         ActivityLog::record("Memperbarui user #{$id} ({$request->email})", 'users', (int) $id);
 
         // Auto-trigger: akun mahasiswa baru diaktifkan
@@ -696,7 +868,20 @@ class KlnController extends Controller
 
     public function destroyUser($id)
     {
-        return response()->json(['success' => true]);
+        $user = User::findOrFail($id);
+
+        if ($user->id === Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Tidak dapat menghapus akun sendiri.'], 403);
+        }
+
+        DB::table('users')->where('id', $id)->delete();
+
+        ActivityLog::record("Menghapus user #{$id} ({$user->email})", 'users', (int) $id);
+
+        return response()->json([
+            'success' => true,
+            'flash'   => ['type' => 'success', 'message' => 'User berhasil dihapus.'],
+        ]);
     }
 
     /*
