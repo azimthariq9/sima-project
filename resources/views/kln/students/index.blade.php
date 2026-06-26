@@ -49,17 +49,26 @@
                     <option value="{{ $j->id }}" {{ $jurusanM == $j->id ? 'selected' : '' }}>{{ $j->namaJurusan }}</option>
                 @endforeach
             </select>
+            <select name="tipe_m" class="sima-input" style="width:175px;" onchange="this.form.submit()">
+                <option value="">Semua Tipe</option>
+                <option value="Beasiswa TIAS"       {{ $tipeMhs === 'Beasiswa TIAS'       ? 'selected' : '' }}>Beasiswa TIAS</option>
+                <option value="Beasiswa KNB"        {{ $tipeMhs === 'Beasiswa KNB'        ? 'selected' : '' }}>Beasiswa KNB</option>
+                <option value="Beasiswa Gunadarma"  {{ $tipeMhs === 'Beasiswa Gunadarma'  ? 'selected' : '' }}>Beasiswa Gunadarma</option>
+                <option value="Internasional Mandiri" {{ $tipeMhs === 'Internasional Mandiri' ? 'selected' : '' }}>Internasional Mandiri</option>
+                <option value="Short Course (3 Bulan)" {{ $tipeMhs === 'Short Course (3 Bulan)' ? 'selected' : '' }}>Short Course (3 Bulan)</option>
+            </select>
             <select name="dok_status" class="sima-input" style="width:145px;" onchange="this.form.submit()">
                 <option value="">Semua Status Dok</option>
                 <option value="belum_ada" {{ $dokStatus === 'belum_ada' ? 'selected' : '' }}>Belum Ada</option>
-                <option value="expired"  {{ $dokStatus === 'expired'  ? 'selected' : '' }}>Expired</option>
-                <option value="warning"  {{ $dokStatus === 'warning'  ? 'selected' : '' }}>Warning</option>
-                <option value="aman"     {{ $dokStatus === 'aman'     ? 'selected' : '' }}>Aman</option>
+                <option value="expired"   {{ $dokStatus === 'expired'   ? 'selected' : '' }}>Expired</option>
+                <option value="pending"   {{ $dokStatus === 'pending'   ? 'selected' : '' }}>Pending</option>
+                <option value="warning"   {{ $dokStatus === 'warning'   ? 'selected' : '' }}>Warning</option>
+                <option value="aman"      {{ $dokStatus === 'aman'      ? 'selected' : '' }}>Aman</option>
             </select>
             <input type="text" name="search_m" value="{{ $searchM }}" class="sima-input" style="width:150px;"
                    placeholder="Cari nama / NPM...">
             <button type="submit" class="sima-btn sima-btn--outline"><i class="fas fa-search"></i></button>
-            @if($searchM || $jurusanM || $dokStatus)
+            @if($searchM || $jurusanM || $dokStatus || $tipeMhs)
             <a href="{{ route('kln.students.page', array_filter(['search_d'=>$searchD,'jurusan_d'=>$jurusanD])) }}"
                class="sima-btn sima-btn--outline"><i class="fas fa-times"></i></a>
             @endif
@@ -67,12 +76,22 @@
     </div>
     <div class="table-responsive">
         <table class="sima-table">
+            @php
+            $tipeBadgeMap = [
+                'Beasiswa TIAS'        => 'sima-badge--blue',
+                'Beasiswa KNB'         => 'sima-badge--green',
+                'Beasiswa Gunadarma'   => 'sima-badge--purple',
+                'Internasional Mandiri'=> 'sima-badge--teal',
+                'Short Course (3 Bulan)' => 'sima-badge--amber',
+            ];
+            @endphp
             <thead>
                 <tr>
                     <th>#</th>
                     <th>Nama</th>
                     <th>NPM</th>
                     <th>Jurusan</th>
+                    <th>Tipe</th>
                     <th>Akun</th>
                     <th>Status Dokumen</th>
                     <th>Aksi</th>
@@ -83,17 +102,26 @@
                 @php
                     $docLevel = $m->doc_expiry_level;
                     if ($docLevel === null)  { $docBadge = ''; $docStyle = 'background:var(--c-border);color:var(--c-text-3);'; $docLabel = 'Belum Ada'; $docIcon = 'fa-minus-circle'; }
-                    elseif ($docLevel == 1) { $docBadge = 'sima-badge--red';   $docStyle = ''; $docLabel = 'Expired'; $docIcon = 'fa-exclamation-circle'; }
-                    elseif ($docLevel == 2) { $docBadge = 'sima-badge--amber'; $docStyle = ''; $docLabel = 'Warning'; $docIcon = 'fa-exclamation-triangle'; }
-                    else                    { $docBadge = 'sima-badge--green'; $docStyle = ''; $docLabel = 'Aman';    $docIcon = 'fa-check-circle'; }
+                    elseif ($docLevel == 1) { $docBadge = 'sima-badge--red';    $docStyle = ''; $docLabel = 'Expired'; $docIcon = 'fa-exclamation-circle'; }
+                    elseif ($docLevel == 2) { $docBadge = 'sima-badge--blue';   $docStyle = ''; $docLabel = 'Pending'; $docIcon = 'fa-clock'; }
+                    elseif ($docLevel == 3) { $docBadge = 'sima-badge--amber';  $docStyle = ''; $docLabel = 'Warning'; $docIcon = 'fa-exclamation-triangle'; }
+                    else                    { $docBadge = 'sima-badge--green';  $docStyle = ''; $docLabel = 'Aman';    $docIcon = 'fa-check-circle'; }
                     $akunBadge = $m->status === 'active' ? 'sima-badge--green' : 'sima-badge--red';
                     $akunLabel = $m->status === 'active' ? 'Aktif' : 'Nonaktif';
+                    $tipeCls   = $tipeBadgeMap[$m->tipeMahasiswa ?? ''] ?? '';
                 @endphp
                 <tr>
                     <td>{{ $mahasiswaList->firstItem() + $loop->index }}</td>
                     <td>{{ $m->nama }}</td>
                     <td><span style="font-family:var(--f-mono);font-size:13px;">{{ $m->identifier ?? '-' }}</span></td>
                     <td>{{ $m->namaJurusan ?? '-' }}</td>
+                    <td>
+                        @if($m->tipeMahasiswa)
+                            <span class="sima-badge {{ $tipeCls }}" style="white-space:nowrap">{{ $m->tipeMahasiswa }}</span>
+                        @else
+                            <span style="font-size:12px;color:var(--c-text-3)">—</span>
+                        @endif
+                    </td>
                     <td><span class="sima-badge {{ $akunBadge }}">{{ $akunLabel }}</span></td>
                     <td>
                         <span class="sima-badge {{ $docBadge }}" style="{{ $docStyle }}">
@@ -131,6 +159,7 @@
             @if($searchM)   <input type="hidden" name="search_m"   value="{{ $searchM }}"> @endif
             @if($jurusanM)  <input type="hidden" name="jurusan_m"  value="{{ $jurusanM }}"> @endif
             @if($dokStatus) <input type="hidden" name="dok_status" value="{{ $dokStatus }}"> @endif
+            @if($tipeMhs)   <input type="hidden" name="tipe_m"     value="{{ $tipeMhs }}">  @endif
 
             <select name="jurusan_d" class="sima-input" style="width:150px;" onchange="this.form.submit()">
                 <option value="">Semua Jurusan</option>
@@ -142,7 +171,7 @@
                    placeholder="Cari nama...">
             <button type="submit" class="sima-btn sima-btn--outline"><i class="fas fa-search"></i></button>
             @if($searchD || $jurusanD)
-            <a href="{{ route('kln.students.page', array_filter(['search_m'=>$searchM,'jurusan_m'=>$jurusanM,'dok_status'=>$dokStatus])) }}"
+            <a href="{{ route('kln.students.page', array_filter(['search_m'=>$searchM,'jurusan_m'=>$jurusanM,'dok_status'=>$dokStatus,'tipe_m'=>$tipeMhs])) }}"
                class="sima-btn sima-btn--outline"><i class="fas fa-times"></i></a>
             @endif
         </form>

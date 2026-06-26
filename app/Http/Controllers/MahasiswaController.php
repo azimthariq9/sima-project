@@ -649,10 +649,11 @@ class MahasiswaController extends Controller
             'noDkmn'    => 'required|string|max:100',
             'tglTerbit' => 'required|date',
             'tglKdlwrs' => 'required|date|after:tglTerbit',
-            'penerbit'  => 'required|string|max:200',
+            'penerbit'  => 'required|in:KLN,IMIGRASI,KEPENDUDUKAN',
             'file'      => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ], [
             'tglKdlwrs.after' => 'Tanggal berlaku harus setelah tanggal terbit.',
+            'penerbit.in'     => 'Pilih penerbit yang valid.',
         ]);
 
         $mahasiswa = $this->getMahasiswa();
@@ -670,7 +671,7 @@ class MahasiswaController extends Controller
             'noDkmn'       => $request->noDkmn,
             'tglTerbit'    => $request->tglTerbit,
             'tglKdlwrs'    => $request->tglKdlwrs,
-            'status'       => 'sedang diproses',
+            'status'       => 'pending',
             'created_at'   => now(),
             'updated_at'   => now(),
         ]);
@@ -714,6 +715,94 @@ class MahasiswaController extends Controller
         abort_if(!$storage->exists($file->path), 404, 'File tidak ditemukan di server.');
 
         return $storage->download($file->path, basename($file->path));
+    }
+
+    public function updateDokumen(Request $request, int $id)
+    {
+        $request->validate([
+            'tipeDkmn'  => 'required|string',
+            'noDkmn'    => 'required|string|max:100',
+            'tglTerbit' => 'required|date',
+            'tglKdlwrs' => 'required|date|after:tglTerbit',
+            'penerbit'  => 'required|in:KLN,IMIGRASI,KEPENDUDUKAN',
+            'file'      => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ], [
+            'tglKdlwrs.after' => 'Tanggal berlaku harus setelah tanggal terbit.',
+        ]);
+
+        $mahasiswa = $this->getMahasiswa();
+        if (!$mahasiswa) {
+            return back()->with('error', 'Profil mahasiswa tidak ditemukan.');
+        }
+
+        $dok = DB::table('dokumen')
+            ->where('id', $id)
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->whereNull('deleted_at')
+            ->first();
+
+        abort_if(!$dok, 403);
+
+        // Jika status approved → reset ke pending (butuh verifikasi ulang KLN)
+        $newStatus = $dok->status === 'approved' ? 'pending' : $dok->status;
+        $namaDkmn  = str_replace('_', ' ', $request->tipeDkmn);
+
+        DB::table('dokumen')->where('id', $id)->update([
+            'tipeDkmn'  => $request->tipeDkmn,
+            'namaDkmn'  => $namaDkmn,
+            'penerbit'  => $request->penerbit,
+            'noDkmn'    => $request->noDkmn,
+            'tglTerbit' => $request->tglTerbit,
+            'tglKdlwrs' => $request->tglKdlwrs,
+            'status'    => $newStatus,
+            'updated_at'=> now(),
+        ]);
+
+        if ($request->hasFile('file')) {
+            $path = $request->file('file')->store('dokumen', 'local');
+            DB::table('fileDetail')->insert([
+                'dokumen_id' => $id,
+                'path'       => $path,
+                'mimeType'   => $request->file('file')->getClientMimeType(),
+                'fileSize'   => $request->file('file')->getSize(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $msg = $newStatus === 'pending' && $dok->status === 'approved'
+            ? 'Dokumen diperbarui dan dikembalikan ke status pending (perlu verifikasi ulang KLN).'
+            : 'Dokumen berhasil diperbarui.';
+
+        return redirect()->route('mahasiswa.dokumen.index')->with('success', $msg);
+    }
+
+    public function destroyDokumen(int $id)
+    {
+        $mahasiswa = $this->getMahasiswa();
+        if (!$mahasiswa) {
+            return back()->with('error', 'Profil mahasiswa tidak ditemukan.');
+        }
+
+        $dok = DB::table('dokumen')
+            ->where('id', $id)
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->whereNull('deleted_at')
+            ->first();
+
+        abort_if(!$dok, 403);
+
+        // Soft delete — tidak boleh hapus dokumen yang sudah approved
+        if ($dok->status === 'approved') {
+            return back()->with('error', 'Dokumen yang sudah diverifikasi tidak dapat dihapus.');
+        }
+
+        DB::table('dokumen')->where('id', $id)->update([
+            'deleted_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('mahasiswa.dokumen.index')->with('success', 'Dokumen berhasil dihapus.');
     }
 
     public function createRequest()
@@ -774,8 +863,10 @@ class MahasiswaController extends Controller
     {
         $announcements = DB::table('announcement')
             ->where('status', 'active')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->orderByDesc('is_penting')
+            ->orderByDesc('created_at')
+            ->paginate(10)
+            ->withQueryString();
 
         $unreadNotifCount = $this->unreadNotifCount();
 

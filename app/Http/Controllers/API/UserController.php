@@ -146,7 +146,12 @@ class UserController extends Controller
     public function getUsers(Request $request)
     {
         $query = User::query();
-        
+
+        // Filter role
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
         // Fitur Search berdasarkan email
         if ($request->has('email') && !empty($request->email)) {
             $query->where('email', 'LIKE', "%{$request->email}%");
@@ -188,8 +193,7 @@ class UserController extends Controller
                 'message' => 'Users retrieved successfully',
                 'theme' => 'amazon',
                 'timeout' => 5000
-            ]
-            ,200
+            ],
         ]);
     }
 
