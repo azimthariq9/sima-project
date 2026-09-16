@@ -6,6 +6,9 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>@yield('page_title', 'SIMA') — SIMA</title>
 
+<!-- Vite Assets -->
+@vite(['resources/css/datatables.css', 'resources/js/app.js'])
+
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">

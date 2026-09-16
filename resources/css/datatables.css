@@ -1,0 +1,250 @@
+/* ═══════════════════════════════════════════════════════
+   DATATABLES — SIMA Theme Overrides
+   ═══════════════════════════════════════════════════════ */
+
+/* ── BASE WRAPPER ─────────────────────────────────── */
+.datatable-wrapper {
+    width: 100%;
+}
+
+.datatable-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* ── TABLE ────────────────────────────────────────── */
+.datatable-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.datatable-table thead tr {
+    border-bottom: 1px solid var(--c-border-soft);
+}
+
+.datatable-table thead th {
+    padding: 10px 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--c-text-3);
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.datatable-table thead th:hover {
+    color: var(--c-text-1);
+}
+
+/* Sort indicator */
+.datatable-table thead th.datatable-sortable-asc::after,
+.datatable-table thead th.datatable-sortable-desc::after {
+    content: '';
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+}
+
+.datatable-table thead th.datatable-sortable-asc::after {
+    border-bottom: 5px solid var(--c-accent);
+}
+
+.datatable-table thead th.datatable-sortable-desc::after {
+    border-top: 5px solid var(--c-accent);
+}
+
+.datatable-table tbody td {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--c-border-soft);
+    color: var(--c-text-2);
+    vertical-align: middle;
+}
+
+.datatable-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.datatable-table tbody tr:hover td {
+    background: var(--c-bg);
+}
+
+/* ── TOP BAR (Search + Per Page) ──────────────────── */
+.datatable-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.datatable-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.datatable-search .datatable-input {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 14px;
+    color: var(--c-text-1);
+    font-family: var(--f-body);
+    font-size: 13px;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    min-width: 200px;
+}
+
+.datatable-search .datatable-input:focus {
+    border-color: var(--c-accent);
+    box-shadow: 0 0 0 3px rgba(108,143,255,.1);
+}
+
+.datatable-search .datatable-input::placeholder {
+    color: var(--c-text-4);
+}
+
+/* Per page selector */
+.datatable-selector-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--c-text-3);
+}
+
+.datatable-selector {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    color: var(--c-text-1);
+    font-family: var(--f-body);
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+}
+
+.datatable-selector:focus {
+    border-color: var(--c-accent);
+}
+
+/* ── BOTTOM BAR (Info + Pagination) ───────────────── */
+.datatable-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-top: 1px solid var(--c-border-soft);
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.datatable-info {
+    font-size: 12.5px;
+    color: var(--c-text-3);
+    margin: 0;
+}
+
+/* ── PAGINATION ───────────────────────────────────── */
+.datatable-pagination ul {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.datatable-pagination li {
+    list-style: none;
+}
+
+.datatable-pagination li a,
+.datatable-pagination li span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--c-text-2);
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: all var(--transition);
+    cursor: pointer;
+}
+
+.datatable-pagination li a:hover {
+    background: var(--c-bg);
+    border-color: var(--c-border);
+    color: var(--c-text-1);
+}
+
+.datatable-pagination li.active a {
+    background: linear-gradient(135deg, var(--c-accent), var(--c-accent-2));
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(108,143,255,.25);
+}
+
+.datatable-pagination li.disabled a,
+.datatable-pagination li.disabled span {
+    color: var(--c-text-4);
+    cursor: not-allowed;
+    opacity: .5;
+}
+
+.datatable-pagination li.ellipsis span {
+    cursor: default;
+    color: var(--c-text-3);
+}
+
+/* ── NO DATA ──────────────────────────────────────── */
+.datatable-no-data {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--c-text-3);
+    font-size: 13px;
+}
+
+/* ── RESPONSIVE ───────────────────────────────────── */
+@media (max-width: 768px) {
+    .datatable-top {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .datatable-search {
+        width: 100%;
+    }
+
+    .datatable-search .datatable-input {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .datatable-bottom {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .datatable-pagination ul {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
