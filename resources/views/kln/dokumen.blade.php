@@ -55,10 +55,7 @@
                 <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
                 <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
             </select>
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari mahasiswa / tipe..."
-                   class="sima-input" style="min-width:200px;">
-            <button type="submit" class="sima-btn sima-btn--outline"><i class="fas fa-search"></i></button>
-            @if(request('status') || request('search'))
+            @if(request('status'))
             <a href="{{ route('kln.dokumen.page') }}" class="sima-btn sima-btn--outline"><i class="fas fa-times"></i></a>
             @endif
         </form>

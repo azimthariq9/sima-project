@@ -65,10 +65,7 @@
                 <option value="warning"   {{ $dokStatus === 'warning'   ? 'selected' : '' }}>Warning</option>
                 <option value="aman"      {{ $dokStatus === 'aman'      ? 'selected' : '' }}>Aman</option>
             </select>
-            <input type="text" name="search_m" value="{{ $searchM }}" class="sima-input" style="width:150px;"
-                   placeholder="Cari nama / NPM...">
-            <button type="submit" class="sima-btn sima-btn--outline"><i class="fas fa-search"></i></button>
-            @if($searchM || $jurusanM || $dokStatus || $tipeMhs)
+            @if($jurusanM || $dokStatus || $tipeMhs)
             <a href="{{ route('kln.students.page', array_filter(['search_d'=>$searchD,'jurusan_d'=>$jurusanD])) }}"
                class="sima-btn sima-btn--outline"><i class="fas fa-times"></i></a>
             @endif
@@ -160,10 +157,7 @@
                     <option value="{{ $j->id }}" {{ $jurusanD == $j->id ? 'selected' : '' }}>{{ $j->namaJurusan }}</option>
                 @endforeach
             </select>
-            <input type="text" name="search_d" value="{{ $searchD }}" class="sima-input" style="width:150px;"
-                   placeholder="Cari nama...">
-            <button type="submit" class="sima-btn sima-btn--outline"><i class="fas fa-search"></i></button>
-            @if($searchD || $jurusanD)
+            @if($jurusanD)
             <a href="{{ route('kln.students.page', array_filter(['search_m'=>$searchM,'jurusan_m'=>$jurusanM,'dok_status'=>$dokStatus,'tipe_m'=>$tipeMhs])) }}"
                class="sima-btn sima-btn--outline"><i class="fas fa-times"></i></a>
             @endif

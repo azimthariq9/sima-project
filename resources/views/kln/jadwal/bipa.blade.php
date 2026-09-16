@@ -29,10 +29,7 @@
                     <option value="{{ $h }}" {{ request('hari') === $h ? 'selected' : '' }}>{{ $h }}</option>
                 @endforeach
             </select>
-            <input type="text" name="search" value="{{ request('search') }}" class="sima-input" style="width:160px;"
-                   placeholder="Cari matakuliah / dosen...">
-            <button type="submit" class="sima-btn sima-btn--outline"><i class="fas fa-search"></i></button>
-            @if(request('hari') || request('search'))
+            @if(request('hari'))
             <a href="{{ route('kln.jadwal.bipa') }}" class="sima-btn sima-btn--outline"><i class="fas fa-times"></i></a>
             @endif
         </form>

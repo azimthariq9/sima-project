@@ -35,21 +35,6 @@
 <div class="sima-card">
     <div class="sima-card__header">
         <h5 class="sima-card__title">Rekap Kehadiran Mahasiswa</h5>
-        <div style="display:flex;gap:8px;align-items:center;">
-            <form method="GET" action="{{ route('kln.attendance') }}"
-                  style="display:flex;gap:6px;align-items:center;">
-                <input type="text" name="q" class="sima-input" style="width:200px;"
-                       value="{{ $search }}" placeholder="Cari nama / NPM...">
-                <button type="submit" class="sima-btn sima-btn--outline">
-                    <i class="fas fa-search"></i>
-                </button>
-                @if($search)
-                <a href="{{ route('kln.attendance') }}" class="sima-btn sima-btn--outline">
-                    <i class="fas fa-times"></i>
-                </a>
-                @endif
-            </form>
-        </div>
     </div>
 
     <div class="table-responsive">

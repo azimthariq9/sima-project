@@ -64,7 +64,7 @@
 
 .datatable-table thead th button:hover,
 .datatable-table thead th .datatable-sorter:hover {
-    background: var(--c-bg-2, #f8fafc);
+    background: var(--c-surface, #fff);
     border-color: var(--c-border-soft, #e2e8f0);
     color: var(--c-text-1);
 }
@@ -173,8 +173,8 @@
 }
 
 .datatable-search .datatable-input {
-    background: var(--c-bg-2, #f8fafc);
-    border: 1px solid transparent;
+    background: var(--c-surface, #fff);
+    border: 1px solid var(--c-border-soft, #e2e8f0);
     border-radius: 10px;
     padding: 9px 14px 9px 36px;
     color: var(--c-text-1);
@@ -186,12 +186,10 @@
 }
 
 .datatable-search .datatable-input:hover {
-    background: var(--c-surface, #fff);
-    border-color: var(--c-border-soft, #e2e8f0);
+    border-color: var(--c-text-4, #d1d5db);
 }
 
 .datatable-search .datatable-input:focus {
-    background: var(--c-surface, #fff);
     border-color: var(--c-accent, #6c8fff);
     box-shadow: 0 0 0 3px rgba(108,143,255,.08);
 }
@@ -210,8 +208,8 @@
 }
 
 .datatable-selector {
-    background: var(--c-bg-2, #f8fafc);
-    border: 1px solid transparent;
+    background: var(--c-surface, #fff);
+    border: 1px solid var(--c-border-soft, #e2e8f0);
     border-radius: 10px;
     padding: 8px 28px 8px 12px;
     color: var(--c-text-1);
@@ -228,8 +226,7 @@
 }
 
 .datatable-selector:hover {
-    background-color: var(--c-surface, #fff);
-    border-color: var(--c-border-soft, #e2e8f0);
+    border-color: var(--c-text-4, #d1d5db);
 }
 
 .datatable-selector:focus {
@@ -291,7 +288,7 @@
 
 .datatable-pagination li a:hover,
 .datatable-pagination li button:hover {
-    background: var(--c-bg-2, #f1f5f9);
+    background: var(--c-surface, #fff);
     border-color: var(--c-border-soft, #e2e8f0);
     color: var(--c-text-1, #1e293b);
 }
