@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
             perPageSelect: [5, 10, 15, 20, 25],
             labels: {
                 placeholder: "Cari...",
-                perPage: "{select} data per halaman",
+                perPage: "data per halaman",
                 noRows: "Tidak ada data ditemukan",
                 info: "Menampilkan {start} - {end} dari {rows} data",
                 loading: "Memuat...",

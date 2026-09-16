@@ -331,15 +331,6 @@
     position: relative;
 }
 
-.datatable-loading::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(255,255,255,.6);
-    border-radius: inherit;
-    pointer-events: none;
-}
-
 /* ── HEADER CONTAINER ─────────────────────────────── */
 .datatable-headercontainer {
     width: 100%;
