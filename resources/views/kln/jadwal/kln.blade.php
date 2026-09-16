@@ -2,7 +2,7 @@
 
 @section('page_title',    'Jadwal KLN')
 @section('page_section',  'JADWAL')
-@section('page_subtitle', 'Jadwal yang dibuat oleh KLN')
+@section('page_subtitle', 'Schedules created by KLN')
 
 @section('main_content')
 
@@ -25,7 +25,7 @@
             <form method="GET" action="{{ route('kln.jadwal.kln') }}"
                   style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                 <select name="hari" class="sima-input" style="width:140px;" onchange="this.form.submit()">
-                    <option value="">Semua Hari</option>
+                    <option value="">All Days</option>
                     @foreach(['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'] as $h)
                         <option value="{{ $h }}" {{ request('hari') === $h ? 'selected' : '' }}>{{ $h }}</option>
                     @endforeach
@@ -44,14 +44,14 @@
         <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>Kegiatan</th>
-                    <th>Kelas</th>
-                    <th>Hari</th>
-                    <th>Jam</th>
-                    <th>Lokasi</th>
-                    <th>Sesi</th>
-                    <th>Tahun Ajar</th>
-                    <th>Aksi</th>
+                    <th>Activity</th>
+                    <th>Class</th>
+                    <th>Day</th>
+                    <th>Time</th>
+                    <th>Location</th>
+                    <th>Sessions</th>
+                    <th>Academic Year</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -82,7 +82,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="text-center text-muted py-4">Belum ada jadwal KLN.</td>
+                    <td colspan="8" class="text-center text-muted py-4">No KLN schedules yet.</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -111,7 +111,7 @@
                     <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">Kegiatan</label>
                     <div style="position:relative;" id="kegiatanWrap">
                         <input type="text" id="fKegiatanText" class="sima-input mt-1"
-                               placeholder="Cari atau ketik kegiatan baru..."
+                               placeholder="Search or type new activity..."
                                autocomplete="off"
                                oninput="onKegiatanInput(this.value)"
                                onfocus="onKegiatanInput(this.value)">
@@ -129,7 +129,7 @@
                 <div class="col-12">
                     <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">Kelas Mahasiswa Asing</label>
                     <select name="kelas_id" id="fKelas" class="sima-input mt-1" required>
-                        <option value="">— Pilih Kelas —</option>
+                        <option value="">-- Select Class --</option>
                         @foreach($kelas as $k)
                             <option value="{{ $k->id }}">{{ $k->kodeKelas }}{{ $k->tahunAjar ? ' (' . $k->tahunAjar . ')' : '' }}</option>
                         @endforeach
@@ -139,7 +139,7 @@
                 <div class="col-12 col-md-6">
                     <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">Hari</label>
                     <select name="hari" id="fHari" class="sima-input mt-1" required>
-                        <option value="">— Pilih Hari —</option>
+                        <option value="">-- Select Day --</option>
                         @foreach(['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'] as $h)
                             <option value="{{ $h }}">{{ $h }}</option>
                         @endforeach
@@ -178,9 +178,9 @@
             <div id="formError" class="text-danger" style="font-size:13px;display:none;"></div>
 
             <div style="display:flex;gap:8px;justify-content:flex-end;padding-top:4px;">
-                <button type="button" onclick="closeModal()" class="sima-btn sima-btn--outline">Batal</button>
+                <button type="button" onclick="closeModal()" class="sima-btn sima-btn--outline">Cancel</button>
                 <button type="submit" id="btnSimpan" class="sima-btn sima-btn--accent">
-                    <i class="fas fa-save me-1"></i> Simpan
+                    <i class="fas fa-save me-1"></i> Save
                 </button>
             </div>
         </form>
@@ -279,7 +279,7 @@ function selectKegiatan(id, nama) {
     document.getElementById('fKegiatanText').value  = nama;
     document.getElementById('fKegiatanId').value    = id;
     document.getElementById('fKegiatanBaru').value  = '';
-    document.getElementById('kegiatanHint').textContent = 'Kegiatan dipilih dari daftar.';
+    document.getElementById('kegiatanHint').textContent = 'Activity selected from list.';
     document.getElementById('kegiatanDropdown').style.display = 'none';
 }
 
@@ -313,7 +313,7 @@ document.getElementById('addForm').addEventListener('submit', function (e) {
     const kegiatanBaru = document.getElementById('fKegiatanBaru').value.trim();
 
     if (!kegiatanId && !kegiatanBaru) {
-        err.textContent = 'Pilih kegiatan dari daftar atau ketik nama kegiatan baru.';
+        err.textContent = 'Select an activity from the list or type a new activity name.';
         err.style.display = '';
         return;
     }
@@ -353,17 +353,17 @@ document.getElementById('addForm').addEventListener('submit', function (e) {
             closeModal();
             window.location.reload();
         } else {
-            err.textContent = data.message || 'Gagal menyimpan jadwal.';
+            err.textContent = data.message || 'Failed to save schedule.';
             err.style.display = '';
         }
     })
     .catch(() => {
-        err.textContent = 'Terjadi kesalahan. Coba lagi.';
+        err.textContent = 'An error occurred. Try again.';
         err.style.display = '';
     })
     .finally(() => {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-save me-1"></i> Simpan';
+        btn.innerHTML = '<i class="fas fa-save me-1"></i> Save';
     });
 });
 </script>

@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Notifikasi KLN')
+@section('page_title',    'KLN Notifications')
 @section('page_section',  'NOTIFIKASI')
-@section('page_subtitle', 'Alert board — monitoring kondisi yang perlu perhatian')
+@section('page_subtitle', 'Alert board — monitoring issues that need attention')
 
 @section('main_content')
 
@@ -25,7 +25,7 @@
     <div class="col-6 col-md-3">
         <div class="sima-stat sima-stat--blue">
             <div class="sima-stat__icon sima-stat__icon--blue"><i class="fas fa-user-slash"></i></div>
-            <div class="sima-stat__label">Akun Nonaktif</div>
+            <div class="sima-stat__label">Inactive Accounts</div>
             <div class="sima-stat__value">{{ $stats['inactive'] }}</div>
         </div>
     </div>
@@ -51,16 +51,16 @@
     @if($expiredDokumen->isEmpty())
     <div class="text-center text-muted py-4" style="font-size:13px;">
         <i class="fas fa-check-circle fa-2x d-block mb-2" style="color:var(--c-green);opacity:.6;"></i>
-        Tidak ada dokumen yang sudah kadaluwarsa.
+        No expired documents.
     </div>
     @else
     <div class="table-responsive">
         <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>Mahasiswa</th>
-                    <th>Jurusan</th>
-                    <th>Tipe Dokumen</th>
+                    <th>Student</th>
+                    <th>Major</th>
+                    <th>Document Type</th>
                     <th style="text-align:center;">Tgl Kadaluwarsa</th>
                     <th></th>
                 </tr>
@@ -82,7 +82,7 @@
                     <td>
                         <a href="{{ route('kln.students.mahasiswa', $doc->mahasiswa_id) }}"
                            class="sima-btn sima-btn--outline sima-btn--sm">
-                            <i class="fas fa-eye me-1"></i> Lihat
+                            <i class="fas fa-eye me-1"></i> View
                         </a>
                     </td>
                 </tr>
@@ -106,16 +106,16 @@
     @if($nearExpiredDokumen->isEmpty())
     <div class="text-center text-muted py-4" style="font-size:13px;">
         <i class="fas fa-check-circle fa-2x d-block mb-2" style="color:var(--c-green);opacity:.6;"></i>
-        Tidak ada dokumen yang hampir kadaluwarsa dalam 30 hari ke depan.
+        No documents expiring within 30 days.
     </div>
     @else
     <div class="table-responsive">
         <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>Mahasiswa</th>
-                    <th>Jurusan</th>
-                    <th>Tipe Dokumen</th>
+                    <th>Student</th>
+                    <th>Major</th>
+                    <th>Document Type</th>
                     <th style="text-align:center;">Kadaluwarsa</th>
                     <th style="text-align:center;">Sisa Hari</th>
                     <th></th>
@@ -145,7 +145,7 @@
                     <td>
                         <a href="{{ route('kln.students.mahasiswa', $doc->mahasiswa_id) }}"
                            class="sima-btn sima-btn--outline sima-btn--sm">
-                            <i class="fas fa-eye me-1"></i> Lihat
+                            <i class="fas fa-eye me-1"></i> View
                         </a>
                     </td>
                 </tr>
@@ -161,7 +161,7 @@
     <div class="sima-card__header" style="border-left: 4px solid var(--c-blue);">
         <div style="display:flex;align-items:center;gap:8px;">
             <i class="fas fa-user-slash" style="color:var(--c-blue);"></i>
-            <h5 class="sima-card__title" style="margin:0;">Akun Mahasiswa Nonaktif</h5>
+            <h5 class="sima-card__title" style="margin:0;">Inactive Student Accounts</h5>
             <span class="sima-badge sima-badge--blue">{{ $stats['inactive'] }}</span>
         </div>
     </div>
@@ -169,16 +169,16 @@
     @if($inactiveMahasiswa->isEmpty())
     <div class="text-center text-muted py-4" style="font-size:13px;">
         <i class="fas fa-check-circle fa-2x d-block mb-2" style="color:var(--c-green);opacity:.6;"></i>
-        Semua akun mahasiswa sudah aktif.
+        All student accounts are active.
     </div>
     @else
     <div class="table-responsive">
         <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>Mahasiswa</th>
+                    <th>Student</th>
                     <th>Email</th>
-                    <th>Jurusan</th>
+                    <th>Major</th>
                     <th style="text-align:center;">Status</th>
                     <th></th>
                 </tr>
@@ -193,7 +193,7 @@
                     <td style="font-size:13px;color:var(--c-text-3);">{{ $mhs->email }}</td>
                     <td style="font-size:13px;color:var(--c-text-3);">{{ $mhs->namaJurusan ?? '—' }}</td>
                     <td style="text-align:center;">
-                        <span class="sima-badge sima-badge--red">Nonaktif</span>
+                        <span class="sima-badge sima-badge--red">Inactive</span>
                     </td>
                     <td>
                         <a href="{{ route('kln.users.page') }}"
@@ -214,7 +214,7 @@
     <div class="sima-card__header" style="border-left: 4px solid var(--c-amber);">
         <div style="display:flex;align-items:center;gap:8px;">
             <i class="fas fa-file-alt" style="color:var(--c-amber);"></i>
-            <h5 class="sima-card__title" style="margin:0;">Request Dokumen Pending</h5>
+            <h5 class="sima-card__title" style="margin:0;">Pending Document Requests</h5>
             <span class="sima-badge sima-badge--amber">{{ $stats['pending'] }}</span>
         </div>
     </div>
@@ -222,16 +222,16 @@
     @if($pendingRequests->isEmpty())
     <div class="text-center text-muted py-4" style="font-size:13px;">
         <i class="fas fa-check-circle fa-2x d-block mb-2" style="color:var(--c-green);opacity:.6;"></i>
-        Tidak ada request dokumen yang pending.
+        No pending document requests.
     </div>
     @else
     <div class="table-responsive">
         <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>Mahasiswa</th>
-                    <th>Jurusan</th>
-                    <th>Tipe Dokumen</th>
+                    <th>Student</th>
+                    <th>Major</th>
+                    <th>Document Type</th>
                     <th style="text-align:center;">Tanggal Request</th>
                     <th style="text-align:center;">Menunggu</th>
                     <th></th>
@@ -261,7 +261,7 @@
                     <td>
                         <a href="{{ route('kln.dokumen.page') }}"
                            class="sima-btn sima-btn--outline sima-btn--sm">
-                            <i class="fas fa-external-link-alt me-1"></i> Proses
+                            <i class="fas fa-external-link-alt me-1"></i> Process
                         </a>
                     </td>
                 </tr>

@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Broadcast Notifikasi')
+@section('page_title',    'Broadcast Notification')
 @section('page_section',  'NOTIFIKASI')
-@section('page_subtitle', 'Kirim notifikasi ke mahasiswa')
+@section('page_subtitle', 'Send notifications to students')
 
 @section('main_content')
 
@@ -18,7 +18,7 @@
     <div class="col-lg-5">
         <div class="sima-card" style="position:sticky;top:20px;">
             <div class="sima-card__header">
-                <h5 class="sima-card__title">Kirim Notifikasi</h5>
+                <h5 class="sima-card__title">Send Notification</h5>
             </div>
             <div style="padding:20px 24px;">
                 <form method="POST" action="{{ route('kln.broadcast.send') }}" id="broadcastForm">
@@ -26,15 +26,15 @@
 
                     {{-- Subject --}}
                     <div class="mb-3">
-                        <label class="sima-label">Judul Notifikasi <span style="color:var(--c-red)">*</span></label>
+                        <label class="sima-label">Notification Title <span style="color:var(--c-red)">*</span></label>
                         <input type="text" name="subject" class="sima-input @error('subject') is-invalid @enderror"
-                               value="{{ old('subject') }}" placeholder="Contoh: Pengumuman Libur Nasional" required>
+                               value="{{ old('subject') }}" placeholder="e.g., National Holiday Announcement" required>
                         @error('subject')<div class="invalid-feedback" style="color:var(--c-red);font-size:12px;">{{ $message }}</div>@enderror
                     </div>
 
                     {{-- Message --}}
                     <div class="mb-3">
-                        <label class="sima-label">Isi Notifikasi <span style="color:var(--c-red)">*</span></label>
+                        <label class="sima-label">Notification Message <span style="color:var(--c-red)">*</span></label>
                         <textarea name="message" rows="5" class="sima-input @error('message') is-invalid @enderror"
                                   placeholder="Tulis isi notifikasi di sini..." required>{{ old('message') }}</textarea>
                         @error('message')<div class="invalid-feedback" style="color:var(--c-red);font-size:12px;">{{ $message }}</div>@enderror
@@ -42,42 +42,42 @@
 
                     {{-- Target --}}
                     <div class="mb-3">
-                        <label class="sima-label">Kirim Ke</label>
+                        <label class="sima-label">Send To</label>
                         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;">
                             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;">
                                 <input type="radio" name="target" value="all"
                                        {{ old('target','all') === 'all' ? 'checked' : '' }}
                                        onchange="toggleMahasiswaPicker(this.value)">
-                                Semua Mahasiswa
+                                All Students
                             </label>
                             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;">
                                 <input type="radio" name="target" value="selected"
                                        {{ old('target') === 'selected' ? 'checked' : '' }}
                                        onchange="toggleMahasiswaPicker(this.value)">
-                                Pilih Mahasiswa
+                                Select Students
                             </label>
                         </div>
                     </div>
 
                     {{-- Mahasiswa picker (hidden by default) --}}
                     <div id="mahasiswaPicker" style="display:{{ old('target') === 'selected' ? 'block' : 'none' }};margin-bottom:16px;">
-                        <label class="sima-label">Pilih Mahasiswa</label>
+                        <label class="sima-label">Select Students</label>
 
                         {{-- Filter bar --}}
                         <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
                             <input type="text" id="mhsSearch" class="sima-input sima-input--sm"
-                                   placeholder="Cari nama / NPM…" oninput="filterMhsPicker()"
+                                   placeholder="Search name / NPM..." oninput="filterMhsPicker()"
                                    style="flex:1;min-width:120px;">
                             <select id="mhsJurusan" class="sima-input sima-input--sm" onchange="filterMhsPicker()"
                                     style="flex:1;min-width:120px;">
-                                <option value="">Semua Jurusan</option>
+                                <option value="">All Majors</option>
                                 @foreach($jurusanList as $j)
                                     <option value="{{ $j->id }}">{{ $j->namaJurusan }}</option>
                                 @endforeach
                             </select>
                             <select id="mhsKelas" class="sima-input sima-input--sm" onchange="filterMhsPicker()"
                                     style="flex:1;min-width:110px;">
-                                <option value="">Semua Kelas</option>
+                                <option value="">All Classes</option>
                                 @foreach($kelasList as $k)
                                     <option value="{{ $k->id }}">{{ $k->kodeKelas }}{{ $k->tahunAjar ? ' ('.$k->tahunAjar.')' : '' }}</option>
                                 @endforeach
@@ -106,10 +106,10 @@
                                 </span>
                             </label>
                             @empty
-                            <div style="padding:10px;font-size:13px;color:var(--c-text-3);">Tidak ada mahasiswa aktif.</div>
+                            <div style="padding:10px;font-size:13px;color:var(--c-text-3);">No active students.</div>
                             @endforelse
                             <div id="mhsEmpty" style="display:none;padding:10px;font-size:13px;color:var(--c-text-3);text-align:center;">
-                                Tidak ada mahasiswa yang cocok.
+                                No matching students.
                             </div>
                         </div>
                         <div style="font-size:11px;color:var(--c-text-3);margin-top:4px;" id="mhsCount">
@@ -119,7 +119,7 @@
                     </div>
 
                     <button type="submit" class="sima-btn sima-btn--full">
-                        <i class="fas fa-paper-plane me-2"></i> Kirim Notifikasi
+                        <i class="fas fa-paper-plane me-2"></i> Send Notification
                     </button>
                 </form>
             </div>
@@ -130,7 +130,7 @@
     <div class="col-lg-7">
         <div class="sima-card">
             <div class="sima-card__header">
-                <h5 class="sima-card__title">Riwayat Terkirim</h5>
+                <h5 class="sima-card__title">Sent History</h5>
                 <span class="sima-badge sima-badge--blue">{{ $riwayat->count() }}</span>
             </div>
 
@@ -140,7 +140,7 @@
                     'broadcast'    => ['label' => 'Broadcast',    'cls' => 'sima-badge--blue',   'ic' => 'fa-bullhorn'],
                     'document'     => ['label' => 'Dokumen',      'cls' => 'sima-badge--green',  'ic' => 'fa-file-alt'],
                     'account'      => ['label' => 'Akun',         'cls' => 'sima-badge--purple', 'ic' => 'fa-user-check'],
-                    'announcement' => ['label' => 'Pengumuman',   'cls' => 'sima-badge--amber',  'ic' => 'fa-bell'],
+                    'announcement' => ['label' => 'Announcement',   'cls' => 'sima-badge--amber',  'ic' => 'fa-bell'],
                 ];
                 $tm = $typeMap[$notif->type] ?? ['label' => $notif->type, 'cls' => '', 'ic' => 'fa-bell'];
                 $readPct = $notif->total_penerima > 0
@@ -164,10 +164,10 @@
                         </div>
                     </div>
                     <div style="text-align:right;flex-shrink:0;min-width:90px;">
-                        <div style="font-size:12px;color:var(--c-text-3);">Penerima</div>
+                        <div style="font-size:12px;color:var(--c-text-3);">Recipients</div>
                         <div style="font-size:18px;font-weight:700;line-height:1.2;">{{ $notif->total_penerima }}</div>
                         <div style="font-size:11px;color:var(--c-text-3);margin-top:2px;">
-                            {{ $notif->total_dibaca }} dibaca ({{ $readPct }}%)
+                            {{ $notif->total_dibaca }} read ({{ $readPct }}%)
                         </div>
                         {{-- mini progress bar --}}
                         <div style="width:80px;height:3px;background:var(--c-border);border-radius:999px;overflow:hidden;margin-top:5px;margin-left:auto;">
@@ -179,7 +179,7 @@
             @empty
             <div class="text-center text-muted py-5">
                 <i class="fas fa-paper-plane fa-2x d-block mb-2" style="opacity:.3;"></i>
-                Belum ada notifikasi yang dikirim.
+                No notifications sent yet.
             </div>
             @endforelse
         </div>

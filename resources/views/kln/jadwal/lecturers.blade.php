@@ -2,7 +2,7 @@
 
 @section('page_title',    'Jadwal Lecturers')
 @section('page_section',  'JADWAL')
-@section('page_subtitle', 'Jadwal yang dibuat oleh admin jurusan')
+@section('page_subtitle', 'Schedules created by department admins')
 
 @section('main_content')
 
@@ -24,7 +24,7 @@
         <form method="GET" action="{{ route('kln.jadwal.lecturers') }}"
               style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <select name="hari" class="sima-input" style="width:140px;" onchange="this.form.submit()">
-                <option value="">Semua Hari</option>
+                <option value="">All Days</option>
                 @foreach(['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'] as $h)
                     <option value="{{ $h }}" {{ request('hari') === $h ? 'selected' : '' }}>{{ $h }}</option>
                 @endforeach
@@ -39,15 +39,15 @@
         <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>Matakuliah</th>
-                    <th>Kelas</th>
-                    <th>Dosen</th>
-                    <th>Hari</th>
-                    <th>Jam</th>
-                    <th>Ruangan</th>
-                    <th>Sesi</th>
-                    <th>Tahun Ajar</th>
-                    <th>Aksi</th>
+                    <th>Course</th>
+                    <th>Class</th>
+                    <th>Lecturer</th>
+                    <th>Day</th>
+                    <th>Time</th>
+                    <th>Room</th>
+                    <th>Sessions</th>
+                    <th>Academic Year</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -79,7 +79,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="9" class="text-center text-muted py-4">Belum ada jadwal dari jurusan.</td>
+                    <td colspan="9" class="text-center text-muted py-4">No schedules from departments yet.</td>
                 </tr>
                 @endforelse
             </tbody>

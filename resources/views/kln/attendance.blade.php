@@ -2,7 +2,7 @@
 
 @section('page_title',    'Daftar Kehadiran')
 @section('page_section',  'KEHADIRAN')
-@section('page_subtitle', 'Rekap kehadiran mahasiswa asing per matakuliah')
+@section('page_subtitle', 'Attendance summary for foreign students per course')
 
 @section('main_content')
 
@@ -25,7 +25,7 @@
     <div class="col-6 col-md-4">
         <div class="sima-stat sima-stat--amber">
             <div class="sima-stat__icon sima-stat__icon--amber"><i class="fas fa-clock"></i></div>
-            <div class="sima-stat__label">Belum Ada Data</div>
+            <div class="sima-stat__label">No Data Yet</div>
             <div class="sima-stat__value">{{ $stats['noData'] }}</div>
         </div>
     </div>
@@ -41,13 +41,13 @@
         <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>Mahasiswa</th>
-                    <th style="text-align:center;">Matakuliah</th>
-                    <th style="text-align:center;">Hadir</th>
-                    <th style="text-align:center;">Absen</th>
-                    <th style="text-align:center;">Izin</th>
-                    <th style="text-align:center;">Belum</th>
-                    <th style="text-align:center;">% Kehadiran</th>
+                    <th>Student</th>
+                    <th style="text-align:center;">Course</th>
+                    <th style="text-align:center;">Present</th>
+                    <th style="text-align:center;">Absent</th>
+                    <th style="text-align:center;">Excused</th>
+                    <th style="text-align:center;">Pending</th>
+                    <th style="text-align:center;">% Attendance</th>
                     <th></th>
                 </tr>
             </thead>
@@ -119,9 +119,9 @@
                     <td colspan="8" class="text-center text-muted py-5">
                         <i class="fas fa-users fa-2x d-block mb-2" style="opacity:.3;"></i>
                         @if($search)
-                            Tidak ada mahasiswa yang cocok dengan "{{ $search }}".
+                            No matching students.
                         @else
-                            Belum ada data mahasiswa.
+                            No student data yet.
                         @endif
                     </td>
                 </tr>

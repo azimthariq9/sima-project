@@ -2,7 +2,7 @@
 
 @section('page_title',    'Students & Lecturers')
 @section('page_section',  'KERJA SAMA LUAR NEGERI')
-@section('page_subtitle', 'Data mahasiswa dan dosen per jurusan')
+@section('page_subtitle', 'Students and lecturers by department')
 
 @section('main_content')
 
@@ -25,7 +25,7 @@
     <div class="col-6 col-md-4">
         <div class="sima-stat sima-stat--purple">
             <div class="sima-stat__icon sima-stat__icon--purple"><i class="fas fa-university"></i></div>
-            <div class="sima-stat__label">Jurusan Aktif</div>
+            <div class="sima-stat__label">Active Departments</div>
             <div class="sima-stat__value">{{ $totalJurusan }}</div>
         </div>
     </div>
@@ -44,13 +44,13 @@
             @if($jurusanD) <input type="hidden" name="jurusan_d" value="{{ $jurusanD }}"> @endif
 
             <select name="jurusan_m" class="sima-input" style="width:150px;" onchange="this.form.submit()">
-                <option value="">Semua Jurusan</option>
+                <option value="">All Majors</option>
                 @foreach($jurusan as $j)
                     <option value="{{ $j->id }}" {{ $jurusanM == $j->id ? 'selected' : '' }}>{{ $j->namaJurusan }}</option>
                 @endforeach
             </select>
             <select name="tipe_m" class="sima-input" style="width:175px;" onchange="this.form.submit()">
-                <option value="">Semua Tipe</option>
+                <option value="">All Types</option>
                 <option value="Beasiswa TIAS"       {{ $tipeMhs === 'Beasiswa TIAS'       ? 'selected' : '' }}>Beasiswa TIAS</option>
                 <option value="Beasiswa KNB"        {{ $tipeMhs === 'Beasiswa KNB'        ? 'selected' : '' }}>Beasiswa KNB</option>
                 <option value="Beasiswa Gunadarma"  {{ $tipeMhs === 'Beasiswa Gunadarma'  ? 'selected' : '' }}>Beasiswa Gunadarma</option>
@@ -58,12 +58,12 @@
                 <option value="Short Course (3 Bulan)" {{ $tipeMhs === 'Short Course (3 Bulan)' ? 'selected' : '' }}>Short Course (3 Bulan)</option>
             </select>
             <select name="dok_status" class="sima-input" style="width:145px;" onchange="this.form.submit()">
-                <option value="">Semua Status Dok</option>
-                <option value="belum_ada" {{ $dokStatus === 'belum_ada' ? 'selected' : '' }}>Belum Ada</option>
+                <option value="">All Doc Status</option>
+                <option value="belum_ada" {{ $dokStatus === 'belum_ada' ? 'selected' : '' }}>Not Available</option>
                 <option value="expired"   {{ $dokStatus === 'expired'   ? 'selected' : '' }}>Expired</option>
                 <option value="pending"   {{ $dokStatus === 'pending'   ? 'selected' : '' }}>Pending</option>
                 <option value="warning"   {{ $dokStatus === 'warning'   ? 'selected' : '' }}>Warning</option>
-                <option value="aman"      {{ $dokStatus === 'aman'      ? 'selected' : '' }}>Aman</option>
+                <option value="aman"      {{ $dokStatus === 'aman'      ? 'selected' : '' }}>Valid</option>
             </select>
             @if($jurusanM || $dokStatus || $tipeMhs)
             <a href="{{ route('kln.students.page', array_filter(['search_d'=>$searchD,'jurusan_d'=>$jurusanD])) }}"
@@ -84,26 +84,26 @@
             @endphp
             <thead>
                 <tr>
-                    <th>Nama</th>
+                    <th>Name</th>
                     <th>NPM</th>
-                    <th>Jurusan</th>
-                    <th>Tipe</th>
-                    <th>Akun</th>
-                    <th>Status Dokumen</th>
-                    <th>Aksi</th>
+                    <th>Major</th>
+                    <th>Type</th>
+                    <th>Account</th>
+                    <th>Document Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($mahasiswaList as $m)
                 @php
                     $docLevel = $m->doc_expiry_level;
-                    if ($docLevel === null)  { $docBadge = ''; $docStyle = 'background:var(--c-border);color:var(--c-text-3);'; $docLabel = 'Belum Ada'; $docIcon = 'fa-minus-circle'; }
+                    if ($docLevel === null)  { $docBadge = ''; $docStyle = 'background:var(--c-border);color:var(--c-text-3);'; $docLabel = 'Not Available'; $docIcon = 'fa-minus-circle'; }
                     elseif ($docLevel == 1) { $docBadge = 'sima-badge--red';    $docStyle = ''; $docLabel = 'Expired'; $docIcon = 'fa-exclamation-circle'; }
                     elseif ($docLevel == 2) { $docBadge = 'sima-badge--blue';   $docStyle = ''; $docLabel = 'Pending'; $docIcon = 'fa-clock'; }
                     elseif ($docLevel == 3) { $docBadge = 'sima-badge--amber';  $docStyle = ''; $docLabel = 'Warning'; $docIcon = 'fa-exclamation-triangle'; }
-                    else                    { $docBadge = 'sima-badge--green';  $docStyle = ''; $docLabel = 'Aman';    $docIcon = 'fa-check-circle'; }
+                    else                    { $docBadge = 'sima-badge--green';  $docStyle = ''; $docLabel = 'Valid';    $docIcon = 'fa-check-circle'; }
                     $akunBadge = $m->status === 'active' ? 'sima-badge--green' : 'sima-badge--red';
-                    $akunLabel = $m->status === 'active' ? 'Aktif' : 'Nonaktif';
+                    $akunLabel = $m->status === 'active' ? 'Active' : 'Inactive';
                     $tipeCls   = $tipeBadgeMap[$m->tipeMahasiswa ?? ''] ?? '';
                 @endphp
                 <tr>
@@ -130,7 +130,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" class="text-center text-muted py-4">Belum ada data mahasiswa.</td></tr>
+                <tr><td colspan="7" class="text-center text-muted py-4">No student data yet.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -152,7 +152,7 @@
             @if($tipeMhs)   <input type="hidden" name="tipe_m"     value="{{ $tipeMhs }}">  @endif
 
             <select name="jurusan_d" class="sima-input" style="width:150px;" onchange="this.form.submit()">
-                <option value="">Semua Jurusan</option>
+                <option value="">All Majors</option>
                 @foreach($jurusan as $j)
                     <option value="{{ $j->id }}" {{ $jurusanD == $j->id ? 'selected' : '' }}>{{ $j->namaJurusan }}</option>
                 @endforeach
@@ -167,18 +167,18 @@
         <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>Nama</th>
+                    <th>Name</th>
                     <th>NIDN</th>
-                    <th>Jurusan</th>
+                    <th>Major</th>
                     <th>Status</th>
-                    <th>Aksi</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($dosenList as $d)
                 @php
                     $badgeSts = $d->status === 'active' ? 'sima-badge--green' : 'sima-badge--red';
-                    $labelSts = $d->status === 'active' ? 'Aktif' : 'Nonaktif';
+                    $labelSts = $d->status === 'active' ? 'Active' : 'Inactive';
                 @endphp
                 <tr>
                     <td>{{ $d->nama }}</td>
@@ -192,7 +192,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="5" class="text-center text-muted py-4">Belum ada data dosen.</td></tr>
+                <tr><td colspan="5" class="text-center text-muted py-4">No lecturer data yet.</td></tr>
                 @endforelse
             </tbody>
         </table>

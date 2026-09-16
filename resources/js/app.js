@@ -21,12 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
             perPage: 10,
             perPageSelect: [5, 10, 15, 20, 25],
             labels: {
-                placeholder: "Cari...",
-                perPage: "data per halaman",
-                noRows: "Tidak ada data ditemukan",
-                info: "Menampilkan {start} - {end} dari {rows} data",
-                loading: "Memuat...",
-                linearPagination: { previous: "Sebelumnya", next: "Selanjutnya" }
+                placeholder: "Search...",
+                perPage: "rows per page",
+                noRows: "No data found",
+                info: "Showing {start} - {end} of {rows} rows",
+                loading: "Loading...",
+                linearPagination: { previous: "Previous", next: "Next" }
             },
             layout: {
                 top: "{search}",

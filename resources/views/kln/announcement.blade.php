@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Pengumuman KLN')
+@section('page_title',    'KLN Announcements')
 @section('page_section',  'PENGUMUMAN')
-@section('page_subtitle', 'Kelola pengumuman yang dibuat oleh KLN')
+@section('page_subtitle', 'Manage announcements created by KLN')
 
 @section('main_content')
 
@@ -18,7 +18,7 @@
     <div class="col-6 col-md-3">
         <div class="sima-stat sima-stat--green">
             <div class="sima-stat__icon sima-stat__icon--green"><i class="fas fa-check-circle"></i></div>
-            <div class="sima-stat__label">Aktif</div>
+            <div class="sima-stat__label">Active</div>
             <div class="sima-stat__value">{{ $totalActive }}</div>
         </div>
     </div>
@@ -50,10 +50,10 @@
 {{-- ── TABLE CARD ───────────────────────────────────── --}}
 <div class="sima-card">
     <div class="sima-card__header">
-        <h5 class="sima-card__title">Daftar Pengumuman</h5>
+        <h5 class="sima-card__title">Announcement List</h5>
         <div style="display:flex;gap:8px;align-items:center;">
             <a href="{{ route('kln.announcement.create') }}" class="sima-btn sima-btn--accent">
-                <i class="fas fa-plus me-1"></i> Buat Pengumuman
+                <i class="fas fa-plus me-1"></i> Create Announcement
             </a>
         </div>
     </div>
@@ -62,20 +62,20 @@
         <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>Judul &amp; Ringkasan</th>
-                    <th>Lampiran</th>
+                    <th>Title &amp; Summary</th>
+                    <th>Attachments</th>
                     <th>Status</th>
-                    <th>Penting</th>
-                    <th>Tanggal</th>
-                    <th>Aksi</th>
+                    <th>Priority</th>
+                    <th>Date</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($announcements as $ann)
                 @php
                     $statusMap = [
-                        'active'   => ['label' => 'Aktif',    'cls' => 'sima-badge--green'],
-                        'inactive' => ['label' => 'Nonaktif', 'cls' => 'sima-badge--red'],
+                        'active'   => ['label' => 'Active',    'cls' => 'sima-badge--green'],
+                        'inactive' => ['label' => 'Inactive', 'cls' => 'sima-badge--red'],
                         'draft'    => ['label' => 'Draft',    'cls' => 'sima-badge--amber'],
                     ];
                     $s = $statusMap[$ann->status] ?? ['label' => $ann->status, 'cls' => 'sima-badge--amber'];
@@ -127,7 +127,7 @@
                 <tr>
                     <td colspan="6" class="text-center text-muted py-5">
                         <i class="fas fa-bullhorn fa-2x d-block mb-2" style="opacity:.3;"></i>
-                        Belum ada pengumuman.
+                        No announcements yet.
                         <a href="{{ route('kln.announcement.create') }}" style="color:var(--c-accent);">Buat sekarang</a>
                     </td>
                 </tr>
@@ -143,7 +143,7 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <script>
 function deleteAnn(id) {
-    if (!confirm('Hapus pengumuman ini? Semua lampiran juga akan dihapus.')) return;
+    if (!confirm('Delete this announcement? All attachments will also be deleted.')) return;
     fetch(`/kln/announcement/${id}`, {
         method: 'DELETE',
         headers: {
@@ -157,7 +157,7 @@ function deleteAnn(id) {
             document.getElementById('row-' + id)?.remove();
         }
     })
-    .catch(() => alert('Gagal menghapus. Coba lagi.'));
+    .catch(() => alert('Failed to delete. Try again.'));
 }
 </script>
 @endpush
