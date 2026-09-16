@@ -595,6 +595,20 @@ class KlnController extends Controller
         $jurusan = DB::table('jurusan')->orderBy('namaJurusan')->get();
         return view('kln.users.index', compact('jurusan'));
     }
+
+    public function createUserPage()
+    {
+        $jurusan = DB::table('jurusan')->orderBy('namaJurusan')->get();
+        return view('kln.users.create', compact('jurusan'));
+    }
+
+    public function editUserPage($id)
+    {
+        $user   = User::with(['mahasiswa', 'dosen'])->findOrFail($id);
+        $jurusan = DB::table('jurusan')->orderBy('namaJurusan')->get();
+        return view('kln.users.edit', compact('user', 'jurusan'));
+    }
+
     /*
     |--------------------------------------------------------------------------
     | GET USERS DATA
@@ -1468,6 +1482,16 @@ class KlnController extends Controller
             ->get();
 
         return view('kln.jadwal.kln', compact('jadwalList', 'kelas'));
+    }
+
+    public function createJadwalPage()
+    {
+        $kelas = DB::table('kelas')
+            ->select('id', 'kodeKelas', 'tahunAjar')
+            ->orderBy('kodeKelas')
+            ->get();
+
+        return view('kln.jadwal.create', compact('kelas'));
     }
 
     /*

@@ -262,6 +262,7 @@ Route::middleware(['auth', 'check.role:KLN'])
             Route::get('bipa',      [KlnController::class, 'jadwalBipa'])->name('bipa');
             Route::get('lecturers', [KlnController::class, 'jadwalLecturers'])->name('lecturers');
             Route::get('kln',       [KlnController::class, 'jadwalKln'])->name('kln');
+            Route::get('create',    [KlnController::class, 'createJadwalPage'])->name('create');
             Route::get('kegiatan',  [KlnController::class, 'searchKegiatan'])->name('kegiatan');
             Route::get('{id}',      [KlnController::class, 'jadwalDetail'])->name('detail')->where('id', '[0-9]+');
             Route::post('/',        [KlnController::class, 'jadwalStore'])->name('store');
@@ -286,9 +287,11 @@ Route::middleware(['auth', 'check.role:KLN'])
         // Users management
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('/',             [KlnController::class, 'usersPage'])->name('page');
+            Route::get('create',        [KlnController::class, 'createUserPage'])->name('create');
             Route::get('data',          [KlnController::class, 'getUsers'])->name('data');
             Route::get('generate-npm',  [KlnController::class, 'generateNpm'])->name('generate-npm'); // harus sebelum {id}
             Route::get('{id}',          [KlnController::class, 'showUser'])->name('show');
+            Route::get('{id}/edit',     [KlnController::class, 'editUserPage'])->name('edit');
             Route::post('/',            [KlnController::class, 'storeUser'])->name('store');
             Route::patch('{id}',        [KlnController::class, 'updateUser'])->name('update');
             Route::delete('{id}',       [KlnController::class, 'destroyUser'])->name('destroy');
