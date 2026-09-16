@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Pengumuman')
-@section('page_section',  'ADMIN JURUSAN')
-@section('page_subtitle', 'Kelola pengumuman dari jurusan')
+@section('page_title',    'Announcements')
+@section('page_section',  'DEPARTMENT ADMIN')
+@section('page_subtitle', 'Manage announcements from your department')
 
 @section('main_content')
 
@@ -16,55 +16,36 @@
 <div class="sima-card sima-fade">
     <div class="sima-card__header">
         <div>
-            <h5 class="sima-card__title">Pengumuman Jurusan</h5>
-            <div class="sima-card__subtitle">Pengumuman yang diterbitkan oleh jurusan</div>
+            <h5 class="sima-card__title">Department Announcements</h5>
+            <div class="sima-card__subtitle">Announcements published by your department</div>
         </div>
         <button onclick="document.getElementById('modalCreate').style.display='flex'"
                 class="sima-btn sima-btn--sm">
-            <i class="fas fa-plus"></i> Buat Pengumuman
+            <i class="fas fa-plus"></i> Create Announcement
         </button>
     </div>
 
     {{-- Filter bar --}}
     <div style="padding:12px 20px;border-bottom:1px solid var(--c-border-soft)">
         <form method="GET" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-            <input type="text" name="search" value="{{ $search }}" placeholder="Cari pengumuman…"
-                   class="sima-input" style="width:240px;font-size:13px">
             <select name="filter" class="sima-input" style="width:150px;font-size:13px" onchange="this.form.submit()">
-                <option value="">— Semua Status —</option>
-                <option value="active"   {{ $filter === 'active'   ? 'selected' : '' }}>Aktif</option>
-                <option value="inactive" {{ $filter === 'inactive' ? 'selected' : '' }}>Nonaktif</option>
-                <option value="penting"  {{ $filter === 'penting'  ? 'selected' : '' }}>Penting</option>
+                <option value="">— All Status —</option>
+                <option value="active"   {{ $filter === 'active'   ? 'selected' : '' }}>Active</option>
+                <option value="inactive" {{ $filter === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                <option value="penting"  {{ $filter === 'penting'  ? 'selected' : '' }}>Priority</option>
             </select>
-            <button type="submit" class="sima-btn sima-btn--sm sima-btn--outline">
-                <i class="fas fa-search"></i> Cari
-            </button>
-            @if($search || $filter)
-                <a href="{{ route('jurusan.announcement.index') }}" class="sima-btn sima-btn--sm sima-btn--outline">
-                    <i class="fas fa-xmark"></i> Reset
-                </a>
-            @endif
         </form>
     </div>
 
-    @if($announcements->isEmpty())
-        <div class="sima-card__body" style="text-align:center;padding:48px 20px;color:var(--c-text-3)">
-            <i class="fas fa-bullhorn" style="font-size:36px;opacity:.3;display:block;margin-bottom:12px"></i>
-            <div style="font-size:14px;font-weight:500;color:var(--c-text-2)">
-                {{ $search || $filter ? 'Tidak ditemukan pengumuman yang cocok' : 'Belum ada pengumuman' }}
-            </div>
-            <div style="font-size:12.5px;margin-top:4px">Klik "Buat Pengumuman" untuk menambah pengumuman baru.</div>
-        </div>
-    @else
-        <div class="sima-card__body" style="padding:0">
-            <table class="sima-table">
+    <div class="sima-card__body" style="padding:0">
+            <table class="sima-table" data-datatable>
                 <thead>
                     <tr>
                         <th style="width:40px">#</th>
-                        <th>Judul</th>
+                        <th>Title</th>
                         <th style="width:100px">Status</th>
-                        <th style="width:80px;text-align:center">Penting</th>
-                        <th style="width:110px">Tanggal</th>
+                        <th style="width:80px;text-align:center">Priority</th>
+                        <th style="width:110px">Date</th>
                         <th style="width:100px"></th>
                     </tr>
                 </thead>
@@ -72,7 +53,7 @@
                     @foreach($announcements as $ann)
                     <tr>
                         <td style="color:var(--c-text-3);font-size:12px">
-                            {{ $announcements->firstItem() + $loop->index }}
+                            {{ $loop->index + 1 }}
                         </td>
                         <td>
                             <div style="font-weight:600;font-size:13.5px;color:var(--c-text-1)">{{ $ann->subject }}</div>
@@ -82,12 +63,12 @@
                         </td>
                         <td>
                             <span class="sima-badge {{ $ann->status === 'active' ? 'sima-badge--green' : 'sima-badge--grey' }}">
-                                {{ $ann->status === 'active' ? 'Aktif' : 'Nonaktif' }}
+                                {{ $ann->status === 'active' ? 'Active' : 'Inactive' }}
                             </span>
                         </td>
                         <td style="text-align:center">
                             @if($ann->is_penting)
-                                <i class="fas fa-thumbtack" style="color:var(--c-accent);font-size:14px" title="Penting"></i>
+                                <i class="fas fa-thumbtack" style="color:var(--c-accent);font-size:14px" title="Priority"></i>
                             @else
                                 <span style="color:var(--c-text-3);font-size:12px">—</span>
                             @endif
@@ -105,12 +86,12 @@
                                     <i class="fas fa-pencil"></i>
                                 </button>
                                 <form method="POST" action="{{ route('jurusan.announcement.destroy', $ann->id) }}"
-                                      onsubmit="return confirm('Hapus pengumuman ini?')">
+                                      onsubmit="return confirm('Delete this announcement?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="sima-btn sima-btn--sm"
                                             style="font-size:11.5px;padding:4px 10px;background:rgba(220,38,38,.08);color:#dc2626;border:1px solid rgba(220,38,38,.2)"
-                                            title="Hapus">
+                                            title="Delete">
                                         <i class="fas fa-trash-can"></i>
                                     </button>
                                 </form>
@@ -121,21 +102,16 @@
                 </tbody>
             </table>
         </div>
-
-        <div style="padding:14px 20px">
-            {{ $announcements->links('vendor.pagination.sima') }}
-        </div>
-    @endif
 </div>
 
 
 {{-- ══════════════════════════════════════
-     MODAL BUAT PENGUMUMAN
+     CREATE ANNOUNCEMENT MODAL
 ══════════════════════════════════════ --}}
 <div id="modalCreate" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center">
     <div style="background:#fff;border-radius:18px;width:100%;max-width:520px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden">
         <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
-            <div style="font-size:15px;font-weight:700;color:#1e293b">Buat Pengumuman</div>
+            <div style="font-size:15px;font-weight:700;color:#1e293b">Create Announcement</div>
             <button onclick="document.getElementById('modalCreate').style.display='none'"
                     style="width:32px;height:32px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;color:#64748b">
                 <i class="fas fa-xmark"></i>
@@ -145,13 +121,13 @@
             <form method="POST" action="{{ route('jurusan.announcement.store') }}">
                 @csrf
                 <div style="margin-bottom:14px">
-                    <label class="sima-label">Judul <span style="color:var(--c-red)">*</span></label>
-                    <input type="text" name="subject" class="sima-input" placeholder="Judul pengumuman…" required maxlength="200">
+                    <label class="sima-label">Title <span style="color:var(--c-red)">*</span></label>
+                    <input type="text" name="subject" class="sima-input" placeholder="Announcement title…" required maxlength="200">
                 </div>
                 <div style="margin-bottom:14px">
-                    <label class="sima-label">Isi Pengumuman <span style="color:var(--c-red)">*</span></label>
+                    <label class="sima-label">Message <span style="color:var(--c-red)">*</span></label>
                     <textarea name="message" class="sima-input" rows="5"
-                              placeholder="Tulis isi pengumuman di sini…"
+                              placeholder="Write your announcement here…"
                               required style="resize:vertical"></textarea>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
@@ -159,13 +135,13 @@
                            style="width:16px;height:16px;cursor:pointer">
                     <label for="create-penting" class="sima-label" style="margin-bottom:0;cursor:pointer">
                         <i class="fas fa-thumbtack" style="color:var(--c-accent);margin-right:4px"></i>
-                        Tandai sebagai Penting (tampil di atas dengan penanda)
+                        Mark as Priority (pinned at top with indicator)
                     </label>
                 </div>
                 <div style="display:flex;gap:8px">
-                    <button type="submit" class="sima-btn"><i class="fas fa-paper-plane"></i> Terbitkan</button>
+                    <button type="submit" class="sima-btn"><i class="fas fa-paper-plane"></i> Publish</button>
                     <button type="button" onclick="document.getElementById('modalCreate').style.display='none'"
-                            class="sima-btn sima-btn--outline">Batal</button>
+                            class="sima-btn sima-btn--outline">Cancel</button>
                 </div>
             </form>
         </div>
@@ -174,12 +150,12 @@
 
 
 {{-- ══════════════════════════════════════
-     MODAL EDIT PENGUMUMAN
+     EDIT ANNOUNCEMENT MODAL
 ══════════════════════════════════════ --}}
 <div id="modalEdit" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center">
     <div style="background:#fff;border-radius:18px;width:100%;max-width:520px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden">
         <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
-            <div style="font-size:15px;font-weight:700;color:#1e293b">Edit Pengumuman</div>
+            <div style="font-size:15px;font-weight:700;color:#1e293b">Edit Announcement</div>
             <button onclick="document.getElementById('modalEdit').style.display='none'"
                     style="width:32px;height:32px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;color:#64748b">
                 <i class="fas fa-xmark"></i>
@@ -190,19 +166,19 @@
                 @csrf
                 @method('PATCH')
                 <div style="margin-bottom:14px">
-                    <label class="sima-label">Judul <span style="color:var(--c-red)">*</span></label>
+                    <label class="sima-label">Title <span style="color:var(--c-red)">*</span></label>
                     <input type="text" name="subject" id="edit-subject" class="sima-input" required maxlength="200">
                 </div>
                 <div style="margin-bottom:14px">
-                    <label class="sima-label">Isi Pengumuman <span style="color:var(--c-red)">*</span></label>
+                    <label class="sima-label">Message <span style="color:var(--c-red)">*</span></label>
                     <textarea name="message" id="edit-message" class="sima-input" rows="5"
                               required style="resize:vertical"></textarea>
                 </div>
                 <div style="margin-bottom:14px">
                     <label class="sima-label">Status</label>
                     <select name="status" id="edit-status" class="sima-input">
-                        <option value="active">Aktif</option>
-                        <option value="inactive">Nonaktif</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
                     </select>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
@@ -210,13 +186,13 @@
                            style="width:16px;height:16px;cursor:pointer">
                     <label for="edit-penting" class="sima-label" style="margin-bottom:0;cursor:pointer">
                         <i class="fas fa-thumbtack" style="color:var(--c-accent);margin-right:4px"></i>
-                        Tandai sebagai Penting
+                        Mark as Priority
                     </label>
                 </div>
                 <div style="display:flex;gap:8px">
-                    <button type="submit" class="sima-btn"><i class="fas fa-save"></i> Simpan</button>
+                    <button type="submit" class="sima-btn"><i class="fas fa-save"></i> Save</button>
                     <button type="button" onclick="document.getElementById('modalEdit').style.display='none'"
-                            class="sima-btn sima-btn--outline">Batal</button>
+                            class="sima-btn sima-btn--outline">Cancel</button>
                 </div>
             </form>
         </div>

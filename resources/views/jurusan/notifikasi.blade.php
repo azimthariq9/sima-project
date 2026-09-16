@@ -1,14 +1,14 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Notifikasi')
-@section('page_section',  'ADMIN JURUSAN')
-@section('page_subtitle', 'Daftar notifikasi masuk')
+@section('page_title',    'Notifications')
+@section('page_section',  'DEPARTMENT ADMIN')
+@section('page_subtitle', 'Incoming notifications')
 
 @section('content')
 <div class="container-fluid px-4">
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Notifikasi</h5>
+            <h5 class="mb-0">Notifications</h5>
         </div>
         <div class="card-body p-0">
             @forelse ($notifikasi as $item)
@@ -24,21 +24,17 @@
                         </div>
                     </div>
                     @if (!$item->is_read)
-                        <span class="badge bg-primary ms-2">Baru</span>
+                        <span class="badge bg-primary ms-2">New</span>
                     @endif
                 </div>
             @empty
                 <div class="text-center text-muted py-5">
                     <i class="bi bi-bell-slash fs-1"></i>
-                    <p class="mt-2">Belum ada notifikasi.</p>
+                    <p class="mt-2">No notifications yet.</p>
                 </div>
             @endforelse
         </div>
-        @if ($notifikasi->hasPages())
-            <div class="card-footer">
-                {{ $notifikasi->links('vendor.pagination.sima') }}
-            </div>
-        @endif
+
     </div>
 </div>
 @endsection

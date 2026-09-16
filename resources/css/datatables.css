@@ -155,13 +155,14 @@
     align-items: center;
     gap: 8px;
     position: relative;
+    
 }
 
 /* Search icon */
 .datatable-search::before {
     content: '';
     position: absolute;
-    left: 14px;
+    left: 40px;
     width: 15px;
     height: 15px;
     opacity: 0.4;

@@ -58,95 +58,69 @@ class JurusanController extends Controller
 
     public function mahasiswaPage(Request $request)
     {
-        $jid    = Auth::user()->jurusan_id;
-        $search = $request->input('search', '');
+        $jid = Auth::user()->jurusan_id;
 
-        $query = User::where('role', 'mahasiswa')
+        $mahasiswa = User::where('role', 'mahasiswa')
             ->where('jurusan_id', $jid)
-            ->with(['mahasiswa', 'mahasiswa.kelas']);
+            ->with(['mahasiswa', 'mahasiswa.kelas'])
+            ->latest()
+            ->get();
 
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('email', 'ilike', "%{$search}%")
-                  ->orWhereHas('mahasiswa', function ($m) use ($search) {
-                      $m->where('nama', 'ilike', "%{$search}%")
-                        ->orWhere('npm',  'ilike', "%{$search}%");
-                  });
-            });
-        }
-
-        $mahasiswa        = $query->latest()->paginate(15)->withQueryString();
         $unreadNotifCount = $this->unreadNotif();
 
-        return view('jurusan.mahasiswa.index', compact('mahasiswa', 'search', 'unreadNotifCount'));
+        return view('jurusan.mahasiswa.index', compact('mahasiswa', 'unreadNotifCount'));
     }
 
     public function dosenPage(Request $request)
     {
-        $jid    = Auth::user()->jurusan_id;
-        $search = $request->input('search', '');
+        $jid = Auth::user()->jurusan_id;
 
-        $query = dosen::with('user')
+        $dosens = dosen::with('user')
             ->whereHas('user', function ($q) use ($jid) {
                 $q->where('jurusan_id', $jid);
-            });
+            })
+            ->latest()
+            ->get();
 
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('nama',    'ilike', "%{$search}%")
-                  ->orWhere('nidn',   'ilike', "%{$search}%")
-                  ->orWhere('kodeDos','ilike', "%{$search}%");
-            });
-        }
-
-        $dosens           = $query->latest()->paginate(15)->withQueryString();
         $unreadNotifCount = $this->unreadNotif();
 
-        return view('jurusan.dosen.index', compact('dosens', 'search', 'unreadNotifCount'));
+        return view('jurusan.dosen.index', compact('dosens', 'unreadNotifCount'));
     }
 
     public function matakuliahPage(Request $request)
     {
-        $jid    = Auth::user()->jurusan_id;
-        $search = $request->input('search', '');
+        $jid = Auth::user()->jurusan_id;
 
-        $query = DB::table('matakuliah')->where('jurusan_id', $jid);
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('namaMk', 'ilike', "%{$search}%")
-                  ->orWhere('kodeMk', 'ilike', "%{$search}%");
-            });
-        }
-        $matakuliah       = $query->orderByDesc('created_at')->paginate(15)->withQueryString();
+        $matakuliah = DB::table('matakuliah')
+            ->where('jurusan_id', $jid)
+            ->orderByDesc('created_at')
+            ->get();
+
         $unreadNotifCount = $this->unreadNotif();
 
-        return view('jurusan.matakuliah.index', compact('matakuliah', 'search', 'unreadNotifCount'));
+        return view('jurusan.matakuliah.index', compact('matakuliah', 'unreadNotifCount'));
     }
 
     public function kelasPage(Request $request)
     {
-        $jid    = Auth::user()->jurusan_id;
-        $search = $request->input('search', '');
+        $jid = Auth::user()->jurusan_id;
 
-        $query = DB::table('kelas')
+        $kelas = DB::table('kelas')
             ->join('jurusan', 'kelas.jurusan_id', '=', 'jurusan.id')
-            ->where('kelas.jurusan_id', $jid);
-        if ($search) {
-            $query->where('kelas.kodeKelas', 'ilike', "%{$search}%");
-        }
-        $kelas = $query
+            ->where('kelas.jurusan_id', $jid)
             ->selectRaw('kelas.*, jurusan."namaJurusan", (SELECT COUNT(*) FROM mahasiswa_kelas mk WHERE mk.kelas_id = kelas.id) as mahasiswa_count')
             ->orderByDesc('kelas.created_at')
-            ->paginate(15)->withQueryString();
+            ->get();
+
         $unreadNotifCount = $this->unreadNotif();
 
-        return view('jurusan.kelas.index', compact('kelas', 'search', 'unreadNotifCount'));
+        return view('jurusan.kelas.index', compact('kelas', 'unreadNotifCount'));
     }
 
     public function jadwalPage(Request $request)
     {
-        $jid    = Auth::user()->jurusan_id;
-        $search = $request->input('search', '');
+        $jid  = Auth::user()->jurusan_id;
+        $hari = $request->input('hari', '');
 
         $query = DB::table('jadwal')
             ->join('dosen as d', 'jadwal.dosen_id', '=', 'd.id')
@@ -155,12 +129,8 @@ class JurusanController extends Controller
             ->leftJoin('kelas', 'jadwal.kelas_id', '=', 'kelas.id')
             ->where('u.jurusan_id', $jid);
 
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('matakuliah.namaMk', 'ilike', "%{$search}%")
-                  ->orWhere('d.nama', 'ilike', "%{$search}%")
-                  ->orWhere('kelas.kodeKelas', 'ilike', "%{$search}%");
-            });
+        if ($hari) {
+            $query->where('jadwal.hari', $hari);
         }
 
         $jadwal = $query->select(
@@ -173,11 +143,11 @@ class JurusanController extends Controller
                 WHEN 'Senin'   THEN 1 WHEN 'Selasa'  THEN 2 WHEN 'Rabu'    THEN 3
                 WHEN 'Kamis'   THEN 4 WHEN 'Jumat'   THEN 5 WHEN 'Sabtu'   THEN 6
                 ELSE 7 END, jadwal.jam")
-            ->paginate(15)->withQueryString();
+            ->get();
 
         $unreadNotifCount = $this->unreadNotif();
 
-        return view('jurusan.jadwal.index', compact('jadwal', 'search', 'unreadNotifCount'));
+        return view('jurusan.jadwal.index', compact('jadwal', 'unreadNotifCount'));
     }
 
     /*
