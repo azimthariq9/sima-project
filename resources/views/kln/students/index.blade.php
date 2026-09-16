@@ -75,7 +75,7 @@
         </form>
     </div>
     <div class="table-responsive">
-        <table class="sima-table">
+        <table class="sima-table" data-datatable>
             @php
             $tipeBadgeMap = [
                 'Beasiswa TIAS'        => 'sima-badge--blue',
@@ -87,7 +87,6 @@
             @endphp
             <thead>
                 <tr>
-                    <th>#</th>
                     <th>Nama</th>
                     <th>NPM</th>
                     <th>Jurusan</th>
@@ -98,7 +97,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($mahasiswaList as $idx => $m)
+                @forelse($mahasiswaList as $m)
                 @php
                     $docLevel = $m->doc_expiry_level;
                     if ($docLevel === null)  { $docBadge = ''; $docStyle = 'background:var(--c-border);color:var(--c-text-3);'; $docLabel = 'Belum Ada'; $docIcon = 'fa-minus-circle'; }
@@ -111,7 +110,6 @@
                     $tipeCls   = $tipeBadgeMap[$m->tipeMahasiswa ?? ''] ?? '';
                 @endphp
                 <tr>
-                    <td>{{ $mahasiswaList->firstItem() + $loop->index }}</td>
                     <td>{{ $m->nama }}</td>
                     <td><span style="font-family:var(--f-mono);font-size:13px;">{{ $m->identifier ?? '-' }}</span></td>
                     <td>{{ $m->namaJurusan ?? '-' }}</td>
@@ -140,11 +138,6 @@
             </tbody>
         </table>
     </div>
-    @if($mahasiswaList->hasPages())
-    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
-        {{ $mahasiswaList->links('vendor.pagination.sima') }}
-    </div>
-    @endif
 </div>
 
 {{-- ── DOSEN TABLE ──────────────────────────────────── --}}
@@ -177,10 +170,9 @@
         </form>
     </div>
     <div class="table-responsive">
-        <table class="sima-table">
+        <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>#</th>
                     <th>Nama</th>
                     <th>NIDN</th>
                     <th>Jurusan</th>
@@ -189,13 +181,12 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($dosenList as $idx => $d)
+                @forelse($dosenList as $d)
                 @php
                     $badgeSts = $d->status === 'active' ? 'sima-badge--green' : 'sima-badge--red';
                     $labelSts = $d->status === 'active' ? 'Aktif' : 'Nonaktif';
                 @endphp
                 <tr>
-                    <td>{{ $dosenList->firstItem() + $loop->index }}</td>
                     <td>{{ $d->nama }}</td>
                     <td><span style="font-family:var(--f-mono);font-size:13px;">{{ $d->identifier ?? '-' }}</span></td>
                     <td>{{ $d->namaJurusan ?? '-' }}</td>
@@ -207,16 +198,11 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="6" class="text-center text-muted py-4">Belum ada data dosen.</td></tr>
+                <tr><td colspan="5" class="text-center text-muted py-4">Belum ada data dosen.</td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    @if($dosenList->hasPages())
-    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
-        {{ $dosenList->links('vendor.pagination.sima') }}
-    </div>
-    @endif
 </div>
 
 @endsection

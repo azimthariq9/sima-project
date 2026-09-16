@@ -52,11 +52,6 @@
     <div class="sima-card__header">
         <h5 class="sima-card__title">Daftar Pengumuman</h5>
         <div style="display:flex;gap:8px;align-items:center;">
-            <input type="text" id="searchInput" class="sima-input" style="width:200px;"
-                   placeholder="Cari judul..." oninput="filterAnn()">
-            <button class="sima-btn sima-btn--outline" onclick="resetFilter()">
-                <i class="fas fa-redo"></i>
-            </button>
             <a href="{{ route('kln.announcement.create') }}" class="sima-btn sima-btn--accent">
                 <i class="fas fa-plus me-1"></i> Buat Pengumuman
             </a>
@@ -64,10 +59,9 @@
     </div>
 
     <div class="table-responsive">
-        <table class="sima-table" id="annTable">
+        <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>#</th>
                     <th>Judul &amp; Ringkasan</th>
                     <th>Lampiran</th>
                     <th>Status</th>
@@ -77,7 +71,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($announcements as $i => $ann)
+                @forelse($announcements as $ann)
                 @php
                     $statusMap = [
                         'active'   => ['label' => 'Aktif',    'cls' => 'sima-badge--green'],
@@ -86,8 +80,7 @@
                     ];
                     $s = $statusMap[$ann->status] ?? ['label' => $ann->status, 'cls' => 'sima-badge--amber'];
                 @endphp
-                <tr id="row-{{ $ann->id }}" data-judul="{{ strtolower($ann->subject) }}">
-                    <td>{{ $i + 1 }}</td>
+                <tr id="row-{{ $ann->id }}">
                     <td style="max-width:300px;">
                         <div class="fw-600" style="margin-bottom:3px;">{{ $ann->subject }}</div>
                         <div style="font-size:12px;color:var(--c-text-3);line-height:1.5;">
@@ -132,7 +125,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="text-center text-muted py-5">
+                    <td colspan="6" class="text-center text-muted py-5">
                         <i class="fas fa-bullhorn fa-2x d-block mb-2" style="opacity:.3;"></i>
                         Belum ada pengumuman.
                         <a href="{{ route('kln.announcement.create') }}" style="color:var(--c-accent);">Buat sekarang</a>
@@ -142,11 +135,6 @@
             </tbody>
         </table>
     </div>
-    @if($announcements->hasPages())
-    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
-        {{ $announcements->links('vendor.pagination.sima') }}
-    </div>
-    @endif
 </div>
 
 @endsection
@@ -154,17 +142,6 @@
 @push('page_js')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <script>
-function filterAnn() {
-    const q = document.getElementById('searchInput').value.toLowerCase();
-    document.querySelectorAll('#annTable tbody tr[data-judul]').forEach(row => {
-        row.style.display = !q || row.dataset.judul.includes(q) ? '' : 'none';
-    });
-}
-function resetFilter() {
-    document.getElementById('searchInput').value = '';
-    filterAnn();
-}
-
 function deleteAnn(id) {
     if (!confirm('Hapus pengumuman ini? Semua lampiran juga akan dihapus.')) return;
     fetch(`/kln/announcement/${id}`, {

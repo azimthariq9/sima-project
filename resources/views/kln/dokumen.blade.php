@@ -65,7 +65,7 @@
     </div>
 
     <div style="overflow-x:auto;padding:8px 0">
-        <table class="sima-table" id="mainTable">
+        <table class="sima-table" data-datatable>
             <thead>
                 <tr>
                     <th>Mahasiswa</th>
@@ -87,10 +87,7 @@
                         default    => 'sima-badge--amber',
                     };
                 @endphp
-                <tr id="row-{{ $req->id }}"
-                    data-mahasiswa="{{ strtolower($req->mahasiswa?->nama ?? '') }}"
-                    data-tipe="{{ strtolower($tipeVal) }}"
-                    data-status="{{ $statusVal }}">
+                <tr id="row-{{ $req->id }}">
                     <td>
                         <div style="font-weight:600;color:var(--c-text-1)">{{ $req->mahasiswa?->nama ?? '-' }}</div>
                         <div style="font-size:12px;color:var(--c-text-3)">{{ $req->mahasiswa?->npm ?? '' }}</div>
@@ -130,11 +127,6 @@
             </tbody>
         </table>
     </div>
-    @if($requests->hasPages())
-    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
-        {{ $requests->links('vendor.pagination.sima') }}
-    </div>
-    @endif
 
 </div>
 

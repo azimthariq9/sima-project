@@ -131,7 +131,7 @@
         <div class="sima-card">
             <div class="sima-card__header">
                 <h5 class="sima-card__title">Riwayat Terkirim</h5>
-                <span class="sima-badge sima-badge--blue">{{ $riwayat->total() }}</span>
+                <span class="sima-badge sima-badge--blue">{{ $riwayat->count() }}</span>
             </div>
 
             @forelse($riwayat as $notif)
@@ -182,11 +182,6 @@
                 Belum ada notifikasi yang dikirim.
             </div>
             @endforelse
-            @if($riwayat->hasPages())
-            <div style="padding:14px 24px;border-top:1px solid var(--c-border);">
-                {{ $riwayat->links('vendor.pagination.sima') }}
-            </div>
-            @endif
         </div>
     </div>
 

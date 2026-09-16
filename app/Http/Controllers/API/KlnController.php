@@ -112,7 +112,7 @@ class KlnController extends Controller
             });
         }
 
-        $requests = $query->paginate(10)->withQueryString();
+        $requests = $query->get();
 
         return view('kln.dokumen', compact('requests', 'total', 'pending', 'approved', 'rejected'));
     }
@@ -356,7 +356,7 @@ class KlnController extends Controller
             $mhsQuery->where('mahasiswa.tipeMahasiswa', $tipeMhs);
         }
 
-        $mahasiswaList = $mhsQuery->paginate(10, ['*'], 'page_m')->withQueryString();
+        $mahasiswaList = $mhsQuery->get();
 
         if ($dokStatus) {
             $caseExpr = 'MIN(CASE
@@ -368,13 +368,13 @@ class KlnController extends Controller
                 END)';
             if ($dokStatus === 'belum_ada') {
                 $mahasiswaList = $mhsQuery->havingRaw("{$caseExpr} IS NULL")
-                    ->paginate(10, ['*'], 'page_m')->withQueryString();
+                    ->get();
             } else {
                 $levelMap = ['expired' => 1, 'pending' => 2, 'warning' => 3, 'aman' => 4];
                 $level = $levelMap[$dokStatus] ?? null;
                 if ($level) {
                     $mahasiswaList = $mhsQuery->havingRaw("{$caseExpr} = ?", [$level])
-                        ->paginate(10, ['*'], 'page_m')->withQueryString();
+                        ->get();
                 }
             }
         }
@@ -402,7 +402,7 @@ class KlnController extends Controller
             $dosQuery->where('users.jurusan_id', $jurusanD);
         }
 
-        $dosenList = $dosQuery->paginate(10, ['*'], 'page_d')->withQueryString();
+        $dosenList = $dosQuery->get();
 
         $jurusan = DB::table('jurusan')->orderBy('namaJurusan')->get();
 
@@ -912,7 +912,7 @@ class KlnController extends Controller
             ->where('sumber', 'kln')
             ->selectRaw("announcement.*, (SELECT COUNT(*) FROM announcement_files WHERE announcement_files.announcement_id = announcement.id) as file_count")
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->get();
 
         return view('kln.announcement', compact(
             'announcements', 'totalAll', 'totalActive', 'totalDraft', 'totalPenting'
@@ -1101,7 +1101,7 @@ class KlnController extends Controller
             });
         }
 
-        // hitung stats dari full data (tanpa paginate)
+        // hitung stats dari full data
         $allRows = $query->get()->map(function ($row) {
             $berlangsung = $row->hadir + $row->absen + $row->izin;
             $row->pct    = $berlangsung > 0 ? round($row->hadir / $berlangsung * 100, 1) : null;
@@ -1113,13 +1113,8 @@ class KlnController extends Controller
             'noData'  => $allRows->filter(fn ($r) => $r->pct === null)->count(),
         ];
 
-        // paginate untuk display
-        $attendanceList = $query->paginate(10)->withQueryString();
-        $attendanceList->through(function ($row) {
-            $berlangsung = $row->hadir + $row->absen + $row->izin;
-            $row->pct    = $berlangsung > 0 ? round($row->hadir / $berlangsung * 100, 1) : null;
-            return $row;
-        });
+        // Return all data for DataTables client-side pagination
+        $attendanceList = $allRows;
 
         return view('kln.attendance', compact('attendanceList', 'stats', 'search'));
     }
@@ -1281,7 +1276,7 @@ class KlnController extends Controller
                 DB::raw('(SELECT COUNT(*) FROM notification_mahasiswa WHERE notification_mahasiswa.notification_id = notification.id AND is_read = true) as total_dibaca')
             )
             ->orderBy('notification.created_at', 'desc')
-            ->paginate(10);
+            ->get();
 
         return view('kln.broadcast', compact(
             'mahasiswaList', 'mahasiswaKelasMap', 'jurusanList', 'kelasList', 'riwayat'
@@ -1337,7 +1332,7 @@ class KlnController extends Controller
                 'jurusan.namaJurusan'
             )
             ->orderBy('dokumen.tglKdlwrs')
-            ->paginate(10, ['*'], 'page_exp')->withQueryString();
+            ->get();
 
         // Dokumen hampir kadaluwarsa (≤ 30 hari ke depan)
         $nearExpiredDokumen = DB::table('dokumen')
@@ -1358,9 +1353,9 @@ class KlnController extends Controller
                 'jurusan.namaJurusan'
             )
             ->orderBy('dokumen.tglKdlwrs')
-            ->paginate(10, ['*'], 'page_near')->withQueryString();
+            ->get();
 
-        $nearExpiredDokumen->through(function ($row) {
+        $nearExpiredDokumen = $nearExpiredDokumen->map(function ($row) {
             $row->sisa_hari = now()->diffInDays(\Carbon\Carbon::parse($row->tglKdlwrs), false);
             return $row;
         });
@@ -1380,7 +1375,7 @@ class KlnController extends Controller
                 'jurusan.namaJurusan'
             )
             ->orderBy('mahasiswa.nama')
-            ->paginate(10, ['*'], 'page_inact')->withQueryString();
+            ->get();
 
         // Request dokumen pending
         $pendingRequests = DB::table('reqDokumen')
@@ -1398,13 +1393,13 @@ class KlnController extends Controller
                 'jurusan.namaJurusan'
             )
             ->orderBy('reqDokumen.created_at')
-            ->paginate(10, ['*'], 'page_req')->withQueryString();
+            ->get();
 
         $stats = [
-            'expired'     => $expiredDokumen->total(),
-            'nearExpired' => $nearExpiredDokumen->total(),
-            'inactive'    => $inactiveMahasiswa->total(),
-            'pending'     => $pendingRequests->total(),
+            'expired'     => $expiredDokumen->count(),
+            'nearExpired' => $nearExpiredDokumen->count(),
+            'inactive'    => $inactiveMahasiswa->count(),
+            'pending'     => $pendingRequests->count(),
         ];
 
         return view('kln.notifikasi', compact(
@@ -1653,12 +1648,12 @@ class KlnController extends Controller
             });
         }
 
-        return $query->paginate(10)->withQueryString();
+        return $query->get();
     }
 
     private function emptyPaginator()
     {
-        return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
+        return collect([]);
     }
 
 }

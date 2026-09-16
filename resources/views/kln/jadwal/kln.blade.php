@@ -12,7 +12,7 @@
         <div class="sima-stat sima-stat--purple">
             <div class="sima-stat__icon sima-stat__icon--purple"><i class="fas fa-calendar-alt"></i></div>
             <div class="sima-stat__label">Total Jadwal</div>
-            <div class="sima-stat__value">{{ $jadwalList->total() }}</div>
+            <div class="sima-stat__value">{{ $jadwalList->count() }}</div>
         </div>
     </div>
 </div>
@@ -44,10 +44,9 @@
     </div>
 
     <div class="table-responsive">
-        <table class="sima-table">
+        <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>#</th>
                     <th>Kegiatan</th>
                     <th>Kelas</th>
                     <th>Hari</th>
@@ -59,9 +58,8 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($jadwalList as $i => $j)
+                @forelse($jadwalList as $j)
                 <tr>
-                    <td>{{ $jadwalList->firstItem() + $loop->index }}</td>
                     <td>
                         <div class="fw-600">{{ $j->namaMk ?? '-' }}</div>
                         <code style="font-size:11px;color:var(--c-text-3);">{{ $j->kodeMk }}</code>
@@ -87,17 +85,12 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="9" class="text-center text-muted py-4">Belum ada jadwal KLN.</td>
+                    <td colspan="8" class="text-center text-muted py-4">Belum ada jadwal KLN.</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    @if($jadwalList->hasPages())
-    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
-        {{ $jadwalList->links('vendor.pagination.sima') }}
-    </div>
-    @endif
 </div>
 
 {{-- ── ADD JADWAL MODAL ─────────────────────────────── --}}

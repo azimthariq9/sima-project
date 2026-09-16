@@ -55,10 +55,9 @@
     </div>
     @else
     <div class="table-responsive">
-        <table class="sima-table">
+        <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>#</th>
                     <th>Mahasiswa</th>
                     <th>Jurusan</th>
                     <th>Tipe Dokumen</th>
@@ -67,9 +66,8 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($expiredDokumen as $i => $doc)
+                @foreach($expiredDokumen as $doc)
                 <tr>
-                    <td>{{ $expiredDokumen->firstItem() + $loop->index }}</td>
                     <td>
                         <div class="fw-600">{{ $doc->nama }}</div>
                         <code style="font-size:11px;color:var(--c-text-3);">{{ $doc->npm }}</code>
@@ -92,11 +90,6 @@
             </tbody>
         </table>
     </div>
-    @if($expiredDokumen->hasPages())
-    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
-        {{ $expiredDokumen->links('vendor.pagination.sima') }}
-    </div>
-    @endif
     @endif
 </div>
 
@@ -117,10 +110,9 @@
     </div>
     @else
     <div class="table-responsive">
-        <table class="sima-table">
+        <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>#</th>
                     <th>Mahasiswa</th>
                     <th>Jurusan</th>
                     <th>Tipe Dokumen</th>
@@ -130,13 +122,12 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($nearExpiredDokumen as $i => $doc)
+                @foreach($nearExpiredDokumen as $doc)
                 @php
                     $sisa = (int) $doc->sisa_hari;
                     $sisaBadge = $sisa <= 7 ? 'sima-badge--red' : ($sisa <= 14 ? 'sima-badge--amber' : 'sima-badge--blue');
                 @endphp
                 <tr>
-                    <td>{{ $nearExpiredDokumen->firstItem() + $loop->index }}</td>
                     <td>
                         <div class="fw-600">{{ $doc->nama }}</div>
                         <code style="font-size:11px;color:var(--c-text-3);">{{ $doc->npm }}</code>
@@ -162,11 +153,6 @@
             </tbody>
         </table>
     </div>
-    @if($nearExpiredDokumen->hasPages())
-    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
-        {{ $nearExpiredDokumen->links('vendor.pagination.sima') }}
-    </div>
-    @endif
     @endif
 </div>
 
@@ -187,10 +173,9 @@
     </div>
     @else
     <div class="table-responsive">
-        <table class="sima-table">
+        <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>#</th>
                     <th>Mahasiswa</th>
                     <th>Email</th>
                     <th>Jurusan</th>
@@ -199,9 +184,8 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($inactiveMahasiswa as $i => $mhs)
+                @foreach($inactiveMahasiswa as $mhs)
                 <tr>
-                    <td>{{ $inactiveMahasiswa->firstItem() + $loop->index }}</td>
                     <td>
                         <div class="fw-600">{{ $mhs->nama }}</div>
                         <code style="font-size:11px;color:var(--c-text-3);">{{ $mhs->npm }}</code>
@@ -222,11 +206,6 @@
             </tbody>
         </table>
     </div>
-    @if($inactiveMahasiswa->hasPages())
-    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
-        {{ $inactiveMahasiswa->links('vendor.pagination.sima') }}
-    </div>
-    @endif
     @endif
 </div>
 
@@ -247,10 +226,9 @@
     </div>
     @else
     <div class="table-responsive">
-        <table class="sima-table">
+        <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>#</th>
                     <th>Mahasiswa</th>
                     <th>Jurusan</th>
                     <th>Tipe Dokumen</th>
@@ -260,13 +238,12 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($pendingRequests as $i => $req)
+                @foreach($pendingRequests as $req)
                 @php
                     $menunggu = now()->diffInDays(\Carbon\Carbon::parse($req->created_at));
                     $menungguBadge = $menunggu >= 7 ? 'sima-badge--red' : ($menunggu >= 3 ? 'sima-badge--amber' : 'sima-badge--blue');
                 @endphp
                 <tr>
-                    <td>{{ $pendingRequests->firstItem() + $loop->index }}</td>
                     <td>
                         <div class="fw-600">{{ $req->nama }}</div>
                         <code style="font-size:11px;color:var(--c-text-3);">{{ $req->npm }}</code>
@@ -292,11 +269,6 @@
             </tbody>
         </table>
     </div>
-    @if($pendingRequests->hasPages())
-    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
-        {{ $pendingRequests->links('vendor.pagination.sima') }}
-    </div>
-    @endif
     @endif
 </div>
 
