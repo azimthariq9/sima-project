@@ -865,8 +865,7 @@ class MahasiswaController extends Controller
             ->where('status', 'active')
             ->orderByDesc('is_penting')
             ->orderByDesc('created_at')
-            ->paginate(10)
-            ->withQueryString();
+            ->get();
 
         $unreadNotifCount = $this->unreadNotifCount();
 

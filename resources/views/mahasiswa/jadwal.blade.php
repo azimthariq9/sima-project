@@ -1,7 +1,7 @@
 @extends('layouts.sima')
 
-@section('page_title',   'Jadwal Perkuliahan')
-@section('page_section', 'Mahasiswa')
+@section('page_title',   'Class Schedule')
+@section('page_section', 'Student')
 @section('page_subtitle', now()->translatedFormat('l\, d F Y'))
 
 @push('styles')
@@ -11,7 +11,7 @@
 ══════════════════════════════════════════════════ */
 
 
-/* Tabel mingguan */
+/* Weekly table */
 .hari-badge {
     display: inline-block;
     padding: 3px 10px;
@@ -54,7 +54,7 @@
 }
 .att-pct { font-size: 12px; font-weight: 700; min-width: 36px; text-align: right; }
 
-/* Kosong state */
+/* Empty state */
 .jdw-empty {
     text-align: center;
     padding: 40px 20px;
@@ -81,7 +81,7 @@
 <div class="sima-card fade-up">
 
             <div class="sima-card__header">
-                <h5 class="sima-card__title mb-0">Jadwal Mingguan</h5>
+                <h5 class="sima-card__title mb-0">Weekly Schedule</h5>
             </div>
 
             @if($weeklySchedules->isEmpty())
@@ -89,21 +89,21 @@
                 <div class="sima-card__body">
                     <div class="jdw-empty">
                         <div class="jdw-empty__icon">📅</div>
-                        <div class="jdw-empty__text">Belum ada jadwal terdaftar</div>
+                        <div class="jdw-empty__text">No schedules registered</div>
                     </div>
                 </div>
 
             @else
 
                 <div class="sima-card__body" style="padding:0">
-                    <table class="sima-table">
+                    <table class="sima-table" data-datatable>
                         <thead>
                             <tr>
-                                <th>Hari</th>
-                                <th>Waktu</th>
-                                <th>Mata Kuliah</th>
-                                <th>Ruangan</th>
-                                <th>Tipe</th>
+                                <th>Day</th>
+                                <th>Time</th>
+                                <th>Course</th>
+                                <th>Room</th>
+                                <th>Type</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -114,7 +114,7 @@
                                     [$chipCls, $chipLabel] = match($tipeLower) {
                                         'bipa'  => ['sima-badge--purple', 'BIPA'],
                                         'kln'   => ['sima-badge--teal',   'KLN'],
-                                        default => ['sima-badge--blue',   'Perkuliahan'],
+                                        default => ['sima-badge--blue',   'Lecture'],
                                     };
                                 @endphp
                                 <tr>
@@ -153,7 +153,7 @@
 <div class="sima-card mt-3 fade-up fade-up--3">
     <div class="sima-card__header">
         <h5 class="sima-card__title mb-0">
-            <i class="fas fa-chart-bar" style="margin-right:6px;color:var(--c-accent)"></i> Kehadiran per Mata Kuliah
+            <i class="fas fa-chart-bar" style="margin-right:6px;color:var(--c-accent)"></i> Attendance per Course
         </h5>
     </div>
     <div class="sima-card__body">
@@ -168,9 +168,9 @@
                 <div style="min-width:140px">
                     <div class="att-mk">{{ $att->namaMk ?? '-' }}</div>
                     <div style="font-size:11.5px;color:var(--c-text-3)">
-                        {{ $hadir }} hadir
-                        @if(($att->terlambat ?? 0) > 0) · {{ $att->terlambat }} terlambat @endif
-                        · {{ $totalSesi }} sesi
+                        {{ $hadir }} present
+                        @if(($att->terlambat ?? 0) > 0) · {{ $att->terlambat }} late @endif
+                        · {{ $totalSesi }} sessions
                     </div>
                 </div>
                 <div class="att-bar-wrap">

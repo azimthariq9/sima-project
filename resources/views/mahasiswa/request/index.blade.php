@@ -1,49 +1,49 @@
 @extends('layouts.sima')
 
-@section('page_title',   'Semua Request')
+@section('page_title',   'All Requests')
 @section('page_section', 'Mahasiswa')
-@section('page_subtitle','Riwayat permintaan dokumen ke KLN')
+@section('page_subtitle','Document request history to KLN')
 
 @section('main_content')
 
 @php
 $statusMap = [
-    'pending'    => ['label' => 'Menunggu',  'cls' => 'blue',  'ico' => 'fa-clock'],
-    'approved'   => ['label' => 'Disetujui', 'cls' => 'green', 'ico' => 'fa-circle-check'],
-    'rejected'   => ['label' => 'Ditolak',   'cls' => 'red',   'ico' => 'fa-circle-xmark'],
-    'processing' => ['label' => 'Diproses',  'cls' => 'amber', 'ico' => 'fa-spinner'],
+    'pending'    => ['label' => 'Pending',  'cls' => 'blue',  'ico' => 'fa-clock'],
+    'approved'   => ['label' => 'Approved', 'cls' => 'green', 'ico' => 'fa-circle-check'],
+    'rejected'   => ['label' => 'Rejected', 'cls' => 'red',   'ico' => 'fa-circle-xmark'],
+    'processing' => ['label' => 'Processing', 'cls' => 'amber', 'ico' => 'fa-spinner'],
 ];
 @endphp
 
 <div class="sima-card sima-fade">
     <div class="sima-card__header">
         <div>
-            <h5 class="sima-card__title">Riwayat Request Dokumen</h5>
-            <div class="sima-card__subtitle">Semua permintaan dokumen yang pernah diajukan</div>
+            <h5 class="sima-card__title">Document Request History</h5>
+            <div class="sima-card__subtitle">All document requests ever submitted</div>
         </div>
         <a href="{{ route('mahasiswa.request.create') }}" class="sima-btn sima-btn--sm">
-            <i class="fas fa-plus"></i> Request Baru
+            <i class="fas fa-plus"></i> New Request
         </a>
     </div>
 
     @if($requests->isEmpty())
         <div class="sima-card__body" style="text-align:center;padding:48px 20px;color:var(--c-text-3)">
             <i class="fas fa-inbox" style="font-size:36px;margin-bottom:12px;display:block;opacity:.35"></i>
-            <div style="font-size:14px;font-weight:500">Belum ada request yang diajukan</div>
-            <div style="font-size:12.5px;margin-top:4px">Ajukan permintaan dokumen pertama Anda ke KLN</div>
+            <div style="font-size:14px;font-weight:500">No requests submitted yet</div>
+            <div style="font-size:12.5px;margin-top:4px">Submit your first document request to KLN</div>
             <a href="{{ route('mahasiswa.request.create') }}" class="sima-btn sima-btn--sm" style="margin-top:16px">
-                <i class="fas fa-paper-plane"></i> Ajukan Request
+                <i class="fas fa-paper-plane"></i> Submit Request
             </a>
         </div>
     @else
         <div class="sima-card__body" style="padding:0">
-            <table class="sima-table">
+            <table class="sima-table" data-datatable>
                 <thead>
                     <tr>
-                        <th style="width:90px">Kode</th>
-                        <th>Jenis Dokumen</th>
-                        <th>Keperluan</th>
-                        <th style="width:110px">Tanggal</th>
+                        <th style="width:90px">Code</th>
+                        <th>Document Type</th>
+                        <th>Purpose</th>
+                        <th style="width:110px">Date</th>
                         <th style="width:110px">Status</th>
                         <th style="width:80px"></th>
                     </tr>
@@ -114,7 +114,7 @@ $statusMap = [
         <div style="padding:20px 24px">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
                 <div style="padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #f1f5f9">
-                    <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px">Tanggal</div>
+                    <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px">Date</div>
                     <div id="dm-tgl" style="font-size:13.5px;font-weight:600;color:#1e293b"></div>
                 </div>
                 <div style="padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #f1f5f9">
@@ -124,14 +124,14 @@ $statusMap = [
             </div>
 
             <div style="margin-bottom:14px">
-                <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:6px">Keperluan</div>
+                <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:6px">Purpose</div>
                 <div id="dm-message" style="font-size:13px;color:#334155;background:#f8fafc;border-radius:10px;padding:12px;border:1px solid #f1f5f9;line-height:1.55"></div>
             </div>
 
             {{-- Rejection reason --}}
             <div id="dm-reject-box" style="display:none;margin-bottom:14px">
                 <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#ef4444;margin-bottom:6px">
-                    <i class="fas fa-circle-xmark"></i> Alasan Penolakan
+                    <i class="fas fa-circle-xmark"></i> Rejection Reason
                 </div>
                 <div id="dm-keterangan" style="font-size:13px;color:#7f1d1d;background:#fef2f2;border-radius:10px;padding:12px;border:1px solid rgba(220,38,38,.15);line-height:1.55"></div>
             </div>
@@ -139,12 +139,12 @@ $statusMap = [
             {{-- File from KLN --}}
             <div id="dm-file-box" style="display:none;margin-bottom:14px">
                 <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#059669;margin-bottom:6px">
-                    <i class="fas fa-file-circle-check"></i> Dokumen dari KLN
+                    <i class="fas fa-file-circle-check"></i> Document from KLN
                 </div>
                 <a id="dm-file-link" href="#" target="_blank"
                    style="display:flex;align-items:center;gap:10px;padding:12px;background:#ecfdf5;border:1px solid rgba(5,150,105,.2);border-radius:10px;color:#065f46;text-decoration:none;font-size:13px;font-weight:500">
                     <i class="fas fa-file-arrow-down" style="font-size:18px;color:#059669"></i>
-                    <span>Unduh dokumen yang dikirim KLN</span>
+                    <span>Download document sent by KLN</span>
                     <i class="fas fa-arrow-down" style="margin-left:auto;font-size:11px;opacity:.6"></i>
                 </a>
             </div>
@@ -153,10 +153,10 @@ $statusMap = [
         {{-- Footer --}}
         <div style="padding:14px 24px 20px;display:flex;gap:8px">
             <a href="{{ route('mahasiswa.request.create') }}" class="sima-btn sima-btn--sm" id="dm-btn-ulang" style="display:none">
-                <i class="fas fa-rotate-right"></i> Ajukan Ulang
+                <i class="fas fa-rotate-right"></i> Resubmit
             </a>
             <button onclick="closeDetail()" class="sima-btn sima-btn--sm sima-btn--outline">
-                <i class="fas fa-xmark"></i> Tutup
+                <i class="fas fa-xmark"></i> Close
             </button>
         </div>
     </div>
