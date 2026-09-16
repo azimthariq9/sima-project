@@ -10,7 +10,7 @@
     <div class="sima-card__header">
         <div>
             <h5 class="sima-card__title">Student List</h5>
-            <div class="sima-card__subtitle">Total {{ $mahasiswa->total() }} students</div>
+            <div class="sima-card__subtitle">Total {{ $mahasiswa->count() }} students</div>
         </div>
     </div>
 

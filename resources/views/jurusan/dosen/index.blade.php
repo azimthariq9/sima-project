@@ -10,7 +10,7 @@
     <div class="sima-card__header">
         <div>
             <h5 class="sima-card__title">Lecturer List</h5>
-            <div class="sima-card__subtitle">Total {{ $dosens->total() }} lecturers</div>
+            <div class="sima-card__subtitle">Total {{ $dosens->count() }} lecturers</div>
         </div>
         <button type="button" id="btnTambah" class="sima-btn sima-btn--sm">
             <i class="fas fa-plus"></i> Add Lecturer

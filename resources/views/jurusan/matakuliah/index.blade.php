@@ -10,7 +10,7 @@
     <div class="sima-card__header">
         <div>
             <h5 class="sima-card__title">Course List</h5>
-            <div class="sima-card__subtitle">Total {{ $matakuliah->total() }} courses</div>
+            <div class="sima-card__subtitle">Total {{ $matakuliah->count() }} courses</div>
         </div>
         <button type="button" id="btnTambah" class="sima-btn sima-btn--sm">
             <i class="fas fa-plus"></i> Add Course

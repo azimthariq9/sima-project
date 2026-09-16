@@ -21,7 +21,7 @@ $hariOrder = ['Senin'=>1,'Selasa'=>2,'Rabu'=>3,'Kamis'=>4,'Jumat'=>5,'Sabtu'=>6]
     <div class="sima-card__header">
         <div>
             <h5 class="sima-card__title">Schedule List</h5>
-            <div class="sima-card__subtitle">Total {{ $jadwal->total() }} schedules</div>
+            <div class="sima-card__subtitle">Total {{ $jadwal->count() }} schedules</div>
         </div>
         <button type="button" id="btnTambah" class="sima-btn sima-btn--sm">
             <i class="fas fa-plus"></i> Add Schedule

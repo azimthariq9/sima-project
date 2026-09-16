@@ -20,7 +20,7 @@ for ($i = -1; $i <= 10; $i++) {
     <div class="sima-card__header">
         <div>
             <h5 class="sima-card__title">Class List</h5>
-            <div class="sima-card__subtitle">Total {{ $kelas->total() }} classes</div>
+            <div class="sima-card__subtitle">Total {{ $kelas->count() }} classes</div>
         </div>
         <button type="button" id="btnTambah" class="sima-btn sima-btn--sm">
             <i class="fas fa-plus"></i> Add Class
