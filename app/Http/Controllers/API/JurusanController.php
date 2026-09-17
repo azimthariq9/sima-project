@@ -87,6 +87,11 @@ class JurusanController extends Controller
         return view('jurusan.dosen.index', compact('dosens', 'unreadNotifCount'));
     }
 
+    public function createDosenPage()
+    {
+        return view('jurusan.dosen.create');
+    }
+
     public function matakuliahPage(Request $request)
     {
         $jid = Auth::user()->jurusan_id;
@@ -99,6 +104,19 @@ class JurusanController extends Controller
         $unreadNotifCount = $this->unreadNotif();
 
         return view('jurusan.matakuliah.index', compact('matakuliah', 'unreadNotifCount'));
+    }
+
+    public function createMatakuliahPage()
+    {
+        return view('jurusan.matakuliah.create');
+    }
+
+    public function editMatakuliahPage($id)
+    {
+        $jid = Auth::user()->jurusan_id;
+        $mk = DB::table('matakuliah')->where('id', $id)->where('jurusan_id', $jid)->first();
+        abort_if(!$mk, 404);
+        return view('jurusan.matakuliah.edit', compact('mk'));
     }
 
     public function kelasPage(Request $request)
@@ -148,6 +166,42 @@ class JurusanController extends Controller
         $unreadNotifCount = $this->unreadNotif();
 
         return view('jurusan.jadwal.index', compact('jadwal', 'unreadNotifCount'));
+    }
+
+    public function createJadwalPage()
+    {
+        $tahunSekarang = (int) date('Y');
+        $tahunAjarList = [];
+        for ($i = -1; $i <= 10; $i++) {
+            $a = $tahunSekarang + $i;
+            $tahunAjarList[] = "{$a}/".($a+1);
+        }
+        $tahunAjarDefault = date('Y').'/'.(date('Y')+1);
+        return view('jurusan.jadwal.create', compact('tahunAjarList', 'tahunAjarDefault'));
+    }
+
+    public function editJadwalPage($id)
+    {
+        $jid = Auth::user()->jurusan_id;
+        $jadwal = DB::table('jadwal')
+            ->join('dosen as d', 'jadwal.dosen_id', '=', 'd.id')
+            ->join('users as u', 'd.user_id', '=', 'u.id')
+            ->leftJoin('matakuliah', 'jadwal.matakuliah_id', '=', 'matakuliah.id')
+            ->leftJoin('kelas', 'jadwal.kelas_id', '=', 'kelas.id')
+            ->where('jadwal.id', $id)
+            ->where('u.jurusan_id', $jid)
+            ->select('jadwal.*', 'matakuliah.kodeMk as kodeMk', 'kelas.kodeKelas as kodeKelas', 'd.kodeDos as kodeDos', 'd.nidn as nidn')
+            ->first();
+        abort_if(!$jadwal, 404);
+
+        $tahunSekarang = (int) date('Y');
+        $tahunAjarList = [];
+        for ($i = -1; $i <= 10; $i++) {
+            $a = $tahunSekarang + $i;
+            $tahunAjarList[] = "{$a}/".($a+1);
+        }
+        $tahunAjarDefault = date('Y').'/'.(date('Y')+1);
+        return view('jurusan.jadwal.edit', compact('jadwal', 'tahunAjarList', 'tahunAjarDefault'));
     }
 
     /*

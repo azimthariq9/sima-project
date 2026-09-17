@@ -124,8 +124,9 @@ Route::middleware(['auth', 'check.role:JURUSAN'])
         // Announcement CRUD
         Route::prefix('announcement')->name('announcement.')->group(function () {
             Route::get('/',          [JurusanController::class, 'announcement'])->name('index');
+            Route::get('create',     [JurusanController::class, 'createAnnouncementPage'])->name('create');
             Route::post('/',         [JurusanController::class, 'storeAnnouncement'])->name('store');
-            Route::get('{id}/edit',  [JurusanController::class, 'editAnnouncement'])->name('edit');
+            Route::get('{id}/edit',  [JurusanController::class, 'editAnnouncementPage'])->name('edit');
             Route::patch('{id}',     [JurusanController::class, 'updateAnnouncement'])->name('update');
             Route::delete('{id}',    [JurusanController::class, 'destroyAnnouncement'])->name('destroy');
         });
@@ -142,7 +143,7 @@ Route::middleware(['auth', 'check.role:JURUSAN'])
         // Request dokumen
         Route::prefix('requestDok')->name('request.')->group(function () {
             Route::get('/',              [JurusanController::class, 'indexReqDocument'])->name('index');
-            Route::get('{id}',           [JurusanController::class, 'showReqDocument'])->name('show');
+            Route::get('{id}',           [JurusanController::class, 'showReqDocumentPage'])->name('show');
             Route::patch('{id}/status',  [JurusanController::class, 'updateReqDokumen'])->name('status');
             Route::post('{id}/upload',   [JurusanController::class, 'uploadReqDokumen'])->name('upload');
         });
@@ -153,6 +154,13 @@ Route::middleware(['auth', 'check.role:JURUSAN'])
         Route::get('kelas',      [ApiJurusanController::class, 'kelasPage'])->name('kelas.page');
         Route::get('jadwal',     [ApiJurusanController::class, 'jadwalPage'])->name('jadwal.page');
         Route::get('mahasiswa',  [ApiJurusanController::class, 'mahasiswaPage'])->name('mahasiswa.page');
+
+        // Standalone form pages
+        Route::get('dosen/create',      [ApiJurusanController::class, 'createDosenPage'])->name('dosen.create');
+        Route::get('matakuliah/create',  [ApiJurusanController::class, 'createMatakuliahPage'])->name('matakuliah.create');
+        Route::get('matakuliah/{id}/edit', [ApiJurusanController::class, 'editMatakuliahPage'])->name('matakuliah.edit');
+        Route::get('jadwal/create',      [ApiJurusanController::class, 'createJadwalPage'])->name('jadwal.create');
+        Route::get('jadwal/{id}/edit',   [ApiJurusanController::class, 'editJadwalPage'])->name('jadwal.edit');
 
         // AJAX — Dosen
         Route::prefix('dosen')->name('dosen.')->group(function () {

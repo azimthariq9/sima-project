@@ -244,6 +244,21 @@ class JurusanController extends Controller
         return view('jurusan.announcement.index', compact('announcements', 'unreadNotifCount', 'filter'));
     }
 
+    public function createAnnouncementPage()
+    {
+        return view('jurusan.announcement.create');
+    }
+
+    public function editAnnouncementPage(int $id)
+    {
+        $ann = DB::table('announcement')
+            ->where('id', $id)
+            ->where('sumber', 'jurusan')
+            ->first();
+        abort_if(!$ann, 404);
+        return view('jurusan.announcement.edit', compact('ann'));
+    }
+
     public function storeAnnouncement(Request $request)
     {
         $request->validate([
@@ -452,6 +467,20 @@ class JurusanController extends Controller
         $unreadNotifCount = $this->unreadNotif();
 
         return view('jurusan.request.index', compact('requests', 'unreadNotifCount', 'filter'));
+    }
+
+    public function showReqDocumentPage(int $id)
+    {
+        $jid = $this->jurusanId();
+        $req = DB::table('reqDokumen')
+            ->join('mahasiswa', 'reqDokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
+            ->where('reqDokumen.id', $id)
+            ->where('users.jurusan_id', $jid)
+            ->select('reqDokumen.*', 'mahasiswa.nama as nama_mahasiswa', 'mahasiswa.npm')
+            ->first();
+        abort_if(!$req, 404);
+        return view('jurusan.request.show', compact('req'));
     }
 
     public function showReqDocument(int $id)

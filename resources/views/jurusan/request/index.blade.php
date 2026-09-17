@@ -103,106 +103,16 @@
 </div>
 
 
-{{-- ══════════════════════════════════════
-     MODAL DETAIL + PROSES
-══════════════════════════════════════ --}}
-<div id="detailModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center">
-    <div style="background:#fff;border-radius:18px;width:100%;max-width:520px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden;max-height:90vh;overflow-y:auto">
 
-        <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
-            <div style="font-size:15px;font-weight:700;color:#1e293b">Request Detail</div>
-            <button onclick="document.getElementById('detailModal').style.display='none'"
-                    style="width:32px;height:32px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;color:#64748b">
-                <i class="fas fa-xmark"></i>
-            </button>
-        </div>
-
-        <div style="padding:20px 24px">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-                <div style="padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #f1f5f9">
-                    <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px">Student</div>
-                    <div id="dm-mahasiswa" style="font-size:13.5px;font-weight:600;color:#1e293b"></div>
-                    <div id="dm-npm" style="font-size:11.5px;color:#64748b;font-family:monospace"></div>
-                </div>
-                <div style="padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #f1f5f9">
-                    <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px">Document Type</div>
-                    <div id="dm-tipeDkmn" style="font-size:13.5px;font-weight:600;color:#1e293b"></div>
-                    <div id="dm-date" style="font-size:11.5px;color:#64748b"></div>
-                </div>
-            </div>
-
-            <div style="margin-bottom:16px">
-                <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:6px">Purpose</div>
-                <div id="dm-message" style="font-size:13px;color:#334155;background:#f8fafc;border-radius:10px;padding:12px;border:1px solid #f1f5f9;line-height:1.55"></div>
-            </div>
-
-            {{-- Upload file --}}
-            <div id="dm-upload-box" style="margin-bottom:16px">
-                <div style="font-size:12px;font-weight:600;color:var(--c-text-2);margin-bottom:8px">Upload Document to Student</div>
-                <form id="uploadForm" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div style="display:flex;gap:8px;align-items:center">
-                        <input type="file" name="file" class="sima-input" accept=".pdf,.jpg,.jpeg,.png"
-                               style="padding:7px 12px;font-size:12.5px;flex:1" required>
-                        <button type="submit" class="sima-btn sima-btn--sm">
-                            <i class="fas fa-upload"></i> Upload
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            {{-- Status update --}}
-            <div id="dm-status-box">
-                <div style="font-size:12px;font-weight:600;color:var(--c-text-2);margin-bottom:8px">Update Status</div>
-                <form id="statusForm" method="POST">
-                    @csrf
-                    @method('PATCH')
-                    <div style="margin-bottom:10px">
-                        <select name="status" class="sima-input" required>
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                        </select>
-                    </div>
-                    <div style="margin-bottom:10px">
-                        <textarea name="message" class="sima-input" rows="2"
-                                  placeholder="Notes (optional, for rejection)" style="resize:vertical"></textarea>
-                    </div>
-                    <button type="submit" class="sima-btn sima-btn--sm">
-                        <i class="fas fa-rotate"></i> Update Status
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 @endsection
 
 @section('page_js')
 <script>
-document.getElementById('detailModal').addEventListener('click', function(e) {
-    if (e.target === this) this.style.display = 'none';
-});
-
 document.querySelectorAll('.btn-detail').forEach(btn => {
     btn.addEventListener('click', function() {
         const d = JSON.parse(this.dataset.req);
-        document.getElementById('dm-mahasiswa').textContent = d.mahasiswa;
-        document.getElementById('dm-npm').textContent       = d.npm;
-        document.getElementById('dm-tipeDkmn').textContent  = d.tipeDkmn;
-        document.getElementById('dm-date').textContent      = d.created_at;
-        document.getElementById('dm-message').textContent   = d.message || '—';
-
-        const baseUrl = `{{ url('jurusan/requestDok') }}/${d.id}`;
-        document.getElementById('uploadForm').action = `${baseUrl}/upload`;
-        document.getElementById('statusForm').action = `${baseUrl}/status`;
-
-        // Hide upload & status box if already final
-        const isFinal = d.status === 'approved' || d.status === 'rejected';
-        document.getElementById('dm-upload-box').style.display = isFinal ? 'none' : 'block';
-
-        document.getElementById('detailModal').style.display = 'flex';
+        window.location.href = `/jurusan/requestDok/${d.id}`;
     });
 });
 </script>

@@ -23,9 +23,9 @@ $hariOrder = ['Senin'=>1,'Selasa'=>2,'Rabu'=>3,'Kamis'=>4,'Jumat'=>5,'Sabtu'=>6]
             <h5 class="sima-card__title">Schedule List</h5>
             <div class="sima-card__subtitle">Total {{ $jadwal->count() }} schedules</div>
         </div>
-        <button type="button" id="btnTambah" class="sima-btn sima-btn--sm">
+        <a href="{{ route('jurusan.jadwal.create') }}" class="sima-btn sima-btn--sm">
             <i class="fas fa-plus"></i> Add Schedule
-        </button>
+        </a>
     </div>
 
     {{-- Filter --}}
@@ -105,189 +105,7 @@ $hariOrder = ['Senin'=>1,'Selasa'=>2,'Rabu'=>3,'Kamis'=>4,'Jumat'=>5,'Sabtu'=>6]
 </div>
 
 
-{{-- ══════════════════════════════════════
-     ADD SCHEDULE MODAL
-══════════════════════════════════════ --}}
-<div id="modalTambah" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center">
-    <div style="background:#fff;border-radius:18px;width:100%;max-width:560px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto">
-        <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1">
-            <div>
-                <div style="font-size:15px;font-weight:700;color:#1e293b">Add Schedule</div>
-                <div style="font-size:12px;color:#94a3b8;margin-top:2px">Enter code — system will look up ID automatically</div>
-            </div>
-            <button type="button" onclick="closeModals()" style="width:32px;height:32px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;color:#64748b">
-                <i class="fas fa-xmark"></i>
-            </button>
-        </div>
 
-        <div style="padding:20px 24px">
-            <form id="formTambah">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-                    <div>
-                        <label class="sima-label">Day</label>
-                        <select name="hari" class="sima-input">
-                            @foreach(['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'] as $h)
-                                <option value="{{ $h }}">{{ $h }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="sima-label">Time</label>
-                        <input type="text" name="jam" class="sima-input" placeholder="08:00-10:00">
-                    </div>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-                    <div>
-                        <label class="sima-label">Room</label>
-                        <input type="text" name="ruangan" class="sima-input" placeholder="Gd.4 R.201">
-                    </div>
-                    <div>
-                        <label class="sima-label">Total Sessions</label>
-                        <input type="number" name="totalSesi" class="sima-input" value="16" min="1">
-                    </div>
-                </div>
-
-                <hr style="border:none;border-top:1px solid #f1f5f9;margin:16px 0">
-                <div style="font-size:11.5px;color:#94a3b8;margin-bottom:12px"><i class="fas fa-info-circle"></i> Enter code — ID will be looked up automatically</div>
-
-                {{-- Kelas --}}
-                <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:12px;padding:14px;margin-bottom:12px">
-                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#64748b;margin-bottom:10px">
-                        <i class="fas fa-door-open"></i> Class
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-                        <div>
-                            <label class="sima-label">Class Code</label>
-                            <input type="text" name="kodeKelas" id="kodeKelas" class="sima-input" placeholder="3KA35" style="font-family:var(--f-mono)">
-                        </div>
-                        <div>
-                            <label class="sima-label">Academic Year</label>
-                            <select name="tahunAjar" id="tahunAjar" class="sima-input">
-                                @foreach($tahunAjarList as $ta)
-                                    <option value="{{ $ta }}" {{ $ta === $tahunAjarDefault ? 'selected' : '' }}>{{ $ta }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div id="kelasPreview" style="margin-top:6px;font-size:11.5px;min-height:16px"></div>
-                </div>
-
-                {{-- MK --}}
-                <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:12px;padding:14px;margin-bottom:12px">
-                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#64748b;margin-bottom:10px">
-                        <i class="fas fa-book"></i> Course
-                    </div>
-                    <label class="sima-label">Course Code</label>
-                    <input type="text" name="kodeMk" id="kodeMk" class="sima-input" placeholder="IT012236" style="font-family:var(--f-mono)">
-                    <div id="mkPreview" style="margin-top:6px;font-size:11.5px;min-height:16px"></div>
-                </div>
-
-                {{-- Dosen --}}
-                <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:12px;padding:14px;margin-bottom:18px">
-                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#64748b;margin-bottom:10px">
-                        <i class="fas fa-chalkboard-teacher"></i> Lecturer
-                    </div>
-                    <label class="sima-label">Lecturer Code / NIDN</label>
-                    <input type="text" name="kodeDos" id="kodeDos" class="sima-input" placeholder="DOS001 or 0123456789" style="font-family:var(--f-mono)">
-                    <div id="dosenPreview" style="margin-top:6px;font-size:11.5px;min-height:16px"></div>
-                </div>
-
-                <div id="tambahErr" style="display:none;font-size:12.5px;color:#dc2626;margin-bottom:12px;padding:10px;background:#fef2f2;border-radius:8px"></div>
-                <div style="display:flex;gap:8px">
-                    <button type="submit" class="sima-btn"><i class="fas fa-save"></i> Save</button>
-                    <button type="button" onclick="closeModals()" class="sima-btn sima-btn--outline">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-
-{{-- ══════════════════════════════════════
-     EDIT SCHEDULE MODAL
-══════════════════════════════════════ --}}
-<div id="modalEdit" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center">
-    <div style="background:#fff;border-radius:18px;width:100%;max-width:560px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto">
-        <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1">
-            <div>
-                <div style="font-size:15px;font-weight:700;color:#1e293b">Edit Schedule</div>
-                <div style="font-size:12px;color:#94a3b8;margin-top:2px">Leave blank to keep current value</div>
-            </div>
-            <button type="button" onclick="closeModals()" style="width:32px;height:32px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;color:#64748b">
-                <i class="fas fa-xmark"></i>
-            </button>
-        </div>
-
-        <div style="padding:20px 24px">
-            <form id="formEdit">
-                <input type="hidden" id="editId">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-                    <div>
-                        <label class="sima-label">Day</label>
-                        <select name="hari" id="editHari" class="sima-input">
-                            @foreach(['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'] as $h)
-                                <option value="{{ $h }}">{{ $h }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="sima-label">Time</label>
-                        <input type="text" name="jam" id="editJam" class="sima-input">
-                    </div>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-                    <div>
-                        <label class="sima-label">Room</label>
-                        <input type="text" name="ruangan" id="editRuangan" class="sima-input">
-                    </div>
-                    <div>
-                        <label class="sima-label">Total Sessions</label>
-                        <input type="number" name="totalSesi" id="editTotalSesi" class="sima-input" min="1">
-                    </div>
-                </div>
-
-                <hr style="border:none;border-top:1px solid #f1f5f9;margin:16px 0">
-                <div style="font-size:11.5px;color:#94a3b8;margin-bottom:12px"><i class="fas fa-info-circle"></i> Leave blank to keep class / course / lecturer unchanged</div>
-
-                <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:12px;padding:14px;margin-bottom:12px">
-                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#64748b;margin-bottom:10px">Class (optional)</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-                        <div>
-                            <label class="sima-label">Class Code</label>
-                            <input type="text" name="kodeKelas" id="editKodeKelas" class="sima-input" style="font-family:var(--f-mono)">
-                        </div>
-                        <div>
-                            <label class="sima-label">Academic Year</label>
-                            <select name="tahunAjar" id="editTahunAjar" class="sima-input">
-                                @foreach($tahunAjarList as $ta)
-                                    <option value="{{ $ta }}" {{ $ta === $tahunAjarDefault ? 'selected' : '' }}>{{ $ta }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:12px;padding:14px;margin-bottom:12px">
-                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#64748b;margin-bottom:10px">Course (optional)</div>
-                    <label class="sima-label">Course Code</label>
-                    <input type="text" name="kodeMk" id="editKodeMk" class="sima-input" style="font-family:var(--f-mono)">
-                </div>
-
-                <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:12px;padding:14px;margin-bottom:18px">
-                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#64748b;margin-bottom:10px">Lecturer (optional)</div>
-                    <label class="sima-label">Lecturer Code / NIDN</label>
-                    <input type="text" name="kodeDos" id="editKodeDos" class="sima-input" style="font-family:var(--f-mono)">
-                </div>
-
-                <div id="editErr" style="display:none;font-size:12.5px;color:#dc2626;margin-bottom:12px;padding:10px;background:#fef2f2;border-radius:8px"></div>
-                <div style="display:flex;gap:8px">
-                    <button type="submit" class="sima-btn"><i class="fas fa-save"></i> Update</button>
-                    <button type="button" onclick="closeModals()" class="sima-btn sima-btn--outline">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 @endsection
 
@@ -295,152 +113,25 @@ $hariOrder = ['Senin'=>1,'Selasa'=>2,'Rabu'=>3,'Kamis'=>4,'Jumat'=>5,'Sabtu'=>6]
 <script>
 const CSRF = '{{ csrf_token() }}';
 
-['modalTambah','modalEdit'].forEach(id => {
-    document.getElementById(id).addEventListener('click', function(e) { if (e.target === this) closeModals(); });
-});
-function closeModals() {
-    document.getElementById('modalTambah').style.display = 'none';
-    document.getElementById('modalEdit').style.display   = 'none';
-}
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('created') === '1' || params.get('updated') === '1') {
+        const msg = params.get('created') === '1' ? 'Schedule created successfully.' : 'Schedule updated successfully.';
+        const toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;background:#059669;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.15);display:flex;align-items:center;gap:8px;animation:simaFadeIn .3s';
+        toast.innerHTML = '<i class="fas fa-circle-check"></i> ' + msg;
+        document.body.appendChild(toast);
+        window.history.replaceState({}, '', window.location.pathname);
+        setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity .3s'; setTimeout(() => toast.remove(), 300); }, 3000);
+    }
+})();
 
-document.getElementById('btnTambah').addEventListener('click', function() {
-    document.getElementById('formTambah').reset();
-    document.getElementById('tambahErr').style.display = 'none';
-    ['kelasPreview','mkPreview','dosenPreview'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = '';
-    });
-    document.getElementById('modalTambah').style.display = 'flex';
-});
-
-/* ── PREVIEW ────────────────────────────────── */
-function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
-
-function previewKelas() {
-    const kode = document.getElementById('kodeKelas').value.trim();
-    const ta   = document.getElementById('tahunAjar').value.trim();
-    const pv   = document.getElementById('kelasPreview');
-    if (!kode || !ta) { pv.textContent = ''; return; }
-    fetch(`/jurusan/kelas/preview?kodeKelas=${encodeURIComponent(kode)}&tahunAjar=${encodeURIComponent(ta)}`, { headers: { Accept: 'application/json' } })
-        .then(r => r.json())
-        .then(res => {
-            pv.style.color = res.found ? '#059669' : '#dc2626';
-            pv.textContent = res.found ? `✓ Found: Class ${res.kodeKelas} (${res.tahunAjar})` : `✗ Class '${kode}' not found`;
-        }).catch(() => {});
-}
-function previewMk() {
-    const kode = document.getElementById('kodeMk').value.trim();
-    const pv   = document.getElementById('mkPreview');
-    if (!kode) { pv.textContent = ''; return; }
-    fetch(`/jurusan/matakuliah/preview?kodeMk=${encodeURIComponent(kode)}`, { headers: { Accept: 'application/json' } })
-        .then(r => r.json())
-        .then(res => {
-            pv.style.color = res.found ? '#059669' : '#dc2626';
-            pv.textContent = res.found ? `✓ Found: ${res.namaMk} (${res.kodeMk})` : `✗ Course code '${kode}' not found`;
-        }).catch(() => {});
-}
-function previewDosen() {
-    const kode = document.getElementById('kodeDos').value.trim();
-    const pv   = document.getElementById('dosenPreview');
-    if (!kode) { pv.textContent = ''; return; }
-    fetch(`/jurusan/dosen/preview?kodeDos=${encodeURIComponent(kode)}`, { headers: { Accept: 'application/json' } })
-        .then(r => r.json())
-        .then(res => {
-            pv.style.color = res.found ? '#059669' : '#dc2626';
-            pv.textContent = res.found ? `✓ Found: ${res.nama} (${res.kodeDos ?? res.nidn})` : `✗ Code/NIDN '${kode}' not found`;
-        }).catch(() => {});
-}
-
-document.getElementById('kodeKelas').addEventListener('input', debounce(previewKelas, 500));
-document.getElementById('tahunAjar').addEventListener('change', debounce(previewKelas, 200));
-document.getElementById('kodeMk').addEventListener('input', debounce(previewMk, 500));
-document.getElementById('kodeDos').addEventListener('input', debounce(previewDosen, 500));
-
-/* ── CREATE ─────────────────────────────────── */
-document.getElementById('formTambah').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const errDiv = document.getElementById('tambahErr');
-    errDiv.style.display = 'none';
-    const btn = this.querySelector('[type=submit]');
-    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-
-    const data = Object.fromEntries(new FormData(this));
-    if (data.totalSesi) data.totalSesi = parseInt(data.totalSesi);
-
-    fetch('{{ route("jurusan.jadwal.store") }}', {
-        method: 'POST',
-        headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(data),
-    })
-    .then(r => r.json())
-    .then(res => {
-        if (res.success) { window.location.reload(); }
-        else { errDiv.textContent = res.message || 'Failed to save'; errDiv.style.display = 'block'; }
-    })
-    .catch(err => { errDiv.textContent = err.message; errDiv.style.display = 'block'; })
-    .finally(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Save'; });
-});
-
-/* ── EDIT ───────────────────────────────────── */
 document.querySelectorAll('.btn-edit-jadwal').forEach(btn => {
     btn.addEventListener('click', function() {
-        const id = this.dataset.id;
-        document.getElementById('editErr').style.display = 'none';
-        fetch(`/jurusan/jadwal/${id}`, { headers: { Accept: 'application/json' } })
-        .then(r => r.json())
-        .then(res => {
-            const j = res.data ?? res;
-            document.getElementById('editId').value         = j.id;
-            document.getElementById('editHari').value       = j.hari ?? '';
-            document.getElementById('editJam').value        = j.jam ?? '';
-            document.getElementById('editRuangan').value    = j.ruangan ?? '';
-            document.getElementById('editTotalSesi').value  = j.totalSesi ?? '';
-            // placeholder = current value, value = empty (so it won't be sent if unchanged)
-            const kelasEl = document.getElementById('editKodeKelas');
-            kelasEl.placeholder = j.kelas?.kodeKelas ?? '';
-            kelasEl.value = '';
-            const mkEl = document.getElementById('editKodeMk');
-            mkEl.placeholder = j.matakuliah?.kodeMk ?? '';
-            mkEl.value = '';
-            const dosEl = document.getElementById('editKodeDos');
-            dosEl.placeholder = j.dosen?.kodeDos ?? j.dosen?.nidn ?? '';
-            dosEl.value = '';
-            document.getElementById('modalEdit').style.display = 'flex';
-        })
-        .catch(err => alert('Failed to load: ' + err.message));
+        window.location.href = `/jurusan/jadwal/${this.dataset.id}/edit`;
     });
 });
 
-document.getElementById('formEdit').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const errDiv = document.getElementById('editErr');
-    errDiv.style.display = 'none';
-    const id  = document.getElementById('editId').value;
-    const btn = this.querySelector('[type=submit]');
-    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-
-    const data = {};
-    ['hari','jam','ruangan','totalSesi','kodeKelas','tahunAjar','kodeMk','kodeDos'].forEach(f => {
-        const el = this.querySelector(`[name="${f}"]`);
-        if (el && el.value.trim() !== '') data[f] = el.value.trim();
-    });
-    if (data.totalSesi) data.totalSesi = parseInt(data.totalSesi);
-
-    fetch(`/jurusan/jadwal/${id}`, {
-        method: 'PATCH',
-        headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(data),
-    })
-    .then(r => r.json())
-    .then(res => {
-        if (res.success) { window.location.reload(); }
-        else { errDiv.textContent = res.message || 'Failed to update'; errDiv.style.display = 'block'; }
-    })
-    .catch(err => { errDiv.textContent = err.message; errDiv.style.display = 'block'; })
-    .finally(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Update'; });
-});
-
-/* ── DELETE ─────────────────────────────────── */
 document.querySelectorAll('.btn-del-jadwal').forEach(btn => {
     btn.addEventListener('click', function() {
         const id = this.dataset.id;

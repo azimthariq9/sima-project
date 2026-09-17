@@ -12,9 +12,9 @@
             <h5 class="sima-card__title">Lecturer List</h5>
             <div class="sima-card__subtitle">Total {{ $dosens->count() }} lecturers</div>
         </div>
-        <button type="button" id="btnTambah" class="sima-btn sima-btn--sm">
+        <a href="{{ route('jurusan.dosen.create') }}" class="sima-btn sima-btn--sm">
             <i class="fas fa-plus"></i> Add Lecturer
-        </button>
+        </a>
     </div>
 
     <div style="overflow-x:auto">
@@ -76,48 +76,7 @@
 </div>
 
 
-{{-- ══════════════════════════════════════
-     MODAL TAMBAH DOSEN (SIMA Light)
-══════════════════════════════════════ --}}
-<div id="modalTambah" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center">
-    <div style="background:#fff;border-radius:18px;width:100%;max-width:480px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden">
-        <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
-            <div style="font-size:15px;font-weight:700;color:#1e293b">Add Lecturer</div>
-            <button type="button" onclick="closeModals()"
-                    style="width:32px;height:32px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;color:#64748b">
-                <i class="fas fa-xmark"></i>
-            </button>
-        </div>
-        <div style="padding:20px 24px">
-            <form id="formTambah">
-                <div style="margin-bottom:14px">
-                    <label class="sima-label">Lecturer Name <span style="color:var(--c-red)">*</span></label>
-                    <input type="text" name="nama" class="sima-input" required placeholder="Full lecturer name">
-                </div>
-                <div style="margin-bottom:14px">
-                    <label class="sima-label">NIDN</label>
-                    <input type="text" name="nidn" class="sima-input" placeholder="National Lecturer Identification Number">
-                </div>
-                <div style="margin-bottom:14px">
-                    <label class="sima-label">Lecturer Code</label>
-                    <input type="text" name="kodeDos" class="sima-input" placeholder="Short lecturer code">
-                </div>
-                <div style="margin-bottom:18px">
-                    <label class="sima-label">User Account <span style="color:var(--c-red)">*</span></label>
-                    <select name="user_id" id="selectUser" class="sima-input" required>
-                        <option value="">— Loading accounts... —</option>
-                    </select>
-                    <div style="font-size:11px;color:var(--c-text-3);margin-top:4px">Select a user account with Lecturer role</div>
-                </div>
-                <div id="tambahErr" style="display:none;font-size:12.5px;color:#dc2626;margin-bottom:12px;padding:10px;background:#fef2f2;border-radius:8px;border:1px solid #fecaca"></div>
-                <div style="display:flex;gap:8px">
-                    <button type="submit" class="sima-btn"><i class="fas fa-plus"></i> Save</button>
-                    <button type="button" onclick="closeModals()" class="sima-btn sima-btn--outline">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+
 
 
 {{-- ══════════════════════════════════════
@@ -163,64 +122,13 @@
 <script>
 const CSRF = '{{ csrf_token() }}';
 
-/* ─── close modal on backdrop click ─── */
-['modalTambah','modalEdit'].forEach(id => {
-    document.getElementById(id).addEventListener('click', function(e) {
-        if (e.target === this) closeModals();
-    });
+document.querySelectorAll('#modalEdit').forEach(el => {
+    el.addEventListener('click', function(e) { if (e.target === this) this.style.display = 'none'; });
 });
 
 function closeModals() {
-    document.getElementById('modalTambah').style.display = 'none';
-    document.getElementById('modalEdit').style.display   = 'none';
+    document.getElementById('modalEdit').style.display = 'none';
 }
-
-/* ─── Buka modal tambah → load user list ─── */
-document.getElementById('btnTambah').addEventListener('click', function() {
-    const sel = document.getElementById('selectUser');
-    sel.innerHTML = '<option value="">— Loading... —</option>';
-
-    fetch('{{ route("jurusan.users.data") }}?role=dosen', { headers: { Accept: 'application/json' } })
-        .then(r => r.json())
-        .then(res => {
-            sel.innerHTML = '<option value="">— Select account —</option>';
-            (res.data || []).forEach(u => {
-                sel.innerHTML += `<option value="${u.id}">${u.email} (${u.name ?? u.email})</option>`;
-            });
-        })
-        .catch(() => { sel.innerHTML = '<option value="">Failed to load</option>'; });
-
-    document.getElementById('tambahErr').style.display = 'none';
-    document.getElementById('formTambah').reset();
-    document.getElementById('modalTambah').style.display = 'flex';
-});
-
-/* ─── Tambah dosen ─── */
-document.getElementById('formTambah').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const errDiv = document.getElementById('tambahErr');
-    errDiv.style.display = 'none';
-    const btn = this.querySelector('[type=submit]');
-    btn.disabled = true;
-
-    const data = Object.fromEntries(new FormData(this));
-
-    fetch('{{ route("jurusan.dosen.store") }}', {
-        method: 'POST',
-        headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(data),
-    })
-    .then(r => r.json())
-    .then(res => {
-        if (res.success) { window.location.reload(); }
-        else {
-            errDiv.textContent = res.message || 'Failed to save';
-            errDiv.style.display = 'block';
-        }
-    })
-    .catch(err => { errDiv.textContent = 'Error: ' + err.message; errDiv.style.display = 'block'; })
-    .finally(() => { btn.disabled = false; });
-});
 
 /* ─── Buka modal edit ─── */
 document.querySelectorAll('.btn-edit-dosen').forEach(btn => {
