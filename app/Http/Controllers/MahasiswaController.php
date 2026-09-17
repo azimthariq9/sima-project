@@ -821,7 +821,7 @@ class MahasiswaController extends Controller
                 'date'   => \Carbon\Carbon::parse($r->created_at)->format('d M Y'),
             ]);
 
-        return view('mahasiswa.request.create', compact('recentRequests'));
+        return redirect()->route('mahasiswa.dokumen.index')->with('success', 'Dokumen berhasil dikirim.');
     }
 
     // BUG FIX: Route mahasiswa.request.quick (bukan duplikat mahasiswa.request.store)

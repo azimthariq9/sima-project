@@ -226,7 +226,6 @@ html, body { min-height:100%;background:var(--bg);font-family:'Plus Jakarta Sans
                     <input type="checkbox" name="remember">
                     <span data-t="remember">Ingat saya</span>
                 </label>
-                <a href="{{ route('password.request') }}" class="forgot" data-t="forgot">Lupa password?</a>
             </div>
 
             <button type="submit" class="btn" data-t="submit">Masuk</button>
@@ -278,7 +277,6 @@ const translations = {
         'lbl-email':'Email',
         'lbl-pw':   'Password',
         remember:       'Ingat saya',
-        forgot:         'Lupa password?',
         submit:         'Masuk',
         'submit-otp':   'Kirim Kode OTP',
         secure:         'Koneksi <strong>terenkripsi & aman</strong>',
@@ -296,7 +294,6 @@ const translations = {
         'lbl-email':    'Email',
         'lbl-pw':       'Password',
         remember:       'Remember me',
-        forgot:         'Forgot password?',
         submit:         'Sign In',
         'submit-otp':   'Send OTP Code',
         secure:         'Connection is <strong>encrypted & secure</strong>',
