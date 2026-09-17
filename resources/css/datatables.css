@@ -156,7 +156,7 @@
     position: relative;
 }
 
-/* Search icon */
+/* Search icon — positioned inside the input's left padding */
 .datatable-search::before {
     content: '';
     position: absolute;
@@ -182,7 +182,7 @@
     outline: none;
     transition: all 0.2s ease;
     min-width: 220px;
-    width: 100%;
+    flex: 0 1 auto;
 }
 
 .datatable-search .datatable-input:hover {
