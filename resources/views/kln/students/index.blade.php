@@ -88,6 +88,7 @@
                     <th>NPM</th>
                     <th>Major</th>
                     <th>Type</th>
+                    <th>Masa Aktif</th>
                     <th>Account</th>
                     <th>Document Status</th>
                     <th>Actions</th>
@@ -117,6 +118,20 @@
                             <span style="font-size:12px;color:var(--c-text-3)">—</span>
                         @endif
                     </td>
+                    <td>
+                        @if($m->masaAktif)
+                            @php $mAktif = \Carbon\Carbon::parse($m->masaAktif); @endphp
+                            @if($mAktif->isPast())
+                                <span class="sima-badge sima-badge--red"><i class="fas fa-exclamation-circle me-1"></i>{{ $mAktif->format('d M Y') }}</span>
+                            @elseif($mAktif->lte(now()->addDays(30)))
+                                <span class="sima-badge sima-badge--amber"><i class="fas fa-clock me-1"></i>{{ $mAktif->format('d M Y') }}</span>
+                            @else
+                                <span style="font-size:13px;">{{ $mAktif->format('d M Y') }}</span>
+                            @endif
+                        @else
+                            <span style="font-size:12px;color:var(--c-text-3)">—</span>
+                        @endif
+                    </td>
                     <td><span class="sima-badge {{ $akunBadge }}">{{ $akunLabel }}</span></td>
                     <td>
                         <span class="sima-badge {{ $docBadge }}" style="{{ $docStyle }}">
@@ -130,7 +145,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" class="text-center text-muted py-4">No student data yet.</td></tr>
+                <tr><td colspan="8" class="text-center text-muted py-4">No student data yet.</td></tr>
                 @endforelse
             </tbody>
         </table>

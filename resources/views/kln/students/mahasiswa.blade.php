@@ -66,6 +66,23 @@
                         {{ $mahasiswa->tglLahir ? \Carbon\Carbon::parse($mahasiswa->tglLahir)->translatedFormat('d F Y') : '-' }}
                     </div>
                 </div>
+                <div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Masa Aktif</div>
+                    <div class="fw-600">
+                        @if($mahasiswa->masaAktif)
+                            @php $mAktif = \Carbon\Carbon::parse($mahasiswa->masaAktif); @endphp
+                            @if($mAktif->isPast())
+                                <span style="color:var(--c-red)">{{ $mAktif->translatedFormat('d F Y') }} (Expired)</span>
+                            @elseif($mAktif->lte(now()->addDays(30)))
+                                <span style="color:#d97706">{{ $mAktif->translatedFormat('d F Y') }} (Expiring soon)</span>
+                            @else
+                                {{ $mAktif->translatedFormat('d F Y') }}
+                            @endif
+                        @else
+                            -
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-12 col-md-6">

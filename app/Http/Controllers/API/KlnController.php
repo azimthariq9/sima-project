@@ -327,6 +327,7 @@ class KlnController extends Controller
                 'mahasiswa.nama',
                 'mahasiswa.npm as identifier',
                 'mahasiswa.tipeMahasiswa',
+                'mahasiswa.masaAktif',
                 'jurusan.namaJurusan',
                 'users.jurusan_id',
                 'users.status',
@@ -339,7 +340,7 @@ class KlnController extends Controller
                 END) as doc_expiry_level")
             )
             ->groupBy('mahasiswa.id', 'mahasiswa.nama', 'mahasiswa.npm',
-                      'mahasiswa.tipeMahasiswa', 'jurusan.namaJurusan',
+                      'mahasiswa.tipeMahasiswa', 'mahasiswa.masaAktif', 'jurusan.namaJurusan',
                       'users.jurusan_id', 'users.status')
             ->orderBy('mahasiswa.nama');
 
@@ -715,6 +716,7 @@ class KlnController extends Controller
                     'nama'            => $mhs['nama'] ?? null,
                     'npm'             => $npm,
                     'tipeMahasiswa'   => $mhs['tipeMahasiswa'] ?? null,
+                    'masaAktif'       => $mhs['masaAktif'] ?? null,
                     'created_at'      => now(),
                     'updated_at'      => now(),
                 ]);
@@ -842,6 +844,7 @@ class KlnController extends Controller
             if (isset($mhs['nama']) && $mhs['nama'])            $mhsUpdate['nama']          = $mhs['nama'];
             if (isset($mhs['npm'])  && $mhs['npm'])             $mhsUpdate['npm']           = $mhs['npm'];
             if (array_key_exists('tipeMahasiswa', $mhs))        $mhsUpdate['tipeMahasiswa'] = $mhs['tipeMahasiswa'] ?: null;
+            if (array_key_exists('masaAktif', $mhs))            $mhsUpdate['masaAktif']     = $mhs['masaAktif'] ?: null;
             if (!empty($mhsUpdate)) {
                 DB::table('mahasiswa')->where('user_id', $id)->update($mhsUpdate);
             }

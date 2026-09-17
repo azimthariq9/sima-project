@@ -179,6 +179,7 @@ class SimaSeeder extends Seeder
                     'alamatAsal' => 'Luar Negeri',
                     'alamatIndo' => 'Jakarta Pusat',
                     'user_id'    => $uid,
+                    'masaAktif'  => '2027-06-30',
                     'created_at' => $now,
                     'updated_at' => $now,
                 ]);

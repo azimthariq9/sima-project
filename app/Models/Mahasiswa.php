@@ -12,7 +12,8 @@ class Mahasiswa extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'tglLahir' => 'date',
+        'tglLahir'  => 'date',
+        'masaAktif' => 'date',
     ];
 
     public function kelas()

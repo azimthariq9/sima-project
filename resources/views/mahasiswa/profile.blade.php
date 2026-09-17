@@ -108,6 +108,13 @@
        value="{{ old('alamatIndo', $mahasiswa->alamatIndo ?? '') }}">
 </div>
 
+<div class="mb-3">
+<label class="sima-label">Masa Aktif</label>
+<input type="date" name="masaAktif" class="sima-input" disabled
+       value="{{ old('masaAktif', $mahasiswa->masaAktif ? \Carbon\Carbon::parse($mahasiswa->masaAktif)->format('Y-m-d') : '') }}">
+<div style="font-size:11.5px;color:var(--c-text-3);margin-top:4px">Set by KLN admin</div>
+</div>
+
 <hr>
 
 <div class="mb-3">

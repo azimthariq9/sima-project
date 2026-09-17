@@ -580,12 +580,12 @@ class MahasiswaController extends Controller
             'warNeg'     => 'nullable|string|max:100',
             'alamatAsal' => 'nullable|string|max:500',
             'alamatIndo' => 'nullable|string|max:500',
+            'masaAktif'  => 'nullable|date',
             'password'   => 'nullable|string|min:8|confirmed',
         ], [
             'noWa.unique' => 'Nomor WhatsApp ini sudah digunakan oleh mahasiswa lain.',
         ]);
 
-        // Kolom DB menggunakan camelCase sesuai migrasi
         DB::table('mahasiswa')
             ->where('user_id', Auth::id())
             ->update([
@@ -595,6 +595,7 @@ class MahasiswaController extends Controller
                 'warNeg'     => $request->warNeg,
                 'alamatAsal' => $request->alamatAsal,
                 'alamatIndo' => $request->alamatIndo,
+                'masaAktif'  => $request->masaAktif,
                 'updated_at' => now(),
             ]);
 

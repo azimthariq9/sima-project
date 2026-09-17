@@ -64,6 +64,7 @@
                                     'noWa'     => $mhs->noWa ?? '—',
                                     'tglLahir' => $mhs->tglLahir ?? '—',
                                     'warNeg'   => $mhs->warNeg ?? '—',
+                                    'masaAktif'=> $mhs->masaAktif ?? '—',
                                     'status'   => $u->status,
                                     'kelas'    => $klsList,
                                 ]) }}"
@@ -112,6 +113,10 @@
                     <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px">Nationality</div>
                     <div id="dm-warNeg" style="font-size:12.5px;font-weight:500;color:#1e293b"></div>
                 </div>
+                <div style="padding:11px;background:#f8fafc;border-radius:10px;border:1px solid #f1f5f9">
+                    <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px">Masa Aktif</div>
+                    <div id="dm-masaAktif" style="font-size:12.5px;font-weight:500;color:#1e293b"></div>
+                </div>
             </div>
             <div style="padding:11px;background:#f8fafc;border-radius:10px;border:1px solid #f1f5f9;margin-bottom:14px">
                 <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px">Classes Enrolled</div>
@@ -145,6 +150,7 @@ document.querySelectorAll('.btn-detail').forEach(btn => {
         document.getElementById('dm-noWa').textContent    = d.noWa;
         document.getElementById('dm-tglLahir').textContent = d.tglLahir;
         document.getElementById('dm-warNeg').textContent  = d.warNeg;
+        document.getElementById('dm-masaAktif').textContent = d.masaAktif && d.masaAktif !== '—' ? d.masaAktif : '—';
         document.getElementById('dm-kelas').textContent   = d.kelas;
 
         const stMap = {

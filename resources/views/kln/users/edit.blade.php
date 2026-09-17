@@ -134,6 +134,13 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="col-12 col-md-6">
+                            <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">
+                                Masa Aktif
+                            </label>
+                            <input type="date" name="mahasiswa[masaAktif]" class="sima-input mt-1"
+                                   value="{{ $mhs?->masaAktif ? \Carbon\Carbon::parse($mhs->masaAktif)->format('Y-m-d') : '' }}">
+                        </div>
                     </div>
                 </div>
 
@@ -207,6 +214,7 @@ function buildUserData(formData) {
             npm: formData.get('mahasiswa[npm]'),
             nama: formData.get('mahasiswa[nama]'),
             tipeMahasiswa: formData.get('mahasiswa[tipeMahasiswa]'),
+            masaAktif: formData.get('mahasiswa[masaAktif]'),
         };
     }
     if (role === 'dosen') {
