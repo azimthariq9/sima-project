@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
             perPage: 10,
             perPageSelect: [5, 10, 15, 20, 25],
             labels: {
+                search: "",
                 placeholder: "",
                 perPage: "rows per page",
                 noRows: "No data found",
