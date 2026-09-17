@@ -151,18 +151,16 @@
 }
 
 .datatable-search {
-    display: flex;
-    align-items: center;
-    gap: 8px;
     position: relative;
-    
 }
 
 /* Search icon */
 .datatable-search::before {
     content: '';
     position: absolute;
-    left: 40px;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 15px;
     height: 15px;
     opacity: 0.4;
