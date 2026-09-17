@@ -86,7 +86,9 @@ Route::middleware(['auth', 'check.role:MAHASISWA'])
 
             Route::prefix('dokumen')->name('dokumen.')->group(function () {
                 Route::get('/',             [MahasiswaController::class, 'dokumenPage'])->name('index');
+                Route::get('create',        [MahasiswaController::class, 'dokumenCreate'])->name('create');
                 Route::post('/',            [MahasiswaController::class, 'storeDokumen'])->name('store');
+                Route::get('{id}/edit',     [MahasiswaController::class, 'dokumenEdit'])->name('edit');
                 Route::get('{id}/download', [MahasiswaController::class, 'downloadDokumen'])->name('download');
                 Route::patch('{id}',        [MahasiswaController::class, 'updateDokumen'])->name('update');
                 Route::delete('{id}',       [MahasiswaController::class, 'destroyDokumen'])->name('destroy');

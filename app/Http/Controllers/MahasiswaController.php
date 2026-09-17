@@ -642,6 +642,23 @@ class MahasiswaController extends Controller
         return view('mahasiswa.dokumen.index', compact('dokumen', 'recentRequests', 'unreadNotifCount'));
     }
 
+    public function dokumenCreate()
+    {
+        return view('mahasiswa.dokumen.create');
+    }
+
+    public function dokumenEdit(int $id)
+    {
+        $mahasiswa = $this->getMahasiswa();
+        $dok = DB::table('dokumen')
+            ->where('id', $id)
+            ->where('mahasiswa_id', $mahasiswa->id ?? 0)
+            ->whereNull('deleted_at')
+            ->first();
+        abort_if(!$dok, 404);
+        return view('mahasiswa.dokumen.edit', compact('dok'));
+    }
+
     public function storeDokumen(Request $request)
     {
         $request->validate([

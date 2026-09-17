@@ -82,9 +82,9 @@
                 <h5 class="sima-card__title">Dokumen Penting</h5>
                 <div class="sima-card__subtitle">Dokumen resmi yang telah diupload dan diverifikasi KLN</div>
             </div>
-            <button onclick="document.getElementById('modalUpload').style.display='flex'" class="sima-btn sima-btn--sm">
+            <a href="{{ route('mahasiswa.dokumen.create') }}" class="sima-btn sima-btn--sm">
                 <i class="fas fa-upload"></i> Upload Dokumen
-            </button>
+            </a>
         </div>
 
         <div class="sima-card__body">
@@ -151,20 +151,11 @@
                                     style="font-size:11.5px;flex:1;justify-content:center">
                                     <i class="fas fa-download"></i> Unduh
                                 </a>
-                                <button type="button"
-                                    onclick="openEditModal({{ json_encode([
-                                        'id' => $dok->id,
-                                        'tipeDkmn' => $dok->tipeDkmn,
-                                        'noDkmn' => $dok->noDkmn,
-                                        'tglTerbit' => $dok->tglTerbit,
-                                        'tglKdlwrs' => $dok->tglKdlwrs,
-                                        'penerbit' => $dok->penerbit,
-                                        'status' => $dok->status,
-                                    ]) }})"
+                                <a href="{{ route('mahasiswa.dokumen.edit', $dok->id) }}"
                                     class="sima-btn sima-btn--outline sima-btn--sm"
                                     style="font-size:11.5px;padding:4px 10px" title="Edit">
                                     <i class="fas fa-pencil"></i>
-                                </button>
+                                </a>
                                 @if ($canDelete)
                                     <button type="button"
                                         onclick="confirmDelete({{ $dok->id }}, '{{ addslashes($dok->namaDkmn ?? str_replace('_', ' ', $dok->tipeDkmn)) }}')"
@@ -286,187 +277,17 @@
 
     </div>
 
-
-    {{-- ══════════════════════════════════════
-     MODAL UPLOAD DOKUMEN
-══════════════════════════════════════ --}}
-    <div id="modalUpload"
-        style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center">
-        <div
-            style="background:#fff;border-radius:18px;width:100%;max-width:480px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden;max-height:90vh;overflow-y:auto">
-            <div
-                style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1">
-                <div style="font-size:15px;font-weight:700;color:#1e293b">Upload Dokumen Penting</div>
-                <button onclick="document.getElementById('modalUpload').style.display='none'"
-                    style="width:32px;height:32px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;color:#64748b;font-size:14px">
-                    <i class="fas fa-xmark"></i>
-                </button>
-            </div>
-            <div style="padding:20px 24px">
-                <form method="POST" action="{{ route('mahasiswa.dokumen.store') }}" enctype="multipart/form-data">
-                    @csrf
-                    <div style="margin-bottom:14px">
-                        <label class="sima-label">Jenis Dokumen <span style="color:var(--c-red)">*</span></label>
-                        <select name="tipeDkmn" class="sima-input" required>
-                            <option value="">— Pilih —</option>
-                            @foreach (\App\Enums\TipeDok::cases() as $dok)
-                                <option value="{{ $dok->value }}">{{ str_replace('_', ' ', $dok->value) }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div style="margin-bottom:14px">
-                        <label class="sima-label">Nomor Dokumen <span style="color:var(--c-red)">*</span></label>
-                        <input type="text" name="noDkmn" class="sima-input" placeholder="cth. A1234567" required>
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-                        <div>
-                            <label class="sima-label">Tanggal Terbit <span style="color:var(--c-red)">*</span></label>
-                            <input type="date" name="tglTerbit" class="sima-input" required>
-                        </div>
-                        <div>
-                            <label class="sima-label">Berlaku s/d <span style="color:var(--c-red)">*</span></label>
-                            <input type="date" name="tglKdlwrs" class="sima-input" required>
-                        </div>
-                    </div>
-                    <div style="margin-bottom:14px">
-                        <label class="sima-label">Penerbit <span style="color:var(--c-red)">*</span></label>
-                        <select name="penerbit" class="sima-input" required>
-                            <option value="">— Pilih penerbit —</option>
-                            @foreach (\App\Enums\Penerbit::cases() as $p)
-                                <option value="{{ $p->value }}">{{ $p->value }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div style="margin-bottom:18px">
-                        <label class="sima-label">File Dokumen</label>
-                        <input type="file" name="file" class="sima-input" accept=".pdf,.jpg,.jpeg,.png"
-                            style="padding:7px 12px;font-size:12.5px">
-                        <div style="font-size:11.5px;color:var(--c-text-3);margin-top:4px">PDF, JPG, PNG — maks. 5MB</div>
-                    </div>
-                    <div style="display:flex;gap:8px">
-                        <button type="submit" class="sima-btn"><i class="fas fa-upload"></i> Upload</button>
-                        <button type="button" onclick="document.getElementById('modalUpload').style.display='none'"
-                            class="sima-btn sima-btn--outline">Batal</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-
-    {{-- ══════════════════════════════════════
-     MODAL EDIT DOKUMEN
-══════════════════════════════════════ --}}
-    <div id="modalEdit"
-        style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center">
-        <div
-            style="background:#fff;border-radius:18px;width:100%;max-width:480px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden;max-height:90vh;overflow-y:auto">
-            <div
-                style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1">
-                <div>
-                    <div style="font-size:15px;font-weight:700;color:#1e293b">Edit Dokumen</div>
-                    <div id="edit-status-info" style="font-size:12px;color:#f59e0b;margin-top:2px;display:none">
-                        <i class="fas fa-triangle-exclamation"></i> Dokumen yang sudah disetujui akan kembali ke status
-                        Pending setelah diedit
-                    </div>
-                </div>
-                <button onclick="document.getElementById('modalEdit').style.display='none'"
-                    style="width:32px;height:32px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;color:#64748b;font-size:14px">
-                    <i class="fas fa-xmark"></i>
-                </button>
-            </div>
-            <div style="padding:20px 24px">
-                <form id="editForm" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    @method('PATCH')
-                    <div style="margin-bottom:14px">
-                        <label class="sima-label">Jenis Dokumen <span style="color:var(--c-red)">*</span></label>
-                        <select name="tipeDkmn" id="edit-tipeDkmn" class="sima-input" required>
-                            <option value="">— Pilih —</option>
-                            @foreach (\App\Enums\TipeDok::cases() as $dok)
-                                <option value="{{ $dok->value }}">{{ str_replace('_', ' ', $dok->value) }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div style="margin-bottom:14px">
-                        <label class="sima-label">Nomor Dokumen <span style="color:var(--c-red)">*</span></label>
-                        <input type="text" name="noDkmn" id="edit-noDkmn" class="sima-input" required>
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-                        <div>
-                            <label class="sima-label">Tanggal Terbit <span style="color:var(--c-red)">*</span></label>
-                            <input type="date" name="tglTerbit" id="edit-tglTerbit" class="sima-input" required>
-                        </div>
-                        <div>
-                            <label class="sima-label">Berlaku s/d <span style="color:var(--c-red)">*</span></label>
-                            <input type="date" name="tglKdlwrs" id="edit-tglKdlwrs" class="sima-input" required>
-                        </div>
-                    </div>
-                    <div style="margin-bottom:14px">
-                        <label class="sima-label">Penerbit <span style="color:var(--c-red)">*</span></label>
-                        <select name="penerbit" id="edit-penerbit" class="sima-input" required>
-                            <option value="">— Pilih penerbit —</option>
-                            @foreach (\App\Enums\Penerbit::cases() as $p)
-                                <option value="{{ $p->value }}">{{ $p->value }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div style="margin-bottom:18px">
-                        <label class="sima-label">Ganti File (opsional)</label>
-                        <input type="file" name="file" class="sima-input" accept=".pdf,.jpg,.jpeg,.png"
-                            style="padding:7px 12px;font-size:12.5px">
-                        <div style="font-size:11.5px;color:var(--c-text-3);margin-top:4px">Kosongkan jika tidak ingin
-                            mengganti file</div>
-                    </div>
-                    <div style="display:flex;gap:8px">
-                        <button type="submit" class="sima-btn"><i class="fas fa-save"></i> Simpan</button>
-                        <button type="button" onclick="document.getElementById('modalEdit').style.display='none'"
-                            class="sima-btn sima-btn--outline">Batal</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-
-    {{-- ══════════════════════════════════════
-     FORM HAPUS (HIDDEN)
-══════════════════════════════════════ --}}
-    <form id="deleteForm" method="POST" style="display:none">
-        @csrf
-        @method('DELETE')
-    </form>
-
 @endsection
 
 @section('page_js')
     <script>
-        document.getElementById('modalUpload').addEventListener('click', function(e) {
-            if (e.target === this) this.style.display = 'none';
-        });
-        document.getElementById('modalEdit').addEventListener('click', function(e) {
-            if (e.target === this) this.style.display = 'none';
-        });
-
-        function openEditModal(data) {
-            document.getElementById('edit-tipeDkmn').value = data.tipeDkmn || '';
-            document.getElementById('edit-noDkmn').value = data.noDkmn || '';
-            document.getElementById('edit-tglTerbit').value = data.tglTerbit ? data.tglTerbit.substring(0, 10) : '';
-            document.getElementById('edit-tglKdlwrs').value = data.tglKdlwrs ? data.tglKdlwrs.substring(0, 10) : '';
-            document.getElementById('edit-penerbit').value = data.penerbit || '';
-
-            document.getElementById('editForm').action = '/mahasiswa/dokumen/' + data.id;
-
-            const statusInfo = document.getElementById('edit-status-info');
-            statusInfo.style.display = data.status === 'approved' ? 'block' : 'none';
-
-            document.getElementById('modalEdit').style.display = 'flex';
-        }
-
         function confirmDelete(id, nama) {
-            if (!confirm('Hapus dokumen "' + nama + '"?\nDokumen yang belum diverifikasi akan dihapus.')) return;
-            const form = document.getElementById('deleteForm');
+            if (!confirm('Delete "' + nama + '"?\nUnverified documents will be permanently deleted.')) return;
+            const form = document.createElement('form');
+            form.method = 'POST';
             form.action = '/mahasiswa/dokumen/' + id;
+            form.innerHTML = '<input type="hidden" name="_token" value="{{ csrf_token() }}"><input type="hidden" name="_method" value="DELETE">';
+            document.body.appendChild(form);
             form.submit();
         }
     </script>
