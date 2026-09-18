@@ -142,8 +142,8 @@
                 @php
                     $tipe      = str_replace('_', ' ', $dok->tipeDkmn ?? '-');
                     $expiry    = $dok->tglKdlwrs ? \Carbon\Carbon::parse($dok->tglKdlwrs) : null;
-                    $isExpired = $expiry && $expiry->isPast();
-                    $isWarning = $expiry && !$isExpired && $expiry->lte(now()->addDays(30));
+                    $isExpired = $expiry && $expiry->startOfDay()->lt(today());
+                    $isWarning = $expiry && !$isExpired && $expiry->lte(today()->addDays(30));
                     if ($isExpired) {
                         $kondisiBadge = 'sima-badge--red';
                         $kondisiLabel = 'Expired';

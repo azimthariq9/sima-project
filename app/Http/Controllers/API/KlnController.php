@@ -1373,7 +1373,7 @@ class KlnController extends Controller
             ->get();
 
         $nearExpiredDokumen = $nearExpiredDokumen->map(function ($row) {
-            $row->sisa_hari = now()->diffInDays(\Carbon\Carbon::parse($row->tglKdlwrs), false);
+            $row->sisa_hari = today()->diffInDays(\Carbon\Carbon::parse($row->tglKdlwrs), false);
             return $row;
         });
 
