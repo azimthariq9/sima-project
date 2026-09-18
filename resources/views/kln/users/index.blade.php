@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         </span>
                     </td>
                     <td>
-                        <button onclick="editUser(${user.id})" class="sima-btn sima-btn--blue">
+                        <button onclick="editUser(${user.id}, '${user.role ?? ''}')" class="sima-btn sima-btn--blue">
                          <i class="fa-solid fa-pen"></i>    Edit
                         </button>
                         <button onclick="deleteUser(${user.id})" class="sima-btn sima-btn--danger">
@@ -309,8 +309,12 @@ document.addEventListener('DOMContentLoaded', function () {
         loadUsers(searchInput ? searchInput.value : '', newSort, 1);
     }
 
-    window.editUser = function(userId) {
-        window.location.href = '/kln/users/' + userId + '/edit';
+    window.editUser = function(userId, role) {
+        if (role === 'mahasiswa') {
+            window.location.href = '/kln/users/mahasiswa/' + userId + '/edit';
+        } else {
+            window.location.href = '/kln/users/' + userId + '/edit';
+        }
     }
 
     /* =========================
