@@ -15,4 +15,12 @@ enum TipeDok:string
     case ktp = 'KTP';
     case polis = 'Polis_Asuransi';
     case foto_profile = 'Foto_Profil';
+    case loa = 'LOA';
+    case visa = 'VISA';
+    case stayPermit = 'Stay_Permit';
+    case krs = 'KRS';
+    case frs = 'FRS';
+    case daftarNilai = 'Daftar_Nilai';
+    case jadwal = 'Jadwal';
+    case absensi = 'Absensi';
 }
