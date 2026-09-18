@@ -35,7 +35,6 @@
                             <option value="bipa">BIPA</option>
                             <option value="kln">KLN</option>
                             <option value="jurusan">Jurusan</option>
-                            <option value="mahasiswa">Mahasiswa</option>
                             <option value="dosen">Dosen</option>
                         </select>
                     </div>
@@ -81,54 +80,6 @@
                             <option value="{{ $j->id }}">{{ $j->namaJurusan }}</option>
                         @endforeach
                     </select>
-                </div>
-
-                {{-- MAHASISWA SECTION --}}
-                <div id="mahasiswaSection" style="display:none;background:var(--c-bg-2);border-radius:12px;padding:16px;border:1px solid var(--c-border);">
-                    <div style="font-size:12px;font-weight:700;color:var(--c-text-2);margin-bottom:14px;text-transform:uppercase;letter-spacing:.05em;">
-                        <i class="fas fa-user-graduate" style="margin-right:4px;"></i> Student Data
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-12 col-md-6">
-                            <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">
-                                NPM
-                                <span style="font-weight:400;color:var(--c-text-3);font-size:11px;">(leave empty to auto-generate)</span>
-                            </label>
-                            <div style="display:flex;gap:8px;margin-top:4px;">
-                                <input type="text" name="mahasiswa[npm]" id="npmInput" class="sima-input"
-                                       placeholder="Auto-generate if empty">
-                                <button type="button" id="btnGenerateNpm" onclick="generateNpm()"
-                                    class="sima-btn sima-btn--outline sima-btn--sm" style="white-space:nowrap;">
-                                    <i class="fas fa-dice"></i> Generate
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">
-                                Student Name <span style="color:var(--c-red)">*</span>
-                            </label>
-                            <input type="text" name="mahasiswa[nama]" class="sima-input mt-1" placeholder="Full name" required>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">
-                                Student Type
-                            </label>
-                            <select name="mahasiswa[tipeMahasiswa]" class="sima-input mt-1">
-                                <option value="">— Select Type —</option>
-                                <option value="Beasiswa TIAS">Beasiswa TIAS</option>
-                                <option value="Beasiswa KNB">Beasiswa KNB</option>
-                                <option value="Beasiswa Gunadarma">Beasiswa Gunadarma</option>
-                                <option value="Internasional Mandiri">Internasional Mandiri</option>
-                                <option value="Short Course (3 Bulan)">Short Course (3 Bulan)</option>
-                            </select>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">
-                                Masa Aktif
-                            </label>
-                            <input type="date" name="mahasiswa[masaAktif]" class="sima-input mt-1">
-                        </div>
-                    </div>
                 </div>
 
                 {{-- DOSEN SECTION --}}
@@ -179,32 +130,7 @@
 <script>
 function handleRoleChange() {
     const role = document.getElementById('roleSelect').value;
-    document.getElementById('mahasiswaSection').style.display = role === 'mahasiswa' ? 'block' : 'none';
     document.getElementById('dosenSection').style.display = role === 'dosen' ? 'block' : 'none';
-}
-
-function generateNpm() {
-    const jurusanId = document.getElementById('jurusan_id').value;
-    if (!jurusanId) { alert('Please select a jurusan first'); return; }
-
-    const btn = document.getElementById('btnGenerateNpm');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-    fetch('{{ route("kln.users.generate-npm") }}?jurusan_id=' + jurusanId)
-        .then(r => r.json())
-        .then(res => {
-            if (res.success) {
-                document.getElementById('npmInput').value = res.npm;
-            } else {
-                alert(res.message || 'Failed to generate NPM');
-            }
-        })
-        .catch(err => alert('Error: ' + err.message))
-        .finally(() => {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-dice"></i> Generate';
-        });
 }
 
 function buildUserData(formData) {
@@ -216,14 +142,6 @@ function buildUserData(formData) {
         status: formData.get('status'),
         jurusan_id: formData.get('jurusan_id'),
     };
-    if (role === 'mahasiswa') {
-        data.mahasiswa = {
-            npm: formData.get('mahasiswa[npm]'),
-            nama: formData.get('mahasiswa[nama]'),
-            tipeMahasiswa: formData.get('mahasiswa[tipeMahasiswa]'),
-            masaAktif: formData.get('mahasiswa[masaAktif]'),
-        };
-    }
     if (role === 'dosen') {
         data.dosen = {
             nama: formData.get('dosen[nama]'),
@@ -238,10 +156,6 @@ function validateForm(data) {
     if (!data.role) { alert('Role is required'); return false; }
     if (!data.email || !data.email.includes('@')) { alert('Invalid email'); return false; }
     if (data.password && data.password.length < 6) { alert('Password must be at least 6 characters'); return false; }
-    if (data.role === 'mahasiswa') {
-        if (!data.mahasiswa?.nama) { alert('Student name is required'); return false; }
-        if (!data.jurusan_id) { alert('Jurusan is required for students'); return false; }
-    }
     if (data.role === 'dosen') {
         if (!data.dosen?.nama) { alert('Lecturer name is required'); return false; }
         if (!data.jurusan_id) { alert('Jurusan is required for lecturers'); return false; }
