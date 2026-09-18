@@ -7,7 +7,7 @@
 @section('main_content')
 
 <div class="mb-3">
-    <a href="{{ route('kln.users.page') }}" class="sima-btn sima-btn--outline sima-btn--sm">
+    <a href="javascript:history.back()" class="sima-btn sima-btn--outline sima-btn--sm">
         <i class="fas fa-arrow-left me-1"></i> Back
     </a>
 </div>
