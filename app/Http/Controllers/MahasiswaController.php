@@ -576,28 +576,39 @@ class MahasiswaController extends Controller
         $request->validate([
             'nama'       => 'required|string|max:255',
             'noWa'       => ['nullable', 'string', 'max:20', Rule::unique('mahasiswa', 'noWa')->ignore($mahasiswaId)],
+            'noDarurat'  => 'nullable|string|max:20',
             'tglLahir'   => 'nullable|date',
             'warNeg'     => 'nullable|string|max:100',
             'alamatAsal' => 'nullable|string|max:500',
             'alamatIndo' => 'nullable|string|max:500',
+            'fotoProfil' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'masaAktif'  => 'nullable|date',
             'password'   => 'nullable|string|min:8|confirmed',
         ], [
             'noWa.unique' => 'Nomor WhatsApp ini sudah digunakan oleh mahasiswa lain.',
         ]);
 
+        $updateData = [
+            'nama'       => $request->nama,
+            'noWa'       => $request->noWa,
+            'noDarurat'  => $request->noDarurat,
+            'tglLahir'   => $request->tglLahir,
+            'warNeg'     => $request->warNeg,
+            'alamatAsal' => $request->alamatAsal,
+            'alamatIndo' => $request->alamatIndo,
+            'updated_at' => now(),
+        ];
+
+        if ($request->hasFile('fotoProfil')) {
+            $file = $request->file('fotoProfil');
+            $filename = 'profil_' . $mahasiswaId . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('profil/' . $mahasiswa->user_id, $filename, 'local');
+            $updateData['fotoProfil'] = $filename;
+        }
+
         DB::table('mahasiswa')
             ->where('user_id', Auth::id())
-            ->update([
-                'nama'       => $request->nama,
-                'noWa'       => $request->noWa,
-                'tglLahir'   => $request->tglLahir,
-                'warNeg'     => $request->warNeg,
-                'alamatAsal' => $request->alamatAsal,
-                'alamatIndo' => $request->alamatIndo,
-                'masaAktif'  => $request->masaAktif,
-                'updated_at' => now(),
-            ]);
+            ->update($updateData);
 
         if ($request->filled('password')) {
             DB::table('users')
@@ -1006,5 +1017,17 @@ class MahasiswaController extends Controller
             ->where('mahasiswa_id', $mahasiswa->id)
             ->where('is_read', false)
             ->count();
+    }
+
+    public function serveMyProfilFoto()
+    {
+        $mahasiswa = $this->getMahasiswa();
+        if (!$mahasiswa || !$mahasiswa->fotoProfil) abort(404);
+
+        $path = storage_path('app/profil/' . $mahasiswa->user_id . '/' . $mahasiswa->fotoProfil);
+        if (!file_exists($path)) abort(404);
+
+        $mime = mime_content_type($path);
+        return response()->file($path, ['Content-Type' => $mime]);
     }
 }

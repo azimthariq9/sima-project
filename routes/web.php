@@ -78,6 +78,7 @@ Route::middleware(['auth', 'check.role:MAHASISWA'])
             Route::get('dashboard', [MahasiswaController::class, 'dashboard'])->name('dashboard');
             Route::get('profile',   [MahasiswaController::class, 'getProfile'])->name('profile');
             Route::patch('profile', [MahasiswaController::class, 'updateProfile'])->name('profile.update');
+            Route::get('profile/foto', [MahasiswaController::class, 'serveMyProfilFoto'])->name('profile.foto');
 
             Route::get('request',             [MahasiswaRequestController::class, 'index'])->name('request.index');
             Route::post('request',            [MahasiswaRequestController::class, 'store'])->name('request.store');

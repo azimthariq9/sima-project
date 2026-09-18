@@ -80,11 +80,8 @@
         <div class="sima-card__header">
             <div>
                 <h5 class="sima-card__title">Dokumen Penting</h5>
-                <div class="sima-card__subtitle">Dokumen resmi yang telah diupload dan diverifikasi KLN</div>
+                <div class="sima-card__subtitle">Dokumen resmi yang telah diupload oleh KLN</div>
             </div>
-            <a href="{{ route('mahasiswa.dokumen.create') }}" class="sima-btn sima-btn--sm">
-                <i class="fas fa-upload"></i> Upload Dokumen
-            </a>
         </div>
 
         <div class="sima-card__body">
@@ -103,8 +100,6 @@
                             $icon = $dokIcon($dok->namaDkmn ?? $dok->tipeDkmn, $iconMap);
                             $exp = $dok->tglKdlwrs ? \Carbon\Carbon::parse($dok->tglKdlwrs)->format('d M Y') : '-';
                             $terbit = $dok->tglTerbit ? \Carbon\Carbon::parse($dok->tglTerbit)->format('d M Y') : '-';
-                            $canEdit = !in_array($dok->status, []);
-                            $canDelete = $dok->status !== 'approved';
                         @endphp
                         <div style="border:1px solid var(--c-border-soft);border-radius:14px;padding:16px;background:var(--c-surface);transition:box-shadow .15s"
                             onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,.08)'"
@@ -151,20 +146,6 @@
                                     style="font-size:11.5px;flex:1;justify-content:center">
                                     <i class="fas fa-download"></i> Unduh
                                 </a>
-                                <a href="{{ route('mahasiswa.dokumen.edit', $dok->id) }}"
-                                    class="sima-btn sima-btn--outline sima-btn--sm"
-                                    style="font-size:11.5px;padding:4px 10px" title="Edit">
-                                    <i class="fas fa-pencil"></i>
-                                </a>
-                                @if ($canDelete)
-                                    <button type="button"
-                                        onclick="confirmDelete({{ $dok->id }}, '{{ addslashes($dok->namaDkmn ?? str_replace('_', ' ', $dok->tipeDkmn)) }}')"
-                                        class="sima-btn sima-btn--sm"
-                                        style="font-size:11.5px;padding:4px 10px;background:rgba(220,38,38,.08);color:#dc2626;border:1px solid rgba(220,38,38,.2)"
-                                        title="Hapus">
-                                        <i class="fas fa-trash-can"></i>
-                                    </button>
-                                @endif
                             </div>
                         </div>
                     @endforeach
@@ -281,14 +262,5 @@
 
 @section('page_js')
     <script>
-        function confirmDelete(id, nama) {
-            if (!confirm('Delete "' + nama + '"?\nUnverified documents will be permanently deleted.')) return;
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/mahasiswa/dokumen/' + id;
-            form.innerHTML = '<input type="hidden" name="_token" value="{{ csrf_token() }}"><input type="hidden" name="_method" value="DELETE">';
-            document.body.appendChild(form);
-            form.submit();
-        }
     </script>
 @endsection
