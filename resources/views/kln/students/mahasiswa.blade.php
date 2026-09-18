@@ -6,6 +6,14 @@
 
 @section('main_content')
 
+@php
+    $expiredCount  = $dokumen->filter(fn($d) => $d->tglKdlwrs && \Carbon\Carbon::parse($d->tglKdlwrs)->startOfDay()->lt(today()))->count();
+    $warningCount  = $dokumen->filter(fn($d) => $d->tglKdlwrs && \Carbon\Carbon::parse($d->tglKdlwrs)->startOfDay()->gte(today()) && \Carbon\Carbon::parse($d->tglKdlwrs)->lte(today()->addDays(30)))->count();
+    $validCount    = $dokumen->filter(fn($d) => $d->tglKdlwrs && \Carbon\Carbon::parse($d->tglKdlwrs)->gt(today()->addDays(30)))->count();
+    $pendingCount  = $dokumen->filter(fn($d) => ($d->status ?? '') === 'pending')->count();
+    $approvedCount = $dokumen->filter(fn($d) => ($d->status ?? '') === 'approved')->count();
+@endphp
+
 {{-- ── BACK BUTTON ─────────────────────────────────── --}}
 <div class="mb-3">
     <a href="{{ route('kln.students.page') }}" class="sima-btn sima-btn--outline sima-btn--sm">
@@ -14,16 +22,18 @@
 </div>
 
 {{-- ── PROFILE HEADER ──────────────────────────────── --}}
-<div class="sima-card mb-4" style="padding: 24px;">
+<div class="sima-card mb-4" style="padding:24px;">
     <div class="d-flex align-items-center gap-4 flex-wrap">
-        <div style="width:72px;height:72px;border-radius:50%;background:var(--c-accent);
-                    display:flex;align-items:center;justify-content:center;
-                    font-size:28px;font-weight:700;color:#fff;flex-shrink:0;">
-            {{ strtoupper(substr($mahasiswa->nama, 0, 1)) }}
+        <div style="width:80px;height:80px;border-radius:50%;overflow:hidden;border:3px solid var(--c-border);flex-shrink:0;background:var(--c-accent);display:flex;align-items:center;justify-content:center;">
+            @if($mahasiswa->fotoProfil)
+                <img src="{{ route('kln.students.foto', $mahasiswa->id) }}" style="width:100%;height:100%;object-fit:cover;" alt="{{ $mahasiswa->nama }}">
+            @else
+                <span style="font-size:32px;font-weight:700;color:#fff;">{{ strtoupper(substr($mahasiswa->nama, 0, 1)) }}</span>
+            @endif
         </div>
-        <div>
+        <div style="flex:1;">
             <h4 class="mb-1" style="font-family:var(--f-display);font-weight:700;">{{ $mahasiswa->nama }}</h4>
-            <div class="d-flex gap-2 flex-wrap">
+            <div class="d-flex gap-2 flex-wrap" style="margin-top:4px;">
                 <span class="sima-badge sima-badge--blue">Mahasiswa</span>
                 <span class="sima-badge {{ $mahasiswa->status === 'active' ? 'sima-badge--green' : 'sima-badge--red' }}">
                     {{ $mahasiswa->status === 'active' ? 'Aktif' : 'Nonaktif' }}
@@ -31,13 +41,60 @@
                 @if($mahasiswa->namaJurusan)
                     <span class="sima-badge sima-badge--amber">{{ $mahasiswa->namaJurusan }}</span>
                 @endif
+                @if($mahasiswa->tipeMahasiswa)
+                    <span class="sima-badge sima-badge--purple">{{ $mahasiswa->tipeMahasiswa }}</span>
+                @endif
+                @if(isset($mahasiswa->isOnline))
+                    <span class="sima-badge {{ $mahasiswa->isOnline ? 'sima-badge--green' : 'sima-badge--teal' }}">
+                        {{ $mahasiswa->isOnline ? 'Online' : 'Offline' }}
+                    </span>
+                @endif
             </div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('kln.users.mahasiswa.edit', $mahasiswa->user_id) }}" class="sima-btn sima-btn--blue sima-btn--sm">
+                <i class="fas fa-pen me-1"></i> Edit
+            </a>
         </div>
     </div>
 </div>
 
+{{-- ── DOCUMENT STATUS SUMMARY ────────────────────── --}}
+@if($dokumen->isNotEmpty())
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="sima-stat sima-stat--red" style="padding:14px 16px;">
+            <div class="sima-stat__icon sima-stat__icon--red" style="width:36px;height:36px;font-size:14px;"><i class="fas fa-exclamation-circle"></i></div>
+            <div class="sima-stat__label" style="font-size:11px;">Expired</div>
+            <div class="sima-stat__value" style="font-size:20px;">{{ $expiredCount }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="sima-stat sima-stat--amber" style="padding:14px 16px;">
+            <div class="sima-stat__icon sima-stat__icon--amber" style="width:36px;height:36px;font-size:14px;"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="sima-stat__label" style="font-size:11px;">Warning</div>
+            <div class="sima-stat__value" style="font-size:20px;">{{ $warningCount }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="sima-stat sima-stat--green" style="padding:14px 16px;">
+            <div class="sima-stat__icon sima-stat__icon--green" style="width:36px;height:36px;font-size:14px;"><i class="fas fa-check-circle"></i></div>
+            <div class="sima-stat__label" style="font-size:11px;">Valid</div>
+            <div class="sima-stat__value" style="font-size:20px;">{{ $validCount }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="sima-stat sima-stat--blue" style="padding:14px 16px;">
+            <div class="sima-stat__icon sima-stat__icon--blue" style="width:36px;height:36px;font-size:14px;"><i class="fas fa-clock"></i></div>
+            <div class="sima-stat__label" style="font-size:11px;">Pending</div>
+            <div class="sima-stat__value" style="font-size:20px;">{{ $pendingCount }}</div>
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- ── PERSONAL INFO ───────────────────────────────── --}}
-<div class="sima-card mb-4" style="padding: 24px;">
+<div class="sima-card mb-4" style="padding:24px;">
     <h6 class="fw-700 mb-3" style="font-family:var(--f-display);letter-spacing:.5px;">
         <i class="fas fa-id-card me-2" style="color:var(--c-accent);"></i>Informasi Pribadi
     </h6>
@@ -46,7 +103,7 @@
             <div class="d-flex flex-column gap-3">
                 <div>
                     <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">NPM</div>
-                    <div class="fw-600">{{ $mahasiswa->npm ?? '-' }}</div>
+                    <div class="fw-600" style="font-family:var(--f-mono);">{{ $mahasiswa->npm ?? '-' }}</div>
                 </div>
                 <div>
                     <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Email</div>
@@ -71,9 +128,9 @@
                     <div class="fw-600">
                         @if($mahasiswa->masaAktif)
                             @php $mAktif = \Carbon\Carbon::parse($mahasiswa->masaAktif); @endphp
-                            @if($mAktif->isPast())
+                            @if($mAktif->startOfDay()->lt(today()))
                                 <span style="color:var(--c-red)">{{ $mAktif->translatedFormat('d F Y') }} (Expired)</span>
-                            @elseif($mAktif->lte(now()->addDays(30)))
+                            @elseif($mAktif->lte(today()->addDays(30)))
                                 <span style="color:#d97706">{{ $mAktif->translatedFormat('d F Y') }} (Expiring soon)</span>
                             @else
                                 {{ $mAktif->translatedFormat('d F Y') }}
@@ -96,6 +153,14 @@
                     <div class="fw-600">{{ $mahasiswa->namaJurusan ?? '-' }}</div>
                 </div>
                 <div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Tipe Mahasiswa</div>
+                    <div class="fw-600">{{ $mahasiswa->tipeMahasiswa ?? '-' }}</div>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Tahun Masuk</div>
+                    <div class="fw-600">{{ $mahasiswa->tahunMasuk ?? '-' }}</div>
+                </div>
+                <div>
                     <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Alamat Asal</div>
                     <div class="fw-600">{{ $mahasiswa->alamatAsal ?? '-' }}</div>
                 </div>
@@ -110,13 +175,15 @@
 
 {{-- ── DOKUMEN ─────────────────────────────────────── --}}
 <div class="sima-card">
-    <h6 class="fw-700 mb-3" style="font-family:var(--f-display);letter-spacing:.5px;padding: 24px 24px 0;">
-        <i class="fas fa-folder-open me-2" style="color:var(--c-accent);"></i>Dokumen Penting
-        <span class="sima-badge sima-badge--blue ms-2">{{ $dokumen->count() }}</span>
-    </h6>
+    <div class="sima-card__header">
+        <div>
+            <h5 class="sima-card__title">Dokumen Penting</h5>
+            <div class="sima-card__subtitle">{{ $dokumen->count() }} dokumen</div>
+        </div>
+    </div>
 
     @if($dokumen->isEmpty())
-        <div class="text-center text-muted py-4" style="padding: 0 24px 24px;">
+        <div class="text-center text-muted py-4" style="padding:0 24px 24px;">
             <i class="fas fa-folder-open fa-2x mb-2 d-block" style="opacity:.3;"></i>
             Belum ada dokumen yang diupload.
         </div>
