@@ -350,11 +350,11 @@ Route::middleware(['auth', 'check.role:KLN'])
             Route::get('mahasiswa',               [TypeController::class, 'tipeMahasiswaIndex'])->name('mahasiswa');
             Route::post('mahasiswa',              [TypeController::class, 'storeTipeMahasiswa'])->name('mahasiswa.store');
             Route::patch('mahasiswa/{id}',        [TypeController::class, 'updateTipeMahasiswa'])->name('mahasiswa.update');
-            Route::delete('mahasiswa/{id}',       [TypeController::class, 'destroyTipeMahasiswa'])->name('mahasiswa.destroy');
+            Route::delete('mahasiswa/{id}',       [TypeController::class, 'destroyTipeMahasiswa'])->name('mahasiswa.toggle');
             Route::get('dokumen',                 [TypeController::class, 'tipeDokumenIndex'])->name('dokumen');
             Route::post('dokumen',                [TypeController::class, 'storeTipeDokumen'])->name('dokumen.store');
             Route::patch('dokumen/{id}',          [TypeController::class, 'updateTipeDokumen'])->name('dokumen.update');
-            Route::delete('dokumen/{id}',         [TypeController::class, 'destroyTipeDokumen'])->name('dokumen.destroy');
+            Route::delete('dokumen/{id}',         [TypeController::class, 'destroyTipeDokumen'])->name('dokumen.toggle');
         });
 
         // Multi-step mahasiswa wizard
