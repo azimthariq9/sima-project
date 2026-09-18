@@ -16,8 +16,8 @@ class TypeController extends Controller
 
     public function tipeMahasiswaIndex()
     {
-        $items = DB::table('tipe_mahasiswa')->orderBy('nama')->get();
-        return view('kln.types.mahasiswa', compact('items'));
+        $types = DB::table('tipe_mahasiswa')->orderBy('nama')->paginate(10)->withQueryString();
+        return view('kln.types.mahasiswa', compact('types'));
     }
 
     public function storeTipeMahasiswa(Request $request)
@@ -84,8 +84,8 @@ class TypeController extends Controller
 
     public function tipeDokumenIndex()
     {
-        $items = DB::table('tipe_dokumen')->orderBy('kategori')->orderBy('nama')->get();
-        return view('kln.types.dokumen', compact('items'));
+        $types = DB::table('tipe_dokumen')->orderBy('kategori')->orderBy('nama')->paginate(10)->withQueryString();
+        return view('kln.types.dokumen', compact('types'));
     }
 
     public function storeTipeDokumen(Request $request)
