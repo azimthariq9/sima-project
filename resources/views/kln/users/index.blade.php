@@ -16,7 +16,10 @@
                     <h5 class="sima-card__title">Users List</h5>
                     {{-- <div class="sima-card__subtitle">kumpulan user yang ada dalam sistem</div> --}}
                 </div>
-                <div>
+                <div style="display:flex;gap:8px">
+                    <a href="{{ route('kln.users.mahasiswa.create') }}" class="sima-btn sima-btn--green">
+                        + Add Mahasiswa
+                    </a>
                     <a href="{{ route('kln.users.create') }}" class="sima-btn sima-btn--blue">
                         + Add User
                     </a>
