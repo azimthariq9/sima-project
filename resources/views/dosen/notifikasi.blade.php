@@ -1,16 +1,16 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Notifikasi')
+@section('page_title',    'Notifications')
 @section('page_section',  'DOSEN')
-@section('page_subtitle', 'Semua notifikasi yang masuk ke akun Anda')
+@section('page_subtitle', 'All notifications sent to your account')
 
 @section('main_content')
 
 <div class="sima-card sima-fade">
     <div class="sima-card__header">
         <div>
-            <h5 class="sima-card__title">Notifikasi</h5>
-            <div class="sima-card__subtitle">Riwayat notifikasi dari sistem</div>
+            <h5 class="sima-card__title">Notifications</h5>
+            <div class="sima-card__subtitle">Notification history from the system</div>
         </div>
     </div>
 
@@ -18,8 +18,8 @@
         @if($notif->isEmpty())
             <div style="text-align:center;padding:48px 20px;color:var(--c-text-3)">
                 <i class="fas fa-bell-slash" style="font-size:36px;opacity:.3;display:block;margin-bottom:12px"></i>
-                <div style="font-size:14px;font-weight:500;color:var(--c-text-2)">Belum ada notifikasi</div>
-                <div style="font-size:12.5px;margin-top:4px">Notifikasi akan muncul di sini saat ada pembaruan.</div>
+                <div style="font-size:14px;font-weight:500;color:var(--c-text-2)">No notifications</div>
+                <div style="font-size:12.5px;margin-top:4px">Notifications will appear here when there are updates.</div>
             </div>
         @else
             @foreach($notif as $n)

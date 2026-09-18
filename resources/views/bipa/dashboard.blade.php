@@ -1,7 +1,7 @@
 @extends('layouts.sima')
 
-@section('page_title', 'Dashboard BIPA')
-@section('page_subtitle', 'Bahasa Indonesia bagi Penutur Asing — Pusat Bahasa Gunadarma')
+@section('page_title', 'BIPA Dashboard')
+@section('page_subtitle', 'Indonesian Language for Foreign Speakers — Gunadarma Language Center')
 
 @section('main_content')
 
@@ -16,10 +16,10 @@
             <div class="sima-stat__icon sima-stat__icon--teal">
                 <i class="fas fa-language"></i>
             </div>
-            <div class="sima-stat__label">Peserta BIPA Aktif</div>
+            <div class="sima-stat__label">Active BIPA Students</div>
             <div class="sima-stat__value" data-count="56">56</div>
             <div class="sima-stat__delta sima-stat__delta--up">
-                <i class="fas fa-arrow-up"></i> +12 semester ini
+                <i class="fas fa-arrow-up"></i> +12 this semester
             </div>
         </div>
     </div>
@@ -30,7 +30,7 @@
             <div class="sima-stat__icon sima-stat__icon--blue">
                 <i class="fas fa-book-open"></i>
             </div>
-            <div class="sima-stat__label">Kelas Aktif</div>
+            <div class="sima-stat__label">Active Classes</div>
             <div class="sima-stat__value" data-count="4">4</div>
             <div class="sima-stat__delta sima-stat__delta--flat">A1 · A2 · B1 · B2</div>
         </div>
@@ -42,10 +42,10 @@
             <div class="sima-stat__icon sima-stat__icon--emerald">
                 <i class="fas fa-clipboard-check"></i>
             </div>
-            <div class="sima-stat__label">Absensi Hari Ini</div>
+            <div class="sima-stat__label">Today's Attendance</div>
             <div class="sima-stat__value" data-count="42">42</div>
             <div class="sima-stat__delta sima-stat__delta--up">
-                <i class="fas fa-arrow-up"></i> 75% kehadiran
+                <i class="fas fa-arrow-up"></i> 75% attendance
             </div>
         </div>
     </div>
@@ -56,10 +56,10 @@
             <div class="sima-stat__icon sima-stat__icon--amber">
                 <i class="fas fa-chart-bar"></i>
             </div>
-            <div class="sima-stat__label">Rata-rata Skor Ujian</div>
+            <div class="sima-stat__label">Average Exam Score</div>
             <div class="sima-stat__value" data-count="78">78</div>
             <div class="sima-stat__delta sima-stat__delta--up">
-                <i class="fas fa-arrow-up"></i> +4 poin dari bulan lalu
+                <i class="fas fa-arrow-up"></i> +4 points from last month
             </div>
         </div>
     </div>
@@ -72,7 +72,7 @@
 <div class="row" style="margin-bottom:4px">
     <div class="col-12 sima-fade sima-fade--4">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
-            <h5 style="font-family:var(--font-display);font-size:18px;font-weight:600;margin:0;color:var(--sima-text-primary)">Status Per Level</h5>
+            <h5 style="font-family:var(--font-display);font-size:18px;font-weight:600;margin:0;color:var(--sima-text-primary)">Status by Level</h5>
             <div style="flex:1;height:1px;background:var(--sima-border-soft)"></div>
         </div>
     </div>
@@ -82,10 +82,10 @@
 
     @php
     $levels = [
-        ['A1', 'Pemula',        16, 18, '#0D9488', '#F0FDFA', 'Dasar percakapan'],
-        ['A2', 'Dasar',         14, 15, '#2563EB', '#EFF6FF', 'Komunikasi harian'],
-        ['B1', 'Menengah',      15, 16, '#7C3AED', '#F5F3FF', 'Topik akademis'],
-        ['B2', 'Atas-Menengah', 11, 12, '#D97706', '#FFFBEB', 'Menulis ilmiah'],
+        ['A1', 'Beginner',        16, 18, '#0D9488', '#F0FDFA', 'Basic conversation'],
+        ['A2', 'Basic',         14, 15, '#2563EB', '#EFF6FF', 'Daily communication'],
+        ['B1', 'Intermediate',      15, 16, '#7C3AED', '#F5F3FF', 'Academic topics'],
+        ['B2', 'Upper-Intermediate', 11, 12, '#D97706', '#FFFBEB', 'Academic writing'],
     ];
     @endphp
 
@@ -104,7 +104,7 @@
                 </div>
 
                 <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-                    <span style="font-size:12px;color:var(--sima-text-secondary)">Peserta</span>
+                    <span style="font-size:12px;color:var(--sima-text-secondary)">Students</span>
                     <span style="font-family:var(--font-mono);font-size:12px;font-weight:600;color:{{ $l[4] }}">{{ $l[2] }}/{{ $l[3] }}</span>
                 </div>
                 <div class="sima-progress" style="margin-bottom:12px">
@@ -113,10 +113,10 @@
 
                 <div style="display:flex;gap:8px">
                     <a href="#" style="flex:1;text-align:center;padding:7px;background:{{ $l[5] }};color:{{ $l[4] }};border-radius:8px;font-size:12px;font-weight:500;text-decoration:none">
-                        <i class="fas fa-clipboard"></i> Absensi
+                        <i class="fas fa-clipboard"></i> Attendance
                     </a>
                     <a href="#" style="flex:1;text-align:center;padding:7px;background:var(--sima-surface-2);color:var(--sima-text-secondary);border-radius:8px;font-size:12px;font-weight:500;text-decoration:none;border:1px solid var(--sima-border-soft)">
-                        <i class="fas fa-chart-bar"></i> Laporan
+                        <i class="fas fa-chart-bar"></i> Reports
                     </a>
                 </div>
 
@@ -137,19 +137,19 @@
         <div class="sima-card">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Jadwal BIPA Hari Ini</h5>
+                    <h5 class="sima-card__title">Today's BIPA Schedule</h5>
                     <div class="sima-card__subtitle">{{ date('l, d F Y') }}</div>
                 </div>
-                <a href="#" class="sima-card__action"><i class="fas fa-plus"></i> Input Jadwal</a>
+                <a href="#" class="sima-card__action"><i class="fas fa-plus"></i> Input Schedule</a>
             </div>
             <div class="sima-card__body">
 
                 @php
                 $schedule = [
-                    ['A1', 'Pemula',        '08:00–10:00', 'Ruang B.01', 16, '#0D9488', 'selesai'],
-                    ['B1', 'Menengah',      '10:00–12:00', 'Ruang B.02', 15, '#7C3AED', 'selesai'],
-                    ['A2', 'Dasar',         '13:00–15:00', 'Ruang B.01', 14, '#2563EB', 'berlangsung'],
-                    ['B2', 'Atas-Menengah', '15:00–17:00', 'Ruang B.03', 11, '#D97706', 'terjadwal'],
+                    ['A1', 'Beginner',        '08:00–10:00', 'Room B.01', 16, '#0D9488', 'selesai'],
+                    ['B1', 'Intermediate',      '10:00–12:00', 'Room B.02', 15, '#7C3AED', 'selesai'],
+                    ['A2', 'Basic',         '13:00–15:00', 'Room B.01', 14, '#2563EB', 'berlangsung'],
+                    ['B2', 'Upper-Intermediate', '15:00–17:00', 'Room B.03', 11, '#D97706', 'terjadwal'],
                 ];
                 @endphp
 
@@ -167,13 +167,13 @@
                         </div>
                     </div>
                     <div style="text-align:right">
-                        <div style="font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--sima-text-primary);margin-bottom:3px">{{ $s[4] }} peserta</div>
+                        <div style="font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--sima-text-primary);margin-bottom:3px">{{ $s[4] }} students</div>
                         @if($s[6]=='selesai')
-                            <span class="sima-badge sima-badge--emerald" style="font-size:10px"><i class="fas fa-check"></i> Selesai</span>
+                            <span class="sima-badge sima-badge--emerald" style="font-size:10px"><i class="fas fa-check"></i> Completed</span>
                         @elseif($s[6]=='berlangsung')
                             <span class="sima-badge sima-badge--blue" style="font-size:10px"><i class="fas fa-circle" style="font-size:6px"></i> Live</span>
                         @else
-                            <span class="sima-badge sima-badge--grey" style="font-size:10px"><i class="fas fa-clock"></i> Terjadwal</span>
+                            <span class="sima-badge sima-badge--grey" style="font-size:10px"><i class="fas fa-clock"></i> Scheduled</span>
                         @endif
                     </div>
                 </div>
@@ -188,8 +188,8 @@
         <div class="sima-card h-100">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Progres Peserta Unggulan</h5>
-                    <div class="sima-card__subtitle">Semester Genap 2025/2026</div>
+                    <h5 class="sima-card__title">Featured Student Progress</h5>
+                    <div class="sima-card__subtitle">Even Semester 2025/2026</div>
                 </div>
             </div>
             <div class="sima-card__body">
@@ -241,44 +241,44 @@
         <div class="sima-card">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Pengumuman BIPA</h5>
-                    <div class="sima-card__subtitle">Informasi untuk peserta kelas bahasa</div>
+                    <h5 class="sima-card__title">BIPA Announcements</h5>
+                    <div class="sima-card__subtitle">Information for language class students</div>
                 </div>
-                <a href="#" class="sima-card__action"><i class="fas fa-plus"></i> Post Baru</a>
+                <a href="#" class="sima-card__action"><i class="fas fa-plus"></i> New Post</a>
             </div>
             <div class="sima-card__body">
 
                 <div class="sima-announce">
                     <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-                        <div class="sima-announce__title">🎉 Pembukaan Kelas BIPA B2 Semester Genap</div>
+                        <div class="sima-announce__title">🎉 BIPA B2 Class Opening Even Semester</div>
                         <span class="sima-badge sima-badge--emerald">Published</span>
                     </div>
-                    <div class="sima-announce__body">Kelas BIPA tingkat B2 resmi dibuka untuk semester genap. Peserta yang lolos seleksi harap konfirmasi kehadiran sebelum 25 Februari 2026.</div>
+                    <div class="sima-announce__body">BIPA B2 level class is officially open for even semester. Selected students please confirm attendance before February 25, 2026.</div>
                     <div class="sima-announce__meta">
-                        <i class="fas fa-users"></i> 11 peserta
-                        <span>· 2 hari lalu</span>
+                        <i class="fas fa-users"></i> 11 students
+                        <span>· 2 days ago</span>
                     </div>
                 </div>
 
                 <div class="sima-announce">
                     <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-                        <div class="sima-announce__title">📝 Ujian Akhir BIPA A1 — 28 Februari</div>
+                        <div class="sima-announce__title">📝 BIPA A1 Final Exam — 28 February</div>
                         <span class="sima-badge sima-badge--emerald">Published</span>
                     </div>
-                    <div class="sima-announce__body">Ujian akhir kelas A1 dijadwalkan 28 Februari 2026 pukul 09.00–11.00 di Ruang BIPA B.01. Materi: percakapan, menulis, dan membaca.</div>
+                    <div class="sima-announce__body">A1 class final exam scheduled February 28, 2026 at 09:00–11:00 at BIPA Room B.01. Topics: conversation, writing, and reading.</div>
                     <div class="sima-announce__meta">
-                        <i class="fas fa-users"></i> 16 peserta
-                        <span>· 4 hari lalu</span>
-                        <span class="sima-badge sima-badge--amber">Penting</span>
+                        <i class="fas fa-users"></i> 16 students
+                        <span>· 4 days ago</span>
+                        <span class="sima-badge sima-badge--amber">Important</span>
                     </div>
                 </div>
 
                 <div class="sima-announce" style="background:#FFFBEB;border-color:var(--sima-border)">
                     <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-                        <div class="sima-announce__title">🗣️ Kegiatan Percakapan — Cultural Night</div>
+                        <div class="sima-announce__title">🗣️ Conversation Activity — Cultural Night</div>
                         <span class="sima-badge sima-badge--amber">Draft</span>
                     </div>
-                    <div class="sima-announce__body">Kegiatan Cultural Night akan diadakan...</div>
+                    <div class="sima-announce__body">Cultural Night activity will be held...</div>
                     <div class="sima-announce__meta">
                         <i class="fas fa-edit"></i> Draft
                         <a href="#" style="color:var(--sima-blue);margin-left:auto">Edit →</a>
@@ -292,18 +292,18 @@
     <div class="col-md-4 mb-4 sima-fade sima-fade--8">
         <div class="sima-card h-100">
             <div class="sima-card__header">
-                <h5 class="sima-card__title">Ringkasan Bulan Ini</h5>
+                <h5 class="sima-card__title">This Month's Summary</h5>
             </div>
             <div class="sima-card__body">
 
                 @php
                 $summary = [
-                    ['Total Sesi Kelas',    '48', 'fas fa-book',          '#2563EB'],
-                    ['Sesi Selesai',         '36', 'fas fa-check-circle',   '#059669'],
-                    ['Peserta Lulus',         '8',  'fas fa-graduation-cap', '#C4973A'],
-                    ['Absensi Rata-rata',    '78%', 'fas fa-chart-pie',      '#0D9488'],
-                    ['Materi Upload',        '12',  'fas fa-file-pdf',       '#7C3AED'],
-                    ['Tugas Dikumpulkan',   '145',  'fas fa-paper-plane',    '#D97706'],
+                    ['Total Class Sessions',    '48', 'fas fa-book',          '#2563EB'],
+                    ['Completed Sessions',         '36', 'fas fa-check-circle',   '#059669'],
+                    ['Graduated Students',         '8',  'fas fa-graduation-cap', '#C4973A'],
+                    ['Average Attendance',    '78%', 'fas fa-chart-pie',      '#0D9488'],
+                    ['Materials Uploaded',        '12',  'fas fa-file-pdf',       '#7C3AED'],
+                    ['Assignments Submitted',   '145',  'fas fa-paper-plane',    '#D97706'],
                 ];
                 @endphp
 

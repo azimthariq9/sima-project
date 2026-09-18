@@ -11,7 +11,7 @@
     <div class="col-6 col-md-3">
         <div class="sima-stat sima-stat--green">
             <div class="sima-stat__icon sima-stat__icon--green"><i class="fas fa-calendar-alt"></i></div>
-            <div class="sima-stat__label">Total Jadwal</div>
+            <div class="sima-stat__label">Total Schedules</div>
             <div class="sima-stat__value">{{ $jadwalList->count() }}</div>
         </div>
     </div>
@@ -25,7 +25,7 @@
               style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <select name="hari" class="sima-input" style="width:140px;" onchange="this.form.submit()">
                 <option value="">All Days</option>
-                @foreach(['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'] as $h)
+                @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $h)
                     <option value="{{ $h }}" {{ request('hari') === $h ? 'selected' : '' }}>{{ $h }}</option>
                 @endforeach
             </select>

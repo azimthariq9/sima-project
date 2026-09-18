@@ -27,7 +27,7 @@
                 {{-- Kode MK --}}
                 <div>
                     <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">
-                        Kode Mata Kuliah
+                        Course Code
                     </label>
                     <input type="text" name="kodeMk" class="sima-input mt-1"
                            placeholder="e.g., IT012236">
@@ -36,7 +36,7 @@
                 {{-- Nama MK --}}
                 <div>
                     <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">
-                        Nama Mata Kuliah <span style="color:var(--c-red)">*</span>
+                        Course Name <span style="color:var(--c-red)">*</span>
                     </label>
                     <input type="text" name="namaMk" class="sima-input mt-1"
                            placeholder="e.g., Data Structures" required>
@@ -45,7 +45,7 @@
                 {{-- SKS --}}
                 <div>
                     <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">
-                        SKS
+                        Credits
                     </label>
                     <input type="number" name="sks" class="sima-input mt-1"
                            min="1" max="6" placeholder="1–6">
@@ -54,7 +54,7 @@
                 {{-- Keterangan --}}
                 <div>
                     <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">
-                        Keterangan
+                        Description
                         <span style="font-weight:400;color:var(--c-text-3);font-size:11px;">(Max 5 characters)</span>
                     </label>
                     <input type="text" name="keterangan" class="sima-input mt-1"

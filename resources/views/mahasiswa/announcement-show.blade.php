@@ -2,7 +2,7 @@
 
 @section('page_title', $ann->subject)
 @section('page_section', 'Mahasiswa')
-@section('page_subtitle', 'Detail Pengumuman')
+@section('page_subtitle', 'Announcement Detail')
 
 @push('styles')
 <style>
@@ -92,7 +92,7 @@ $fileSize = function($bytes) {
     {{-- Back --}}
     <div class="sima-fade" style="margin-bottom:16px">
         <a href="{{ route('mahasiswa.announcement') }}" class="sima-btn sima-btn--sm sima-btn--outline">
-            <i class="fas fa-arrow-left"></i> Kembali
+            <i class="fas fa-arrow-left"></i> Back
         </a>
     </div>
 
@@ -105,7 +105,7 @@ $fileSize = function($bytes) {
                 <span class="sima-badge {{ $sumberBadge }}">{{ $ann->sumber ?? 'KLN' }}</span>
                 @if($ann->is_penting)
                     <span class="sima-badge sima-badge--amber">
-                        <i class="fas fa-triangle-exclamation"></i> Penting
+                        <i class="fas fa-triangle-exclamation"></i> Important
                     </span>
                 @endif
             </div>
@@ -144,8 +144,8 @@ $fileSize = function($bytes) {
     <div class="sima-card sima-fade sima-fade--1" style="margin-top:14px">
         <div class="sima-card__header">
             <div>
-                <h5 class="sima-card__title">Lampiran</h5>
-                <div class="sima-card__subtitle">{{ $files->count() }} file terlampir</div>
+                <h5 class="sima-card__title">Attachments</h5>
+                <div class="sima-card__subtitle">{{ $files->count() }} file attached</div>
             </div>
         </div>
         <div class="sima-card__body">

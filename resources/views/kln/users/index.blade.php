@@ -1,7 +1,7 @@
 <x-app-layout>
 @section('page_title',    'User Index')
 @section('page_section',  'KERJA SAMA LUAR NEGERI')
-@section('page_subtitle', 'Pengelolaan Akun Admin, Mahasiswa, dan Dosen')
+@section('page_subtitle', 'Manage Admin, Student, and Lecturer accounts')
     {{-- <x-slot name="header">
         <h2 class="text-2xl font-bold text-white">
             Users KLN
@@ -18,7 +18,7 @@
                 </div>
                 <div style="display:flex;gap:8px">
                     <a href="{{ route('kln.users.mahasiswa.create') }}" class="sima-btn sima-btn--green">
-                        + Add Mahasiswa
+                        + Add Student
                     </a>
                     <a href="{{ route('kln.users.create') }}" class="sima-btn sima-btn--blue">
                         + Add User
@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const info = document.createElement('div');
         info.style.cssText = 'font-size:12px;color:var(--c-text-3);';
-        info.textContent = `Menampilkan ${from}–${to} dari ${total} users`;
+        info.textContent = `Showing ${from}–${to} of ${total} users`;
         container.appendChild(info);
 
         const nav = document.createElement('div');
@@ -322,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
     ==========================*/
 
     window.deleteUser = function(userId) {
-        if (confirm('Apakah Anda yakin ingin menghapus user ini?')) {
+        if (confirm('Are you sure you want to delete this user?')) {
             fetch(`/kln/users/${userId}`, {
                 method: "DELETE",
                 headers: {

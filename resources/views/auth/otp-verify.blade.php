@@ -1,10 +1,10 @@
 {{-- resources/views/auth/otp-verify.blade.php --}}
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Verifikasi OTP — SIMA</title>
+<title>OTP Verification — SIMA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -94,9 +94,9 @@ html, body { min-height:100%;background:var(--bg);font-family:'Plus Jakarta Sans
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
             </div>
-            <div class="title">Masukkan Kode OTP</div>
+            <div class="title">Enter OTP Code</div>
             <div class="sub">
-                Kode 6-digit telah dikirim ke<br>
+                A 6-digit code has been sent to<br>
                 <span class="email-chip">{{ session('otp_email') }}</span>
             </div>
         </div>
@@ -126,7 +126,7 @@ html, body { min-height:100%;background:var(--bg);font-family:'Plus Jakarta Sans
         <form method="POST" action="{{ route('otp.verify.submit') }}" id="otpForm">
             @csrf
             <div class="field">
-                <label>Kode OTP</label>
+                <label>OTP Code</label>
                 <div class="otp-wrap">
                     @for($i = 0; $i < 6; $i++)
                         <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]"
@@ -137,22 +137,22 @@ html, body { min-height:100%;background:var(--bg);font-family:'Plus Jakarta Sans
             </div>
 
             <button type="submit" class="btn-submit" id="btnSubmit">
-                Verifikasi & Masuk
+                Verify & Sign In
             </button>
         </form>
 
         <div class="resend-row">
-            Tidak menerima kode?
+            Didn't receive the code?
             <form method="POST" action="{{ route('otp.resend') }}" style="display:inline">
                 @csrf
-                <button type="submit" class="resend-btn" id="resendBtn">Kirim ulang</button>
+                <button type="submit" class="resend-btn" id="resendBtn">Resend</button>
             </form>
             <span id="countdown" style="display:none;color:var(--muted)"></span>
         </div>
 
         <a href="{{ route('login') }}" class="back-link">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-            Kembali ke halaman login
+            Back to login page
         </a>
     </div>
 </div>
@@ -197,14 +197,14 @@ document.getElementById('otpForm').addEventListener('submit', function(e) {
     syncHidden();
     if (hidden.value.length !== 6) {
         e.preventDefault();
-        alertErr.textContent = 'Masukkan semua 6 digit kode OTP.';
+        alertErr.textContent = 'Enter all 6 digits of the OTP code.';
         alertErr.style.display = 'flex';
         digits.forEach(d => d.classList.add('err'));
         return;
     }
     alertErr.style.display = 'none';
     document.getElementById('btnSubmit').disabled = true;
-    document.getElementById('btnSubmit').textContent = 'Memverifikasi…';
+    document.getElementById('btnSubmit').textContent = 'Verifying…';
 });
 
 // Countdown resend (60 detik)

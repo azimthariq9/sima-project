@@ -1,22 +1,22 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Buat Pengumuman')
+@section('page_title',    'Create Announcement')
 @section('page_section',  'PENGUMUMAN')
-@section('page_subtitle', 'Tulis pengumuman baru untuk mahasiswa')
+@section('page_subtitle', 'Write a new announcement for students')
 
 @section('main_content')
 
 <div class="mb-3">
     <a href="{{ route('kln.announcement') }}" class="sima-btn sima-btn--outline sima-btn--sm">
-        <i class="fas fa-arrow-left me-1"></i> Kembali
+        <i class="fas fa-arrow-left me-1"></i> Back
     </a>
 </div>
 
 <div class="sima-card">
     <div style="padding:20px 24px;border-bottom:1px solid var(--c-border);">
-        <h5 style="font-weight:700;font-family:var(--f-display);margin:0;">Buat Pengumuman Baru</h5>
+        <h5 style="font-weight:700;font-family:var(--f-display);margin:0;">Create New Announcement</h5>
         <div style="font-size:13px;color:var(--c-text-3);margin-top:2px;">
-            Pengumuman aktif akan langsung tampil di halaman mahasiswa.
+            Active announcements will be displayed directly to students.
         </div>
     </div>
 
@@ -27,7 +27,7 @@
         @if($errors->any())
         <div style="background:rgba(239,68,68,.1);border:1px solid var(--c-red);border-radius:10px;
                     padding:12px 16px;margin-bottom:20px;color:var(--c-red);font-size:13px;">
-            <strong>Terdapat kesalahan:</strong>
+            <strong>There are errors:</strong>
             <ul style="margin:6px 0 0 16px;padding:0;">
                 @foreach($errors->all() as $err)<li>{{ $err }}</li>@endforeach
             </ul>
@@ -39,21 +39,21 @@
             {{-- Judul --}}
             <div>
                 <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">
-                    Judul Pengumuman
+                    Announcement Title
                 </label>
                 <input type="text" name="subject" class="sima-input mt-1"
                        value="{{ old('subject') }}"
-                       placeholder="Contoh: Outing Class Semester Ganjil 2025/2026"
+                       placeholder="Example: Outing Class Odd Semester 2025/2026"
                        required>
             </div>
 
             {{-- Isi --}}
             <div>
                 <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">
-                    Isi Pengumuman
+                    Announcement Content
                 </label>
                 <textarea name="message" class="sima-input mt-1" rows="10"
-                          placeholder="Tulis isi pengumuman secara lengkap di sini..."
+                          placeholder="Write the full announcement content here..."
                           required style="resize:vertical;min-height:220px;line-height:1.7;">{{ old('message') }}</textarea>
             </div>
 
@@ -61,23 +61,23 @@
             <div class="row g-3">
                 <div class="col-12 col-md-6">
                     <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">
-                        Status Publikasi
+                        Publication Status
                     </label>
                     <select name="status" class="sima-input mt-1" required>
                         <option value="draft"    {{ old('status', 'draft') === 'draft'    ? 'selected' : '' }}>
-                            Draft — belum tampil ke mahasiswa
+                            Draft — not visible to students
                         </option>
                         <option value="active"   {{ old('status') === 'active'   ? 'selected' : '' }}>
-                            Aktif — langsung tampil
+                            Active — visible immediately
                         </option>
                         <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>
-                            Nonaktif — sembunyikan
+                            Inactive — hidden
                         </option>
                     </select>
                 </div>
                 <div class="col-12 col-md-6">
                     <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">
-                        Tandai Penting
+                        Mark as Important
                     </label>
                     <div style="margin-top:12px;display:flex;align-items:center;gap:10px;">
                         <input type="checkbox" name="is_penting" id="isPenting" value="1"
@@ -85,8 +85,8 @@
                                style="width:18px;height:18px;accent-color:var(--c-red);cursor:pointer;">
                         <label for="isPenting"
                                style="font-size:13px;color:var(--c-text-2);cursor:pointer;line-height:1.4;">
-                            Tandai sebagai pengumuman penting<br>
-                            <span style="font-size:11px;color:var(--c-text-3);">Akan ditampilkan dengan badge merah</span>
+                            Mark as important announcement<br>
+                            <span style="font-size:11px;color:var(--c-text-3);">Will be displayed with a red badge</span>
                         </label>
                     </div>
                 </div>
@@ -95,7 +95,7 @@
             {{-- Lampiran --}}
             <div>
                 <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">
-                    Lampiran <span style="font-weight:400;color:var(--c-text-3);">(opsional)</span>
+                    Attachment <span style="font-weight:400;color:var(--c-text-3);">(optional)</span>
                 </label>
                 <div style="margin-top:8px;border:2px dashed var(--c-border);border-radius:10px;
                             padding:28px 20px;text-align:center;cursor:pointer;transition:border-color .2s;"
@@ -106,10 +106,10 @@
                            style="display:none;" onchange="previewFiles(this)">
                     <i class="fas fa-cloud-upload-alt fa-2x" style="color:var(--c-accent);display:block;margin-bottom:10px;"></i>
                     <div style="font-size:13px;font-weight:600;color:var(--c-text-2);">
-                        Klik untuk pilih file
+                        Click to select file
                     </div>
                     <div style="font-size:11px;color:var(--c-text-3);margin-top:4px;">
-                        Gambar (JPG, PNG, GIF, WEBP), PDF, DOC &middot; Maks. 5 MB per file
+                        Images (JPG, PNG, GIF, WEBP), PDF, DOC &middot; Max. 5 MB per file
                     </div>
                 </div>
                 <div id="filePreview" style="margin-top:10px;display:flex;flex-direction:column;gap:6px;"></div>
@@ -118,10 +118,10 @@
             {{-- Buttons --}}
             <div style="display:flex;gap:8px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--c-border);">
                 <a href="{{ route('kln.announcement') }}" class="sima-btn sima-btn--outline">
-                    Batal
+                    Cancel
                 </a>
                 <button type="submit" class="sima-btn sima-btn--accent">
-                    <i class="fas fa-paper-plane me-1"></i> Simpan Pengumuman
+                    <i class="fas fa-paper-plane me-1"></i> Save Announcement
                 </button>
             </div>
 

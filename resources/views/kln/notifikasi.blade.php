@@ -11,14 +11,14 @@
     <div class="col-6 col-md-3">
         <div class="sima-stat sima-stat--red">
             <div class="sima-stat__icon sima-stat__icon--red"><i class="fas fa-exclamation-circle"></i></div>
-            <div class="sima-stat__label">Dokumen Kadaluwarsa</div>
+            <div class="sima-stat__label">Expired Documents</div>
             <div class="sima-stat__value">{{ $stats['expired'] }}</div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="sima-stat sima-stat--amber">
             <div class="sima-stat__icon sima-stat__icon--amber"><i class="fas fa-clock"></i></div>
-            <div class="sima-stat__label">Hampir Kadaluwarsa</div>
+            <div class="sima-stat__label">Expiring Soon</div>
             <div class="sima-stat__value">{{ $stats['nearExpired'] }}</div>
         </div>
     </div>
@@ -43,7 +43,7 @@
     <div class="sima-card__header" style="border-left: 4px solid var(--c-red);">
         <div style="display:flex;align-items:center;gap:8px;">
             <i class="fas fa-exclamation-circle" style="color:var(--c-red);"></i>
-            <h5 class="sima-card__title" style="margin:0;">Dokumen Sudah Kadaluwarsa</h5>
+            <h5 class="sima-card__title" style="margin:0;">Expired Documents</h5>
             <span class="sima-badge sima-badge--red">{{ $stats['expired'] }}</span>
         </div>
     </div>
@@ -61,7 +61,7 @@
                     <th>Student</th>
                     <th>Major</th>
                     <th>Document Type</th>
-                    <th style="text-align:center;">Tgl Kadaluwarsa</th>
+                    <th style="text-align:center;">Expiry Date</th>
                     <th></th>
                 </tr>
             </thead>
@@ -98,7 +98,7 @@
     <div class="sima-card__header" style="border-left: 4px solid var(--c-amber);">
         <div style="display:flex;align-items:center;gap:8px;">
             <i class="fas fa-clock" style="color:var(--c-amber);"></i>
-            <h5 class="sima-card__title" style="margin:0;">Dokumen Hampir Kadaluwarsa <small style="font-weight:400;font-size:12px;color:var(--c-text-3);">(≤ 30 hari)</small></h5>
+            <h5 class="sima-card__title" style="margin:0;">Expiring Soon <small style="font-weight:400;font-size:12px;color:var(--c-text-3);">(≤ 30 days)</small></h5>
             <span class="sima-badge sima-badge--amber">{{ $stats['nearExpired'] }}</span>
         </div>
     </div>
@@ -116,8 +116,8 @@
                     <th>Student</th>
                     <th>Major</th>
                     <th>Document Type</th>
-                    <th style="text-align:center;">Kadaluwarsa</th>
-                    <th style="text-align:center;">Sisa Hari</th>
+                    <th style="text-align:center;">Expiry</th>
+                    <th style="text-align:center;">Days Left</th>
                     <th></th>
                 </tr>
             </thead>
@@ -140,7 +140,7 @@
                         {{ \Carbon\Carbon::parse($doc->tglKdlwrs)->isoFormat('D MMM YYYY') }}
                     </td>
                     <td style="text-align:center;">
-                        <span class="sima-badge {{ $sisaBadge }}">{{ $sisa }} hari</span>
+                        <span class="sima-badge {{ $sisaBadge }}">{{ $sisa }} days</span>
                     </td>
                     <td>
                         <a href="{{ route('kln.students.mahasiswa', $doc->mahasiswa_id) }}"
@@ -198,7 +198,7 @@
                     <td>
                         <a href="{{ route('kln.users.page') }}"
                            class="sima-btn sima-btn--outline sima-btn--sm">
-                            <i class="fas fa-key me-1"></i> Kelola
+                            <i class="fas fa-key me-1"></i> Manage
                         </a>
                     </td>
                 </tr>
@@ -232,8 +232,8 @@
                     <th>Student</th>
                     <th>Major</th>
                     <th>Document Type</th>
-                    <th style="text-align:center;">Tanggal Request</th>
-                    <th style="text-align:center;">Menunggu</th>
+                    <th style="text-align:center;">Request Date</th>
+                    <th style="text-align:center;">Waiting</th>
                     <th></th>
                 </tr>
             </thead>
@@ -256,7 +256,7 @@
                         {{ \Carbon\Carbon::parse($req->created_at)->isoFormat('D MMM YYYY') }}
                     </td>
                     <td style="text-align:center;">
-                        <span class="sima-badge {{ $menungguBadge }}">{{ $menunggu }} hari</span>
+                        <span class="sima-badge {{ $menungguBadge }}">{{ $menunggu }} days</span>
                     </td>
                     <td>
                         <a href="{{ route('kln.dokumen.page') }}"

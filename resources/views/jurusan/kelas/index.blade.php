@@ -105,7 +105,7 @@ for ($i = -1; $i <= 10; $i++) {
         <div style="overflow-x:auto">
             <table class="sima-table">
                 <thead>
-                    <tr><th>#</th><th>NPM</th><th>Nama</th><th>Email</th><th style="width:80px"></th></tr>
+                    <tr><th>#</th><th>NPM</th><th>Name</th><th>Email</th><th style="width:80px"></th></tr>
                 </thead>
                 <tbody id="mhsPanelTbody">
                     <tr><td colspan="5" style="padding:24px;text-align:center;color:var(--c-text-3)">Select a class to view students</td></tr>

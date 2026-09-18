@@ -8,7 +8,7 @@
 
 @if($errors->any())
 <div style="background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.2);border-radius:10px;padding:14px 18px;margin-bottom:16px">
-    <div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:6px"><i class="fas fa-circle-exclamation"></i> Periksa isian berikut:</div>
+    <div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:6px"><i class="fas fa-circle-exclamation"></i> Please check the following:</div>
     @foreach($errors->all() as $error)
         <div style="font-size:12.5px;color:#b91c1c;margin-top:3px">· {{ $error }}</div>
     @endforeach
@@ -25,7 +25,7 @@
             <div class="sima-card__header">
                 <div style="flex:1;min-width:0">
                     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                        <h5 class="sima-card__title" style="margin-bottom:0">Edit Dokumen</h5>
+                        <h5 class="sima-card__title" style="margin-bottom:0">Edit Document</h5>
                         <span class="sima-badge sima-badge--{{ $dok->status === 'approved' ? 'green' : ($dok->status === 'rejected' ? 'red' : 'blue') }}">
                             {{ ucfirst($dok->status) }}
                         </span>
@@ -38,7 +38,7 @@
                 @if($dok->status === 'approved')
                 <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:12px 16px;margin-bottom:18px">
                     <div style="font-size:12.5px;color:#b45309">
-                        <i class="fas fa-triangle-exclamation"></i> Dokumen yang sudah disetujui akan kembali ke status <strong>Pending</strong> setelah diedit.
+                        <i class="fas fa-triangle-exclamation"></i> Documents that have been approved will revert to <strong>Pending</strong> status after editing.
                     </div>
                 </div>
                 @endif
@@ -49,10 +49,10 @@
 
                     <div style="margin-bottom:18px">
                         <label class="sima-label">
-                            Jenis Dokumen <span style="color:var(--c-red)">*</span>
+                            Document Type <span style="color:var(--c-red)">*</span>
                         </label>
                         <select name="tipeDkmn" class="sima-input" required>
-                            <option value="">— Pilih —</option>
+                            <option value="">— Select —</option>
                             @foreach (\App\Enums\TipeDok::cases() as $tipe)
                                 <option value="{{ $tipe->value }}" {{ old('tipeDkmn', $dok->tipeDkmn) == $tipe->value ? 'selected' : '' }}>
                                     {{ str_replace('_', ' ', $tipe->value) }}
@@ -68,7 +68,7 @@
 
                     <div style="margin-bottom:18px">
                         <label class="sima-label">
-                            Nomor Dokumen <span style="color:var(--c-red)">*</span>
+                            Document Number <span style="color:var(--c-red)">*</span>
                         </label>
                         <input type="text" name="noDkmn" class="sima-input" value="{{ old('noDkmn', $dok->noDkmn) }}" required>
                         @error('noDkmn')
@@ -81,7 +81,7 @@
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
                         <div>
                             <label class="sima-label">
-                                Tanggal Terbit <span style="color:var(--c-red)">*</span>
+                                Issue Date <span style="color:var(--c-red)">*</span>
                             </label>
                             <input type="date" name="tglTerbit" class="sima-input"
                                 value="{{ old('tglTerbit', $dok->tglTerbit ? date('Y-m-d', strtotime($dok->tglTerbit)) : '') }}" required>
@@ -93,7 +93,7 @@
                         </div>
                         <div>
                             <label class="sima-label">
-                                Berlaku s/d <span style="color:var(--c-red)">*</span>
+                                Valid Until <span style="color:var(--c-red)">*</span>
                             </label>
                             <input type="date" name="tglKdlwrs" class="sima-input"
                                 value="{{ old('tglKdlwrs', $dok->tglKdlwrs ? date('Y-m-d', strtotime($dok->tglKdlwrs)) : '') }}" required>
@@ -107,10 +107,10 @@
 
                     <div style="margin-bottom:18px">
                         <label class="sima-label">
-                            Penerbit <span style="color:var(--c-red)">*</span>
+                            Issuer <span style="color:var(--c-red)">*</span>
                         </label>
                         <select name="penerbit" class="sima-input" required>
-                            <option value="">— Pilih penerbit —</option>
+                            <option value="">— Select issuer —</option>
                             @foreach (\App\Enums\Penerbit::cases() as $p)
                                 <option value="{{ $p->value }}" {{ old('penerbit', $dok->penerbit) == $p->value ? 'selected' : '' }}>
                                     {{ $p->value }}
@@ -125,10 +125,10 @@
                     </div>
 
                     <div style="margin-bottom:18px">
-                        <label class="sima-label">Ganti File (opsional)</label>
+                        <label class="sima-label">Replace File (optional)</label>
                         <input type="file" name="file" class="sima-input" accept=".pdf,.jpg,.jpeg,.png"
                             style="padding:7px 12px;font-size:12.5px">
-                        <div style="font-size:11.5px;color:var(--c-text-3);margin-top:4px">Kosongkan jika tidak ingin mengganti file</div>
+                        <div style="font-size:11.5px;color:var(--c-text-3);margin-top:4px">Leave empty if you don't want to replace the file</div>
                         @error('file')
                             <div style="font-size:12px;color:var(--c-red);margin-top:5px">
                                 <i class="fas fa-exclamation-circle"></i> {{ $message }}
@@ -137,8 +137,8 @@
                     </div>
 
                     <div style="display:flex;gap:10px;margin-top:24px">
-                        <button type="submit" class="sima-btn"><i class="fas fa-save"></i> Simpan</button>
-                        <a href="{{ route('mahasiswa.dokumen.index') }}" class="sima-btn sima-btn--outline">Batal</a>
+                        <button type="submit" class="sima-btn"><i class="fas fa-save"></i> Save</button>
+                        <a href="{{ route('mahasiswa.dokumen.index') }}" class="sima-btn sima-btn--outline">Cancel</a>
                     </div>
                 </form>
             </div>
@@ -149,7 +149,7 @@
         <div class="sima-alert sima-alert--blue">
             <i class="fas fa-info-circle sima-alert__icon"></i>
             <div class="sima-alert__text" style="font-size:12.5px">
-                <strong>Catatan:</strong> Perubahan dokumen akan memicu ulang verifikasi oleh KLN. Pastikan data sudah benar sebelum menyimpan.
+                <strong>Note:</strong> Document changes will trigger re-verification by KLN. Make sure data is correct before saving.
             </div>
         </div>
     </div>

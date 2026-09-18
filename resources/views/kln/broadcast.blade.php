@@ -36,7 +36,7 @@
                     <div class="mb-3">
                         <label class="sima-label">Notification Message <span style="color:var(--c-red)">*</span></label>
                         <textarea name="message" rows="5" class="sima-input @error('message') is-invalid @enderror"
-                                  placeholder="Tulis isi notifikasi di sini..." required>{{ old('message') }}</textarea>
+                                  placeholder="Write notification content here..." required>{{ old('message') }}</textarea>
                         @error('message')<div class="invalid-feedback" style="color:var(--c-red);font-size:12px;">{{ $message }}</div>@enderror
                     </div>
 
@@ -113,7 +113,7 @@
                             </div>
                         </div>
                         <div style="font-size:11px;color:var(--c-text-3);margin-top:4px;" id="mhsCount">
-                            {{ $mahasiswaList->count() }} mahasiswa aktif
+                            {{ $mahasiswaList->count() }} active students
                         </div>
                         @error('mahasiswa_ids')<div style="color:var(--c-red);font-size:12px;margin-top:4px;">{{ $message }}</div>@enderror
                     </div>
@@ -138,8 +138,8 @@
             @php
                 $typeMap = [
                     'broadcast'    => ['label' => 'Broadcast',    'cls' => 'sima-badge--blue',   'ic' => 'fa-bullhorn'],
-                    'document'     => ['label' => 'Dokumen',      'cls' => 'sima-badge--green',  'ic' => 'fa-file-alt'],
-                    'account'      => ['label' => 'Akun',         'cls' => 'sima-badge--purple', 'ic' => 'fa-user-check'],
+                    'document'     => ['label' => 'Document',      'cls' => 'sima-badge--green',  'ic' => 'fa-file-alt'],
+                    'account'      => ['label' => 'Account',         'cls' => 'sima-badge--purple', 'ic' => 'fa-user-check'],
                     'announcement' => ['label' => 'Announcement',   'cls' => 'sima-badge--amber',  'ic' => 'fa-bell'],
                 ];
                 $tm = $typeMap[$notif->type] ?? ['label' => $notif->type, 'cls' => '', 'ic' => 'fa-bell'];
@@ -212,7 +212,7 @@ function filterMhsPicker() {
     });
 
     document.getElementById('mhsEmpty').style.display = visible === 0 ? '' : 'none';
-    document.getElementById('mhsCount').textContent   = visible + ' mahasiswa ditampilkan';
+    document.getElementById('mhsCount').textContent   = visible + ' students shown';
 }
 
 function resetMhsFilter() {

@@ -2,7 +2,7 @@
 
 @section('page_title',    $mahasiswa->nama)
 @section('page_section',  'STUDENTS & LECTURERS')
-@section('page_subtitle', 'Detail data mahasiswa')
+@section('page_subtitle', 'Student detail data')
 
 @section('main_content')
 
@@ -17,7 +17,7 @@
 {{-- ── BACK BUTTON ─────────────────────────────────── --}}
 <div class="mb-3">
     <a href="{{ route('kln.students.page') }}" class="sima-btn sima-btn--outline sima-btn--sm">
-        <i class="fas fa-arrow-left me-1"></i> Kembali
+        <i class="fas fa-arrow-left me-1"></i> Back
     </a>
 </div>
 
@@ -36,7 +36,7 @@
             <div class="d-flex gap-2 flex-wrap" style="margin-top:4px;">
                 <span class="sima-badge sima-badge--blue">Mahasiswa</span>
                 <span class="sima-badge {{ $mahasiswa->status === 'active' ? 'sima-badge--green' : 'sima-badge--red' }}">
-                    {{ $mahasiswa->status === 'active' ? 'Aktif' : 'Nonaktif' }}
+                    {{ $mahasiswa->status === 'active' ? 'Active' : 'Inactive' }}
                 </span>
                 @if($mahasiswa->namaJurusan)
                     <span class="sima-badge sima-badge--amber">{{ $mahasiswa->namaJurusan }}</span>
@@ -96,7 +96,7 @@
 {{-- ── PERSONAL INFO ───────────────────────────────── --}}
 <div class="sima-card mb-4" style="padding:24px;">
     <h6 class="fw-700 mb-3" style="font-family:var(--f-display);letter-spacing:.5px;">
-        <i class="fas fa-id-card me-2" style="color:var(--c-accent);"></i>Informasi Pribadi
+        <i class="fas fa-id-card me-2" style="color:var(--c-accent);"></i>Personal Information
     </h6>
     <div class="row g-3">
         <div class="col-12 col-md-6">
@@ -110,21 +110,21 @@
                     <div class="fw-600">{{ $mahasiswa->email ?? '-' }}</div>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">No. WhatsApp</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">WhatsApp Number</div>
                     <div class="fw-600">{{ $mahasiswa->noWa ?? '-' }}</div>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">No. Darurat</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Emergency Number</div>
                     <div class="fw-600">{{ $mahasiswa->noDarurat ?? '-' }}</div>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Tanggal Lahir</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Date of Birth</div>
                     <div class="fw-600">
                         {{ $mahasiswa->tglLahir ? \Carbon\Carbon::parse($mahasiswa->tglLahir)->translatedFormat('d F Y') : '-' }}
                     </div>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Masa Aktif</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Active Period</div>
                     <div class="fw-600">
                         @if($mahasiswa->masaAktif)
                             @php $mAktif = \Carbon\Carbon::parse($mahasiswa->masaAktif); @endphp
@@ -145,27 +145,27 @@
         <div class="col-12 col-md-6">
             <div class="d-flex flex-column gap-3">
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Kewarganegaraan</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Nationality</div>
                     <div class="fw-600">{{ $mahasiswa->warNeg ?? '-' }}</div>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Jurusan</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Department</div>
                     <div class="fw-600">{{ $mahasiswa->namaJurusan ?? '-' }}</div>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Tipe Mahasiswa</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Student Type</div>
                     <div class="fw-600">{{ $mahasiswa->tipeMahasiswa ?? '-' }}</div>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Tahun Masuk</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Enrollment Year</div>
                     <div class="fw-600">{{ $mahasiswa->tahunMasuk ?? '-' }}</div>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Alamat Asal</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Home Address</div>
                     <div class="fw-600">{{ $mahasiswa->alamatAsal ?? '-' }}</div>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Alamat di Indonesia</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Indonesia Address</div>
                     <div class="fw-600">{{ $mahasiswa->alamatIndo ?? '-' }}</div>
                 </div>
             </div>
@@ -177,15 +177,15 @@
 <div class="sima-card">
     <div class="sima-card__header">
         <div>
-            <h5 class="sima-card__title">Dokumen Penting</h5>
-            <div class="sima-card__subtitle">{{ $dokumen->count() }} dokumen</div>
+            <h5 class="sima-card__title">Important Documents</h5>
+            <div class="sima-card__subtitle">{{ $dokumen->count() }} documents</div>
         </div>
     </div>
 
     @if($dokumen->isEmpty())
         <div class="text-center text-muted py-4" style="padding:0 24px 24px;">
             <i class="fas fa-folder-open fa-2x mb-2 d-block" style="opacity:.3;"></i>
-            Belum ada dokumen yang diupload.
+            No documents uploaded.
         </div>
     @else
     <div class="table-responsive">
@@ -193,13 +193,13 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Tipe Dokumen</th>
-                    <th>Nama Dokumen</th>
-                    <th>Penerbit</th>
-                    <th>No. Dokumen</th>
-                    <th>Terbit</th>
-                    <th>Kedaluwarsa</th>
-                    <th>Kondisi</th>
+                    <th>Document Type</th>
+                    <th>Document Name</th>
+                    <th>Issuer</th>
+                    <th>Doc. Number</th>
+                    <th>Issued</th>
+                    <th>Expiry</th>
+                    <th>Condition</th>
                     <th>Status</th>
                     <th>File</th>
                 </tr>
@@ -221,7 +221,7 @@
                         $kondisiIcon  = 'fa-exclamation-triangle';
                     } elseif ($expiry) {
                         $kondisiBadge = 'sima-badge--green';
-                        $kondisiLabel = 'Aman';
+                        $kondisiLabel = 'Valid';
                         $kondisiIcon  = 'fa-check-circle';
                     } else {
                         $kondisiBadge = '';
@@ -273,10 +273,10 @@
                             <div style="display:flex;gap:6px;">
                                 <button class="sima-btn sima-btn--outline sima-btn--sm"
                                         onclick="previewFile('{{ $previewUrl }}', '{{ $isImage ? 'image' : 'pdf' }}')"
-                                        title="Lihat file">
+                                        title="View file">
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                <a href="{{ $downloadUrl }}" class="sima-btn sima-btn--outline sima-btn--sm" title="Unduh file">
+                                <a href="{{ $downloadUrl }}" class="sima-btn sima-btn--outline sima-btn--sm" title="Download file">
                                     <i class="fas fa-download"></i>
                                 </a>
                             </div>
@@ -299,7 +299,7 @@
                 height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);">
         <div style="display:flex;align-items:center;justify-content:space-between;
                     padding:14px 20px;border-bottom:1px solid var(--c-border);">
-            <span style="font-weight:600;font-size:14px;">Preview Dokumen</span>
+            <span style="font-weight:600;font-size:14px;">Document Preview</span>
             <button onclick="closePreview()" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--c-text-3);">
                 <i class="fas fa-times"></i>
             </button>
@@ -333,12 +333,12 @@ document.querySelectorAll('.status-select').forEach(sel => {
         .then(r => r.json())
         .then(data => {
             if (!data.success) {
-                alert('Gagal mengubah status.');
+                alert('Failed to change status.');
                 this.value = orig ? orig.value : 'pending';
             }
         })
         .catch(() => {
-            alert('Terjadi kesalahan.');
+            alert('An error occurred.');
         });
     });
 });

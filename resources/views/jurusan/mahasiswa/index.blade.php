@@ -114,7 +114,7 @@
                     <div id="dm-warNeg" style="font-size:12.5px;font-weight:500;color:#1e293b"></div>
                 </div>
                 <div style="padding:11px;background:#f8fafc;border-radius:10px;border:1px solid #f1f5f9">
-                    <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px">Masa Aktif</div>
+                    <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px">Active Period</div>
                     <div id="dm-masaAktif" style="font-size:12.5px;font-weight:500;color:#1e293b"></div>
                 </div>
             </div>

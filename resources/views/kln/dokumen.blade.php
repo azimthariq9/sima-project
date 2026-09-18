@@ -70,7 +70,7 @@
                     <th>Description</th>
                     <th>Status</th>
                     <th>Date</th>
-                    <th style="text-align:center">Aksi</th>
+                    <th style="text-align:center">Actions</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -135,7 +135,7 @@
         <div style="padding:20px 24px 16px;border-bottom:1px solid var(--c-border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--c-surface);z-index:1;">
             <div>
                 <div style="font-size:15px;font-weight:700;color:var(--c-text-1)">Document Request Detail</div>
-                <div id="modalSubtitle" style="font-size:12px;color:var(--c-text-3);margin-top:2px">Tinjau permintaan dokumen mahasiswa</div>
+                <div id="modalSubtitle" style="font-size:12px;color:var(--c-text-3);margin-top:2px">Review student document request</div>
             </div>
             <button onclick="closeModal()" style="width:32px;height:32px;border:1px solid var(--c-border);border-radius:8px;background:none;cursor:pointer;color:var(--c-text-3);font-size:16px">
                 <i class="fas fa-times"></i>
@@ -159,7 +159,7 @@
             {{-- File sudah ada (approved) --}}
             <div id="fileInfo" style="display:none;background:var(--c-bg);border-radius:12px;padding:14px 16px;margin-bottom:16px;">
                 <div style="font-size:11px;font-weight:600;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">
-                    Dokumen Terupload
+                    Uploaded Document
                 </div>
                 <div style="display:flex;align-items:center;gap:12px;">
                     <div style="width:36px;height:36px;background:rgba(239,68,68,.1);border-radius:8px;display:grid;place-items:center;flex-shrink:0">
@@ -170,7 +170,7 @@
                         <div id="fileSize" style="font-size:11px;color:var(--c-text-3);margin-top:2px"></div>
                     </div>
                     <a id="fileDownload" href="#" class="sima-btn sima-btn--sm sima-btn--outline" style="flex-shrink:0">
-                        <i class="fas fa-download"></i> Unduh
+                        <i class="fas fa-download"></i> Download
                     </a>
                     <button type="button" onclick="gantiFile()" class="sima-btn sima-btn--sm sima-btn--danger" style="flex-shrink:0">
                         <i class="fas fa-rotate"></i> Replace
@@ -183,7 +183,7 @@
                 @csrf
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
                     <label id="uploadLabel" style="font-size:12px;font-weight:600;color:var(--c-text-2)">
-                        Upload Dokumen (PDF)
+                        Upload Document (PDF)
                     </label>
                     <button type="button" id="btnBatalGanti" onclick="batalGanti()"
                             style="display:none;font-size:12px;color:var(--c-text-3);background:none;border:none;cursor:pointer;">
@@ -247,7 +247,7 @@ function showDetail(id) {
             document.getElementById('modalContent').innerHTML = `
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                     <div style="background:var(--c-bg);border-radius:10px;padding:12px;">
-                        <div style="font-size:11px;color:var(--c-text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Mahasiswa</div>
+                        <div style="font-size:11px;color:var(--c-text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Student</div>
                         <div style="font-size:14px;font-weight:600;color:var(--c-text-1);margin-top:4px">${escHtml(data.mahasiswa ?? '-')}</div>
                         <div style="font-size:11px;color:var(--c-text-3);margin-top:2px">${escHtml(data.npm ?? '')}</div>
                     </div>
@@ -260,7 +260,7 @@ function showDetail(id) {
                         <div style="font-size:14px;font-weight:700;color:${badgeColor};margin-top:4px;text-transform:capitalize;">${escHtml(data.status ?? '-')}</div>
                     </div>
                     <div style="background:var(--c-bg);border-radius:10px;padding:12px;">
-                        <div style="font-size:11px;color:var(--c-text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Pesan Mahasiswa</div>
+                        <div style="font-size:11px;color:var(--c-text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Student Message</div>
                         <div style="font-size:13px;color:var(--c-text-2);margin-top:4px">${escHtml(data.message ?? '-')}</div>
                     </div>
                 </div>
@@ -288,7 +288,7 @@ function showDetail(id) {
                 fileInfo.style.display   = 'none';
                 uploadForm.style.display = 'block';
                 document.getElementById('btnShowReject').style.display = 'none';
-                document.getElementById('modalSubtitle').textContent = 'Request sebelumnya ditolak. Upload dokumen untuk menyetujui.';
+                document.getElementById('modalSubtitle').textContent = 'Previous request was rejected. Upload document to approve.';
             } else if (data.file) {
                 // Ada file / approved — tampilkan info file
                 const fileName   = data.file.path.split('/').pop();
@@ -298,13 +298,13 @@ function showDetail(id) {
                 document.getElementById('fileDownload').href     = '/kln/dokumen/' + data.id + '/file';
                 fileInfo.style.display   = 'block';
                 uploadForm.style.display = 'none';
-                document.getElementById('modalSubtitle').textContent = 'Dokumen sudah diupload.';
+                document.getElementById('modalSubtitle').textContent = 'Document already uploaded.';
             } else {
                 // Pending — tampilkan form upload + tombol tolak
                 fileInfo.style.display   = 'none';
                 uploadForm.style.display = 'block';
                 document.getElementById('btnShowReject').style.display = '';
-                document.getElementById('modalSubtitle').textContent = 'Upload PDF untuk menyetujui, atau tolak request.';
+                document.getElementById('modalSubtitle').textContent = 'Upload PDF to approve, or reject request.';
             }
 
             document.getElementById('detailModal').style.display = 'flex';
@@ -337,7 +337,7 @@ function batalGanti() {
 
 function resetUploadForm() {
     document.getElementById('uploadForm').reset();
-    document.getElementById('uploadLabel').textContent  = 'Upload Dokumen (PDF)';
+    document.getElementById('uploadLabel').textContent  = 'Upload Document (PDF)';
     document.getElementById('uploadBtn').innerHTML      = '<i class="fas fa-upload"></i> Upload & Approve';
     document.getElementById('btnBatalGanti').style.display = 'none';
 }
@@ -370,7 +370,7 @@ function submitReject() {
 
     const btn = document.getElementById('btnConfirmReject');
     btn.disabled   = true;
-    btn.innerHTML  = '<i class="fas fa-spinner fa-spin me-1"></i> Memproses...';
+    btn.innerHTML  = '<i class="fas fa-spinner fa-spin me-1"></i> Processing...';
 
     fetch('/kln/dokumen/' + currentId + '/reject', {
         method: 'POST',
@@ -415,7 +415,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
     const btn = document.getElementById('uploadBtn');
     const originalLabel = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengupload...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
 
     fetch('/kln/dokumen/' + currentId + '/upload', {
         method: 'POST',
@@ -445,7 +445,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
                 closeModal();
             }
         } else {
-            alert(data.message ?? 'Upload gagal');
+            alert(data.message ?? 'Upload failed');
         }
     })
     .catch(() => alert('An error occurred during upload'))

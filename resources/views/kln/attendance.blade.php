@@ -1,6 +1,6 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Daftar Kehadiran')
+@section('page_title',    'Attendance List')
 @section('page_section',  'KEHADIRAN')
 @section('page_subtitle', 'Attendance summary for foreign students per course')
 
@@ -11,14 +11,14 @@
     <div class="col-6 col-md-4">
         <div class="sima-stat sima-stat--blue">
             <div class="sima-stat__icon sima-stat__icon--blue"><i class="fas fa-users"></i></div>
-            <div class="sima-stat__label">Total Mahasiswa</div>
+            <div class="sima-stat__label">Total Students</div>
             <div class="sima-stat__value">{{ $stats['total'] }}</div>
         </div>
     </div>
     <div class="col-6 col-md-4">
         <div class="sima-stat sima-stat--red">
             <div class="sima-stat__icon sima-stat__icon--red"><i class="fas fa-exclamation-triangle"></i></div>
-            <div class="sima-stat__label">Kehadiran &lt; 75%</div>
+            <div class="sima-stat__label">Attendance &lt; 75%</div>
             <div class="sima-stat__value">{{ $stats['below75'] }}</div>
         </div>
     </div>
@@ -34,7 +34,7 @@
 {{-- ── TABLE CARD ───────────────────────────────────── --}}
 <div class="sima-card">
     <div class="sima-card__header">
-        <h5 class="sima-card__title">Rekap Kehadiran Mahasiswa</h5>
+        <h5 class="sima-card__title">Student Attendance Recap</h5>
     </div>
 
     <div class="table-responsive">

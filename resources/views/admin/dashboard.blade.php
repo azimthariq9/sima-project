@@ -1,6 +1,6 @@
 @extends('layouts.sima')
 
-@section('page_title', 'Dashboard Admin')
+@section('page_title', 'Admin Dashboard')
 @section('page_subtitle', 'Sistem Informasi Mahasiswa Asing — Universitas Gunadarma')
 
 @section('main_content')
@@ -12,7 +12,7 @@
     <i class="fas fa-server" style="font-size:16px;flex-shrink:0"></i>
     <div style="flex:1">
         <strong>System Status: Operational</strong>
-        &nbsp;—&nbsp; Semua layanan berjalan normal.
+        &nbsp;—&nbsp; All services running normally.
         Database · API · Storage &nbsp;✓
     </div>
     <div style="font-family:var(--font-mono);font-size:11px;color:var(--sima-teal);white-space:nowrap">
@@ -31,10 +31,10 @@
             <div class="sima-stat__icon sima-stat__icon--gold">
                 <i class="fas fa-users"></i>
             </div>
-            <div class="sima-stat__label">Total Mahasiswa Asing</div>
+            <div class="sima-stat__label">Total Foreign Students</div>
             <div class="sima-stat__value" data-count="120">120</div>
             <div class="sima-stat__delta sima-stat__delta--up">
-                <i class="fas fa-arrow-up"></i> +8 dari semester lalu
+                <i class="fas fa-arrow-up"></i> +8 from last semester
             </div>
         </div>
     </div>
@@ -45,9 +45,9 @@
             <div class="sima-stat__icon sima-stat__icon--blue">
                 <i class="fas fa-user-cog"></i>
             </div>
-            <div class="sima-stat__label">Total Pengguna Sistem</div>
+            <div class="sima-stat__label">Total System Users</div>
             <div class="sima-stat__value" data-count="148">148</div>
-            <div class="sima-stat__delta sima-stat__delta--flat">Semua role aktif</div>
+            <div class="sima-stat__delta sima-stat__delta--flat">All roles active</div>
         </div>
     </div>
 
@@ -57,10 +57,10 @@
             <div class="sima-stat__icon sima-stat__icon--teal">
                 <i class="fas fa-globe"></i>
             </div>
-            <div class="sima-stat__label">Negara Terdaftar</div>
+            <div class="sima-stat__label">Registered Countries</div>
             <div class="sima-stat__value" data-count="14">14</div>
             <div class="sima-stat__delta sima-stat__delta--up">
-                <i class="fas fa-arrow-up"></i> +2 negara baru
+                <i class="fas fa-arrow-up"></i> +2 new countries
             </div>
         </div>
     </div>
@@ -71,7 +71,7 @@
             <div class="sima-stat__icon sima-stat__icon--red">
                 <i class="fas fa-exclamation-triangle"></i>
             </div>
-            <div class="sima-stat__label">Dokumen Kritis</div>
+            <div class="sima-stat__label">Critical Documents</div>
             <div class="sima-stat__value" data-count="13">13</div>
             <div class="sima-stat__delta sima-stat__delta--down">
                 <i class="fas fa-exclamation"></i> 5 expired · 8 expiring
@@ -91,7 +91,7 @@
             <div class="sima-stat__icon sima-stat__icon--blue" style="width:36px;height:36px;font-size:14px;border-radius:9px;margin-bottom:10px">
                 <i class="fas fa-university"></i>
             </div>
-            <div class="sima-stat__label">Jurusan</div>
+            <div class="sima-stat__label">Department</div>
             <div class="sima-stat__value" style="font-size:28px" data-count="8">8</div>
         </div>
     </div>
@@ -101,7 +101,7 @@
             <div class="sima-stat__icon sima-stat__icon--teal" style="width:36px;height:36px;font-size:14px;border-radius:9px;margin-bottom:10px">
                 <i class="fas fa-language"></i>
             </div>
-            <div class="sima-stat__label">Peserta BIPA</div>
+            <div class="sima-stat__label">BIPA Participants</div>
             <div class="sima-stat__value" style="font-size:28px" data-count="56">56</div>
         </div>
     </div>
@@ -111,7 +111,7 @@
             <div class="sima-stat__icon sima-stat__icon--purple" style="width:36px;height:36px;font-size:14px;border-radius:9px;margin-bottom:10px">
                 <i class="fas fa-file-alt"></i>
             </div>
-            <div class="sima-stat__label">Dokumen Hari Ini</div>
+            <div class="sima-stat__label">Today's Documents</div>
             <div class="sima-stat__value" style="font-size:28px" data-count="11">11</div>
         </div>
     </div>
@@ -121,7 +121,7 @@
             <div class="sima-stat__icon sima-stat__icon--emerald" style="width:36px;height:36px;font-size:14px;border-radius:9px;margin-bottom:10px">
                 <i class="fas fa-check-double"></i>
             </div>
-            <div class="sima-stat__label">Divalidasi</div>
+            <div class="sima-stat__label">Validated</div>
             <div class="sima-stat__value" style="font-size:28px" data-count="3">3</div>
         </div>
     </div>
@@ -131,7 +131,7 @@
             <div class="sima-stat__icon sima-stat__icon--amber" style="width:36px;height:36px;font-size:14px;border-radius:9px;margin-bottom:10px">
                 <i class="fas fa-bell"></i>
             </div>
-            <div class="sima-stat__label">Notifikasi Terkirim</div>
+            <div class="sima-stat__label">Notifications Sent</div>
             <div class="sima-stat__value" style="font-size:28px" data-count="47">47</div>
         </div>
     </div>
@@ -141,7 +141,7 @@
             <div class="sima-stat__icon sima-stat__icon--gold" style="width:36px;height:36px;font-size:14px;border-radius:9px;margin-bottom:10px">
                 <i class="fas fa-star"></i>
             </div>
-            <div class="sima-stat__label">Mahasiswa Beasiswa</div>
+            <div class="sima-stat__label">Scholarship Students</div>
             <div class="sima-stat__value" style="font-size:28px" data-count="32">32</div>
         </div>
     </div>
@@ -158,21 +158,21 @@
         <div class="sima-card">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Manajemen Pengguna</h5>
-                    <div class="sima-card__subtitle">Semua akun aktif dalam sistem</div>
+                    <h5 class="sima-card__title">User Management</h5>
+                    <div class="sima-card__subtitle">All active accounts in the system</div>
                 </div>
-                <a href="#" class="sima-card__action"><i class="fas fa-plus"></i> Tambah User</a>
+                <a href="#" class="sima-card__action"><i class="fas fa-plus"></i> Add User</a>
             </div>
             <div class="sima-card__body" style="padding:0">
                 <table class="sima-table">
                     <thead>
                         <tr>
-                            <th>Pengguna</th>
+                            <th>Users</th>
                             <th>Role</th>
-                            <th>Jurusan / Unit</th>
+                            <th>Department / Unit</th>
                             <th>Status</th>
-                            <th>Login Terakhir</th>
-                            <th>Aksi</th>
+                            <th>Last Login</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -211,16 +211,16 @@
                             <td style="font-size:12px;color:var(--sima-text-secondary)">{{ $u[2] }}</td>
                             <td>
                                 @if($u[3]=='active')
-                                    <span class="sima-badge sima-badge--emerald" style="font-size:10px"><i class="fas fa-circle" style="font-size:6px"></i> Aktif</span>
+                                    <span class="sima-badge sima-badge--emerald" style="font-size:10px"><i class="fas fa-circle" style="font-size:6px"></i> Active</span>
                                 @else
-                                    <span class="sima-badge sima-badge--grey" style="font-size:10px"><i class="fas fa-circle" style="font-size:6px"></i> Nonaktif</span>
+                                    <span class="sima-badge sima-badge--grey" style="font-size:10px"><i class="fas fa-circle" style="font-size:6px"></i> Inactive</span>
                                 @endif
                             </td>
                             <td style="font-family:var(--font-mono);font-size:11px;color:var(--sima-text-muted)">{{ $u[4] }}</td>
                             <td>
                                 <div style="display:flex;gap:6px">
                                     <a href="#" style="padding:4px 10px;background:var(--sima-blue-soft);color:var(--sima-blue);border-radius:6px;font-size:11px;font-weight:500;text-decoration:none">Edit</a>
-                                    <a href="#" style="padding:4px 10px;background:var(--sima-red-soft);color:var(--sima-red);border-radius:6px;font-size:11px;font-weight:500;text-decoration:none">Hapus</a>
+                                    <a href="#" style="padding:4px 10px;background:var(--sima-red-soft);color:var(--sima-red);border-radius:6px;font-size:11px;font-weight:500;text-decoration:none">Delete</a>
                                 </div>
                             </td>
                         </tr>
@@ -238,7 +238,7 @@
         {{-- Role Distribution --}}
         <div class="sima-card" style="margin-bottom:16px">
             <div class="sima-card__header">
-                <h5 class="sima-card__title">Distribusi Role</h5>
+                <h5 class="sima-card__title">Role Distribution</h5>
             </div>
             <div class="sima-card__body">
 
@@ -271,7 +271,7 @@
         {{-- System Info --}}
         <div class="sima-card">
             <div class="sima-card__header">
-                <h5 class="sima-card__title">Info Sistem</h5>
+                <h5 class="sima-card__title">System Info</h5>
             </div>
             <div class="sima-card__body">
                 @php
@@ -281,7 +281,7 @@
                     ['PHP',            '8.3',            'fas fa-code',        '#7C3AED'],
                     ['Database',       'MySQL 8.0',      'fas fa-database',    '#0D9488'],
                     ['Storage Used',   '2.4 GB / 50 GB', 'fas fa-hdd',        '#D97706'],
-                    ['Last Backup',    'Hari ini 03:00', 'fas fa-save',        '#C4973A'],
+                    ['Last Backup',    'Today 03:00', 'fas fa-save',        '#C4973A'],
                 ];
                 @endphp
                 @foreach($info as $s)
@@ -309,18 +309,18 @@
         <div class="sima-card">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Manajemen Jurusan</h5>
-                    <div class="sima-card__subtitle">8 program studi terdaftar</div>
+                    <h5 class="sima-card__title">Department Management</h5>
+                    <div class="sima-card__subtitle">8 registered study programs</div>
                 </div>
-                <a href="#" class="sima-card__action"><i class="fas fa-plus"></i> Tambah</a>
+                <a href="#" class="sima-card__action"><i class="fas fa-plus"></i> Add</a>
             </div>
             <div class="sima-card__body" style="padding:0">
                 <table class="sima-table">
                     <thead>
                         <tr>
-                            <th>Program Studi</th>
-                            <th>Mahasiswa</th>
-                            <th>Kehadiran</th>
+                            <th>Study Program</th>
+                            <th>Students</th>
+                            <th>Attendance</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -360,8 +360,8 @@
         <div class="sima-card h-100">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Monitoring Global</h5>
-                    <div class="sima-card__subtitle">Rekapitulasi seluruh unit</div>
+                    <h5 class="sima-card__title">Global Monitoring</h5>
+                    <div class="sima-card__subtitle">All units recap</div>
                 </div>
             </div>
             <div class="sima-card__body">
@@ -369,10 +369,10 @@
                 {{-- Module Status --}}
                 @php
                 $modules = [
-                    ['KLN',     'Monitoring & Validasi',   '120 mahasiswa aktif',  'teal',   'fa-check-circle'],
-                    ['Jurusan', 'Absensi & Jadwal',        '40 mahasiswa, 6 kelas','purple', 'fa-check-circle'],
-                    ['BIPA',    'Kelas Bahasa Indonesia',  '56 peserta, 4 kelas',  'amber',  'fa-check-circle'],
-                    ['SIMA',    'Sistem Notifikasi',       '47 notif terkirim',    'blue',   'fa-check-circle'],
+                    ['KLN',     'Monitoring & Validation',   '120 active students',  'teal',   'fa-check-circle'],
+                    ['Jurusan', 'Attendance & Schedule',        '40 students, 6 classes','purple', 'fa-check-circle'],
+                    ['BIPA',    'Indonesian Language Class',  '56 participants, 4 classes',  'amber',  'fa-check-circle'],
+                    ['SIMA',    'Notification System',       '47 notifications sent',    'blue',   'fa-check-circle'],
                 ];
                 $moduleColors = ['teal'=>'#0D9488','purple'=>'#7C3AED','amber'=>'#D97706','blue'=>'#2563EB'];
                 @endphp
@@ -396,7 +396,7 @@
 
                 {{-- Quick Admin Actions --}}
                 <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--sima-border-soft)">
-                    <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--sima-text-muted);margin-bottom:12px">Aksi Cepat Admin</div>
+                    <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--sima-text-muted);margin-bottom:12px">Quick Admin Actions</div>
                     <div style="display:flex;gap:8px;flex-wrap:wrap">
                         <a href="#" style="padding:8px 14px;background:var(--sima-navy);color:white;border-radius:8px;font-size:12px;font-weight:500;text-decoration:none"><i class="fas fa-download"></i> Export Data</a>
                         <a href="#" style="padding:8px 14px;background:var(--sima-red-soft);color:var(--sima-red);border-radius:8px;font-size:12px;font-weight:500;text-decoration:none"><i class="fas fa-sync"></i> Backup DB</a>

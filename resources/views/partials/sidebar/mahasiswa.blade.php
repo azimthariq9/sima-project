@@ -19,7 +19,7 @@
 <nav class="sima-nav" style="flex:1;overflow-y:auto">
 
     {{-- Group: Utama --}}
-    <div class="sima-nav__group-label">Utama</div>
+    <div class="sima-nav__group-label">Main</div>
 
     <a href="{{ route('mahasiswa.dashboard') }}"
        class="sima-nav__item {{ request()->routeIs('mahasiswa.dashboard') ? 'active' : '' }}"
@@ -30,53 +30,53 @@
 
     <a href="{{ route('mahasiswa.profile') }}"
        class="sima-nav__item {{ request()->routeIs('mahasiswa.profile') ? 'active' : '' }}"
-       data-title="Biodata">
+       data-title="Profile">
         <i class="fas fa-circle-user sima-nav__icon"></i>
-        <span>Biodata &amp; Profil</span>
+        <span>Profile</span>
     </a>
 
     {{-- Group: Akademik --}}
-    <div class="sima-nav__group-label" style="margin-top:8px">Akademik</div>
+    <div class="sima-nav__group-label" style="margin-top:8px">Academic</div>
 
     <a href="{{ route('mahasiswa.jadwal') }}"
        class="sima-nav__item {{ request()->routeIs('mahasiswa.jadwal') ? 'active' : '' }}"
-       data-title="Jadwal">
+       data-title="Schedules">
         <i class="fas fa-calendar-days sima-nav__icon"></i>
-        <span>Jadwal</span>
+        <span>Schedules</span>
     </a>
 
     <a href="{{ route('mahasiswa.kehadiran') }}"
        class="sima-nav__item {{ request()->routeIs('mahasiswa.kehadiran*') ? 'active' : '' }}"
-       data-title="Kehadiran">
+       data-title="Attendance">
         <i class="fas fa-clipboard-check sima-nav__icon"></i>
-        <span>Detail Kehadiran</span>
+        <span>Attendance</span>
     </a>
 
     <a href="{{ route('mahasiswa.analytics') }}"
        class="sima-nav__item {{ request()->routeIs('mahasiswa.analytics') ? 'active' : '' }}"
-       data-title="Analitik">
+       data-title="Analytics">
         <i class="fas fa-chart-line sima-nav__icon"></i>
-        <span>Analitik</span>
+        <span>Analytics</span>
     </a>
 
     {{-- Group: Dokumen --}}
-    <div class="sima-nav__group-label" style="margin-top:8px">Dokumen</div>
+    <div class="sima-nav__group-label" style="margin-top:8px">Documents</div>
 
     <a href="{{ route('mahasiswa.dokumen.index') }}"
        class="sima-nav__item {{ request()->routeIs('mahasiswa.dokumen.*') || request()->routeIs('mahasiswa.request.*') ? 'active' : '' }}"
-       data-title="Dokumen">
+       data-title="Documents & Requests">
         <i class="fas fa-folder-open sima-nav__icon"></i>
-        <span>Dokumen &amp; Request</span>
+        <span>Documents &amp; Requests</span>
     </a>
 
     {{-- Group: Informasi --}}
-    <div class="sima-nav__group-label" style="margin-top:8px">Informasi</div>
+    <div class="sima-nav__group-label" style="margin-top:8px">Information</div>
 
     <a href="{{ route('mahasiswa.announcement') }}"
        class="sima-nav__item {{ request()->routeIs('mahasiswa.announcement*') ? 'active' : '' }}"
-       data-title="Pengumuman">
+       data-title="Announcements">
         <i class="fas fa-bullhorn sima-nav__icon"></i>
-        <span>Pengumuman</span>
+        <span>Announcements</span>
     </a>
 
     @php
@@ -92,9 +92,9 @@
     @endphp
     <a href="{{ route('mahasiswa.notifikasi') }}"
        class="sima-nav__item {{ request()->routeIs('mahasiswa.notifikasi') ? 'active' : '' }}"
-       data-title="Notifikasi">
+       data-title="Notifications">
         <i class="fas fa-bell sima-nav__icon"></i>
-        <span>Notifikasi</span>
+        <span>Notifications</span>
         @if($__unread > 0)
             <span class="sima-nav__badge">{{ $__unread > 9 ? '9+' : $__unread }}</span>
         @endif

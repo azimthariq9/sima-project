@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
-@section('page_title', 'Jadwal')
+@section('page_title', 'Schedule')
 @section('page_section', 'BIPA')
-@section('page_subtitle', 'Jadwal kelas BIPA')
+@section('page_subtitle', 'BIPA class schedule')
 
 @section('main_content')
 
@@ -12,30 +12,30 @@
         <table class="sima-table">
             <thead>
                 <tr>
-                    <th>Kelas</th>
-                    <th>Hari</th>
-                    <th>Jam</th>
-                    <th>Ruangan</th>
+                    <th>Class</th>
+                    <th>Day</th>
+                    <th>Time</th>
+                    <th>Room</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td>B1</td>
-                    <td>Senin</td>
+                    <td>Monday</td>
                     <td>08:00 - 10:00</td>
                     <td>R.301</td>
                 </tr>
                 <tr>
                     <td>B2</td>
-                    <td>Rabu</td>
+                    <td>Wednesday</td>
                     <td>10:00 - 12:00</td>
                     <td>R.304</td>
                 </tr>
                 <tr>
                     <td>C1</td>
-                    <td>Jumat</td>
+                    <td>Friday</td>
                     <td>13:00 - 15:00</td>
-                    <td>Lab Bahasa</td>
+                    <td>Language Lab</td>
                 </tr>
             </tbody>
         </table>

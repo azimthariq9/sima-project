@@ -2,7 +2,7 @@
 
 @section('page_title', 'Dokumen & Request')
 @section('page_section', 'Mahasiswa')
-@section('page_subtitle', 'Dokumen penting dan permintaan dokumen ke KLN')
+@section('page_subtitle', 'Important documents and document requests to KLN')
 
 @section('main_content')
 
@@ -13,20 +13,20 @@
         $dokStatusInfo = function ($dok, $today, $soon) {
             $s = $dok->status ?? 'pending';
             if (in_array($s, ['pending', 'sedang diproses'])) {
-                return ['label' => 'Menunggu Verifikasi', 'cls' => 'sima-badge--blue', 'bar' => '#3b82f6'];
+                return ['label' => 'Awaiting Verification', 'cls' => 'sima-badge--blue', 'bar' => '#3b82f6'];
             }
             if ($s === 'rejected') {
-                return ['label' => 'Ditolak', 'cls' => 'sima-badge--red', 'bar' => '#ef4444'];
+                return ['label' => 'Rejected', 'cls' => 'sima-badge--red', 'bar' => '#ef4444'];
             }
             $exp = $dok->tglKdlwrs ?? null;
             if (!$exp) {
-                return ['label' => 'Tidak Diketahui', 'cls' => 'sima-badge--grey', 'bar' => '#94a3b8'];
+                return ['label' => 'Unknown', 'cls' => 'sima-badge--grey', 'bar' => '#94a3b8'];
             }
             if ($exp < $today) {
-                return ['label' => 'Kedaluwarsa', 'cls' => 'sima-badge--red', 'bar' => '#ef4444'];
+                return ['label' => 'Expired', 'cls' => 'sima-badge--red', 'bar' => '#ef4444'];
             }
             if ($exp <= $soon) {
-                return ['label' => 'Segera Habis', 'cls' => 'sima-badge--amber', 'bar' => '#f59e0b'];
+                return ['label' => 'Expiring Soon', 'cls' => 'sima-badge--amber', 'bar' => '#f59e0b'];
             }
             return ['label' => 'Valid', 'cls' => 'sima-badge--green', 'bar' => '#22c55e'];
         };
@@ -50,10 +50,10 @@
         };
 
         $rstatus = [
-            'approved' => ['label' => 'Disetujui', 'cls' => 'green'],
-            'pending' => ['label' => 'Menunggu', 'cls' => 'blue'],
-            'rejected' => ['label' => 'Ditolak', 'cls' => 'red'],
-            'processing' => ['label' => 'Diproses', 'cls' => 'amber'],
+            'approved' => ['label' => 'Approved', 'cls' => 'green'],
+            'pending' => ['label' => 'Pending', 'cls' => 'blue'],
+            'rejected' => ['label' => 'Rejected', 'cls' => 'red'],
+            'processing' => ['label' => 'Processing', 'cls' => 'amber'],
         ];
     @endphp
 
@@ -79,8 +79,8 @@
     <div class="sima-card sima-fade" style="margin-bottom:16px">
         <div class="sima-card__header">
             <div>
-                <h5 class="sima-card__title">Dokumen Penting</h5>
-                <div class="sima-card__subtitle">Dokumen resmi yang telah diupload oleh KLN</div>
+                <h5 class="sima-card__title">Important Documents</h5>
+                <div class="sima-card__subtitle">Official documents uploaded by KLN</div>
             </div>
         </div>
 
@@ -88,8 +88,8 @@
             @if ($dokumen->isEmpty())
                 <div style="text-align:center;padding:40px 20px;color:var(--c-text-3)">
                     <i class="fas fa-folder-open" style="font-size:36px;opacity:.3;display:block;margin-bottom:12px"></i>
-                    <div style="font-size:14px;font-weight:500;color:var(--c-text-2)">Belum ada dokumen yang diupload</div>
-                    <div style="font-size:12.5px;margin-top:4px">Upload dokumen penting seperti paspor, KITAS, dan asuransi
+                    <div style="font-size:14px;font-weight:500;color:var(--c-text-2)">No documents uploaded</div>
+                    <div style="font-size:12.5px;margin-top:4px">Upload important documents such as passport, KITAS, and insurance
                         kesehatan.</div>
                 </div>
             @else
@@ -130,11 +130,11 @@
                             <div
                                 style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;margin-bottom:10px">
                                 <div style="background:var(--c-bg);border-radius:7px;padding:7px 9px">
-                                    <div style="color:var(--c-text-3);margin-bottom:1px">Terbit</div>
+                                    <div style="color:var(--c-text-3);margin-bottom:1px">Issued</div>
                                     <div style="font-weight:600;color:var(--c-text-2)">{{ $terbit }}</div>
                                 </div>
                                 <div style="background:var(--c-bg);border-radius:7px;padding:7px 9px">
-                                    <div style="color:var(--c-text-3);margin-bottom:1px">Berlaku s/d</div>
+                                    <div style="color:var(--c-text-3);margin-bottom:1px">Valid Until</div>
                                     <div style="font-weight:600;color:{{ $stInfo['bar'] }}">{{ $exp }}</div>
                                 </div>
                             </div>
@@ -144,7 +144,7 @@
                                 <a href="{{ route('mahasiswa.dokumen.download', $dok->id) }}"
                                     class="sima-btn sima-btn--outline sima-btn--sm"
                                     style="font-size:11.5px;flex:1;justify-content:center">
-                                    <i class="fas fa-download"></i> Unduh
+                                    <i class="fas fa-download"></i> Download
                                 </a>
                             </div>
                         </div>
@@ -164,8 +164,8 @@
             <div class="sima-card">
                 <div class="sima-card__header">
                     <div>
-                        <h5 class="sima-card__title">Request Dokumen ke KLN</h5>
-                        <div class="sima-card__subtitle">Ajukan permintaan dokumen resmi</div>
+                        <h5 class="sima-card__title">Request Document to KLN</h5>
+                        <div class="sima-card__subtitle">Submit a request for an official document</div>
                     </div>
                 </div>
                 <div class="sima-card__body">
@@ -181,9 +181,9 @@
                     <form method="POST" action="{{ route('mahasiswa.request.store') }}">
                         @csrf
                         <div style="margin-bottom:16px">
-                            <label class="sima-label">Jenis Dokumen <span style="color:var(--c-red)">*</span></label>
+                            <label class="sima-label">Document Type <span style="color:var(--c-red)">*</span></label>
                             <select name="tipeDkmn" class="sima-input" required>
-                                <option value="">— Pilih jenis dokumen —</option>
+                                <option value="">— Select document type —</option>
                                 @foreach (\App\Enums\TipeDok::cases() as $dok)
                                     <option value="{{ $dok->value }}"
                                         {{ old('tipeDkmn') == $dok->value ? 'selected' : '' }}>
@@ -193,13 +193,13 @@
                             </select>
                         </div>
                         <div style="margin-bottom:16px">
-                            <label class="sima-label">Keperluan / Keterangan <span
+                            <label class="sima-label">Purpose / Description <span
                                     style="color:var(--c-red)">*</span></label>
-                            <textarea name="message" class="sima-input" rows="3" placeholder="Jelaskan keperluan dokumen ini…" required
+                            <textarea name="message" class="sima-input" rows="3" placeholder="Explain the purpose of this document…" required
                                 style="resize:vertical">{{ old('message') }}</textarea>
                         </div>
                         <button type="submit" class="sima-btn">
-                            <i class="fas fa-paper-plane"></i> Kirim Request
+                            <i class="fas fa-paper-plane"></i> Submit Request
                         </button>
                     </form>
                 </div>
@@ -210,8 +210,8 @@
             <div class="sima-card">
                 <div class="sima-card__header">
                     <div>
-                        <h5 class="sima-card__title">Riwayat Request</h5>
-                        <div class="sima-card__subtitle">5 request terakhir</div>
+                        <h5 class="sima-card__title">Request History</h5>
+                        <div class="sima-card__subtitle">Last 5 requests</div>
                     </div>
                 </div>
                 <div class="sima-card__body" style="padding:0">
@@ -236,13 +236,13 @@
                         </div>
                     @empty
                         <div style="text-align:center;padding:24px;color:var(--c-text-3);font-size:13px">
-                            Belum ada request
+                            No requests
                         </div>
                     @endforelse
                     <div style="padding:12px 16px">
                         <a href="{{ route('mahasiswa.request.index') }}"
                             class="sima-btn sima-btn--outline sima-btn--sm sima-btn--full">
-                            <i class="fas fa-list"></i> Lihat Semua Request
+                            <i class="fas fa-list"></i> View All Requests
                         </a>
                     </div>
                 </div>
@@ -251,7 +251,7 @@
             <div class="sima-alert sima-alert--blue" style="margin-top:10px">
                 <i class="fas fa-info-circle sima-alert__icon"></i>
                 <div class="sima-alert__text" style="font-size:12px">
-                    Request diproses dalam 1–3 hari kerja oleh KLN.
+                    Requests are processed within 1–3 business days by KLN.
                 </div>
             </div>
         </div>

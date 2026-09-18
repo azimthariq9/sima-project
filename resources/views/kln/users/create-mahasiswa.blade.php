@@ -1,6 +1,6 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Create Mahasiswa')
+@section('page_title',    'Create Student')
 @section('page_section',  'USERS')
 @section('page_subtitle', 'Multi-step wizard to create a new mahasiswa account')
 
@@ -60,7 +60,7 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-2);">
-                                Tahun Masuk
+                                Enrollment Year
                             </label>
                             <input type="text" name="tahunMasuk" class="sima-input mt-1" placeholder="PTA 2026/2027">
                         </div>

@@ -1,20 +1,20 @@
 <x-mail::message>
-# Kode OTP Login SIMA
+# SIMA Login OTP Code
 
-Halo,
+Hello,
 
-Anda mencoba masuk ke SIMA menggunakan email **{{ $email }}**.
+You are trying to sign in to SIMA using email **{{ $email }}**.
 
-Gunakan kode OTP berikut untuk melanjutkan:
+Use the following OTP code to continue:
 
 <x-mail::panel>
 # {{ $otp }}
 </x-mail::panel>
 
-Kode ini **berlaku selama 10 menit**. Jangan bagikan kode ini kepada siapapun.
+This code is **valid for 10 minutes**. Do not share this code with anyone.
 
-Jika Anda tidak melakukan permintaan ini, abaikan email ini.
+If you did not make this request, ignore this email.
 
-Salam,<br>
+Regards,<br>
 {{ config('app.name') }}
 </x-mail::message>

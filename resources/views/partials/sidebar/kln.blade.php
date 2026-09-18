@@ -64,10 +64,10 @@
     @php
         $scheduleActive = request()->routeIs('kln.jadwal.*');
     @endphp
-    <button class="sima-nav__item has-sub {{ $scheduleActive ? 'open active' : '' }}" onclick="toggleNav(this)" data-title="Jadwal"
+    <button class="sima-nav__item has-sub {{ $scheduleActive ? 'open active' : '' }}" onclick="toggleNav(this)" data-title="Schedules"
             style="border:none;background:none;width:100%;text-align:left;">
         <i class="fas fa-clock sima-nav__icon"></i>
-        <span>Jadwal</span>
+        <span>Schedules</span>
         <i class="fas fa-chevron-down sima-nav__chevron"></i>
     </button>
 
@@ -88,18 +88,18 @@
 
     {{-- Announcement --}}
     <a href="{{ route('kln.announcement') }}"
-       class="sima-nav__item {{ request()->routeIs('kln.announcement') ? 'active' : '' }}" data-title="announcement">
+       class="sima-nav__item {{ request()->routeIs('kln.announcement') ? 'active' : '' }}" data-title="Announcements">
         <i class="fas fa-envelope sima-nav__icon"></i>
-        <span>Pengumuman</span>
+        <span>Announcements</span>
     </a>
 
 
     {{-- Notification --}}
     <a href="{{ route('kln.notifikasi') }}"
        class="sima-nav__item {{ request()->routeIs('kln.notifikasi') ? 'active' : '' }}"
-       data-title="Notifikasi">
+       data-title="Notifications">
         <i class="fas fa-bell sima-nav__icon"></i>
-        <span>Notifikasi</span>
+        <span>Notifications</span>
     </a>
 
     {{-- Broadcast --}}
@@ -114,9 +114,9 @@
     {{-- Details Presence --}}
     <a href="{{ route('kln.attendance') }}"
        class="sima-nav__item {{ request()->routeIs('kln.attendance*') ? 'active' : '' }}"
-       data-title="Daftar Kehadiran">
+       data-title="Attendance">
         <i class="fas fa-check-square sima-nav__icon"></i>
-        <span>Daftar Kehadiran</span>
+        <span>Attendance</span>
     </a>
 
 
@@ -124,7 +124,7 @@
        TYPE MANAGEMENT
     ========================= --}}
     <div style="margin-top:20px;padding-top:15px;border-top:1px solid rgba(255,255,255,.25)">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45);padding:0 14px;margin-bottom:6px;">Type Management</div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.85);padding:0 14px;margin-bottom:6px;">Type Management</div>
         <a href="{{ route('kln.types.mahasiswa') }}" class="sima-nav__item {{ request()->routeIs('kln.types.mahasiswa*') ? 'active' : '' }}" data-title="Course Types">
             <i class="fas fa-graduation-cap sima-nav__icon"></i>
             <span>Course Types</span>

@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
-@section('page_title','Biodata Mahasiswa')
+@section('page_title','Student Profile')
 @section('page_section','Mahasiswa')
-@section('page_subtitle','Kelola data profil Anda')
+@section('page_subtitle','Manage your profile data')
 
 @section('main_content')
 
@@ -43,7 +43,7 @@
 @if ($errors->any())
 <div style="background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.2);border-radius:10px;padding:14px 18px;margin-bottom:16px">
     <div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:6px">
-        <i class="fas fa-circle-exclamation"></i> Periksa isian berikut:
+        <i class="fas fa-circle-exclamation"></i> Please check the following:
     </div>
     @foreach ($errors->all() as $error)
         <div style="font-size:12.5px;color:#b91c1c;margin-top:3px">· {{ $error }}</div>
@@ -77,7 +77,7 @@
 </div>
 
 <div class="mb-3">
-<label class="sima-label">Nama Lengkap</label>
+<label class="sima-label">Full Name</label>
 <input type="text" name="nama" class="sima-input"
        value="{{ old('nama', $mahasiswa->nama ?? '') }}" required>
 </div>
@@ -101,15 +101,15 @@
 </div>
 
 <div class="mb-3">
-<label class="sima-label">Tanggal Lahir</label>
+<label class="sima-label">Date of Birth</label>
 <input type="date" name="tglLahir" class="sima-input"
        value="{{ old('tglLahir', $mahasiswa->tglLahir ? \Carbon\Carbon::parse($mahasiswa->tglLahir)->format('Y-m-d') : '') }}">
 </div>
 
 <div class="mb-3">
-<label class="sima-label">Kewarganegaraan</label>
+<label class="sima-label">Nationality</label>
 <select name="warNeg" class="sima-input">
-    <option value="" disabled {{ old('warNeg', $mahasiswa->warNeg ?? '') === '' ? 'selected' : '' }}>-- Pilih Negara --</option>
+    <option value="" disabled {{ old('warNeg', $mahasiswa->warNeg ?? '') === '' ? 'selected' : '' }}>-- Select Country --</option>
     @foreach($countries as $country)
         <option value="{{ $country }}" {{ old('warNeg', $mahasiswa->warNeg ?? '') === $country ? 'selected' : '' }}>
             {{ $country }}
@@ -119,13 +119,13 @@
 </div>
 
 <div class="mb-3">
-<label class="sima-label">Alamat Asal</label>
+<label class="sima-label">Home Address</label>
 <input type="text" name="alamatAsal" class="sima-input"
        value="{{ old('alamatAsal', $mahasiswa->alamatAsal ?? '') }}">
 </div>
 
 <div class="mb-3">
-<label class="sima-label">Alamat Indonesia</label>
+<label class="sima-label">Indonesia Address</label>
 <input type="text" name="alamatIndo" class="sima-input"
        value="{{ old('alamatIndo', $mahasiswa->alamatIndo ?? '') }}">
 </div>
@@ -138,7 +138,7 @@
 </div>
 
 <div class="mb-3">
-<label class="sima-label">Masa Aktif</label>
+<label class="sima-label">Active Period</label>
 <input type="date" name="masaAktif" class="sima-input" disabled
        value="{{ old('masaAktif', $mahasiswa->masaAktif ? \Carbon\Carbon::parse($mahasiswa->masaAktif)->format('Y-m-d') : '') }}">
 <div style="font-size:11.5px;color:var(--c-text-3);margin-top:4px">Set by KLN admin</div>
@@ -147,17 +147,17 @@
 <hr>
 
 <div class="mb-3">
-<label class="sima-label">Ganti Password (Opsional)</label>
+<label class="sima-label">Change Password (Optional)</label>
 <input type="password" name="password" class="sima-input">
 </div>
 
 <div class="mb-3">
-<label class="sima-label">Konfirmasi Password</label>
+<label class="sima-label">Confirm Password</label>
 <input type="password" name="password_confirmation" class="sima-input">
 </div>
 
 <button type="submit" class="sima-btn sima-btn--full">
-Simpan Perubahan
+Save Changes
 </button>
 
 </form>

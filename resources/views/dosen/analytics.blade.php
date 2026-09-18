@@ -2,7 +2,7 @@
 
 @section('page_title',    'Analytics')
 @section('page_section',  'DOSEN')
-@section('page_subtitle', 'Ringkasan statistik kehadiran mahasiswa')
+@section('page_subtitle', 'Student attendance statistics summary')
 
 @section('main_content')
 
@@ -14,7 +14,7 @@
                 <i class="fas fa-chalkboard-teacher"></i>
             </div>
             <div class="sima-stat__body">
-                <div class="sima-stat__label">Total Kelas Diajar</div>
+                <div class="sima-stat__label">Total Classes Taught</div>
                 <div class="sima-stat__value">{{ $totalKelas }}</div>
             </div>
         </div>
@@ -25,7 +25,7 @@
                 <i class="fas fa-users"></i>
             </div>
             <div class="sima-stat__body">
-                <div class="sima-stat__label">Total Mahasiswa</div>
+                <div class="sima-stat__label">Total Students</div>
                 <div class="sima-stat__value">{{ $totalMahasiswa }}</div>
             </div>
         </div>
@@ -36,7 +36,7 @@
                 <i class="fas fa-clipboard-check"></i>
             </div>
             <div class="sima-stat__body">
-                <div class="sima-stat__label">Sesi Sudah Diisi</div>
+                <div class="sima-stat__label">Sessions Completed</div>
                 <div class="sima-stat__value">{{ $totalSesiTerisi }}</div>
             </div>
         </div>
@@ -47,18 +47,18 @@
 <div class="sima-card sima-fade sima-fade--1">
     <div class="sima-card__header">
         <div>
-            <h5 class="sima-card__title">Rekap Kehadiran per Kelas</h5>
-            <div class="sima-card__subtitle">Berdasarkan data absensi yang telah diisi di Detail Jadwal</div>
+            <h5 class="sima-card__title">Attendance Recap by Class</h5>
+            <div class="sima-card__subtitle">Based on attendance data entered in Schedule Detail</div>
         </div>
     </div>
 
     @if($rekapPerKelas->isEmpty())
         <div class="sima-card__body" style="text-align:center;padding:48px 20px;color:var(--c-text-3)">
             <i class="fas fa-chart-bar" style="font-size:36px;opacity:.3;display:block;margin-bottom:12px"></i>
-            <div style="font-size:14px;font-weight:500;color:var(--c-text-2)">Belum ada data kehadiran</div>
+            <div style="font-size:14px;font-weight:500;color:var(--c-text-2)">No attendance data</div>
             <div style="font-size:12.5px;margin-top:4px">
-                Input kehadiran mahasiswa melalui menu <a href="{{ route('dosen.jadwal.index') }}"
-                style="color:var(--c-accent)">Jadwal → Detail</a>.
+                Input student attendance via menu <a href="{{ route('dosen.jadwal.index') }}"
+                style="color:var(--c-accent)">Schedule → Detail</a>.
             </div>
         </div>
     @else
@@ -66,12 +66,12 @@
             <table class="sima-table">
                 <thead>
                     <tr>
-                        <th>Kelas</th>
-                        <th>Mata Kuliah</th>
-                        <th>Jadwal</th>
-                        <th style="text-align:center">Mhs</th>
-                        <th style="text-align:center">Sesi Terisi</th>
-                        <th style="text-align:center;width:120px">% Hadir</th>
+                        <th>Class</th>
+                        <th>Course</th>
+                        <th>Schedule</th>
+                        <th style="text-align:center">Students</th>
+                        <th style="text-align:center">Sessions Filled</th>
+                        <th style="text-align:center;width:120px">% Present</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -122,7 +122,7 @@
 <div class="sima-alert sima-alert--blue sima-fade sima-fade--2" style="margin-top:12px">
     <i class="fas fa-circle-info sima-alert__icon"></i>
     <div class="sima-alert__text" style="font-size:12.5px">
-        Untuk mengisi absensi, buka <strong>Jadwal → Detail</strong> dan input status kehadiran per sesi untuk setiap mahasiswa.
+        To fill attendance, open <strong>Schedule → Detail</strong> and input attendance status per session for each student.
     </div>
 </div>
 

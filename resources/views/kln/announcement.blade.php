@@ -32,7 +32,7 @@
     <div class="col-6 col-md-3">
         <div class="sima-stat sima-stat--red">
             <div class="sima-stat__icon sima-stat__icon--red"><i class="fas fa-exclamation-circle"></i></div>
-            <div class="sima-stat__label">Penting</div>
+            <div class="sima-stat__label">Important</div>
             <div class="sima-stat__value">{{ $totalPenting }}</div>
         </div>
     </div>
@@ -102,7 +102,7 @@
                     <td>
                         @if($ann->is_penting)
                             <span class="sima-badge sima-badge--red">
-                                <i class="fas fa-exclamation me-1"></i>Penting
+                                <i class="fas fa-exclamation me-1"></i>Important
                             </span>
                         @else
                             <span class="text-muted" style="font-size:13px;">—</span>
@@ -128,7 +128,7 @@
                     <td colspan="6" class="text-center text-muted py-5">
                         <i class="fas fa-bullhorn fa-2x d-block mb-2" style="opacity:.3;"></i>
                         No announcements yet.
-                        <a href="{{ route('kln.announcement.create') }}" style="color:var(--c-accent);">Buat sekarang</a>
+                        <a href="{{ route('kln.announcement.create') }}" style="color:var(--c-accent);">Create now</a>
                     </td>
                 </tr>
                 @endforelse

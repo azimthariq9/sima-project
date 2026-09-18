@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Detail Kelas')
+@section('page_title',    'Class Detail')
 @section('page_section',  'DOSEN')
-@section('page_subtitle', ($jadwal->matakuliah->namaMk ?? '-') . ' — Kelas ' . ($jadwal->kelas->kodeKelas ?? '-'))
+@section('page_subtitle', ($jadwal->matakuliah->namaMk ?? '-') . ' — Class ' . ($jadwal->kelas->kodeKelas ?? '-'))
 
 @section('main_content')
 
@@ -22,7 +22,7 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
               transition:color .15s"
        onmouseover="this.style.color='var(--c-text-1)'"
        onmouseout="this.style.color='var(--c-text-3)'">
-        <i class="fas fa-arrow-left"></i> Kembali ke Jadwal
+        <i class="fas fa-arrow-left"></i> Back to Schedule
     </a>
 </div>
 
@@ -53,7 +53,7 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
                             </span>
                             <span style="font-size:12px;color:var(--c-text-3)">
                                 <i class="fas fa-door-open"></i>
-                                Kelas {{ $jadwal->kelas->kodeKelas ?? '-' }}
+                                Class {{ $jadwal->kelas->kodeKelas ?? '-' }}
                             </span>
                             <span style="font-size:12px;color:var(--c-text-3)">
                                 <i class="fas fa-map-marker-alt"></i>
@@ -61,19 +61,19 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
                             </span>
                             <span style="font-size:12px;color:var(--c-text-3)">
                                 <i class="fas fa-layer-group"></i>
-                                {{ $jadwal->totalSesi }} sesi total
+                                {{ $jadwal->totalSesi }} total sessions
                             </span>
                             <span style="font-size:12px;color:var(--c-text-3)">
                                 <i class="fas fa-users"></i>
-                                {{ $mahasiswa->count() }} mahasiswa
+                                {{ $mahasiswa->count() }} students
                             </span>
                         </div>
                         {{-- Sesi yang sudah diisi --}}
                         @if(!empty($sesiTerisi))
                         <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
-                            <span style="font-size:11px;color:var(--c-text-3)">Sesi sudah diisi:</span>
+                            <span style="font-size:11px;color:var(--c-text-3)">Sessions filled:</span>
                             @foreach($sesiTerisi as $s)
-                            <span class="sima-badge sima-badge--green">Sesi {{ $s }}</span>
+                            <span class="sima-badge sima-badge--green">Session {{ $s }}</span>
                             @endforeach
                         </div>
                         @endif
@@ -84,7 +84,7 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
                         <button onclick="document.getElementById('updateJamForm').style.display =
                                          document.getElementById('updateJamForm').style.display === 'none' ? 'flex' : 'none'"
                                 class="sima-btn sima-btn--outline sima-btn--sm">
-                            <i class="fas fa-clock"></i> Ubah Jam
+                            <i class="fas fa-clock"></i> Change Time
                         </button>
                     </div>
                 </div>
@@ -94,16 +94,16 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
                      style="display:none;align-items:center;gap:10px;margin-top:16px;
                             padding-top:16px;border-top:1px solid var(--c-border-soft)">
                     <label style="font-size:13px;color:var(--c-text-2);font-weight:500;
-                                  white-space:nowrap">Jam Mengajar:</label>
+                                  white-space:nowrap">Teaching Time:</label>
                     <input type="text" id="inputJam" value="{{ $jadwal->jam }}"
-                           placeholder="Contoh: 08:00-10:00"
+                           placeholder="Example: 08:00-10:00"
                            class="sima-input" style="max-width:180px;">
                     <button onclick="updateJam()" class="sima-btn sima-btn--blue sima-btn--sm">
-                        <i class="fas fa-save"></i> Simpan
+                        <i class="fas fa-save"></i> Save
                     </button>
                     <button onclick="document.getElementById('updateJamForm').style.display='none'"
                             class="sima-btn sima-btn--outline sima-btn--sm">
-                        Batal
+                        Cancel
                     </button>
                 </div>
             </div>
@@ -115,8 +115,8 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
 <div class="sima-card">
     <div class="sima-card__header">
         <div>
-            <h5 class="sima-card__title">Input Kehadiran Mahasiswa</h5>
-            <div class="sima-card__subtitle">Submit semua kehadiran sekaligus</div>
+            <h5 class="sima-card__title">Input Student Attendance</h5>
+            <div class="sima-card__subtitle">Submit all attendance at once</div>
         </div>
     </div>
     <div class="sima-card__body">
@@ -127,19 +127,19 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
                     background:var(--c-surface-2);border-radius:12px;
                     border:1px solid var(--c-border-soft)">
             <div>
-                <label class="sima-label">Sesi Ke-</label>
+                <label class="sima-label">Session #</label>
                 <select id="inputSesi" class="sima-input">
                     @for($i = 1; $i <= $jadwal->totalSesi; $i++)
                         <option value="{{ $i }}"
                             {{ in_array($i, $sesiTerisi) ? 'disabled' : '' }}
                             style="{{ in_array($i, $sesiTerisi) ? 'color:#94a3b8' : '' }}">
-                            Sesi {{ $i }}{{ in_array($i, $sesiTerisi) ? ' ✓' : '' }}
+                            Session {{ $i }}{{ in_array($i, $sesiTerisi) ? ' ✓' : '' }}
                         </option>
                     @endfor
                 </select>
             </div>
             <div>
-                <label class="sima-label">Tanggal Sesi</label>
+                <label class="sima-label">Session Date</label>
                 <input type="date" id="inputTglSesi" class="sima-input"
                        value="{{ now()->format('Y-m-d') }}">
             </div>
@@ -148,27 +148,27 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
         @if($mahasiswa->isEmpty())
             <div style="padding:32px;text-align:center;color:var(--c-text-3)">
                 <i class="fas fa-users" style="font-size:32px;margin-bottom:12px;display:block"></i>
-                Belum ada mahasiswa terdaftar di kelas ini
+                No students enrolled in this class
             </div>
         @else
             {{-- Tombol select all --}}
             <div style="display:flex;align-items:center;justify-content:space-between;
                         margin-bottom:12px;flex-wrap:wrap;gap:8px">
                 <div style="font-size:13px;color:var(--c-text-2);font-weight:500">
-                    {{ $mahasiswa->count() }} mahasiswa
+                    {{ $mahasiswa->count() }} students
                 </div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap">
                     <button onclick="setAllStatus('present')"
                             class="sima-btn sima-btn--sm"
                             style="background:var(--c-green-lt);color:var(--c-green);
                                    box-shadow:none;border:1px solid rgba(5,150,105,.2)">
-                        <i class="fas fa-check-circle"></i> Semua Hadir
+                        <i class="fas fa-check-circle"></i> All Present
                     </button>
                     <button onclick="setAllStatus('absent')"
                             class="sima-btn sima-btn--sm"
                             style="background:var(--c-red-lt);color:var(--c-red);
                                    box-shadow:none;border:1px solid rgba(220,38,38,.2)">
-                        <i class="fas fa-times-circle"></i> Semua Absen
+                        <i class="fas fa-times-circle"></i> All Absent
                     </button>
                 </div>
             </div>
@@ -216,7 +216,7 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
                                                     font-size:12px;font-weight:600;border:2px solid var(--c-green);
                                                     background:var(--c-green-lt);color:var(--c-green);
                                                     transition:all .15s">
-                                            <i class="fas fa-check"></i><br>Hadir
+                                            <i class="fas fa-check"></i><br>Present
                                         </div>
                                     </label>
                                     {{-- EXCUSED --}}
@@ -228,7 +228,7 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
                                                     font-size:12px;font-weight:600;border:2px solid var(--c-border);
                                                     background:var(--c-bg);color:var(--c-text-3);
                                                     transition:all .15s">
-                                            <i class="fas fa-file-alt"></i><br>Izin
+                                            <i class="fas fa-file-alt"></i><br>Excused
                                         </div>
                                     </label>
                                     {{-- ABSENT --}}
@@ -240,7 +240,7 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
                                                     font-size:12px;font-weight:600;border:2px solid var(--c-border);
                                                     background:var(--c-bg);color:var(--c-text-3);
                                                     transition:all .15s">
-                                            <i class="fas fa-times"></i><br>Absen
+                                            <i class="fas fa-times"></i><br>Absent
                                         </div>
                                     </label>
                                 </div>
@@ -254,7 +254,7 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
             {{-- Submit --}}
             <div style="display:flex;justify-content:flex-end;margin-top:20px;gap:10px">
                 <button onclick="submitKehadiran()" class="sima-btn sima-btn--blue">
-                    <i class="fas fa-paper-plane"></i> Simpan Kehadiran
+                    <i class="fas fa-paper-plane"></i> Save Attendance
                 </button>
             </div>
         @endif
@@ -265,8 +265,8 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
 <div class="sima-card mt-3">
     <div class="sima-card__header">
         <div>
-            <h5 class="sima-card__title">Riwayat Sesi</h5>
-            <div class="sima-card__subtitle">Sesi yang sudah diinput — klik Detail untuk lihat &amp; edit kehadiran</div>
+            <h5 class="sima-card__title">Session History</h5>
+            <div class="sima-card__subtitle">Sessions already input — click Detail to view &amp; edit attendance</div>
         </div>
     </div>
     <div class="sima-card__body" style="padding:0">
@@ -274,7 +274,7 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
         @if($riwayatSesi->isEmpty())
             <div style="padding:48px;text-align:center;color:var(--c-text-3)">
                 <i class="fas fa-clipboard-list" style="font-size:32px;margin-bottom:12px;display:block;opacity:.4"></i>
-                <div style="font-size:13px">Belum ada sesi yang diinput</div>
+                <div style="font-size:13px">No sessions input yet</div>
             </div>
         @else
             <table class="sima-table">
@@ -294,7 +294,7 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
                     @endphp
                     <tr>
                         <td>
-                            <span class="sima-badge sima-badge--blue">Sesi {{ $row->sesi }}</span>
+                            <span class="sima-badge sima-badge--blue">Session {{ $row->sesi }}</span>
                         </td>
                         <td style="font-size:13px;color:var(--c-text-1)">
                             {{ $row->tglSesi ? \Carbon\Carbon::parse($row->tglSesi)->translatedFormat('d M Y') : '-' }}
@@ -355,7 +355,6 @@ label:has(input[type="radio"]:checked) .status-btn {
 const JADWAL_ID = {{ $jadwal->id }};
 const CSRF      = '{{ csrf_token() }}';
 
-// Buat URL dengan parameter yang benar
 const STORE_KEHADIRAN_URL = '{{ route("dosen.jadwal.kehadiran.store", ["jadwalId" => $jadwal->id]) }}';
 const UPDATE_JAM_URL = '{{ route("dosen.jadwal.jam.update", ["jadwalId" => $jadwal->id]) }}';
 
@@ -393,7 +392,6 @@ function updateButtonStyles(group) {
 
 /* ── RADIO CHANGE LISTENER ───────────────────────── */
 document.addEventListener('DOMContentLoaded', function () {
-    // Init all rows (present is default checked)
     document.querySelectorAll('.status-group').forEach(updateButtonStyles);
 
     document.querySelectorAll('.status-radio').forEach(radio => {
@@ -402,10 +400,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Disable past sesi
     const sesiSelect = document.getElementById('inputSesi');
     if (sesiSelect && sesiSelect.options.length > 0) {
-        // Auto pilih sesi pertama yang belum diisi
         for (let opt of sesiSelect.options) {
             if (!opt.disabled) { opt.selected = true; break; }
         }
@@ -418,11 +414,10 @@ window.submitKehadiran = function () {
     const tglSesi = document.getElementById('inputTglSesi').value;
 
     if (!sesi || !tglSesi) {
-        alert('Sesi dan tanggal harus diisi');
+        alert('Session and date must be filled');
         return;
     }
 
-    // Kumpulkan data kehadiran
     const kehadiran = [];
     document.querySelectorAll('.status-group').forEach(group => {
         const mhsId  = group.getAttribute('data-mahasiswa-id');
@@ -433,11 +428,10 @@ window.submitKehadiran = function () {
     });
 
     if (!kehadiran.length) {
-        alert('Tidak ada data kehadiran untuk disimpan');
+        alert('No attendance data to save');
         return;
     }
 
-    // Ambil jam jika diubah
     const jamInput = document.getElementById('inputJam');
     const jam      = jamInput && document.getElementById('updateJamForm').style.display !== 'none'
                      ? jamInput.value : null;
@@ -445,11 +439,9 @@ window.submitKehadiran = function () {
     const payload = { jadwal_id: JADWAL_ID, sesi, tglSesi, kehadiran };
     if (jam) payload.jam = jam;
 
-    // Disable tombol saat proses
     const btn = event.currentTarget;
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...'; }
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...'; }
 
-    // Gunakan URL yang sudah dibuat
     fetch(STORE_KEHADIRAN_URL, {
         method: 'POST',
         headers: {
@@ -462,28 +454,25 @@ window.submitKehadiran = function () {
     .then(r => r.json())
     .then(res => {
         if (res.success) {
-            // Tandai sesi sebagai sudah terisi
             const opt = document.querySelector(`#inputSesi option[value="${sesi}"]`);
             if (opt) { opt.disabled = true; opt.textContent += ' ✓'; }
-            alert('Kehadiran sesi ' + sesi + ' berhasil disimpan!');
-            // Refresh page untuk update badge sesi
+            alert('Session ' + sesi + ' attendance saved!');
             window.location.reload();
         } else {
-            alert(res.message || 'Gagal menyimpan kehadiran');
+            alert(res.message || 'Failed to save attendance');
         }
     })
     .catch(e => alert('Error: ' + e.message))
     .finally(() => {
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Simpan Kehadiran'; }
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Save Attendance'; }
     });
 };
 
 /* ── UPDATE JAM ──────────────────────────────────── */
 window.updateJam = function () {
     const jam = document.getElementById('inputJam').value;
-    if (!jam) { alert('Jam harus diisi'); return; }
+    if (!jam) { alert('Time must be filled'); return; }
 
-    // Gunakan URL yang sudah dibuat
     fetch(UPDATE_JAM_URL, {
         method: 'PATCH',
         headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -494,9 +483,9 @@ window.updateJam = function () {
         if (res.success) {
             document.getElementById('displayJam').textContent = jam;
             document.getElementById('updateJamForm').style.display = 'none';
-            alert('Jam jadwal berhasil diupdate');
+            alert('Schedule time updated successfully');
         } else {
-            alert(res.message || 'Gagal update jam');
+            alert(res.message || 'Failed to update time');
         }
     })
     .catch(e => alert('Error: ' + e.message));

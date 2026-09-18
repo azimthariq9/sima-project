@@ -164,7 +164,7 @@ html, body { min-height:100%;background:var(--bg);font-family:'Plus Jakarta Sans
 
         <div class="status-pill">
             <span class="sdot"></span>
-            <span data-t="status">Sistem aktif</span>
+            <span data-t="status">System active</span>
         </div>
 
         {{-- Mode toggle tabs --}}
@@ -173,13 +173,13 @@ html, body { min-height:100%;background:var(--bg);font-family:'Plus Jakarta Sans
                     style="flex:1;padding:7px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;
                            background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 2px 8px rgba(108,143,255,.3)">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;margin-right:5px;vertical-align:middle"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <span data-t="tab-pw">Login Password</span>
+                <span data-t="tab-pw">Password Login</span>
             </button>
             <button type="button" id="tabOtp" onclick="setMode('otp')"
                     style="flex:1;padding:7px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;
                            background:transparent;color:var(--muted)">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;margin-right:5px;vertical-align:middle"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7.5L22 7"/></svg>
-                <span data-t="tab-otp">Login OTP</span>
+                <span data-t="tab-otp">OTP Login</span>
             </button>
         </div>
 
@@ -187,7 +187,7 @@ html, body { min-height:100%;background:var(--bg);font-family:'Plus Jakarta Sans
         <div id="otpHint" style="display:none;background:rgba(108,143,255,.08);border:1px solid rgba(108,143,255,.15);
                 border-radius:10px;padding:10px 13px;margin-bottom:16px;font-size:12.5px;color:var(--muted-lt);line-height:1.5">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" style="display:inline;margin-right:4px;vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            <span data-t="otp-hint">Untuk akun yang dibuat tanpa password. Kode OTP akan dikirim ke email Anda.</span>
+            <span data-t="otp-hint">For accounts created without a password. An OTP code will be sent to your email.</span>
         </div>
 
         {{-- FORM PASSWORD --}}
@@ -224,11 +224,11 @@ html, body { min-height:100%;background:var(--bg);font-family:'Plus Jakarta Sans
             <div class="opts">
                 <label class="chk">
                     <input type="checkbox" name="remember">
-                    <span data-t="remember">Ingat saya</span>
+                    <span data-t="remember">Remember me</span>
                 </label>
             </div>
 
-            <button type="submit" class="btn" data-t="submit">Masuk</button>
+            <button type="submit" class="btn" data-t="submit">Sign In</button>
         </form>
 
         {{-- FORM OTP --}}
@@ -245,7 +245,7 @@ html, body { min-height:100%;background:var(--bg);font-family:'Plus Jakarta Sans
                 </div>
             </div>
 
-            <button type="submit" class="btn" data-t="submit-otp">Kirim Kode OTP</button>
+            <button type="submit" class="btn" data-t="submit-otp">Send OTP Code</button>
         </form>
 
         @if ($errors->any())
@@ -261,7 +261,7 @@ html, body { min-height:100%;background:var(--bg);font-family:'Plus Jakarta Sans
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
-            <span data-t="secure">Koneksi <strong>terenkripsi & aman</strong></span>
+            <span data-t="secure">Connection is <strong>encrypted & secure</strong></span>
         </div>
 
     </div>
@@ -271,23 +271,23 @@ html, body { min-height:100%;background:var(--bg);font-family:'Plus Jakarta Sans
 const translations = {
     id: {
         tagline:    'Sistem Informasi Mahasiswa Asing',
-        status:     'Sistem aktif',
-        title:      'Masuk ke akun Anda',
-        subtitle:   'Selamat datang kembali di portal SIMA',
+        status:     'System active',
+        title:      'Sign in to your account',
+        subtitle:   'Welcome back to SIMA portal',
         'lbl-email':'Email',
         'lbl-pw':   'Password',
-        remember:       'Ingat saya',
-        submit:         'Masuk',
-        'submit-otp':   'Kirim Kode OTP',
-        secure:         'Koneksi <strong>terenkripsi & aman</strong>',
-        'ph-email':     'email@instansi.ac.id',
-        'tab-pw':       'Login Password',
-        'tab-otp':      'Login OTP',
+        remember:       'Remember me',
+        submit:         'Sign In',
+        'submit-otp':   'Send OTP Code',
+        secure:         'Connection is <strong>encrypted & secure</strong>',
+        'ph-email':     'email@institution.ac.id',
+        'tab-pw':       'Password Login',
+        'tab-otp':      'OTP Login',
         'lbl-email-otp':'Email',
-        'otp-hint':     'Untuk akun yang dibuat tanpa password. Kode OTP akan dikirim ke email Anda.',
+        'otp-hint':     'For accounts created without a password. An OTP code will be sent to your email.',
     },
     en: {
-        tagline:        'Foreign Student Information System',
+        tagline:        'Sistem Informasi Mahasiswa Asing',
         status:         'System online',
         title:          'Sign in to your account',
         subtitle:       'Welcome back to the SIMA portal',

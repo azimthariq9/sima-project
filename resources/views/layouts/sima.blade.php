@@ -1161,7 +1161,7 @@ body.dark .sima-nav__item.active .sima-nav__icon { color: #ffffff; }
                 <!-- Notifikasi -->
                 <a href="{{ route($prefix . '.notifikasi') }}"
                     class="sima-topbar__icon-btn"
-                    title="Notifikasi">
+                    title="Notifications">
                     <i class="fas fa-bell"></i>
                     @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
                         <span class="sima-notif-badge">{{ $unreadNotifCount }}</span>
@@ -1186,7 +1186,7 @@ body.dark .sima-nav__item.active .sima-nav__icon { color: #ffffff; }
                         <li>
                             {{-- BUG #2 FIX: Route profil dinamis, tidak lagi hardcoded ke dosen.profil --}}
                             <a class="dropdown-item" href="{{ route($profilRoute) }}">
-                                <i class="fas fa-user me-2"></i> Profil Saya
+                                <i class="fas fa-user me-2"></i> My Profile
                             </a>
                         </li>
 

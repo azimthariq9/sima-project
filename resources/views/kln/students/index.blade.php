@@ -11,14 +11,14 @@
     <div class="col-6 col-md-4">
         <div class="sima-stat sima-stat--blue">
             <div class="sima-stat__icon sima-stat__icon--blue"><i class="fas fa-user-graduate"></i></div>
-            <div class="sima-stat__label">Total Mahasiswa</div>
+            <div class="sima-stat__label">Total Students</div>
             <div class="sima-stat__value">{{ $totalMahasiswa }}</div>
         </div>
     </div>
     <div class="col-6 col-md-4">
         <div class="sima-stat sima-stat--green">
             <div class="sima-stat__icon sima-stat__icon--green"><i class="fas fa-chalkboard-teacher"></i></div>
-            <div class="sima-stat__label">Total Dosen</div>
+            <div class="sima-stat__label">Total Lecturers</div>
             <div class="sima-stat__value">{{ $totalDosen }}</div>
         </div>
     </div>
@@ -35,7 +35,7 @@
 <div class="sima-card mb-4">
     <div class="sima-card__header">
         <div>
-            <h5 class="sima-card__title">Mahasiswa</h5>
+            <h5 class="sima-card__title">Students</h5>
         </div>
         <form method="GET" action="{{ route('kln.students.page') }}" id="frmM"
               style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -88,7 +88,7 @@
                     <th>NPM</th>
                     <th>Major</th>
                     <th>Type</th>
-                    <th>Masa Aktif</th>
+                    <th>Active Period</th>
                     <th>Account</th>
                     <th>Document Status</th>
                     <th>Actions</th>
@@ -156,7 +156,7 @@
 <div class="sima-card">
     <div class="sima-card__header">
         <div>
-            <h5 class="sima-card__title">Dosen</h5>
+            <h5 class="sima-card__title">Lecturers</h5>
         </div>
         <form method="GET" action="{{ route('kln.students.page') }}"
               style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">

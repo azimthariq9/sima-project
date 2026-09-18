@@ -1,17 +1,17 @@
 @extends('layouts.sima')
 
-@section('page_title',   'Notifikasi')
+@section('page_title',   'Notifications')
 @section('page_section', 'MAHASISWA')
-@section('page_subtitle','Informasi & aktivitas terbaru akun Anda')
+@section('page_subtitle','Recent information and activity for your account')
 
 @section('main_content')
 
 @php
 $typeConfig = [
-    'document'     => ['ic' => 'fa-file-alt',   'cl' => '#059669', 'bg' => '#ECFDF5', 'label' => 'Dokumen'],
-    'account'      => ['ic' => 'fa-user-check',  'cl' => '#7C3AED', 'bg' => '#F5F3FF', 'label' => 'Akun'],
-    'announcement' => ['ic' => 'fa-bullhorn',     'cl' => '#2563EB', 'bg' => '#EFF6FF', 'label' => 'Pengumuman'],
-    'broadcast'    => ['ic' => 'fa-paper-plane',  'cl' => '#0D9488', 'bg' => '#F0FDFA', 'label' => 'Pesan'],
+    'document'     => ['ic' => 'fa-file-alt',   'cl' => '#059669', 'bg' => '#ECFDF5', 'label' => 'Document'],
+    'account'      => ['ic' => 'fa-user-check',  'cl' => '#7C3AED', 'bg' => '#F5F3FF', 'label' => 'Account'],
+    'announcement' => ['ic' => 'fa-bullhorn',     'cl' => '#2563EB', 'bg' => '#EFF6FF', 'label' => 'Announcement'],
+    'broadcast'    => ['ic' => 'fa-paper-plane',  'cl' => '#0D9488', 'bg' => '#F0FDFA', 'label' => 'Message'],
 ];
 @endphp
 
@@ -20,12 +20,12 @@ $typeConfig = [
         <div class="sima-card">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Semua Notifikasi</h5>
+                    <h5 class="sima-card__title">All Notifications</h5>
                     <div class="sima-card__subtitle">
                         @if($unreadCount > 0)
-                            <span style="color:var(--c-accent);font-weight:600;">{{ $unreadCount }}</span> belum dibaca
+                            <span style="color:var(--c-accent);font-weight:600;">{{ $unreadCount }}</span> unread
                         @else
-                            Semua sudah dibaca
+                            All caught up
                         @endif
                     </div>
                 </div>
@@ -33,7 +33,7 @@ $typeConfig = [
                 <form method="POST" action="{{ route('mahasiswa.notifikasi.mark-read') }}" style="display:inline;">
                     @csrf
                     <button type="submit" class="sima-btn sima-btn--outline sima-btn--sm">
-                        <i class="fas fa-check-double me-1"></i> Tandai Semua Dibaca
+                        <i class="fas fa-check-double me-1"></i> Mark All as Read
                     </button>
                 </form>
                 @endif
@@ -82,7 +82,7 @@ $typeConfig = [
                                 @csrf
                                 <button type="submit"
                                         style="font-size:11px;font-weight:600;color:var(--c-accent);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px;">
-                                    Tandai dibaca
+                                    Mark as read
                                 </button>
                             </form>
                             @endif
@@ -97,7 +97,7 @@ $typeConfig = [
                 @empty
                 <div class="text-center text-muted py-5">
                     <i class="fas fa-bell-slash fa-2x d-block mb-2" style="opacity:.3;"></i>
-                    Belum ada notifikasi.
+                    No notifications.
                 </div>
                 @endforelse
             </div>
@@ -108,7 +108,7 @@ $typeConfig = [
     <div class="col-md-4 sima-fade sima-fade--1">
         <div class="sima-card">
             <div class="sima-card__header">
-                <h5 class="sima-card__title">Ringkasan</h5>
+                <h5 class="sima-card__title">Summary</h5>
             </div>
             <div style="padding:16px 20px;">
                 @php
@@ -120,7 +120,7 @@ $typeConfig = [
                     <span class="sima-badge sima-badge--blue">{{ $total }}</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--c-border);font-size:13px;">
-                    <span style="color:var(--c-text-2);">Belum Dibaca</span>
+                    <span style="color:var(--c-text-2);">Unread</span>
                     <span class="sima-badge {{ $unreadCount > 0 ? 'sima-badge--red' : 'sima-badge--green' }}">{{ $unreadCount }}</span>
                 </div>
                 @foreach($typeConfig as $key => $tc)

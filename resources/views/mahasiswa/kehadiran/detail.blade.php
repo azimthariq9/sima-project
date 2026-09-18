@@ -1,6 +1,6 @@
 @extends('layouts.sima')
 
-@section('page_title',   $kelasInfo->namaMk ?? 'Detail Kehadiran')
+@section('page_title',   $kelasInfo->namaMk ?? 'Attendance Detail')
 @section('page_section', 'Mahasiswa')
 @section('page_subtitle','Session attendance detail')
 

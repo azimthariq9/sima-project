@@ -2,7 +2,7 @@
 
 @section('page_title', 'Dashboard KLN')
 @section('page_section', 'KLN')
-@section('page_subtitle', 'Monitoring mahasiswa — Kantor Layanan Internasional')
+@section('page_subtitle', 'Student monitoring — International Office')
 
 @section('main_content')
 
@@ -15,7 +15,7 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
     <div class="col-6 col-md-4 sima-fade sima-fade--1">
         <div class="sima-stat sima-stat--blue">
             <div class="sima-stat__icon sima-stat__icon--blue"><i class="fas fa-users"></i></div>
-            <div class="sima-stat__label">Total Mahasiswa</div>
+            <div class="sima-stat__label">Total Students</div>
             <div class="sima-stat__value">{{ $totalMahasiswa }}</div>
         </div>
     </div>
@@ -26,9 +26,9 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
             <div class="sima-stat__value">{{ $dokumenPending }}</div>
             <div class="sima-stat__delta {{ $dokumenPending > 0 ? 'sima-stat__delta--down' : 'sima-stat__delta--flat' }}">
                 @if($dokumenPending > 0)
-                    <i class="fas fa-exclamation"></i> Perlu ditangani
+                    <i class="fas fa-exclamation"></i> Needs attention
                 @else
-                    <i class="fas fa-check"></i> Semua selesai
+                    <i class="fas fa-check"></i> All completed
                 @endif
             </div>
         </div>
@@ -36,13 +36,13 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
     <div class="col-6 col-md-4 sima-fade sima-fade--3">
         <div class="sima-stat sima-stat--red">
             <div class="sima-stat__icon sima-stat__icon--red"><i class="fas fa-exclamation-triangle"></i></div>
-            <div class="sima-stat__label">Dokumen Expired</div>
+            <div class="sima-stat__label">Expired Documents</div>
             <div class="sima-stat__value">{{ $dokumenExpired }}</div>
             <div class="sima-stat__delta {{ $dokumenExpired > 0 ? 'sima-stat__delta--down' : 'sima-stat__delta--flat' }}">
                 @if($dokumenExpired > 0)
-                    <i class="fas fa-exclamation"></i> Butuh tindakan
+                    <i class="fas fa-exclamation"></i> Needs action
                 @else
-                    <i class="fas fa-check"></i> Semua valid
+                    <i class="fas fa-check"></i> All valid
                 @endif
             </div>
         </div>
@@ -54,18 +54,18 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
     <div class="col-6 col-md-6 sima-fade sima-fade--3">
         <div class="sima-stat sima-stat--purple">
             <div class="sima-stat__icon sima-stat__icon--purple"><i class="fas fa-globe"></i></div>
-            <div class="sima-stat__label">Negara Asal</div>
+            <div class="sima-stat__label">Home Countries</div>
             <div class="sima-stat__value">{{ $negaraDistinct }}</div>
-            <div class="sima-stat__delta sima-stat__delta--flat">Negara berbeda</div>
+            <div class="sima-stat__delta sima-stat__delta--flat">Different countries</div>
         </div>
     </div>
     <div class="col-6 col-md-6 sima-fade sima-fade--4">
         <div class="sima-stat sima-stat--green">
             <div class="sima-stat__icon sima-stat__icon--green"><i class="fas fa-check-double"></i></div>
-            <div class="sima-stat__label">Divalidasi Hari Ini</div>
+            <div class="sima-stat__label">Validated Today</div>
             <div class="sima-stat__value">{{ $divalidasiHariIni }}</div>
             <div class="sima-stat__delta sima-stat__delta--up">
-                <i class="fas fa-arrow-up"></i> Dokumen disetujui
+                <i class="fas fa-arrow-up"></i> Documents approved
             </div>
         </div>
     </div>
@@ -79,21 +79,21 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
         <div class="sima-card">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Dokumen Kritis</h5>
-                    <div class="sima-card__subtitle">Expired &amp; akan expired dalam 30 hari</div>
+                    <h5 class="sima-card__title">Critical Documents</h5>
+                    <div class="sima-card__subtitle">Expired &amp; expiring within 30 days</div>
                 </div>
                 <a href="{{ route('kln.notifikasi') }}" class="sima-btn sima-btn--outline sima-btn--sm">
-                    <i class="fas fa-arrow-right me-1"></i> Semua
+                    <i class="fas fa-arrow-right me-1"></i> All
                 </a>
             </div>
             <div class="table-responsive">
                 <table class="sima-table">
                     <thead>
                         <tr>
-                            <th>Mahasiswa</th>
-                            <th>Negara</th>
-                            <th>Dokumen</th>
-                            <th>Kadaluarsa</th>
+                            <th>Student</th>
+                            <th>Country</th>
+                            <th>Document</th>
+                            <th>Expiry</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -127,7 +127,7 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
                         <tr>
                             <td colspan="5" class="text-center text-muted py-4">
                                 <i class="fas fa-check-circle" style="color:var(--c-green);font-size:20px;display:block;margin-bottom:6px;"></i>
-                                Tidak ada dokumen kritis saat ini.
+                                No critical documents at this time.
                             </td>
                         </tr>
                         @endforelse
@@ -142,8 +142,8 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
         <div class="sima-card h-100">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Sebaran Negara</h5>
-                    <div class="sima-card__subtitle">Top {{ $sebaranNegara->count() }} negara asal</div>
+                    <h5 class="sima-card__title">Country Distribution</h5>
+                    <div class="sima-card__subtitle">Top {{ $sebaranNegara->count() }} home countries</div>
                 </div>
             </div>
             <div style="padding:16px 20px;">
@@ -163,7 +163,7 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
                 </div>
                 @empty
                 <div class="text-center text-muted py-4" style="font-size:13px;">
-                    Belum ada data kewarganegaraan.
+                    No nationality data.
                 </div>
                 @endforelse
             </div>
@@ -180,19 +180,19 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
         <div class="sima-card">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Antrian Validasi Dokumen</h5>
+                    <h5 class="sima-card__title">Document Validation Queue</h5>
                     <div class="sima-card__subtitle">
-                        {{ $antrianValidasi->count() }} dokumen menunggu divalidasi
+                        {{ $antrianValidasi->count() }} documents awaiting validation
                     </div>
                 </div>
                 <a href="{{ route('kln.students.page') }}" class="sima-btn sima-btn--outline sima-btn--sm">
-                    <i class="fas fa-arrow-right me-1"></i> Semua
+                    <i class="fas fa-arrow-right me-1"></i> All
                 </a>
             </div>
             @if($antrianValidasi->isEmpty())
             <div class="text-center text-muted py-5" style="font-size:13px;">
                 <i class="fas fa-inbox fa-2x d-block mb-2" style="opacity:.3;"></i>
-                Tidak ada dokumen menunggu validasi.
+                No documents awaiting validation.
             </div>
             @else
             @foreach($antrianValidasi as $i => $q)
@@ -223,11 +223,11 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
         <div class="sima-card h-100">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Request Dokumen</h5>
-                    <div class="sima-card__subtitle">Permohonan dari mahasiswa</div>
+                    <h5 class="sima-card__title">Document Requests</h5>
+                    <div class="sima-card__subtitle">Requests from students</div>
                 </div>
                 <a href="{{ route('kln.dokumen.page') }}" class="sima-btn sima-btn--outline sima-btn--sm">
-                    <i class="fas fa-arrow-right me-1"></i> Semua
+                    <i class="fas fa-arrow-right me-1"></i> All
                 </a>
             </div>
             <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px;">
@@ -243,22 +243,22 @@ $colorPalette = ['#2563EB','#0D9488','#7C3AED','#D97706','#DC2626','#059669','#9
                     </div>
                     <div>
                         <div style="font-size:22px;font-weight:700;line-height:1.1;">{{ $reqDokumenPending }}</div>
-                        <div style="font-size:12px;color:var(--c-text-3);">Request pending</div>
+                        <div style="font-size:12px;color:var(--c-text-3);">Pending requests</div>
                     </div>
                     @if($reqDokumenPending > 0)
                     <span class="sima-badge sima-badge--amber ms-auto">
-                        <i class="fas fa-exclamation me-1"></i>Perlu ditangani
+                        <i class="fas fa-exclamation me-1"></i>Needs attention
                     </span>
                     @else
                     <span class="sima-badge sima-badge--green ms-auto">
-                        <i class="fas fa-check me-1"></i>Semua selesai
+                        <i class="fas fa-check me-1"></i>All completed
                     </span>
                     @endif
                 </div>
                 <a href="{{ route('kln.dokumen.page') }}"
                    class="sima-btn sima-btn--accent"
                    style="text-align:center;">
-                    <i class="fas fa-folder-open me-2"></i> Kelola Request
+                    <i class="fas fa-folder-open me-2"></i> Manage Requests
                 </a>
             </div>
         </div>

@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Detail Sesi ' . $sesi)
+@section('page_title',    'Session Detail ' . $sesi)
 @section('page_section',  'DOSEN')
-@section('page_subtitle', ($jadwal->matakuliah->namaMk ?? '-') . ' — Kelas ' . ($jadwal->kelas->kodeKelas ?? '-') . ' — Sesi ' . $sesi)
+@section('page_subtitle', ($jadwal->matakuliah->namaMk ?? '-') . ' — Class ' . ($jadwal->kelas->kodeKelas ?? '-') . ' — Session ' . $sesi)
 
 @section('main_content')
 
@@ -21,10 +21,10 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
               font-size:13px;color:var(--c-text-3);text-decoration:none;transition:color .15s"
        onmouseover="this.style.color='var(--c-text-1)'"
        onmouseout="this.style.color='var(--c-text-3)'">
-        <i class="fas fa-arrow-left"></i> Kembali ke Detail Kelas
+        <i class="fas fa-arrow-left"></i> Back to Class Detail
     </a>
     <span style="color:var(--c-border);font-size:12px">/</span>
-    <span style="font-size:13px;color:var(--c-text-2)">Sesi {{ $sesi }}</span>
+    <span style="font-size:13px;color:var(--c-text-2)">Session {{ $sesi }}</span>
 </div>
 
 {{-- ── INFO SESI ────────────────────────────────────── --}}
@@ -38,7 +38,7 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
                     <div style="padding:12px 20px;background:{{ $color }}18;border-radius:12px;
                                 border:1px solid {{ $color }}30;text-align:center;min-width:90px">
                         <div style="font-size:10px;font-weight:700;text-transform:uppercase;
-                                    letter-spacing:.08em;color:{{ $color }}">SESI KE-</div>
+                                    letter-spacing:.08em;color:{{ $color }}">SESSION #</div>
                         <div style="font-size:28px;font-weight:800;color:{{ $color }};line-height:1.1;margin-top:4px">
                             {{ $sesi }}
                         </div>
@@ -50,7 +50,7 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
                         </div>
                         <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
                             <span style="font-size:12px;color:var(--c-text-3)">
-                                <i class="fas fa-door-open"></i> Kelas {{ $jadwal->kelas->kodeKelas ?? '-' }}
+                                <i class="fas fa-door-open"></i> Class {{ $jadwal->kelas->kodeKelas ?? '-' }}
                             </span>
                             <span style="font-size:12px;color:var(--c-text-3)">
                                 <i class="fas fa-calendar-day"></i>
@@ -60,13 +60,13 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
                                 <i class="fas fa-map-marker-alt"></i> {{ $jadwal->ruangan }}
                             </span>
                             <span style="font-size:12px;color:var(--c-text-3)">
-                                <i class="fas fa-users"></i> {{ $mahasiswa->count() }} mahasiswa
+                                <i class="fas fa-users"></i> {{ $mahasiswa->count() }} students
                             </span>
                         </div>
 
                         {{-- Tanggal sesi --}}
                         <div style="margin-top:12px;display:flex;align-items:center;gap:10px">
-                            <label class="sima-label" style="margin:0;white-space:nowrap">Tanggal Sesi:</label>
+                            <label class="sima-label" style="margin:0;white-space:nowrap">Session Date:</label>
                             <input type="date" id="inputTglSesi" class="sima-input"
                                    value="{{ $tglSesi ?? now()->format('Y-m-d') }}"
                                    style="max-width:180px">
@@ -82,8 +82,8 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
 <div class="sima-card">
     <div class="sima-card__header">
         <div>
-            <h5 class="sima-card__title">Kehadiran Mahasiswa — Sesi {{ $sesi }}</h5>
-            <div class="sima-card__subtitle">Ubah status kehadiran lalu klik Simpan Perubahan</div>
+            <h5 class="sima-card__title">Student Attendance — Session {{ $sesi }}</h5>
+            <div class="sima-card__subtitle">Change attendance status then click Save Changes</div>
         </div>
     </div>
     <div class="sima-card__body">
@@ -91,27 +91,27 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
         @if($mahasiswa->isEmpty())
             <div style="padding:48px;text-align:center;color:var(--c-text-3)">
                 <i class="fas fa-users" style="font-size:32px;margin-bottom:12px;display:block"></i>
-                Belum ada mahasiswa terdaftar di kelas ini
+                No students enrolled in this class
             </div>
         @else
             {{-- Tombol select all --}}
             <div style="display:flex;align-items:center;justify-content:space-between;
                         margin-bottom:12px;flex-wrap:wrap;gap:8px">
                 <div style="font-size:13px;color:var(--c-text-2);font-weight:500">
-                    {{ $mahasiswa->count() }} mahasiswa
+                    {{ $mahasiswa->count() }} students
                 </div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap">
                     <button onclick="setAllStatus('present')"
                             class="sima-btn sima-btn--sm"
                             style="background:var(--c-green-lt);color:var(--c-green);
                                    box-shadow:none;border:1px solid rgba(5,150,105,.2)">
-                        <i class="fas fa-check-circle"></i> Semua Hadir
+                        <i class="fas fa-check-circle"></i> All Present
                     </button>
                     <button onclick="setAllStatus('absent')"
                             class="sima-btn sima-btn--sm"
                             style="background:var(--c-red-lt);color:var(--c-red);
                                    box-shadow:none;border:1px solid rgba(220,38,38,.2)">
-                        <i class="fas fa-times-circle"></i> Semua Absen
+                        <i class="fas fa-times-circle"></i> All Absent
                     </button>
                 </div>
             </div>
@@ -161,7 +161,7 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
                                              style="text-align:center;padding:8px 4px;border-radius:8px;
                                                     font-size:12px;font-weight:600;border:2px solid var(--c-green);
                                                     background:var(--c-green-lt);color:var(--c-green);transition:all .15s">
-                                            <i class="fas fa-check"></i><br>Hadir
+                                            <i class="fas fa-check"></i><br>Present
                                         </div>
                                     </label>
                                     {{-- EXCUSED --}}
@@ -173,7 +173,7 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
                                              style="text-align:center;padding:8px 4px;border-radius:8px;
                                                     font-size:12px;font-weight:600;border:2px solid var(--c-border);
                                                     background:var(--c-bg);color:var(--c-text-3);transition:all .15s">
-                                            <i class="fas fa-file-alt"></i><br>Izin
+                                            <i class="fas fa-file-alt"></i><br>Excused
                                         </div>
                                     </label>
                                     {{-- ABSENT --}}
@@ -185,7 +185,7 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
                                              style="text-align:center;padding:8px 4px;border-radius:8px;
                                                     font-size:12px;font-weight:600;border:2px solid var(--c-border);
                                                     background:var(--c-bg);color:var(--c-text-3);transition:all .15s">
-                                            <i class="fas fa-times"></i><br>Absen
+                                            <i class="fas fa-times"></i><br>Absent
                                         </div>
                                     </label>
                                 </div>
@@ -205,10 +205,10 @@ $color = $hariColor[$jadwal->hari] ?? '#888';
                 </div>
                 <a href="{{ route('dosen.jadwal.detail', $jadwal->id) }}"
                    class="sima-btn sima-btn--outline">
-                    Kembali
+                    Back
                 </a>
                 <button onclick="simpanPerubahan(event)" class="sima-btn sima-btn--blue">
-                    <i class="fas fa-save"></i> Simpan Perubahan
+                    <i class="fas fa-save"></i> Save Changes
                 </button>
             </div>
         @endif
@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 window.simpanPerubahan = function (e) {
     const tglSesi = document.getElementById('inputTglSesi').value;
-    if (!tglSesi) { alert('Tanggal sesi harus diisi'); return; }
+    if (!tglSesi) { alert('Session date must be filled'); return; }
 
     const kehadiran = [];
     document.querySelectorAll('.status-group').forEach(group => {
@@ -293,11 +293,11 @@ window.simpanPerubahan = function (e) {
         }
     });
 
-    if (!kehadiran.length) { alert('Tidak ada data kehadiran'); return; }
+    if (!kehadiran.length) { alert('No attendance data'); return; }
 
     const btn = e.currentTarget;
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
     fetch(STORE_URL, {
         method: 'POST',
@@ -312,17 +312,17 @@ window.simpanPerubahan = function (e) {
     .then(res => {
         if (res.success) {
             const msg = document.getElementById('saveMsg');
-            msg.querySelector('span').textContent = 'Kehadiran sesi ' + SESI + ' berhasil diperbarui';
+            msg.querySelector('span').textContent = 'Session ' + SESI + ' attendance updated';
             msg.style.display = 'flex';
             setTimeout(() => { msg.style.display = 'none'; }, 4000);
         } else {
-            alert(res.message || 'Gagal menyimpan');
+            alert(res.message || 'Failed to save');
         }
     })
     .catch(e => alert('Error: ' + e.message))
     .finally(() => {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-save"></i> Simpan Perubahan';
+        btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
     });
 };
 </script>
