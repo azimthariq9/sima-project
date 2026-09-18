@@ -121,6 +121,21 @@
 
 
     {{-- =========================
+       TYPE MANAGEMENT
+    ========================= --}}
+    <div style="margin-top:20px;padding-top:15px;border-top:1px solid rgba(255,255,255,.25)">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45);padding:0 14px;margin-bottom:6px;">Type Management</div>
+        <a href="{{ route('kln.types.mahasiswa') }}" class="sima-nav__item {{ request()->routeIs('kln.types.mahasiswa*') ? 'active' : '' }}" data-title="Course Types">
+            <i class="fas fa-graduation-cap sima-nav__icon"></i>
+            <span>Course Types</span>
+        </a>
+        <a href="{{ route('kln.types.dokumen') }}" class="sima-nav__item {{ request()->routeIs('kln.types.dokumen*') ? 'active' : '' }}" data-title="Document Types">
+            <i class="fas fa-file-medical sima-nav__icon"></i>
+            <span>Document Types</span>
+        </a>
+    </div>
+
+    {{-- =========================
        SETTINGS SECTION
     ========================= --}}
     <div style="margin-top:20px;

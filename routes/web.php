@@ -19,6 +19,7 @@ use App\Http\Controllers\API\KelasController;
 use App\Http\Controllers\API\MahasiswaKelasController;
 use App\Http\Controllers\API\JadwalController;
 use App\Http\Controllers\API\KehadiranController;
+use App\Http\Controllers\API\TypeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -338,6 +339,34 @@ Route::middleware(['auth', 'check.role:KLN'])
             Route::get('{id}/file',       [KlnController::class, 'downloadFile'])->name('file');
             Route::get('{id}/download',   [DokumenController::class, 'download'])->name('download');
             Route::delete('{id}',         [KlnController::class, 'destroy'])->name('destroy');
+        });
+
+        // Profile photo
+        Route::get('students/{id}/foto', [KlnController::class, 'serveProfilFoto'])->name('students.foto');
+
+        // Type Management
+        Route::prefix('types')->name('types.')->group(function () {
+            Route::get('mahasiswa',               [TypeController::class, 'tipeMahasiswaIndex'])->name('mahasiswa');
+            Route::post('mahasiswa',              [TypeController::class, 'storeTipeMahasiswa'])->name('mahasiswa.store');
+            Route::patch('mahasiswa/{id}',        [TypeController::class, 'updateTipeMahasiswa'])->name('mahasiswa.update');
+            Route::delete('mahasiswa/{id}',       [TypeController::class, 'destroyTipeMahasiswa'])->name('mahasiswa.destroy');
+            Route::get('dokumen',                 [TypeController::class, 'tipeDokumenIndex'])->name('dokumen');
+            Route::post('dokumen',                [TypeController::class, 'storeTipeDokumen'])->name('dokumen.store');
+            Route::patch('dokumen/{id}',          [TypeController::class, 'updateTipeDokumen'])->name('dokumen.update');
+            Route::delete('dokumen/{id}',         [TypeController::class, 'destroyTipeDokumen'])->name('dokumen.destroy');
+        });
+
+        // Multi-step mahasiswa wizard
+        Route::prefix('users/mahasiswa')->name('users.mahasiswa.')->group(function () {
+            Route::get('create',                        [KlnController::class, 'createMahasiswaWizard'])->name('create');
+            Route::post('step1',                        [KlnController::class, 'storeMahasiswaStep1'])->name('step1');
+            Route::post('step2',                        [KlnController::class, 'storeMahasiswaStep2'])->name('step2');
+            Route::post('step3',                        [KlnController::class, 'storeMahasiswaStep3'])->name('step3');
+            Route::get('{id}/checker',                  [KlnController::class, 'getMahasiswaChecker'])->name('checker');
+            Route::get('{id}/edit',                     [KlnController::class, 'editMahasiswaWizard'])->name('edit');
+            Route::patch('{id}/step1',                  [KlnController::class, 'updateMahasiswaStep1'])->name('updateStep1');
+            Route::patch('{id}/step2',                  [KlnController::class, 'updateMahasiswaStep2'])->name('updateStep2');
+            Route::patch('{id}/step3',                  [KlnController::class, 'updateMahasiswaStep3'])->name('updateStep3');
         });
     });
 
