@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
-@section('page_title',   'Analitik Kehadiran')
+@section('page_title',   'Attendance Analytics')
 @section('page_section', 'Mahasiswa')
-@section('page_subtitle','Rekap dan statistik kehadiran Anda')
+@section('page_subtitle','Your attendance recap and statistics')
 
 @section('main_content')
 
@@ -12,7 +12,7 @@
     <div class="col-6 col-md-3 sima-fade sima-fade--1">
         <div class="sima-stat sima-stat--green">
             <div class="sima-stat__icon sima-stat__icon--green"><i class="fas fa-circle-check"></i></div>
-            <div class="sima-stat__label">Total Hadir</div>
+            <div class="sima-stat__label">Total Present</div>
             <span class="sima-stat__value">{{ $totalHadir }}</span>
         </div>
     </div>
@@ -20,7 +20,7 @@
     <div class="col-6 col-md-3 sima-fade sima-fade--2">
         <div class="sima-stat sima-stat--amber">
             <div class="sima-stat__icon sima-stat__icon--amber"><i class="fas fa-clock-rotate-left"></i></div>
-            <div class="sima-stat__label">Izin / Excused</div>
+            <div class="sima-stat__label">Excused</div>
             <span class="sima-stat__value">{{ $totalTelat }}</span>
         </div>
     </div>
@@ -28,7 +28,7 @@
     <div class="col-6 col-md-3 sima-fade sima-fade--3">
         <div class="sima-stat sima-stat--red">
             <div class="sima-stat__icon sima-stat__icon--red"><i class="fas fa-circle-xmark"></i></div>
-            <div class="sima-stat__label">Alpha</div>
+            <div class="sima-stat__label">Absent</div>
             <span class="sima-stat__value">{{ $totalAlpha }}</span>
         </div>
     </div>
@@ -36,7 +36,7 @@
     <div class="col-6 col-md-3 sima-fade sima-fade--4">
         <div class="sima-stat sima-stat--blue">
             <div class="sima-stat__icon sima-stat__icon--blue"><i class="fas fa-chart-pie"></i></div>
-            <div class="sima-stat__label">% Kehadiran</div>
+            <div class="sima-stat__label">Attendance Rate</div>
             <span class="sima-stat__value">{{ $persentaseHadir }}%</span>
         </div>
     </div>
@@ -50,8 +50,8 @@
         <div class="sima-card h-100">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Rekap per Mata Kuliah</h5>
-                    <div class="sima-card__subtitle">Berdasarkan data kehadiran tercatat</div>
+                    <h5 class="sima-card__title">Recap by Course</h5>
+                    <div class="sima-card__subtitle">Based on recorded attendance data</div>
                 </div>
             </div>
             <div class="sima-card__body" style="padding:0">
@@ -71,12 +71,12 @@
                             <div style="height:100%;width:{{ $pct }}%;background:{{ $color }};border-radius:999px;transition:width .5s ease"></div>
                         </div>
                         <div style="font-size:11px;color:var(--c-text-3);margin-top:4px">
-                            <i class="fas fa-circle-check" style="color:var(--c-green)"></i> {{ $mk['hadir'] }} hadir
+                            <i class="fas fa-circle-check" style="color:var(--c-green)"></i> {{ $mk['hadir'] }} present
                             &nbsp;·&nbsp;
-                            <i class="fas fa-clock" style="color:var(--c-amber)"></i> {{ $mk['telat'] }} izin
+                            <i class="fas fa-clock" style="color:var(--c-amber)"></i> {{ $mk['telat'] }} excused
                             &nbsp;·&nbsp;
-                            <i class="fas fa-circle-xmark" style="color:var(--c-red)"></i> {{ $mk['alpha'] }} alpha
-                            &nbsp;·&nbsp; {{ $mk['total'] }} total sesi
+                            <i class="fas fa-circle-xmark" style="color:var(--c-red)"></i> {{ $mk['alpha'] }} absent
+                            &nbsp;·&nbsp; {{ $mk['total'] }} total sessions
                         </div>
                     </div>
                     <div style="font-family:var(--f-mono);font-size:15px;font-weight:700;color:{{ $color }};min-width:44px;text-align:right">
@@ -86,7 +86,7 @@
                 @empty
                 <div style="padding:48px 0;text-align:center">
                     <div style="font-size:32px;margin-bottom:10px;opacity:.3">📋</div>
-                    <div style="font-size:13px;color:var(--c-text-3)">Belum ada data kehadiran tercatat</div>
+                    <div style="font-size:13px;color:var(--c-text-3)">No recorded attendance data</div>
                 </div>
                 @endforelse
 
@@ -99,8 +99,8 @@
         <div class="sima-card h-100">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Riwayat Sesi</h5>
-                    <div class="sima-card__subtitle">20 kehadiran terakhir</div>
+                    <h5 class="sima-card__title">Session History</h5>
+                    <div class="sima-card__subtitle">Last 20 attendance records</div>
                 </div>
             </div>
             <div class="sima-card__body" style="padding:0">
@@ -108,9 +108,9 @@
                 @forelse($history->take(20) as $rec)
                 @php
                     $smap = [
-                        'present' => ['label' => 'Hadir',   'cls' => 'green',  'ico' => 'fa-circle-check'],
-                        'excused' => ['label' => 'Izin',    'cls' => 'amber',  'ico' => 'fa-clock'],
-                        'absent'  => ['label' => 'Alpha',   'cls' => 'red',    'ico' => 'fa-circle-xmark'],
+                        'present' => ['label' => 'Present',   'cls' => 'green',  'ico' => 'fa-circle-check'],
+                        'excused' => ['label' => 'Excused',    'cls' => 'amber',  'ico' => 'fa-clock'],
+                        'absent'  => ['label' => 'Absent',   'cls' => 'red',    'ico' => 'fa-circle-xmark'],
                     ];
                     $s = $smap[$rec->status] ?? $smap['present'];
                 @endphp
@@ -124,7 +124,7 @@
                             {{ $rec->namaMk }}
                         </div>
                         <div style="font-size:10.5px;color:var(--c-text-3)">
-                            Sesi ke-{{ $rec->meeting_number }}
+                            Session #{{ $rec->meeting_number }}
                             @if($rec->checkin_time)
                                 · {{ \Carbon\Carbon::parse($rec->checkin_time)->format('d M Y') }}
                             @endif
@@ -137,7 +137,7 @@
                 @empty
                 <div style="padding:48px 0;text-align:center">
                     <div style="font-size:32px;margin-bottom:10px;opacity:.3">📭</div>
-                    <div style="font-size:13px;color:var(--c-text-3)">Belum ada riwayat kehadiran</div>
+                    <div style="font-size:13px;color:var(--c-text-3)">No attendance history</div>
                 </div>
                 @endforelse
 

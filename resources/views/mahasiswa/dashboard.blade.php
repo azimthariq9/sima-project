@@ -2,7 +2,7 @@
 
 @section('page_title',    'Dashboard')
 @section('page_section',  'Mahasiswa')
-@section('page_subtitle', 'Selamat datang kembali, ' . (optional($mahasiswa)->nama ?? auth()->user()->name ?? 'Mahasiswa') . ' 👋')
+@section('page_subtitle', 'Welcome back, ' . (optional($mahasiswa)->nama ?? auth()->user()->name ?? 'Student') . ' 👋')
 
 @section('main_content')
 
@@ -13,8 +13,8 @@
 <div class="sima-alert sima-alert--amber sima-fade" style="margin-bottom:20px">
     <i class="fas fa-triangle-exclamation sima-alert__icon"></i>
     <div class="sima-alert__text">
-        <strong>Dokumen KITAS akan expired dalam {{ $kitasDaysLeft }} hari.</strong>
-        Segera hubungi KLN untuk proses perpanjangan.
+        <strong>KITAS document will expire in {{ $kitasDaysLeft }} days.</strong>
+        Contact KLN immediately for extension processing.
     </div>
     <a href="{{ route('mahasiswa.request.create') }}" class="sima-alert__action">Request →</a>
 </div>
@@ -31,14 +31,14 @@
             <div class="sima-stat__icon sima-stat__icon--blue">
                 <i class="fas fa-calendar-day"></i>
             </div>
-            <div class="sima-stat__label">Jadwal Hari Ini</div>
+            <div class="sima-stat__label">Today's Schedule</div>
             <span class="sima-stat__value">{{ $jadwalHariIni->count() }}</span>
             <div class="sima-stat__delta sima-stat__delta--flat">
                 @if($jadwalHariIni->count() > 0)
                     <i class="fas fa-clock"></i>
                     Mulai {{ optional($jadwalHariIni->first())->jam_mulai ?? '--' }} WIB
                 @else
-                    <i class="fas fa-moon"></i> Tidak ada jadwal
+                    <i class="fas fa-moon"></i> No schedule
                 @endif
             </div>
         </a>
@@ -50,13 +50,13 @@
             <div class="sima-stat__icon sima-stat__icon--green">
                 <i class="fas fa-circle-check"></i>
             </div>
-            <div class="sima-stat__label">Total Hadir</div>
+            <div class="sima-stat__label">Total Present</div>
             <span class="sima-stat__value">{{ $totalHadir }}</span>
             <div class="sima-stat__delta sima-stat__delta--up">
                 <i class="fas fa-arrow-up"></i>
                 {{ $totalHadir + $totalTelat + $totalAlpha > 0
-                    ? round($totalHadir / ($totalHadir + $totalTelat + $totalAlpha) * 100) . '% kehadiran'
-                    : 'Belum ada data' }}
+                    ? round($totalHadir / ($totalHadir + $totalTelat + $totalAlpha) * 100) . '% attendance'
+                    : 'No data available' }}
             </div>
         </a>
     </div>
@@ -67,11 +67,11 @@
             <div class="sima-stat__icon sima-stat__icon--amber">
                 <i class="fas fa-clock-rotate-left"></i>
             </div>
-            <div class="sima-stat__label">Terlambat</div>
+            <div class="sima-stat__label">Late</div>
             <span class="sima-stat__value">{{ $totalTelat }}</span>
             <div class="sima-stat__delta sima-stat__delta--flat">
                 <i class="fas fa-circle" style="font-size:6px"></i>
-                pertemuan tercatat
+                meetings recorded
             </div>
         </a>
     </div>
@@ -82,13 +82,13 @@
             <div class="sima-stat__icon sima-stat__icon--purple">
                 <i class="fas fa-bell"></i>
             </div>
-            <div class="sima-stat__label">Notifikasi Baru</div>
+            <div class="sima-stat__label">New Notifications</div>
             <span class="sima-stat__value">{{ $unreadNotifCount }}</span>
             <div class="sima-stat__delta {{ $unreadNotifCount > 0 ? 'sima-stat__delta--down' : 'sima-stat__delta--flat' }}">
                 @if($unreadNotifCount > 0)
-                    <i class="fas fa-circle" style="font-size:6px;animation:pulse 1.5s infinite"></i> Belum dibaca
+                    <i class="fas fa-circle" style="font-size:6px;animation:pulse 1.5s infinite"></i> Unread
                 @else
-                    <i class="fas fa-circle-check"></i> Semua terbaca
+                    <i class="fas fa-circle-check"></i> All read
                 @endif
             </div>
         </a>
@@ -106,13 +106,13 @@
         <div class="sima-card h-100">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Jadwal Hari Ini</h5>
+                    <h5 class="sima-card__title">Today's Schedule</h5>
                     <div class="sima-card__subtitle">
                         {{ \Carbon\Carbon::now()->locale('id')->isoFormat('dddd, D MMMM Y') }}
                     </div>
                 </div>
                 <a href="{{ route('mahasiswa.jadwal') }}" class="sima-card__action">
-                    Semua <i class="fas fa-arrow-right" style="font-size:10px"></i>
+                    All <i class="fas fa-arrow-right" style="font-size:10px"></i>
                 </a>
             </div>
             <div class="sima-card__body">
@@ -125,7 +125,7 @@
                     </div>
                     <div style="flex:1;min-width:0">
                         <div style="font-size:12.5px;font-weight:600;color:{{ $sudah_absen ? 'var(--c-green)' : 'var(--c-blue)' }}">
-                            {{ $sudah_absen ? 'Absensi tercatat' : 'Sesi absensi aktif!' }}
+                            {{ $sudah_absen ? 'Attendance recorded' : 'Active attendance session!' }}
                         </div>
                         <div style="font-size:11px;color:var(--c-text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
                             {{ $active_attendance->matakuliah }}
@@ -139,7 +139,7 @@
                                 style="width:70px;padding:5px 8px;border-radius:7px;border:1px solid var(--c-border);font-size:12px;font-family:var(--f-mono);text-transform:uppercase;outline:none"
                                 required>
                             <button type="submit" class="sima-btn sima-btn--blue sima-btn--sm">
-                                Absen
+                                Check in
                             </button>
                         </div>
                     </form>
@@ -183,8 +183,8 @@
                     <div style="width:44px;height:44px;border-radius:12px;background:var(--c-bg);display:grid;place-items:center;margin:0 auto 10px;font-size:18px;color:var(--c-text-4)">
                         <i class="fas fa-coffee"></i>
                     </div>
-                    <div style="font-size:13px;font-weight:500;color:var(--c-text-2)">Tidak ada jadwal hari ini</div>
-                    <div style="font-size:11.5px;color:var(--c-text-3);margin-top:3px">Waktu yang baik untuk belajar mandiri</div>
+                    <div style="font-size:13px;font-weight:500;color:var(--c-text-2)">No schedule today</div>
+                    <div style="font-size:11.5px;color:var(--c-text-3);margin-top:3px">Good time for self-study</div>
                 </div>
                 @endforelse
 
@@ -197,7 +197,7 @@
                 <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--c-border-soft)">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
                         <span style="font-size:12px;color:var(--c-text-3);font-weight:500">
-                            <i class="fas fa-chart-pie" style="font-size:10px"></i> Kehadiran keseluruhan
+                            <i class="fas fa-chart-pie" style="font-size:10px"></i> Overall attendance
                         </span>
                         <span style="font-family:var(--f-mono);font-size:13px;font-weight:700;color:{{ $pct >= 80 ? 'var(--c-green)' : 'var(--c-red)' }}">
                             {{ $pct }}%
@@ -210,11 +210,11 @@
                     </div>
                     <div style="display:flex;justify-content:space-between;margin-top:6px">
                         <span style="font-size:10.5px;color:var(--c-text-3)">
-                            <i class="fas fa-circle-check" style="color:var(--c-green)"></i> {{ $totalHadir }} hadir
+                            <i class="fas fa-circle-check" style="color:var(--c-green)"></i> {{ $totalHadir }} present
                             &nbsp;·&nbsp;
-                            <i class="fas fa-clock" style="color:var(--c-amber)"></i> {{ $totalTelat }} terlambat
+                            <i class="fas fa-clock" style="color:var(--c-amber)"></i> {{ $totalTelat }} late
                             &nbsp;·&nbsp;
-                            <i class="fas fa-circle-xmark" style="color:var(--c-red)"></i> {{ $totalAlpha }} alpha
+                            <i class="fas fa-circle-xmark" style="color:var(--c-red)"></i> {{ $totalAlpha }} absent
                         </span>
                     </div>
                 </div>
@@ -229,8 +229,8 @@
         <div class="sima-card h-100">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Riwayat Absensi</h5>
-                    <div class="sima-card__subtitle">10 sesi terakhir</div>
+                    <h5 class="sima-card__title">Attendance History</h5>
+                    <div class="sima-card__subtitle">Last 10 sessions</div>
                 </div>
                 <a href="{{ route('mahasiswa.analytics') }}" class="sima-card__action">
                     Detail <i class="fas fa-arrow-right" style="font-size:10px"></i>
@@ -240,9 +240,9 @@
                 @forelse($history as $rec)
                 @php
                     $smap = [
-                        'present' => ['label'=>'Hadir',    'cls'=>'green',  'ico'=>'fa-circle-check'],
-                        'late'    => ['label'=>'Terlambat','cls'=>'amber',  'ico'=>'fa-clock'],
-                        'absent'  => ['label'=>'Alpha',    'cls'=>'red',    'ico'=>'fa-circle-xmark'],
+                        'present' => ['label'=>'Present',    'cls'=>'green',  'ico'=>'fa-circle-check'],
+                        'late'    => ['label'=>'Late','cls'=>'amber',  'ico'=>'fa-clock'],
+                        'absent'  => ['label'=>'Absent',    'cls'=>'red',    'ico'=>'fa-circle-xmark'],
                     ];
                     $s = $smap[$rec->status] ?? $smap['present'];
                 @endphp
@@ -256,7 +256,7 @@
                             {{ $rec->namaMk }}
                         </div>
                         <div style="font-size:10.5px;color:var(--c-text-3)">
-                            Pertemuan ke-{{ $rec->meeting_number }}
+                            Meeting #{{ $rec->meeting_number }}
                             · {{ \Carbon\Carbon::parse($rec->checkin_time)->format('d M') }}
                         </div>
                     </div>
@@ -267,7 +267,7 @@
                 @empty
                 <div style="padding:40px 0;text-align:center">
                     <div style="font-size:28px;margin-bottom:8px;opacity:.3">📋</div>
-                    <div style="font-size:13px;color:var(--c-text-3)">Belum ada riwayat absensi</div>
+                    <div style="font-size:13px;color:var(--c-text-3)">No attendance history yet</div>
                 </div>
                 @endforelse
             </div>
@@ -285,11 +285,11 @@
         <div class="sima-card">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Pengumuman Terbaru</h5>
-                    <div class="sima-card__subtitle">Dari KLN, Jurusan &amp; BIPA</div>
+                    <h5 class="sima-card__title">Recent Announcements</h5>
+                    <div class="sima-card__subtitle">From KLN, Jurusan &amp; BIPA</div>
                 </div>
                 <a href="{{ route('mahasiswa.announcement') }}" class="sima-card__action">
-                    Semua <i class="fas fa-arrow-right" style="font-size:10px"></i>
+                    All <i class="fas fa-arrow-right" style="font-size:10px"></i>
                 </a>
             </div>
             <div class="sima-card__body">
@@ -317,14 +317,14 @@
                         <i class="fas fa-clock"></i>
                         {{ \Carbon\Carbon::parse($ann->created_at)->diffForHumans() }}
                         @if(!empty($ann->is_penting))
-                            <span class="sima-badge sima-badge--amber"><i class="fas fa-star" style="font-size:8px"></i> Penting</span>
+                            <span class="sima-badge sima-badge--amber"><i class="fas fa-star" style="font-size:8px"></i> Important</span>
                         @endif
                     </div>
                 </div>
                 @empty
                 <div style="padding:32px 0;text-align:center">
                     <div style="font-size:28px;margin-bottom:8px;opacity:.3">📭</div>
-                    <div style="font-size:13px;color:var(--c-text-3)">Belum ada pengumuman</div>
+                    <div style="font-size:13px;color:var(--c-text-3)">No announcements yet</div>
                 </div>
                 @endforelse
             </div>

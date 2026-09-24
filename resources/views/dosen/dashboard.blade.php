@@ -2,7 +2,7 @@
 
 @section('page_title',    'Dashboard')
 @section('page_section',  'DOSEN')
-@section('page_subtitle', 'Selamat datang, ' . (auth()->user()->dosen->nama ?? auth()->user()->email))
+@section('page_subtitle', 'Welcome, ' . (auth()->user()->dosen->nama ?? auth()->user()->email))
 
 @section('main_content')
 
@@ -14,13 +14,13 @@
         <div class="sima-card">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Jadwal Mengajar Hari Ini</h5>
+                    <h5 class="sima-card__title">Today's Teaching Schedule</h5>
                     <div class="sima-card__subtitle">
                         {{ $hariId }}, {{ now()->translatedFormat('d F Y') }}
                     </div>
                 </div>
                 <a href="{{ route('dosen.jadwal.index') }}" class="sima-card__action">
-                    <i class="fas fa-calendar-alt"></i> Semua Jadwal
+                    <i class="fas fa-calendar-alt"></i> All Schedules
                 </a>
             </div>
 
@@ -28,10 +28,10 @@
                 <div style="padding:48px;text-align:center;">
                     <div style="font-size:40px;margin-bottom:12px;">📭</div>
                     <div style="font-size:14px;color:var(--c-text-3);font-weight:500">
-                        Tidak ada jadwal mengajar hari ini
+                        No teaching schedule today
                     </div>
                     <div style="font-size:12px;color:var(--c-text-3);margin-top:4px">
-                        Nikmati hari Anda!
+                        Enjoy your day!
                     </div>
                 </div>
             @else
@@ -74,16 +74,16 @@
                             </div>
                             <div style="font-size:12px;color:var(--c-text-3);margin-top:3px;
                                         display:flex;align-items:center;gap:12px">
-                                <span><i class="fas fa-door-open"></i> Kelas {{ $j->kelas->kodeKelas ?? '-' }}</span>
+                                <span><i class="fas fa-door-open"></i> Class {{ $j->kelas->kodeKelas ?? '-' }}</span>
                                 <span><i class="fas fa-map-marker-alt"></i> {{ $j->ruangan }}</span>
-                                <span><i class="fas fa-layer-group"></i> {{ $j->totalSesi }} sesi total</span>
+                                <span><i class="fas fa-layer-group"></i> {{ $j->totalSesi }} total sessions</span>
                             </div>
                         </div>
 
                         {{-- CTA --}}
                         <div style="flex-shrink:0">
                             <span class="sima-btn sima-btn--blue sima-btn--sm">
-                                <i class="fas fa-clipboard-check"></i> Input Kehadiran
+                                <i class="fas fa-clipboard-check"></i> Input Attendance
                             </span>
                         </div>
                     </a>

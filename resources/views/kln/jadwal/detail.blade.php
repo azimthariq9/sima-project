@@ -2,34 +2,34 @@
 
 @section('page_title',    $jadwal->namaMk)
 @section('page_section',  'JADWAL')
-@section('page_subtitle', 'Detail jadwal & rekap kehadiran mahasiswa')
+@section('page_subtitle', 'Schedule detail & student attendance recap')
 
 @section('main_content')
 
 {{-- ── BACK BUTTON ─────────────────────────────────── --}}
 <div class="mb-3">
     <a href="javascript:history.back()" class="sima-btn sima-btn--outline sima-btn--sm">
-        <i class="fas fa-arrow-left me-1"></i> Kembali
+        <i class="fas fa-arrow-left me-1"></i> Back
     </a>
 </div>
 
 {{-- ── JADWAL INFO ──────────────────────────────────── --}}
 <div class="sima-card mb-4" style="padding:24px;">
     <h6 class="fw-700 mb-3" style="font-family:var(--f-display);letter-spacing:.5px;">
-        <i class="fas fa-calendar-alt me-2" style="color:var(--c-accent);"></i>Informasi Jadwal
+        <i class="fas fa-calendar-alt me-2" style="color:var(--c-accent);"></i>Schedule Information
     </h6>
     <div class="row g-3">
         <div class="col-12 col-md-6">
             <div class="d-flex flex-column gap-3">
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Matakuliah</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Course</div>
                     <div class="fw-600">
                         {{ $jadwal->namaMk ?? '-' }}
                         <code style="font-size:12px;margin-left:6px;">{{ $jadwal->kodeMk }}</code>
                     </div>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Jurusan</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Department</div>
                     <div class="fw-600">{{ $jadwal->namaJurusan ?? '-' }}</div>
                 </div>
                 <div>
@@ -37,7 +37,7 @@
                     <div class="fw-600">{{ $jadwal->sks ?? '-' }}</div>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Kelas</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Class</div>
                     <div class="fw-600">{{ $jadwal->kodeKelas ?? '-' }}</div>
                 </div>
             </div>
@@ -45,7 +45,7 @@
         <div class="col-12 col-md-6">
             <div class="d-flex flex-column gap-3">
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Dosen</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Lecturer</div>
                     <div class="fw-600">
                         {{ $jadwal->namaDosen ?? '-' }}
                         @if($jadwal->nidn)
@@ -54,7 +54,7 @@
                     </div>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Hari & Jam</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Day & Time</div>
                     <div class="fw-600">
                         @if($jadwal->hari)
                             <span class="sima-badge sima-badge--blue me-1">{{ $jadwal->hari }}</span>
@@ -63,11 +63,11 @@
                     </div>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Ruangan</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Room</div>
                     <div class="fw-600">{{ $jadwal->ruangan ?? '-' }}</div>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Total Sesi · Tahun Ajar</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Total Sessions · Academic Year</div>
                     <div class="fw-600">
                         <span class="sima-badge sima-badge--amber me-1">{{ $jadwal->totalSesi }} sesi</span>
                         {{ $jadwal->tahunAjar ?? '-' }}
@@ -81,14 +81,14 @@
 {{-- ── KEHADIRAN REKAP ──────────────────────────────── --}}
 <div class="sima-card">
     <h6 class="fw-700" style="font-family:var(--f-display);letter-spacing:.5px;padding:24px 24px 0;">
-        <i class="fas fa-clipboard-list me-2" style="color:var(--c-accent);"></i>Rekap Kehadiran Mahasiswa
+        <i class="fas fa-clipboard-list me-2" style="color:var(--c-accent);"></i>Student Attendance Recap
         <span class="sima-badge sima-badge--blue ms-2">{{ $kehadiran->count() }}</span>
     </h6>
 
     @if($kehadiran->isEmpty())
         <div class="text-center text-muted py-5">
             <i class="fas fa-users fa-2x mb-2 d-block" style="opacity:.3;"></i>
-            Belum ada data kehadiran untuk jadwal ini.
+            No attendance data for this schedule.
         </div>
     @else
     <div class="table-responsive">
@@ -96,13 +96,13 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Nama Mahasiswa</th>
+                    <th>Student Name</th>
                     <th>NPM</th>
-                    <th style="text-align:center;">Hadir</th>
-                    <th style="text-align:center;">Absen</th>
-                    <th style="text-align:center;">Izin</th>
-                    <th style="text-align:center;">Belum</th>
-                    <th style="text-align:center;">% Kehadiran</th>
+                    <th style="text-align:center;">Present</th>
+                    <th style="text-align:center;">Absent</th>
+                    <th style="text-align:center;">Excused</th>
+                    <th style="text-align:center;">Pending</th>
+                    <th style="text-align:center;">% Attendance</th>
                 </tr>
             </thead>
             <tbody>

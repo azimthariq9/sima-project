@@ -204,8 +204,7 @@ class JurusanController extends Controller
             ->where('notification_users.user_id', Auth::id())
             ->select('notification.*', 'notification_users.is_read', 'notification_users.created_at as received_at')
             ->orderByDesc('notification_users.created_at')
-            ->paginate(15)
-            ->withQueryString();
+            ->get();
 
         $unreadNotifCount = 0;
 
@@ -221,19 +220,11 @@ class JurusanController extends Controller
 
     public function announcement(Request $request)
     {
-        $search = $request->input('search', '');
         $filter = $request->input('filter', '');
 
         $query = DB::table('announcement')
             ->where('sumber', 'jurusan')
             ->whereIn('status', ['active', 'inactive']);
-
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('subject', 'ilike', "%{$search}%")
-                  ->orWhere('message', 'ilike', "%{$search}%");
-            });
-        }
 
         if ($filter === 'penting') {
             $query->where('is_penting', true);
@@ -246,12 +237,26 @@ class JurusanController extends Controller
         $announcements = $query
             ->orderByDesc('is_penting')
             ->orderByDesc('created_at')
-            ->paginate(10)
-            ->withQueryString();
+            ->get();
 
         $unreadNotifCount = $this->unreadNotif();
 
-        return view('jurusan.announcement.index', compact('announcements', 'unreadNotifCount', 'search', 'filter'));
+        return view('jurusan.announcement.index', compact('announcements', 'unreadNotifCount', 'filter'));
+    }
+
+    public function createAnnouncementPage()
+    {
+        return view('jurusan.announcement.create');
+    }
+
+    public function editAnnouncementPage(int $id)
+    {
+        $ann = DB::table('announcement')
+            ->where('id', $id)
+            ->where('sumber', 'jurusan')
+            ->first();
+        abort_if(!$ann, 404);
+        return view('jurusan.announcement.edit', compact('ann'));
     }
 
     public function storeAnnouncement(Request $request)
@@ -330,7 +335,6 @@ class JurusanController extends Controller
     public function dokumen(Request $request)
     {
         $jid    = $this->jurusanId();
-        $search = $request->input('search', '');
         $filter = $request->input('filter', '');
 
         $query = DB::table('dokumen')
@@ -339,15 +343,6 @@ class JurusanController extends Controller
             ->where('users.jurusan_id', $jid)
             ->whereNull('dokumen.deleted_at');
 
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('mahasiswa.nama', 'ilike', "%{$search}%")
-                  ->orWhere('mahasiswa.npm', 'ilike', "%{$search}%")
-                  ->orWhere('dokumen.namaDkmn', 'ilike', "%{$search}%")
-                  ->orWhere('dokumen.noDkmn', 'ilike', "%{$search}%");
-            });
-        }
-
         if ($filter) {
             $query->where('dokumen.status', $filter);
         }
@@ -355,12 +350,11 @@ class JurusanController extends Controller
         $dokumen = $query
             ->select('dokumen.*', 'mahasiswa.nama as nama_mahasiswa', 'mahasiswa.npm')
             ->orderByDesc('dokumen.created_at')
-            ->paginate(15)
-            ->withQueryString();
+            ->get();
 
         $unreadNotifCount = $this->unreadNotif();
 
-        return view('jurusan.dokumen.index', compact('dokumen', 'unreadNotifCount', 'search', 'filter'));
+        return view('jurusan.dokumen.index', compact('dokumen', 'unreadNotifCount', 'filter'));
     }
 
     public function showDokumen(int $id)
@@ -454,21 +448,12 @@ class JurusanController extends Controller
     public function indexReqDocument(Request $request)
     {
         $jid    = $this->jurusanId();
-        $search = $request->input('search', '');
         $filter = $request->input('filter', '');
 
         $query = DB::table('reqDokumen')
             ->join('mahasiswa', 'reqDokumen.mahasiswa_id', '=', 'mahasiswa.id')
             ->join('users', 'mahasiswa.user_id', '=', 'users.id')
             ->where('users.jurusan_id', $jid);
-
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('mahasiswa.nama', 'ilike', "%{$search}%")
-                  ->orWhere('mahasiswa.npm', 'ilike', "%{$search}%")
-                  ->orWhere('reqDokumen.tipeDkmn', 'ilike', "%{$search}%");
-            });
-        }
 
         if ($filter) {
             $query->where('reqDokumen.status', $filter);
@@ -477,12 +462,25 @@ class JurusanController extends Controller
         $requests = $query
             ->select('reqDokumen.*', 'mahasiswa.nama as nama_mahasiswa', 'mahasiswa.npm')
             ->orderByDesc('reqDokumen.created_at')
-            ->paginate(15)
-            ->withQueryString();
+            ->get();
 
         $unreadNotifCount = $this->unreadNotif();
 
-        return view('jurusan.request.index', compact('requests', 'unreadNotifCount', 'search', 'filter'));
+        return view('jurusan.request.index', compact('requests', 'unreadNotifCount', 'filter'));
+    }
+
+    public function showReqDocumentPage(int $id)
+    {
+        $jid = $this->jurusanId();
+        $req = DB::table('reqDokumen')
+            ->join('mahasiswa', 'reqDokumen.mahasiswa_id', '=', 'mahasiswa.id')
+            ->join('users', 'mahasiswa.user_id', '=', 'users.id')
+            ->where('reqDokumen.id', $id)
+            ->where('users.jurusan_id', $jid)
+            ->select('reqDokumen.*', 'mahasiswa.nama as nama_mahasiswa', 'mahasiswa.npm')
+            ->first();
+        abort_if(!$req, 404);
+        return view('jurusan.request.show', compact('req'));
     }
 
     public function showReqDocument(int $id)

@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Dashboard Jurusan')
-@section('page_section',  'ADMIN JURUSAN')
-@section('page_subtitle', 'Pengelolaan akademik — ' . (auth()->user()->jurusan->namaJurusan ?? 'Jurusan'))
+@section('page_title',    'Department Dashboard')
+@section('page_section',  'DEPARTMENT ADMIN')
+@section('page_subtitle', 'Academic management — ' . (auth()->user()->jurusan->namaJurusan ?? 'Jurusan'))
 
 @section('main_content')
 
@@ -23,7 +23,7 @@
             <div class="sima-stat__icon sima-stat__icon--blue">
                 <i class="fas fa-user-graduate"></i>
             </div>
-            <div class="sima-stat__label">Mahasiswa</div>
+            <div class="sima-stat__label">Students</div>
             <span class="sima-stat__value">{{ $totalMahasiswa }}</span>
         </a>
     </div>
@@ -33,7 +33,7 @@
             <div class="sima-stat__icon sima-stat__icon--teal">
                 <i class="fas fa-calendar-check"></i>
             </div>
-            <div class="sima-stat__label">Jadwal Aktif</div>
+            <div class="sima-stat__label">Active Schedules</div>
             <span class="sima-stat__value">{{ $jadwalAktif }}</span>
         </a>
     </div>
@@ -43,7 +43,7 @@
             <div class="sima-stat__icon sima-stat__icon--amber">
                 <i class="fas fa-book"></i>
             </div>
-            <div class="sima-stat__label">Mata Kuliah</div>
+            <div class="sima-stat__label">Courses</div>
             <span class="sima-stat__value">{{ $totalMatakuliah }}</span>
         </a>
     </div>
@@ -53,7 +53,7 @@
             <div class="sima-stat__icon sima-stat__icon--purple">
                 <i class="fas fa-chalkboard-teacher"></i>
             </div>
-            <div class="sima-stat__label">Dosen</div>
+            <div class="sima-stat__label">Lecturers</div>
             <span class="sima-stat__value">{{ $totalDosen }}</span>
         </a>
     </div>
@@ -70,28 +70,28 @@
         <div class="sima-card">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Jadwal Hari Ini</h5>
+                    <h5 class="sima-card__title">Today's Schedule</h5>
                     <div class="sima-card__subtitle">{{ now()->locale('id')->translatedFormat('l, d F Y') }}</div>
                 </div>
                 <a href="{{ route('jurusan.jadwal.page') }}" class="sima-card__action">
-                    <i class="fas fa-calendar-alt"></i> Lihat Semua
+                    <i class="fas fa-calendar-alt"></i> View All
                 </a>
             </div>
             <div style="overflow-x:auto">
                 @if($jadwalHariIni->isEmpty())
                     <div class="sima-card__body" style="text-align:center;padding:36px 20px;color:var(--c-text-3)">
                         <i class="fas fa-calendar-xmark" style="font-size:28px;opacity:.3;display:block;margin-bottom:10px"></i>
-                        <div style="font-size:13.5px;font-weight:500;color:var(--c-text-2)">Tidak ada jadwal hari ini</div>
+                        <div style="font-size:13.5px;font-weight:500;color:var(--c-text-2)">No schedule today</div>
                     </div>
                 @else
                     <table class="sima-table">
                         <thead>
                             <tr>
-                                <th>Mata Kuliah</th>
-                                <th>Jam</th>
-                                <th>Ruang</th>
-                                <th>Dosen</th>
-                                <th>Kelas</th>
+                                <th>Course</th>
+                                <th>Time</th>
+                                <th>Room</th>
+                                <th>Lecturer</th>
+                                <th>Class</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -122,20 +122,20 @@
         <div class="sima-card h-100">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Request Dokumen</h5>
+                    <h5 class="sima-card__title">Document Requests</h5>
                     <div class="sima-card__subtitle">
                         {{ $pendingRequest }} request pending
                     </div>
                 </div>
-                <a href="{{ route('jurusan.request.index') }}" class="sima-card__action">Semua</a>
+                <a href="{{ route('jurusan.request.index') }}" class="sima-card__action">All</a>
             </div>
             <div class="sima-card__body" style="padding:0">
                 @forelse($requestTerbaru as $req)
                 @php
                     $stMap = [
                         'pending'  => ['cls'=>'blue',  'label'=>'Pending'],
-                        'approved' => ['cls'=>'green', 'label'=>'Disetujui'],
-                        'rejected' => ['cls'=>'red',   'label'=>'Ditolak'],
+                        'approved' => ['cls'=>'green', 'label'=>'Approved'],
+                        'rejected' => ['cls'=>'red',   'label'=>'Rejected'],
                     ];
                     $st = $stMap[$req->status] ?? $stMap['pending'];
                 @endphp
@@ -152,13 +152,13 @@
                 </div>
                 @empty
                     <div style="text-align:center;padding:32px 20px;color:var(--c-text-3);font-size:13px">
-                        Belum ada request
+                        No requests
                     </div>
                 @endforelse
                 <div style="padding:12px 16px">
                     <a href="{{ route('jurusan.request.index') }}"
                        class="sima-btn sima-btn--outline sima-btn--sm sima-btn--full">
-                        <i class="fas fa-list"></i> Lihat Semua Request
+                        <i class="fas fa-list"></i> View All Requests
                     </a>
                 </div>
             </div>
@@ -177,18 +177,18 @@
         <div class="sima-card">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Jadwal Mingguan</h5>
-                    <div class="sima-card__subtitle">Semua jadwal berulang per minggu</div>
+                    <h5 class="sima-card__title">Weekly Schedule</h5>
+                    <div class="sima-card__subtitle">All schedules repeat weekly</div>
                 </div>
                 <a href="{{ route('jurusan.jadwal.page') }}" class="sima-card__action">
-                    <i class="fas fa-plus"></i> Tambah
+                    <i class="fas fa-plus"></i> Add
                 </a>
             </div>
             <div class="sima-card__body" style="padding:0">
                 @if($jadwalMingguIni->isEmpty())
                     <div style="text-align:center;padding:36px 20px;color:var(--c-text-3)">
                         <i class="fas fa-calendar-plus" style="font-size:28px;opacity:.3;display:block;margin-bottom:10px"></i>
-                        <div style="font-size:13.5px;font-weight:500;color:var(--c-text-2)">Belum ada jadwal terdaftar</div>
+                        <div style="font-size:13.5px;font-weight:500;color:var(--c-text-2)">No registered schedules</div>
                     </div>
                 @else
                 @php
@@ -231,11 +231,11 @@
         <div class="sima-card h-100">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Pengumuman Jurusan</h5>
-                    <div class="sima-card__subtitle">3 pengumuman terbaru</div>
+                    <h5 class="sima-card__title">Department Announcements</h5>
+                    <div class="sima-card__subtitle">3 latest announcements</div>
                 </div>
                 <a href="{{ route('jurusan.announcement.index') }}" class="sima-card__action">
-                    <i class="fas fa-plus"></i> Buat Baru
+                    <i class="fas fa-plus"></i> Create New
                 </a>
             </div>
             <div class="sima-card__body" style="padding:0">
@@ -257,20 +257,20 @@
                             </div>
                         </div>
                         <span class="sima-badge {{ $ann->status === 'active' ? 'sima-badge--green' : 'sima-badge--grey' }}" style="font-size:10px;flex-shrink:0">
-                            {{ $ann->status === 'active' ? 'Aktif' : 'Nonaktif' }}
+                            {{ $ann->status === 'active' ? 'Active' : 'Inactive' }}
                         </span>
                     </div>
                 </div>
                 @empty
                     <div style="text-align:center;padding:36px 20px;color:var(--c-text-3);font-size:13px">
-                        Belum ada pengumuman. <a href="{{ route('jurusan.announcement.index') }}" style="color:var(--c-accent)">Buat sekarang →</a>
+                        No announcements. <a href="{{ route('jurusan.announcement.index') }}" style="color:var(--c-accent)">Create now →</a>
                     </div>
                 @endforelse
                 @if($announcements->count() > 0)
                 <div style="padding:12px 16px">
                     <a href="{{ route('jurusan.announcement.index') }}"
                        class="sima-btn sima-btn--outline sima-btn--sm sima-btn--full">
-                        <i class="fas fa-bullhorn"></i> Kelola Pengumuman
+                        <i class="fas fa-bullhorn"></i> Manage Announcements
                     </a>
                 </div>
                 @endif

@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Jadwal & Kelas')
+@section('page_title',    'Schedule & Classes')
 @section('page_section',  'DOSEN')
-@section('page_subtitle', 'Daftar jadwal mengajar dan kelas yang Anda ampu')
+@section('page_subtitle', 'List of teaching schedules and classes you handle')
 
 @section('main_content')
 
@@ -23,9 +23,9 @@ $grouped  = $jadwal->groupBy('hari');
     <div class="sima-card">
         <div style="padding:64px;text-align:center;">
             <div style="font-size:48px;margin-bottom:16px;">📅</div>
-            <div style="font-size:15px;font-weight:600;color:var(--c-text-1)">Belum ada jadwal mengajar</div>
+            <div style="font-size:15px;font-weight:600;color:var(--c-text-1)">No teaching schedules yet</div>
             <div style="font-size:13px;color:var(--c-text-3);margin-top:6px">
-                Hubungi admin jurusan untuk informasi jadwal Anda
+                Contact department admin for your schedule information
             </div>
         </div>
     </div>
@@ -37,9 +37,9 @@ $grouped  = $jadwal->groupBy('hari');
                 <div class="sima-stat__icon sima-stat__icon--blue">
                     <i class="fas fa-calendar-alt"></i>
                 </div>
-                <div class="sima-stat__label">Total Jadwal</div>
+                <div class="sima-stat__label">Total Schedules</div>
                 <span class="sima-stat__value">{{ $jadwal->count() }}</span>
-                <div class="sima-stat__delta sima-stat__delta--flat">Semester ini</div>
+                <div class="sima-stat__delta sima-stat__delta--flat">This semester</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
@@ -47,9 +47,9 @@ $grouped  = $jadwal->groupBy('hari');
                 <div class="sima-stat__icon sima-stat__icon--teal">
                     <i class="fas fa-door-open"></i>
                 </div>
-                <div class="sima-stat__label">Kelas Diampu</div>
+                <div class="sima-stat__label">Classes Taught</div>
                 <span class="sima-stat__value">{{ $jadwal->unique('kelas_id')->count() }}</span>
-                <div class="sima-stat__delta sima-stat__delta--flat">Kelas aktif</div>
+                <div class="sima-stat__delta sima-stat__delta--flat">Active classes</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
@@ -57,9 +57,9 @@ $grouped  = $jadwal->groupBy('hari');
                 <div class="sima-stat__icon sima-stat__icon--purple">
                     <i class="fas fa-book"></i>
                 </div>
-                <div class="sima-stat__label">Mata Kuliah</div>
+                <div class="sima-stat__label">Courses</div>
                 <span class="sima-stat__value">{{ $jadwal->unique('matakuliah_id')->count() }}</span>
-                <div class="sima-stat__delta sima-stat__delta--flat">Berbeda</div>
+                <div class="sima-stat__delta sima-stat__delta--flat">Distinct</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
@@ -67,9 +67,9 @@ $grouped  = $jadwal->groupBy('hari');
                 <div class="sima-stat__icon sima-stat__icon--amber">
                     <i class="fas fa-layer-group"></i>
                 </div>
-                <div class="sima-stat__label">Total Sesi</div>
+                <div class="sima-stat__label">Total Sessions</div>
                 <span class="sima-stat__value">{{ $jadwal->sum('totalSesi') }}</span>
-                <div class="sima-stat__delta sima-stat__delta--flat">Sesi semester ini</div>
+                <div class="sima-stat__delta sima-stat__delta--flat">Sessions this semester</div>
             </div>
         </div>
     </div>
@@ -85,7 +85,7 @@ $grouped  = $jadwal->groupBy('hari');
                     <div style="width:8px;height:8px;border-radius:50%;background:{{ $c['color'] }}"></div>
                     <h5 class="sima-card__title" style="margin:0">{{ $hari }}</h5>
                     <span class="sima-badge" style="background:{{ $c['bg'] }};color:{{ $c['color'] }}">
-                        {{ $jList->count() }} jadwal
+                        {{ $jList->count() }} schedules
                     </span>
                 </div>
             </div>
@@ -117,7 +117,7 @@ $grouped  = $jadwal->groupBy('hari');
                         </span>
                         <span>
                             <i class="fas fa-door-open" style="font-size:10px"></i>
-                            Kelas {{ $j->kelas->kodeKelas ?? '-' }}
+                            Class {{ $j->kelas->kodeKelas ?? '-' }}
                         </span>
                         <span>
                             <i class="fas fa-map-marker-alt" style="font-size:10px"></i>
@@ -125,7 +125,7 @@ $grouped  = $jadwal->groupBy('hari');
                         </span>
                         <span>
                             <i class="fas fa-layer-group" style="font-size:10px"></i>
-                            {{ $j->totalSesi }} sesi
+                            {{ $j->totalSesi }} sessions
                         </span>
                     </div>
                 </div>

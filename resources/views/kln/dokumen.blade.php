@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Request Dokumen')
+@section('page_title',    'Document Requests')
 @section('page_section',  'KERJA SAMA LUAR NEGERI')
-@section('page_subtitle', 'Pengelolaan permintaan dokumen dari mahasiswa')
+@section('page_subtitle', 'Manage document requests from students')
 
 @section('main_content')
 
@@ -44,36 +44,33 @@
 
     <div class="sima-card__header">
         <div>
-            <h5 class="sima-card__title">Daftar Request Dokumen</h5>
-            <div class="sima-card__subtitle">Semua permintaan dokumen dari mahasiswa</div>
+            <h5 class="sima-card__title">Document Request List</h5>
+            <div class="sima-card__subtitle">All document requests from students</div>
         </div>
         <form method="GET" action="{{ route('kln.dokumen.page') }}"
               style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <select name="status" class="sima-input" style="min-width:140px;" onchange="this.form.submit()">
-                <option value="">Semua Status</option>
+                <option value="">All Status</option>
                 <option value="pending"  {{ request('status') === 'pending'  ? 'selected' : '' }}>Pending</option>
                 <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
                 <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
             </select>
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari mahasiswa / tipe..."
-                   class="sima-input" style="min-width:200px;">
-            <button type="submit" class="sima-btn sima-btn--outline"><i class="fas fa-search"></i></button>
-            @if(request('status') || request('search'))
+            @if(request('status'))
             <a href="{{ route('kln.dokumen.page') }}" class="sima-btn sima-btn--outline"><i class="fas fa-times"></i></a>
             @endif
         </form>
     </div>
 
     <div style="overflow-x:auto;padding:8px 0">
-        <table class="sima-table" id="mainTable">
+        <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>Mahasiswa</th>
-                    <th>Tipe Dokumen</th>
-                    <th>Keterangan</th>
+                    <th>Student</th>
+                    <th>Document Type</th>
+                    <th>Description</th>
                     <th>Status</th>
-                    <th>Tanggal</th>
-                    <th style="text-align:center">Aksi</th>
+                    <th>Date</th>
+                    <th style="text-align:center">Actions</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -87,10 +84,7 @@
                         default    => 'sima-badge--amber',
                     };
                 @endphp
-                <tr id="row-{{ $req->id }}"
-                    data-mahasiswa="{{ strtolower($req->mahasiswa?->nama ?? '') }}"
-                    data-tipe="{{ strtolower($tipeVal) }}"
-                    data-status="{{ $statusVal }}">
+                <tr id="row-{{ $req->id }}">
                     <td>
                         <div style="font-weight:600;color:var(--c-text-1)">{{ $req->mahasiswa?->nama ?? '-' }}</div>
                         <div style="font-size:12px;color:var(--c-text-3)">{{ $req->mahasiswa?->npm ?? '' }}</div>
@@ -123,18 +117,13 @@
                 <tr>
                     <td colspan="6" style="text-align:center;padding:40px;color:var(--c-text-3)">
                         <i class="fas fa-inbox" style="font-size:32px;margin-bottom:10px;display:block"></i>
-                        Belum ada request dokumen
+                        No document requests yet
                     </td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    @if($requests->hasPages())
-    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
-        {{ $requests->links('vendor.pagination.sima') }}
-    </div>
-    @endif
 
 </div>
 
@@ -145,8 +134,8 @@
         {{-- Header modal --}}
         <div style="padding:20px 24px 16px;border-bottom:1px solid var(--c-border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--c-surface);z-index:1;">
             <div>
-                <div style="font-size:15px;font-weight:700;color:var(--c-text-1)">Detail Request Dokumen</div>
-                <div id="modalSubtitle" style="font-size:12px;color:var(--c-text-3);margin-top:2px">Tinjau permintaan dokumen mahasiswa</div>
+                <div style="font-size:15px;font-weight:700;color:var(--c-text-1)">Document Request Detail</div>
+                <div id="modalSubtitle" style="font-size:12px;color:var(--c-text-3);margin-top:2px">Review student document request</div>
             </div>
             <button onclick="closeModal()" style="width:32px;height:32px;border:1px solid var(--c-border);border-radius:8px;background:none;cursor:pointer;color:var(--c-text-3);font-size:16px">
                 <i class="fas fa-times"></i>
@@ -162,7 +151,7 @@
             {{-- Alasan penolakan (hanya tampil jika rejected) --}}
             <div id="rejectedInfo" style="display:none;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:14px 16px;margin-bottom:16px;">
                 <div style="font-size:11px;font-weight:600;color:var(--c-red);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">
-                    <i class="fas fa-ban me-1"></i>Alasan Penolakan
+                    <i class="fas fa-ban me-1"></i>Rejection Reason
                 </div>
                 <div id="rejectedReason" style="font-size:13px;color:var(--c-text-2);line-height:1.6;"></div>
             </div>
@@ -170,7 +159,7 @@
             {{-- File sudah ada (approved) --}}
             <div id="fileInfo" style="display:none;background:var(--c-bg);border-radius:12px;padding:14px 16px;margin-bottom:16px;">
                 <div style="font-size:11px;font-weight:600;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">
-                    Dokumen Terupload
+                    Uploaded Document
                 </div>
                 <div style="display:flex;align-items:center;gap:12px;">
                     <div style="width:36px;height:36px;background:rgba(239,68,68,.1);border-radius:8px;display:grid;place-items:center;flex-shrink:0">
@@ -181,10 +170,10 @@
                         <div id="fileSize" style="font-size:11px;color:var(--c-text-3);margin-top:2px"></div>
                     </div>
                     <a id="fileDownload" href="#" class="sima-btn sima-btn--sm sima-btn--outline" style="flex-shrink:0">
-                        <i class="fas fa-download"></i> Unduh
+                        <i class="fas fa-download"></i> Download
                     </a>
                     <button type="button" onclick="gantiFile()" class="sima-btn sima-btn--sm sima-btn--danger" style="flex-shrink:0">
-                        <i class="fas fa-rotate"></i> Ganti
+                        <i class="fas fa-rotate"></i> Replace
                     </button>
                 </div>
             </div>
@@ -194,11 +183,11 @@
                 @csrf
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
                     <label id="uploadLabel" style="font-size:12px;font-weight:600;color:var(--c-text-2)">
-                        Upload Dokumen (PDF)
+                        Upload Document (PDF)
                     </label>
                     <button type="button" id="btnBatalGanti" onclick="batalGanti()"
                             style="display:none;font-size:12px;color:var(--c-text-3);background:none;border:none;cursor:pointer;">
-                        <i class="fas fa-arrow-left"></i> Batal
+                        <i class="fas fa-arrow-left"></i> Cancel
                     </button>
                 </div>
                 <input type="file" name="file" accept="application/pdf,image/*" class="sima-input" style="margin-bottom:12px">
@@ -208,7 +197,7 @@
                     </button>
                     <button type="button" id="btnShowReject" onclick="showRejectPanel()"
                             class="sima-btn sima-btn--danger" style="white-space:nowrap;flex-shrink:0;">
-                        <i class="fas fa-ban me-1"></i> Tolak
+                        <i class="fas fa-ban me-1"></i> Reject
                     </button>
                 </div>
             </form>
@@ -217,10 +206,10 @@
             <div id="rejectPanel" style="display:none;">
                 <div style="background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:16px;margin-bottom:12px;">
                     <label style="font-size:12px;font-weight:600;color:var(--c-red);display:block;margin-bottom:8px;">
-                        <i class="fas fa-ban me-1"></i>Alasan Penolakan <span style="color:var(--c-red)">*</span>
+                        <i class="fas fa-ban me-1"></i>Rejection Reason <span style="color:var(--c-red)">*</span>
                     </label>
                     <textarea id="rejectReason" rows="3" class="sima-input"
-                              placeholder="Jelaskan alasan penolakan request ini..."
+                              placeholder="Explain the reason for rejecting this request..."
                               style="resize:vertical;margin-bottom:0;"></textarea>
                     <div id="rejectError" style="display:none;font-size:12px;color:var(--c-red);margin-top:6px;"></div>
                 </div>
@@ -228,10 +217,10 @@
                     <button type="button" onclick="submitReject()"
                             id="btnConfirmReject"
                             class="sima-btn sima-btn--danger sima-btn--full" style="justify-content:center;">
-                        <i class="fas fa-ban me-1"></i> Konfirmasi Tolak
+                        <i class="fas fa-ban me-1"></i> Confirm Reject
                     </button>
                     <button type="button" onclick="cancelReject()" class="sima-btn sima-btn--outline" style="white-space:nowrap;flex-shrink:0;">
-                        Batal
+                        Cancel
                     </button>
                 </div>
             </div>
@@ -258,12 +247,12 @@ function showDetail(id) {
             document.getElementById('modalContent').innerHTML = `
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                     <div style="background:var(--c-bg);border-radius:10px;padding:12px;">
-                        <div style="font-size:11px;color:var(--c-text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Mahasiswa</div>
+                        <div style="font-size:11px;color:var(--c-text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Student</div>
                         <div style="font-size:14px;font-weight:600;color:var(--c-text-1);margin-top:4px">${escHtml(data.mahasiswa ?? '-')}</div>
                         <div style="font-size:11px;color:var(--c-text-3);margin-top:2px">${escHtml(data.npm ?? '')}</div>
                     </div>
                     <div style="background:var(--c-bg);border-radius:10px;padding:12px;">
-                        <div style="font-size:11px;color:var(--c-text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Tipe Dokumen</div>
+                        <div style="font-size:11px;color:var(--c-text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Document Type</div>
                         <div style="font-size:14px;font-weight:600;color:var(--c-text-1);margin-top:4px">${escHtml((data.tipe ?? '-').replace(/_/g,' '))}</div>
                     </div>
                     <div style="background:var(--c-bg);border-radius:10px;padding:12px;">
@@ -271,7 +260,7 @@ function showDetail(id) {
                         <div style="font-size:14px;font-weight:700;color:${badgeColor};margin-top:4px;text-transform:capitalize;">${escHtml(data.status ?? '-')}</div>
                     </div>
                     <div style="background:var(--c-bg);border-radius:10px;padding:12px;">
-                        <div style="font-size:11px;color:var(--c-text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Pesan Mahasiswa</div>
+                        <div style="font-size:11px;color:var(--c-text-3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Student Message</div>
                         <div style="font-size:13px;color:var(--c-text-2);margin-top:4px">${escHtml(data.message ?? '-')}</div>
                     </div>
                 </div>
@@ -299,7 +288,7 @@ function showDetail(id) {
                 fileInfo.style.display   = 'none';
                 uploadForm.style.display = 'block';
                 document.getElementById('btnShowReject').style.display = 'none';
-                document.getElementById('modalSubtitle').textContent = 'Request sebelumnya ditolak. Upload dokumen untuk menyetujui.';
+                document.getElementById('modalSubtitle').textContent = 'Previous request was rejected. Upload document to approve.';
             } else if (data.file) {
                 // Ada file / approved — tampilkan info file
                 const fileName   = data.file.path.split('/').pop();
@@ -309,18 +298,18 @@ function showDetail(id) {
                 document.getElementById('fileDownload').href     = '/kln/dokumen/' + data.id + '/file';
                 fileInfo.style.display   = 'block';
                 uploadForm.style.display = 'none';
-                document.getElementById('modalSubtitle').textContent = 'Dokumen sudah diupload.';
+                document.getElementById('modalSubtitle').textContent = 'Document already uploaded.';
             } else {
                 // Pending — tampilkan form upload + tombol tolak
                 fileInfo.style.display   = 'none';
                 uploadForm.style.display = 'block';
                 document.getElementById('btnShowReject').style.display = '';
-                document.getElementById('modalSubtitle').textContent = 'Upload PDF untuk menyetujui, atau tolak request.';
+                document.getElementById('modalSubtitle').textContent = 'Upload PDF to approve, or reject request.';
             }
 
             document.getElementById('detailModal').style.display = 'flex';
         })
-        .catch(() => alert('Gagal memuat detail request'));
+        .catch(() => alert('Failed to load request detail'));
 }
 
 function closeModal() {
@@ -335,8 +324,8 @@ function closeModal() {
 function gantiFile() {
     document.getElementById('fileInfo').style.display   = 'none';
     document.getElementById('uploadForm').style.display = 'block';
-    document.getElementById('uploadLabel').textContent  = 'Ganti File (PDF)';
-    document.getElementById('uploadBtn').innerHTML      = '<i class="fas fa-rotate"></i> Ganti & Simpan';
+    document.getElementById('uploadLabel').textContent  = 'Replace File (PDF)';
+    document.getElementById('uploadBtn').innerHTML      = '<i class="fas fa-rotate"></i> Replace & Save';
     document.getElementById('btnBatalGanti').style.display = 'inline';
 }
 
@@ -348,7 +337,7 @@ function batalGanti() {
 
 function resetUploadForm() {
     document.getElementById('uploadForm').reset();
-    document.getElementById('uploadLabel').textContent  = 'Upload Dokumen (PDF)';
+    document.getElementById('uploadLabel').textContent  = 'Upload Document (PDF)';
     document.getElementById('uploadBtn').innerHTML      = '<i class="fas fa-upload"></i> Upload & Approve';
     document.getElementById('btnBatalGanti').style.display = 'none';
 }
@@ -372,7 +361,7 @@ function submitReject() {
     const errEl  = document.getElementById('rejectError');
 
     if (!reason) {
-        errEl.textContent     = 'Alasan penolakan wajib diisi.';
+        errEl.textContent     = 'Rejection reason is required.';
         errEl.style.display   = 'block';
         document.getElementById('rejectReason').focus();
         return;
@@ -381,7 +370,7 @@ function submitReject() {
 
     const btn = document.getElementById('btnConfirmReject');
     btn.disabled   = true;
-    btn.innerHTML  = '<i class="fas fa-spinner fa-spin me-1"></i> Memproses...';
+    btn.innerHTML  = '<i class="fas fa-spinner fa-spin me-1"></i> Processing...';
 
     fetch('/kln/dokumen/' + currentId + '/reject', {
         method: 'POST',
@@ -401,17 +390,17 @@ function submitReject() {
             if (row) row.dataset.status = 'rejected';
             closeModal();
         } else {
-            errEl.textContent   = data.message ?? 'Gagal menolak request.';
+            errEl.textContent   = data.message ?? 'Failed to reject request.';
             errEl.style.display = 'block';
         }
     })
     .catch(() => {
-        errEl.textContent   = 'Terjadi kesalahan. Coba lagi.';
+        errEl.textContent   = 'An error occurred. Try again.';
         errEl.style.display = 'block';
     })
     .finally(() => {
         btn.disabled  = false;
-        btn.innerHTML = '<i class="fas fa-ban me-1"></i> Konfirmasi Tolak';
+        btn.innerHTML = '<i class="fas fa-ban me-1"></i> Confirm Reject';
     });
 }
 
@@ -426,7 +415,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
     const btn = document.getElementById('uploadBtn');
     const originalLabel = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengupload...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
 
     fetch('/kln/dokumen/' + currentId + '/upload', {
         method: 'POST',
@@ -456,10 +445,10 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
                 closeModal();
             }
         } else {
-            alert(data.message ?? 'Upload gagal');
+            alert(data.message ?? 'Upload failed');
         }
     })
-    .catch(() => alert('Terjadi kesalahan saat upload'))
+    .catch(() => alert('An error occurred during upload'))
     .finally(() => {
         btn.disabled = false;
         btn.innerHTML = originalLabel;
@@ -468,7 +457,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
 
 /* ── DELETE ──────────────────────────────── */
 function deleteReq(id) {
-    if (!confirm('Yakin ingin menghapus request ini?')) return;
+    if (!confirm('Are you sure you want to delete this request?')) return;
     fetch('/kln/dokumen/' + id, {
         method: 'DELETE',
         headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
@@ -478,10 +467,10 @@ function deleteReq(id) {
         if (data.success) {
             document.getElementById('row-' + id)?.remove();
         } else {
-            alert(data.message ?? 'Gagal menghapus');
+            alert(data.message ?? 'Failed to delete');
         }
     })
-    .catch(() => alert('Terjadi kesalahan'));
+    .catch(() => alert('An error occurred'));
 }
 
 /* tutup modal saat klik backdrop */

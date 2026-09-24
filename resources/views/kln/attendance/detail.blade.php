@@ -1,15 +1,15 @@
 @extends('layouts.sima')
 
-@section('page_title',    $mahasiswa->nama . ' — Kehadiran')
+@section('page_title',    $mahasiswa->nama . ' — Attendance')
 @section('page_section',  'KEHADIRAN')
-@section('page_subtitle', 'Detail kehadiran per matakuliah')
+@section('page_subtitle', 'Attendance detail by course')
 
 @section('main_content')
 
 {{-- ── BACK ─────────────────────────────────────────── --}}
 <div class="mb-3">
     <a href="{{ route('kln.attendance') }}" class="sima-btn sima-btn--outline sima-btn--sm">
-        <i class="fas fa-arrow-left me-1"></i> Kembali
+        <i class="fas fa-arrow-left me-1"></i> Back
     </a>
 </div>
 
@@ -38,7 +38,7 @@
                 $active = $mahasiswa->user_status === 'active';
             @endphp
             <span class="sima-badge {{ $active ? 'sima-badge--green' : 'sima-badge--red' }}">
-                {{ $active ? 'Aktif' : 'Nonaktif' }}
+                {{ $active ? 'Active' : 'Inactive' }}
             </span>
         </div>
     </div>
@@ -60,21 +60,21 @@
     <div class="col-6 col-md-3">
         <div class="sima-stat sima-stat--green">
             <div class="sima-stat__icon sima-stat__icon--green"><i class="fas fa-check"></i></div>
-            <div class="sima-stat__label">Total Hadir</div>
+            <div class="sima-stat__label">Total Present</div>
             <div class="sima-stat__value">{{ $totalHadir }}</div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="sima-stat sima-stat--red">
             <div class="sima-stat__icon sima-stat__icon--red"><i class="fas fa-times"></i></div>
-            <div class="sima-stat__label">Total Absen</div>
+            <div class="sima-stat__label">Total Absent</div>
             <div class="sima-stat__value">{{ $totalAbsen }}</div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="sima-stat sima-stat--amber">
             <div class="sima-stat__icon sima-stat__icon--amber"><i class="fas fa-file-alt"></i></div>
-            <div class="sima-stat__label">Total Izin</div>
+            <div class="sima-stat__label">Total Excused</div>
             <div class="sima-stat__value">{{ $totalIzin }}</div>
         </div>
     </div>
@@ -84,7 +84,7 @@
             <div class="sima-stat__icon {{ $totalPct >= 80 ? 'sima-stat__icon--green' : ($totalPct >= 60 ? 'sima-stat__icon--amber' : 'sima-stat__icon--red') }}">
                 <i class="fas fa-percent"></i>
             </div>
-            <div class="sima-stat__label">Kehadiran Total</div>
+            <div class="sima-stat__label">Total Attendance</div>
             <div class="sima-stat__value">{{ $overallLabel }}</div>
         </div>
     </div>
@@ -95,8 +95,8 @@
 @php $totalBerlangsung = $totalHadir + $totalAbsen + $totalIzin; @endphp
 <div class="sima-card mb-4" style="padding:16px 24px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px;">
-        <span class="fw-600">Progress Kehadiran Keseluruhan</span>
-        <span style="color:var(--c-text-3);">{{ $totalHadir }} / {{ $totalBerlangsung }} sesi berlangsung</span>
+        <span class="fw-600">Overall Attendance Progress</span>
+        <span style="color:var(--c-text-3);">{{ $totalHadir }} / {{ $totalBerlangsung }} sessions attended</span>
     </div>
     <div style="height:10px;background:var(--c-border);border-radius:999px;overflow:hidden;">
         <div style="height:100%;border-radius:999px;transition:width .4s;
@@ -110,8 +110,8 @@
 {{-- ── PER-JADWAL ACCORDION ─────────────────────────── --}}
 <div class="sima-card">
     <div style="padding:16px 24px;border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:8px;">
-        <h5 class="sima-card__title" style="margin:0;">Detail per Matakuliah</h5>
-        <span class="sima-badge sima-badge--blue">{{ $jadwalList->count() }} jadwal</span>
+        <h5 class="sima-card__title" style="margin:0;">Detail by Course</h5>
+        <span class="sima-badge sima-badge--blue">{{ $jadwalList->count() }} schedules</span>
     </div>
 
     @forelse($jadwalList as $j)
@@ -165,7 +165,7 @@
                     <i class="fas fa-file-alt me-1"></i>{{ $j->izin }}
                 </span>
                 @if($j->belum > 0)
-                <span class="sima-badge" style="background:var(--c-border);color:var(--c-text-2);" title="Belum hadir">
+                <span class="sima-badge" style="background:var(--c-border);color:var(--c-text-2);" title="Not yet present">
                     {{ $j->belum }}
                 </span>
                 @endif
@@ -197,8 +197,8 @@
             <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;">
                 <thead>
                     <tr style="border-bottom:1px solid var(--c-border);">
-                        <th style="padding:6px 10px;font-weight:600;color:var(--c-text-3);text-align:center;width:60px;">Sesi</th>
-                        <th style="padding:6px 10px;font-weight:600;color:var(--c-text-3);">Tanggal</th>
+                        <th style="padding:6px 10px;font-weight:600;color:var(--c-text-3);text-align:center;width:60px;">Session</th>
+                        <th style="padding:6px 10px;font-weight:600;color:var(--c-text-3);">Date</th>
                         <th style="padding:6px 10px;font-weight:600;color:var(--c-text-3);text-align:center;">Status</th>
                     </tr>
                 </thead>
@@ -206,10 +206,10 @@
                     @foreach($sesiList as $sesi)
                     @php
                         $statusMap = [
-                            'present'     => ['label' => 'Hadir',  'cls' => 'sima-badge--green'],
-                            'absent'      => ['label' => 'Absen',  'cls' => 'sima-badge--red'],
-                            'excused'     => ['label' => 'Izin',   'cls' => 'sima-badge--amber'],
-                            'belum hadir' => ['label' => 'Belum',  'cls' => ''],
+                            'present'     => ['label' => 'Present',  'cls' => 'sima-badge--green'],
+                            'absent'      => ['label' => 'Absent',  'cls' => 'sima-badge--red'],
+                            'excused'     => ['label' => 'Excused',   'cls' => 'sima-badge--amber'],
+                            'belum hadir' => ['label' => 'N/A',  'cls' => ''],
                         ];
                         $sm = $statusMap[$sesi->status] ?? ['label' => $sesi->status, 'cls' => ''];
                     @endphp
@@ -230,7 +230,7 @@
             </table>
             @else
             <div style="padding:12px 0;color:var(--c-text-3);font-size:13px;">
-                Belum ada data sesi untuk matakuliah ini.
+                No session data for this course.
             </div>
             @endif
         </div>
@@ -239,7 +239,7 @@
     @empty
     <div class="text-center text-muted py-5">
         <i class="fas fa-calendar-times fa-2x d-block mb-2" style="opacity:.3;"></i>
-        Mahasiswa ini belum terdaftar di jadwal manapun.
+        This student is not enrolled in any schedules.
     </div>
     @endforelse
 </div>

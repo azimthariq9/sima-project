@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Pengumuman KLN')
+@section('page_title',    'KLN Announcements')
 @section('page_section',  'PENGUMUMAN')
-@section('page_subtitle', 'Kelola pengumuman yang dibuat oleh KLN')
+@section('page_subtitle', 'Manage announcements created by KLN')
 
 @section('main_content')
 
@@ -18,7 +18,7 @@
     <div class="col-6 col-md-3">
         <div class="sima-stat sima-stat--green">
             <div class="sima-stat__icon sima-stat__icon--green"><i class="fas fa-check-circle"></i></div>
-            <div class="sima-stat__label">Aktif</div>
+            <div class="sima-stat__label">Active</div>
             <div class="sima-stat__value">{{ $totalActive }}</div>
         </div>
     </div>
@@ -32,7 +32,7 @@
     <div class="col-6 col-md-3">
         <div class="sima-stat sima-stat--red">
             <div class="sima-stat__icon sima-stat__icon--red"><i class="fas fa-exclamation-circle"></i></div>
-            <div class="sima-stat__label">Penting</div>
+            <div class="sima-stat__label">Important</div>
             <div class="sima-stat__value">{{ $totalPenting }}</div>
         </div>
     </div>
@@ -50,44 +50,37 @@
 {{-- ── TABLE CARD ───────────────────────────────────── --}}
 <div class="sima-card">
     <div class="sima-card__header">
-        <h5 class="sima-card__title">Daftar Pengumuman</h5>
+        <h5 class="sima-card__title">Announcement List</h5>
         <div style="display:flex;gap:8px;align-items:center;">
-            <input type="text" id="searchInput" class="sima-input" style="width:200px;"
-                   placeholder="Cari judul..." oninput="filterAnn()">
-            <button class="sima-btn sima-btn--outline" onclick="resetFilter()">
-                <i class="fas fa-redo"></i>
-            </button>
             <a href="{{ route('kln.announcement.create') }}" class="sima-btn sima-btn--accent">
-                <i class="fas fa-plus me-1"></i> Buat Pengumuman
+                <i class="fas fa-plus me-1"></i> Create Announcement
             </a>
         </div>
     </div>
 
     <div class="table-responsive">
-        <table class="sima-table" id="annTable">
+        <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Judul &amp; Ringkasan</th>
-                    <th>Lampiran</th>
+                    <th>Title &amp; Summary</th>
+                    <th>Attachments</th>
                     <th>Status</th>
-                    <th>Penting</th>
-                    <th>Tanggal</th>
-                    <th>Aksi</th>
+                    <th>Priority</th>
+                    <th>Date</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($announcements as $i => $ann)
+                @forelse($announcements as $ann)
                 @php
                     $statusMap = [
-                        'active'   => ['label' => 'Aktif',    'cls' => 'sima-badge--green'],
-                        'inactive' => ['label' => 'Nonaktif', 'cls' => 'sima-badge--red'],
+                        'active'   => ['label' => 'Active',    'cls' => 'sima-badge--green'],
+                        'inactive' => ['label' => 'Inactive', 'cls' => 'sima-badge--red'],
                         'draft'    => ['label' => 'Draft',    'cls' => 'sima-badge--amber'],
                     ];
                     $s = $statusMap[$ann->status] ?? ['label' => $ann->status, 'cls' => 'sima-badge--amber'];
                 @endphp
-                <tr id="row-{{ $ann->id }}" data-judul="{{ strtolower($ann->subject) }}">
-                    <td>{{ $i + 1 }}</td>
+                <tr id="row-{{ $ann->id }}">
                     <td style="max-width:300px;">
                         <div class="fw-600" style="margin-bottom:3px;">{{ $ann->subject }}</div>
                         <div style="font-size:12px;color:var(--c-text-3);line-height:1.5;">
@@ -109,7 +102,7 @@
                     <td>
                         @if($ann->is_penting)
                             <span class="sima-badge sima-badge--red">
-                                <i class="fas fa-exclamation me-1"></i>Penting
+                                <i class="fas fa-exclamation me-1"></i>Important
                             </span>
                         @else
                             <span class="text-muted" style="font-size:13px;">—</span>
@@ -132,21 +125,16 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="text-center text-muted py-5">
+                    <td colspan="6" class="text-center text-muted py-5">
                         <i class="fas fa-bullhorn fa-2x d-block mb-2" style="opacity:.3;"></i>
-                        Belum ada pengumuman.
-                        <a href="{{ route('kln.announcement.create') }}" style="color:var(--c-accent);">Buat sekarang</a>
+                        No announcements yet.
+                        <a href="{{ route('kln.announcement.create') }}" style="color:var(--c-accent);">Create now</a>
                     </td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    @if($announcements->hasPages())
-    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
-        {{ $announcements->links('vendor.pagination.sima') }}
-    </div>
-    @endif
 </div>
 
 @endsection
@@ -154,19 +142,8 @@
 @push('page_js')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <script>
-function filterAnn() {
-    const q = document.getElementById('searchInput').value.toLowerCase();
-    document.querySelectorAll('#annTable tbody tr[data-judul]').forEach(row => {
-        row.style.display = !q || row.dataset.judul.includes(q) ? '' : 'none';
-    });
-}
-function resetFilter() {
-    document.getElementById('searchInput').value = '';
-    filterAnn();
-}
-
 function deleteAnn(id) {
-    if (!confirm('Hapus pengumuman ini? Semua lampiran juga akan dihapus.')) return;
+    if (!confirm('Delete this announcement? All attachments will also be deleted.')) return;
     fetch(`/kln/announcement/${id}`, {
         method: 'DELETE',
         headers: {
@@ -180,7 +157,7 @@ function deleteAnn(id) {
             document.getElementById('row-' + id)?.remove();
         }
     })
-    .catch(() => alert('Gagal menghapus. Coba lagi.'));
+    .catch(() => alert('Failed to delete. Try again.'));
 }
 </script>
 @endpush

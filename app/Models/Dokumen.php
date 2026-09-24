@@ -31,6 +31,9 @@ class Dokumen extends Model
     public function fileDetail(){
         return $this->hasMany(FileDetail::class, 'dokumen_id');
     }
+    public function tipeDokumen(){
+        return $this->belongsTo(TipeDokumen::class, 'tipeDkmn', 'kode');
+    }
     public function history(){
         return $this->hasMany(HistoryDokumen::class,'dokumen_id');
     }

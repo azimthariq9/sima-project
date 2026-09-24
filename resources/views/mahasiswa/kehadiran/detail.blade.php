@@ -1,17 +1,17 @@
 @extends('layouts.sima')
 
-@section('page_title',   $kelasInfo->namaMk ?? 'Detail Kehadiran')
+@section('page_title',   $kelasInfo->namaMk ?? 'Attendance Detail')
 @section('page_section', 'Mahasiswa')
-@section('page_subtitle','Detail absensi per sesi')
+@section('page_subtitle','Session attendance detail')
 
 @section('main_content')
 
 @php
 $statusMap = [
-    'present'     => ['label' => 'Hadir',        'cls' => 'sima-badge--green',  'ico' => 'fa-circle-check'],
-    'excused'     => ['label' => 'Izin',          'cls' => 'sima-badge--amber',  'ico' => 'fa-clock'],
-    'absent'      => ['label' => 'Tidak Hadir',   'cls' => 'sima-badge--red',    'ico' => 'fa-circle-xmark'],
-    'belum hadir' => ['label' => 'Belum Dicatat', 'cls' => 'sima-badge--grey',   'ico' => 'fa-minus'],
+    'present'     => ['label' => 'Present',        'cls' => 'sima-badge--green',  'ico' => 'fa-circle-check'],
+    'excused'     => ['label' => 'Excused',          'cls' => 'sima-badge--amber',  'ico' => 'fa-clock'],
+    'absent'      => ['label' => 'Absent',   'cls' => 'sima-badge--red',    'ico' => 'fa-circle-xmark'],
+    'belum hadir' => ['label' => 'Not Recorded', 'cls' => 'sima-badge--grey',   'ico' => 'fa-minus'],
 ];
 
 $totalSesi = max(1, $kelasInfo->total_sesi ?? 1);
@@ -29,7 +29,7 @@ $tipeCls  = $badgeMap[$tipe];
 {{-- Back + info header --}}
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px" class="sima-fade">
     <a href="{{ route('mahasiswa.kehadiran') }}" class="sima-btn sima-btn--sm sima-btn--outline">
-        <i class="fas fa-arrow-left"></i> Kembali
+        <i class="fas fa-arrow-left"></i> Back
     </a>
     <div>
         <div style="font-size:15px;font-weight:700;color:var(--c-text-1)">{{ $kelasInfo->namaMk }}</div>
@@ -46,10 +46,10 @@ $tipeCls  = $badgeMap[$tipe];
     <div class="col-12 sima-fade">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
             @foreach([
-                ['Hadir',        $hadir, '#22c55e', '#ecfdf5', 'fa-circle-check'],
-                ['Izin',         $izin,  '#f59e0b', '#fffbeb', 'fa-clock'],
-                ['Tidak Hadir',  $absen, '#ef4444', '#fef2f2', 'fa-circle-xmark'],
-                ['Persentase',   $pct.'%', $barColor, '#f8fafc', 'fa-chart-pie'],
+                ['Present',        $hadir, '#22c55e', '#ecfdf5', 'fa-circle-check'],
+                ['Excused',         $izin,  '#f59e0b', '#fffbeb', 'fa-clock'],
+                ['Absent',  $absen, '#ef4444', '#fef2f2', 'fa-circle-xmark'],
+                ['Percentage',   $pct.'%', $barColor, '#f8fafc', 'fa-chart-pie'],
             ] as [$label, $val, $color, $bg, $ico])
             <div style="background:{{ $bg }};border:1px solid {{ $color }}22;border-radius:12px;padding:14px 16px">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
@@ -57,7 +57,7 @@ $tipeCls  = $badgeMap[$tipe];
                     <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:{{ $color }}">{{ $label }}</span>
                 </div>
                 <div style="font-size:22px;font-weight:800;color:{{ $color }}">{{ $val }}</div>
-                @if($label === 'Persentase')
+                @if($label === 'Percentage')
                     <div style="height:4px;background:rgba(0,0,0,.07);border-radius:99px;margin-top:8px;overflow:hidden">
                         <div style="height:100%;width:{{ $pct }}%;background:{{ $color }};border-radius:99px"></div>
                     </div>
@@ -72,25 +72,25 @@ $tipeCls  = $badgeMap[$tipe];
         <div class="sima-card">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Rekap per Sesi</h5>
-                    <div class="sima-card__subtitle">Total {{ $totalSesi }} sesi · {{ $sesiList->count() }} tercatat</div>
+                    <h5 class="sima-card__title">Session Summary</h5>
+                    <div class="sima-card__subtitle">Total {{ $totalSesi }} sessions · {{ $sesiList->count() }} recorded</div>
                 </div>
             </div>
 
             @if($sesiList->isEmpty())
                 <div class="sima-card__body" style="text-align:center;padding:40px;color:var(--c-text-3)">
                     <i class="fas fa-clipboard-list" style="font-size:32px;opacity:.3;display:block;margin-bottom:10px"></i>
-                    <div style="font-size:13.5px">Belum ada data kehadiran tercatat</div>
+                    <div style="font-size:13.5px">No attendance data recorded</div>
                 </div>
             @else
                 <div class="sima-card__body" style="padding:0">
-                    <table class="sima-table">
+                    <table class="sima-table" data-datatable>
                         <thead>
                             <tr>
-                                <th style="width:80px">Sesi</th>
-                                <th style="width:120px">Tanggal</th>
-                                <th>Hari &amp; Jam</th>
-                                <th>Ruangan</th>
+                                <th style="width:80px">Session</th>
+                                <th style="width:120px">Date</th>
+                                <th>Day &amp; Time</th>
+                                <th>Room</th>
                                 <th style="width:130px">Status</th>
                             </tr>
                         </thead>

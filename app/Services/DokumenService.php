@@ -522,8 +522,8 @@ class DokumenService extends BaseService
      */
     public function countCritical(): int
     {
-        $today = now();
-        $criticalDate = now()->addDays(30);
+        $today = today();
+        $criticalDate = today()->addDays(30);
         
         return Dokumen::where(function($query) use ($today, $criticalDate) {
                 $query->where('tglKdlwrs', '<', $today) // expired
@@ -547,8 +547,8 @@ class DokumenService extends BaseService
      */
     public function getCriticalDocuments(int $limit = 10): array
     {
-        $today = now();
-        $criticalDate = now()->addDays(30);
+        $today = today();
+        $criticalDate = today()->addDays(30);
         
         $documents = Dokumen::with(['mahasiswa'])
             ->where(function($query) use ($today, $criticalDate) {
@@ -560,7 +560,7 @@ class DokumenService extends BaseService
             ->get();
         
         return $documents->map(function($doc) {
-            $isExpired = $doc->tglkdlwrs < now();
+            $isExpired = $doc->tglkdlwrs->startOfDay()->lt(today());
             
             return [
                 'id' => $doc->id,

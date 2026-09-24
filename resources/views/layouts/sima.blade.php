@@ -6,6 +6,9 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>@yield('page_title', 'SIMA') — SIMA</title>
 
+<!-- Vite Assets -->
+@vite(['resources/css/datatables.css', 'resources/js/app.js'])
+
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -190,6 +193,14 @@ body.dark {
     --c-border-soft: #334155;
 }
 
+html:has(body.dark) {
+    --c-bg: #0f172a;
+    --c-surface: #1e293b;
+    --c-text-1: #f1f5f9;
+    --c-text-2: #cbd5e1;
+    --c-border-soft: #334155;
+}
+
 body.dark .sima-card {
     background: #1e293b;
     border: 1px solid #334155;
@@ -206,12 +217,13 @@ body.dark .sima-sidebar {
 
 body.dark .sima-sidebar .sima-nav__item { color: #e2e8f0; }
 
+body.dark .sima-nav__icon { color: #e2e8f0; }
+
 body.dark .sima-nav__item:hover {
     background: rgba(108,143,255,0.18);
     color: #ffffff;
+    box-shadow: 0 0 12px rgba(108,143,255,0.3);
 }
-
-body.dark .sima-nav__item:hover .sima-nav__icon { color: #ffffff; }
 
 body.dark .sima-nav__item.active {
     background: linear-gradient(135deg, #6c8fff, #a78bfa);
@@ -1158,7 +1170,7 @@ body.dark .sima-nav__item.active .sima-nav__icon { color: #ffffff; }
                 <!-- Notifikasi -->
                 <a href="{{ route($prefix . '.notifikasi') }}"
                     class="sima-topbar__icon-btn"
-                    title="Notifikasi">
+                    title="Notifications">
                     <i class="fas fa-bell"></i>
                     @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
                         <span class="sima-notif-badge">{{ $unreadNotifCount }}</span>
@@ -1183,7 +1195,7 @@ body.dark .sima-nav__item.active .sima-nav__icon { color: #ffffff; }
                         <li>
                             {{-- BUG #2 FIX: Route profil dinamis, tidak lagi hardcoded ke dosen.profil --}}
                             <a class="dropdown-item" href="{{ route($profilRoute) }}">
-                                <i class="fas fa-user me-2"></i> Profil Saya
+                                <i class="fas fa-user me-2"></i> My Profile
                             </a>
                         </li>
 

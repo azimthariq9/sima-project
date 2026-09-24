@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Profil Saya')
+@section('page_title',    'My Profile')
 @section('page_section',  'DOSEN')
-@section('page_subtitle', 'Informasi akun dan data dosen')
+@section('page_subtitle', 'Account information and lecturer data')
 
 @section('main_content')
 
@@ -43,7 +43,7 @@ $user  = auth()->user();
 
                 <span class="sima-badge {{ $user->status === 'active' ? 'sima-badge--green' : 'sima-badge--red' }}">
                     <i class="fas fa-circle" style="font-size:7px"></i>
-                    {{ $user->status === 'active' ? 'Aktif' : 'Nonaktif' }}
+                    {{ $user->status === 'active' ? 'Active' : 'Inactive' }}
                 </span>
 
                 <div style="margin-top:20px;width:100%;border-top:1px solid var(--c-border);padding-top:16px;
@@ -53,11 +53,11 @@ $user  = auth()->user();
                         <span style="font-family:var(--f-mono);font-weight:600;color:var(--c-text-1)">{{ $dosen->nidn ?? '—' }}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;font-size:12.5px">
-                        <span style="color:var(--c-text-3)"><i class="fas fa-tag me-1"></i> Kode Dosen</span>
+                        <span style="color:var(--c-text-3)"><i class="fas fa-tag me-1"></i> Lecturer Code</span>
                         <span style="font-family:var(--f-mono);font-weight:600;color:var(--c-text-1)">{{ $dosen->kodeDos ?? '—' }}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;font-size:12.5px">
-                        <span style="color:var(--c-text-3)"><i class="fas fa-university me-1"></i> Jurusan</span>
+                        <span style="color:var(--c-text-3)"><i class="fas fa-university me-1"></i> Department</span>
                         <span style="font-weight:600;color:var(--c-text-1);text-align:right;max-width:120px">
                             {{ $user->jurusan->namaJurusan ?? '—' }}
                         </span>
@@ -72,8 +72,8 @@ $user  = auth()->user();
         <div class="sima-card">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Edit Profil</h5>
-                    <div class="sima-card__subtitle">Perbarui nama dan password akun Anda</div>
+                    <h5 class="sima-card__title">Edit Profile</h5>
+                    <div class="sima-card__subtitle">Update your account name and password</div>
                 </div>
             </div>
             <div class="sima-card__body">
@@ -93,7 +93,7 @@ $user  = auth()->user();
 
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
                         <div>
-                            <label class="sima-label">Nama Lengkap <span style="color:var(--c-red)">*</span></label>
+                            <label class="sima-label">Full Name <span style="color:var(--c-red)">*</span></label>
                             <input type="text" name="nama" value="{{ old('nama', $dosen->nama ?? '') }}"
                                    class="sima-input" required>
                         </div>
@@ -107,24 +107,24 @@ $user  = auth()->user();
                     <div style="border-top:1px solid var(--c-border);padding-top:16px;margin-bottom:16px">
                         <div style="font-size:12px;font-weight:600;color:var(--c-text-3);
                                     text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">
-                            Ganti Password (kosongkan jika tidak ingin mengubah)
+                            Change Password (leave empty to keep current)
                         </div>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
                             <div>
-                                <label class="sima-label">Password Baru</label>
+                                <label class="sima-label">New Password</label>
                                 <input type="password" name="password" class="sima-input"
-                                       placeholder="Min. 8 karakter" autocomplete="new-password">
+                                       placeholder="Min. 8 characters" autocomplete="new-password">
                             </div>
                             <div>
-                                <label class="sima-label">Konfirmasi Password</label>
+                                <label class="sima-label">Confirm Password</label>
                                 <input type="password" name="password_confirmation" class="sima-input"
-                                       placeholder="Ulangi password baru" autocomplete="new-password">
+                                       placeholder="Repeat new password" autocomplete="new-password">
                             </div>
                         </div>
                     </div>
 
                     <button type="submit" class="sima-btn">
-                        <i class="fas fa-save me-1"></i> Simpan Perubahan
+                        <i class="fas fa-save me-1"></i> Save Changes
                     </button>
                 </form>
             </div>

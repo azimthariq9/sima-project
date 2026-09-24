@@ -46,6 +46,47 @@ class SimaSeeder extends Seeder
         $this->command->info("Jurusan — KLN:{$klnJurId} BIPA:{$bipaJurId} TI:{$tiJurId} SI:{$siJurId}");
 
         // ══════════════════════════════════════════════════════════════
+        // TIPE MAHASISWA — course types
+        // ══════════════════════════════════════════════════════════════
+        $tipeMhsList = [
+            'Beasiswa TIAS', 'Beasiswa KNB', 'Beasiswa Gunadarma',
+            'Internasional Mandiri', 'Short Course (3 Bulan)', 'BIPA', 'Summer Course',
+        ];
+        foreach ($tipeMhsList as $tipe) {
+            $oc('tipe_mahasiswa', ['nama' => $tipe]);
+        }
+        $this->command->info("Tipe Mahasiswa — " . count($tipeMhsList) . " types seeded.");
+
+        // ══════════════════════════════════════════════════════════════
+        // TIPE DOKUMEN — document types
+        // ══════════════════════════════════════════════════════════════
+        $tipeDokList = [
+            ['kode' => 'KITAS',             'nama' => 'Kartu Izin Tinggal Terbatas', 'kategori' => 'external', 'penerbit_default' => 'IMIGRASI'],
+            ['kode' => 'KITAP',             'nama' => 'Kartu Izin Tinggal Tetap',    'kategori' => 'external', 'penerbit_default' => 'IMIGRASI'],
+            ['kode' => 'Paspor',            'nama' => 'Paspor',                       'kategori' => 'external', 'penerbit_default' => 'KLN'],
+            ['kode' => 'KTP',               'nama' => 'Kartu Tanda Penduduk',         'kategori' => 'external', 'penerbit_default' => 'KEPENDUDUKAN'],
+            ['kode' => 'Polis_Asuransi',    'nama' => 'Polis Asuransi',               'kategori' => 'external', 'penerbit_default' => 'KLN'],
+            ['kode' => 'Foto_Profil',       'nama' => 'Foto Profil',                  'kategori' => 'external', 'penerbit_default' => 'KLN'],
+            ['kode' => 'LOA',               'nama' => 'Letter of Acceptance',         'kategori' => 'external', 'penerbit_default' => 'UNIVERSITAS'],
+            ['kode' => 'VISA',              'nama' => 'VISA',                         'kategori' => 'external', 'penerbit_default' => 'IMIGRASI'],
+            ['kode' => 'Stay_Permit',       'nama' => 'Stay Permit /KITAS',           'kategori' => 'external', 'penerbit_default' => 'IMIGRASI'],
+            ['kode' => 'Surat_Keterangan',  'nama' => 'Surat Keterangan',             'kategori' => 'internal', 'penerbit_default' => 'KLN'],
+            ['kode' => 'Surat_Izin',        'nama' => 'Surat Izin',                   'kategori' => 'internal', 'penerbit_default' => 'KLN'],
+            ['kode' => 'Surat_Tugas',       'nama' => 'Surat Tugas',                  'kategori' => 'internal', 'penerbit_default' => 'KLN'],
+            ['kode' => 'Surat_Undangan',    'nama' => 'Surat Undangan',               'kategori' => 'internal', 'penerbit_default' => 'KLN'],
+            ['kode' => 'Surat_Pernyataan',  'nama' => 'Surat Pernyataan',             'kategori' => 'internal', 'penerbit_default' => 'KLN'],
+            ['kode' => 'KRS',               'nama' => 'Kartu Rencana Studi',          'kategori' => 'internal', 'penerbit_default' => 'UNIVERSITAS'],
+            ['kode' => 'FRS',               'nama' => 'Formulir Rencana Studi',       'kategori' => 'internal', 'penerbit_default' => 'UNIVERSITAS'],
+            ['kode' => 'Daftar_Nilai',      'nama' => 'Daftar Nilai / Transkrip',     'kategori' => 'internal', 'penerbit_default' => 'UNIVERSITAS'],
+            ['kode' => 'Jadwal',            'nama' => 'Jadwal Kuliah',                'kategori' => 'internal', 'penerbit_default' => 'UNIVERSITAS'],
+            ['kode' => 'Absensi',           'nama' => 'Daftar Hadir / Absensi',       'kategori' => 'internal', 'penerbit_default' => 'UNIVERSITAS'],
+        ];
+        foreach ($tipeDokList as $td) {
+            $oc('tipe_dokumen', $td);
+        }
+        $this->command->info("Tipe Dokumen — " . count($tipeDokList) . " types seeded.");
+
+        // ══════════════════════════════════════════════════════════════
         // USER KLN (sender notifikasi & pengumuman)
         // ══════════════════════════════════════════════════════════════
         $klnUserId = $oc('users', ['email' => 'kln.demo@seed.test'], [
@@ -179,6 +220,9 @@ class SimaSeeder extends Seeder
                     'alamatAsal' => 'Luar Negeri',
                     'alamatIndo' => 'Jakarta Pusat',
                     'user_id'    => $uid,
+                    'masaAktif'  => '2027-06-30',
+                    'tahunMasuk' => 'PTA 2026/2027',
+                    'isOnline'   => false,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ]);

@@ -10,7 +10,7 @@
         </div>
         <div>
             <div class="sima-sidebar__title">SIMA</div>
-            <div class="sima-sidebar__subtitle">Admin Jurusan</div>
+            <div class="sima-sidebar__subtitle">Department Admin</div>
         </div>
     </div>
 </div>
@@ -30,65 +30,65 @@
     {{-- DOSEN --}}
     <a href="{{ route('jurusan.dosen.page') }}"
        class="sima-nav__item {{ request()->routeIs('jurusan.dosen.*') ? 'active' : '' }}"
-       data-title="Dosen">
+       data-title="Lecturers">
         <i class="fas fa-chalkboard-teacher sima-nav__icon"></i>
-        <span>Dosen</span>
+        <span>Lecturers</span>
     </a>
 
     {{-- MAHASISWA --}}
     <a href="{{ route('jurusan.mahasiswa.page') }}"
        class="sima-nav__item {{ request()->routeIs('jurusan.mahasiswa.*') ? 'active' : '' }}"
-       data-title="Mahasiswa">
+       data-title="Students">
         <i class="fas fa-user-graduate sima-nav__icon"></i>
-        <span>Mahasiswa</span>
+        <span>Students</span>
     </a>
 
     {{-- MATAKULIAH --}}
     <a href="{{ route('jurusan.matakuliah.page') }}"
        class="sima-nav__item {{ request()->routeIs('jurusan.matakuliah.*') ? 'active' : '' }}"
-       data-title="Matakuliah">
+       data-title="Courses">
         <i class="fas fa-book sima-nav__icon"></i>
-        <span>Mata Kuliah</span>
+        <span>Courses</span>
     </a>
 
     {{-- KELAS --}}
     <a href="{{ route('jurusan.kelas.page') }}"
        class="sima-nav__item {{ request()->routeIs('jurusan.kelas.*') ? 'active' : '' }}"
-       data-title="Kelas">
+       data-title="Classes">
         <i class="fas fa-door-open sima-nav__icon"></i>
-        <span>Kelas</span>
+        <span>Classes</span>
     </a>
 
     {{-- JADWAL --}}
     <a href="{{ route('jurusan.jadwal.page') }}"
        class="sima-nav__item {{ request()->routeIs('jurusan.jadwal.*') ? 'active' : '' }}"
-       data-title="Jadwal">
+       data-title="Schedules">
         <i class="fas fa-calendar-alt sima-nav__icon"></i>
-        <span>Jadwal</span>
+        <span>Schedules</span>
     </a>
 
     {{-- PENGUMUMAN --}}
     <a href="#"
        class="sima-nav__item"
-       data-title="Pengumuman">
+       data-title="Announcements">
         <i class="fas fa-megaphone sima-nav__icon"></i>
-        <span>Pengumuman</span>
+        <span>Announcements</span>
     </a>
 
     {{-- NOTIFIKASI --}}
     <a href="{{ route('jurusan.notifikasi') }}"
        class="sima-nav__item {{ request()->routeIs('jurusan.notifikasi') ? 'active' : '' }}"
-       data-title="Notifikasi">
+       data-title="Notifications">
         <i class="fas fa-bell sima-nav__icon"></i>
-        <span>Notifikasi</span>
+        <span>Notifications</span>
     </a>
 
     {{-- PROFIL --}}
     <a href="{{ route('jurusan.profil') }}"
        class="sima-nav__item {{ request()->routeIs('jurusan.profil') ? 'active' : '' }}"
-       data-title="Profil">
+       data-title="Profile">
         <i class="fas fa-user-circle sima-nav__icon"></i>
-        <span>Profil</span>
+        <span>Profile</span>
     </a>
 
     {{-- ========================= SETTINGS ========================= --}}

@@ -1,21 +1,21 @@
 @extends('layouts.sima')
 
-@section('page_title',   'Detail Kehadiran')
+@section('page_title',   'Attendance')
 @section('page_section', 'Mahasiswa')
-@section('page_subtitle','Rekap kehadiran per mata kuliah')
+@section('page_subtitle','Attendance summary per course')
 
 @section('main_content')
 
 @php
-$tipeOptions = ['semua' => 'Semua', 'perkuliahan' => 'Perkuliahan', 'bipa' => 'BIPA', 'kln' => 'KLN'];
+$tipeOptions = ['semua' => 'All', 'perkuliahan' => 'Lecture', 'bipa' => 'BIPA', 'kln' => 'KLN'];
 $badgeMap    = ['kln' => 'sima-badge--teal', 'bipa' => 'sima-badge--purple', 'perkuliahan' => 'sima-badge--blue'];
 @endphp
 
 <div class="sima-card sima-fade">
     <div class="sima-card__header">
         <div>
-            <h5 class="sima-card__title">Mata Kuliah yang Diikuti</h5>
-            <div class="sima-card__subtitle">Klik detail untuk melihat rekap absensi per sesi</div>
+            <h5 class="sima-card__title">Enrolled Courses</h5>
+            <div class="sima-card__subtitle">Click detail to view session attendance</div>
         </div>
 
         {{-- Filter tipe --}}
@@ -33,18 +33,18 @@ $badgeMap    = ['kln' => 'sima-badge--teal', 'bipa' => 'sima-badge--purple', 'pe
     @if($kelas->isEmpty())
         <div class="sima-card__body" style="text-align:center;padding:48px 20px;color:var(--c-text-3)">
             <i class="fas fa-inbox" style="font-size:36px;margin-bottom:12px;display:block;opacity:.35"></i>
-            <div style="font-size:14px;font-weight:500">Belum ada mata kuliah terdaftar</div>
-            <div style="font-size:12.5px;margin-top:4px">Hubungi KLN jika ada pertanyaan mengenai pendaftaran kelas.</div>
+            <div style="font-size:14px;font-weight:500">No courses enrolled</div>
+            <div style="font-size:12.5px;margin-top:4px">Contact KLN if you have questions about class registration.</div>
         </div>
     @else
         <div class="sima-card__body" style="padding:0">
-            <table class="sima-table">
+            <table class="sima-table" data-datatable>
                 <thead>
                     <tr>
-                        <th>Mata Kuliah</th>
-                        <th>Dosen</th>
-                        <th>Tipe</th>
-                        <th style="width:160px">Kehadiran</th>
+                        <th>Course</th>
+                        <th>Lecturer</th>
+                        <th>Type</th>
+                        <th style="width:160px">Attendance</th>
                         <th style="width:100px">Status</th>
                         <th style="width:80px"></th>
                     </tr>
@@ -78,14 +78,14 @@ $badgeMap    = ['kln' => 'sima-badge--teal', 'bipa' => 'sima-badge--purple', 'pe
                                     <span style="font-size:12px;font-weight:700;color:{{ $barColor }};min-width:34px">{{ $pct }}%</span>
                                 </div>
                                 <div style="font-size:11px;color:var(--c-text-3);margin-top:3px">
-                                    {{ $hadir }} hadir · {{ $izin }} izin · {{ $absen }} absen · {{ $totalSesi }} sesi
+                                    {{ $hadir }} present · {{ $izin }} excused · {{ $absen }} absent · {{ $totalSesi }} sessions
                                 </div>
                             </td>
                             <td>
                                 @if($selesai)
-                                    <span class="sima-badge sima-badge--grey"><i class="fas fa-circle-check"></i> Selesai</span>
+                                    <span class="sima-badge sima-badge--grey"><i class="fas fa-circle-check"></i> Completed</span>
                                 @else
-                                    <span class="sima-badge sima-badge--green"><i class="fas fa-circle" style="font-size:6px"></i> Aktif</span>
+                                    <span class="sima-badge sima-badge--green"><i class="fas fa-circle" style="font-size:6px"></i> Active</span>
                                 @endif
                             </td>
                             <td>

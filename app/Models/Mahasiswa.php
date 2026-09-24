@@ -12,7 +12,9 @@ class Mahasiswa extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'tglLahir' => 'date',
+        'tglLahir'  => 'date',
+        'masaAktif' => 'date',
+        'isOnline'  => 'boolean',
     ];
 
     public function kelas()
@@ -30,6 +32,10 @@ class Mahasiswa extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+    public function tipeMahasiswaRel()
+    {
+        return $this->belongsTo(TipeMahasiswa::class, 'tipeMahasiswa', 'nama');
     }
     public function announcement()
     {

@@ -6,6 +6,6 @@
     </x-slot>
 
     <div class="p-6">
-        Halaman Analytics KLN
+        KLN Analytics Page
     </div>
 </x-app-layout>

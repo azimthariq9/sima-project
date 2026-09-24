@@ -10,7 +10,7 @@
         </div>
         <div>
             <div class="sima-sidebar__title">SIMA</div>
-            <div class="sima-sidebar__subtitle">Dosen</div>
+            <div class="sima-sidebar__subtitle">Lecturers</div>
         </div>
     </div>
 </div>
@@ -30,25 +30,25 @@
     {{-- JADWAL & KELAS --}}
     <a href="{{ route('dosen.jadwal.index') }}"
        class="sima-nav__item {{ request()->routeIs('dosen.jadwal.*') ? 'active' : '' }}"
-       data-title="Jadwal & Kelas">
+       data-title="Schedule & Classes">
         <i class="fas fa-calendar-alt sima-nav__icon"></i>
-        <span>Jadwal & Kelas</span>
+        <span>Schedule &amp; Classes</span>
     </a>
 
     {{-- NOTIFIKASI --}}
     <a href="{{ route('dosen.notifikasi') }}"
        class="sima-nav__item {{ request()->routeIs('dosen.notifikasi') ? 'active' : '' }}"
-       data-title="Notifikasi">
+       data-title="Notifications">
         <i class="fas fa-bell sima-nav__icon"></i>
-        <span>Notifikasi</span>
+        <span>Notifications</span>
     </a>
 
     {{-- PROFIL --}}
     <a href="{{ route('dosen.profil') }}"
        class="sima-nav__item {{ request()->routeIs('dosen.profil') ? 'active' : '' }}"
-       data-title="Profil">
+       data-title="Profile">
         <i class="fas fa-user-circle sima-nav__icon"></i>
-        <span>Profil</span>
+        <span>Profile</span>
     </a>
 
     {{-- SETTINGS --}}

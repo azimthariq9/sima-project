@@ -2,14 +2,14 @@
 
 @section('page_title',    $dosen->nama)
 @section('page_section',  'STUDENTS & LECTURERS')
-@section('page_subtitle', 'Detail data dosen')
+@section('page_subtitle', 'Lecturer detail data')
 
 @section('main_content')
 
 {{-- ── BACK BUTTON ─────────────────────────────────── --}}
 <div class="mb-3">
     <a href="{{ route('kln.students.page') }}" class="sima-btn sima-btn--outline sima-btn--sm">
-        <i class="fas fa-arrow-left me-1"></i> Kembali
+        <i class="fas fa-arrow-left me-1"></i> Back
     </a>
 </div>
 
@@ -26,7 +26,7 @@
             <div class="d-flex gap-2 flex-wrap">
                 <span class="sima-badge sima-badge--purple">Dosen</span>
                 <span class="sima-badge {{ $dosen->status === 'active' ? 'sima-badge--green' : 'sima-badge--red' }}">
-                    {{ $dosen->status === 'active' ? 'Aktif' : 'Nonaktif' }}
+                            {{ $dosen->status === 'active' ? 'Active' : 'Inactive' }}
                 </span>
                 @if($dosen->namaJurusan)
                     <span class="sima-badge sima-badge--amber">{{ $dosen->namaJurusan }}</span>
@@ -39,7 +39,7 @@
 {{-- ── INFO ────────────────────────────────────────── --}}
 <div class="sima-card" style="padding: 24px;">
     <h6 class="fw-700 mb-3" style="font-family:var(--f-display);letter-spacing:.5px;">
-        <i class="fas fa-id-card me-2" style="color:var(--c-accent);"></i>Informasi Dosen
+        <i class="fas fa-id-card me-2" style="color:var(--c-accent);"></i>Lecturer Information
     </h6>
     <div class="row g-4">
         <div class="col-12 col-md-6">
@@ -49,7 +49,7 @@
                     <div class="fw-600">{{ $dosen->nidn ?? '-' }}</div>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Kode Dosen</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Lecturer Code</div>
                     <div class="fw-600">{{ $dosen->kodeDos ?? '-' }}</div>
                 </div>
                 <div>
@@ -61,19 +61,19 @@
         <div class="col-12 col-md-6">
             <div class="d-flex flex-column gap-3">
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Jurusan</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Department</div>
                     <div class="fw-600">{{ $dosen->namaJurusan ?? '-' }}</div>
                 </div>
                 <div>
                     <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Status</div>
                     <div class="fw-600">
                         <span class="sima-badge {{ $dosen->status === 'active' ? 'sima-badge--green' : 'sima-badge--red' }}">
-                            {{ $dosen->status === 'active' ? 'Aktif' : 'Nonaktif' }}
+                    {{ $dosen->status === 'active' ? 'Active' : 'Inactive' }}
                         </span>
                     </div>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Terdaftar</div>
+                    <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;">Enrolled</div>
                     <div class="fw-600">
                         {{ $dosen->created_at ? \Carbon\Carbon::parse($dosen->created_at)->translatedFormat('d F Y') : '-' }}
                     </div>

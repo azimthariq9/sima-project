@@ -33,33 +33,33 @@
     {{-- Jadwal --}}
     <a href="{{ route('bipa.jadwal') }}"
        class="sima-nav__item {{ request()->routeIs('bipa.jadwal') ? 'active' : '' }}"
-       data-title="Jadwal">
+       data-title="Schedules">
         <i class="fas fa-clock sima-nav__icon"></i>
-        <span>Jadwal</span>
+        <span>Schedules</span>
     </a>
 
     {{-- Pengumuman --}}
     <a href="{{ route('bipa.announcement') }}"
        class="sima-nav__item {{ request()->routeIs('bipa.announcement') ? 'active' : '' }}"
-       data-title="Pengumuman">
+       data-title="Announcements">
         <i class="fas fa-envelope sima-nav__icon"></i>
-        <span>Pengumuman</span>
+        <span>Announcements</span>
     </a>
 
     {{-- Notifikasi --}}
     <a href="{{ route('bipa.notifikasi') }}"
        class="sima-nav__item {{ request()->routeIs('bipa.notifikasi') ? 'active' : '' }}"
-       data-title="Notifikasi">
+       data-title="Notifications">
         <i class="fas fa-bell sima-nav__icon"></i>
-        <span>Notifikasi</span>
+        <span>Notifications</span>
     </a>
 
     {{-- Kehadiran & Nilai --}}
     <a href="{{ route('bipa.analytics') }}"
        class="sima-nav__item {{ request()->routeIs('bipa.analytics') ? 'active' : '' }}"
-       data-title="Kehadiran & Nilai">
+       data-title="Attendance & Grades">
         <i class="fas fa-check-square sima-nav__icon"></i>
-        <span>Kehadiran & Nilai</span>
+        <span>Attendance &amp; Grades</span>
     </a>
 
 

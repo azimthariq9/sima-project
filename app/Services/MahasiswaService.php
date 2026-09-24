@@ -127,7 +127,7 @@ class MahasiswaService extends BaseService
                 'approved' => $mahasiswa->dokumen()->where('status', 'approved')->count(),
                 'revision' => $mahasiswa->dokumen()->where('status', 'revision')->count(),
                 'expired' => $mahasiswa->dokumen()
-                    ->where('tglkdlwrs', '<', now())
+                    ->where('tglkdlwrs', '<', today())
                     ->count(),
             ],
             'recent_dokumen' => $mahasiswa->dokumen()

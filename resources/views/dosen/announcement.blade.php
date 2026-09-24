@@ -1,16 +1,16 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Pengumuman')
+@section('page_title',    'Announcements')
 @section('page_section',  'DOSEN')
-@section('page_subtitle', 'Informasi dan pengumuman terbaru')
+@section('page_subtitle', 'Latest information and announcements')
 
 @section('main_content')
 
 <div class="sima-card sima-fade">
     <div class="sima-card__header">
         <div>
-            <h5 class="sima-card__title">Pengumuman</h5>
-            <div class="sima-card__subtitle">Daftar pengumuman aktif untuk civitas akademik</div>
+            <h5 class="sima-card__title">Announcements</h5>
+            <div class="sima-card__subtitle">List of active announcements for academic community</div>
         </div>
     </div>
 
@@ -18,8 +18,8 @@
         @if($announcements->isEmpty())
             <div style="text-align:center;padding:48px 20px;color:var(--c-text-3)">
                 <i class="fas fa-bullhorn" style="font-size:36px;opacity:.3;display:block;margin-bottom:12px"></i>
-                <div style="font-size:14px;font-weight:500;color:var(--c-text-2)">Belum ada pengumuman</div>
-                <div style="font-size:12.5px;margin-top:4px">Pengumuman dari KLN dan jurusan akan tampil di sini.</div>
+                <div style="font-size:14px;font-weight:500;color:var(--c-text-2)">No announcements</div>
+                <div style="font-size:12.5px;margin-top:4px">Announcements from KLN and department will appear here.</div>
             </div>
         @else
             <div style="display:flex;flex-direction:column;gap:10px">
@@ -49,7 +49,7 @@
                                 <div style="font-size:14px;font-weight:700;color:var(--c-text-1)">{{ $ann->subject }}</div>
                                 @if($isPenting)
                                     <span class="sima-badge sima-badge--amber" style="font-size:10px">
-                                        <i class="fas fa-thumbtack"></i> Penting
+                                        <i class="fas fa-thumbtack"></i> Important
                                     </span>
                                 @endif
                                 <span class="sima-badge" style="font-size:10px;background:var(--c-bg);color:var(--c-text-3);border:1px solid var(--c-border)">

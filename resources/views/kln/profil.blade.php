@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Profil Saya')
+@section('page_title',    'My Profile')
 @section('page_section',  'KERJA SAMA LUAR NEGERI')
-@section('page_subtitle', 'Informasi akun KLN')
+@section('page_subtitle', 'KLN account information')
 
 @section('main_content')
 
@@ -39,7 +39,7 @@
 
                 <span class="sima-badge {{ $user->status === 'active' ? 'sima-badge--green' : 'sima-badge--red' }}">
                     <i class="fas fa-circle" style="font-size:7px"></i>
-                    {{ $user->status === 'active' ? 'Aktif' : 'Nonaktif' }}
+                    {{ $user->status === 'active' ? 'Active' : 'Inactive' }}
                 </span>
 
                 <div style="margin-top:20px;width:100%;border-top:1px solid var(--c-border);padding-top:16px;
@@ -55,7 +55,7 @@
                         </span>
                     </div>
                     <div style="display:flex;justify-content:space-between;font-size:12.5px">
-                        <span style="color:var(--c-text-3)"><i class="fas fa-calendar me-1"></i> Bergabung</span>
+                        <span style="color:var(--c-text-3)"><i class="fas fa-calendar me-1"></i> Joined</span>
                         <span style="font-weight:600;color:var(--c-text-1)">
                             {{ $user->created_at ? \Carbon\Carbon::parse($user->created_at)->format('d M Y') : '—' }}
                         </span>
@@ -71,8 +71,8 @@
         <div class="sima-card">
             <div class="sima-card__header">
                 <div>
-                    <h5 class="sima-card__title">Edit Profil</h5>
-                    <div class="sima-card__subtitle">Perbarui password akun Anda</div>
+                    <h5 class="sima-card__title">Edit Profile</h5>
+                    <div class="sima-card__subtitle">Update your account password</div>
                 </div>
             </div>
             <div class="sima-card__body">
@@ -96,31 +96,31 @@
                         <input type="email" value="{{ $user->email }}" class="sima-input"
                                disabled style="background:var(--c-bg);color:var(--c-text-3)">
                         <div style="font-size:11.5px;color:var(--c-text-3);margin-top:5px">
-                            <i class="fas fa-info-circle"></i> Email tidak dapat diubah. Hubungi administrator sistem jika perlu.
+                            <i class="fas fa-info-circle"></i> Email cannot be changed. Contact system administrator if needed.
                         </div>
                     </div>
 
                     <div style="border-top:1px solid var(--c-border);padding-top:16px;margin-bottom:16px">
                         <div style="font-size:12px;font-weight:600;color:var(--c-text-3);
                                     text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">
-                            Ganti Password (kosongkan jika tidak ingin mengubah)
+                            Change Password (leave empty to keep current)
                         </div>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
                             <div>
-                                <label class="sima-label">Password Baru</label>
+                                <label class="sima-label">New Password</label>
                                 <input type="password" name="password" class="sima-input"
-                                       placeholder="Min. 8 karakter" autocomplete="new-password">
+                                       placeholder="Min. 8 characters" autocomplete="new-password">
                             </div>
                             <div>
-                                <label class="sima-label">Konfirmasi Password</label>
+                                <label class="sima-label">Confirm Password</label>
                                 <input type="password" name="password_confirmation" class="sima-input"
-                                       placeholder="Ulangi password baru" autocomplete="new-password">
+                                       placeholder="Repeat new password" autocomplete="new-password">
                             </div>
                         </div>
                     </div>
 
                     <button type="submit" class="sima-btn">
-                        <i class="fas fa-save me-1"></i> Simpan Perubahan
+                        <i class="fas fa-save me-1"></i> Save Changes
                     </button>
                 </form>
 

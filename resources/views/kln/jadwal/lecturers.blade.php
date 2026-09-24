@@ -2,7 +2,7 @@
 
 @section('page_title',    'Jadwal Lecturers')
 @section('page_section',  'JADWAL')
-@section('page_subtitle', 'Jadwal yang dibuat oleh admin jurusan')
+@section('page_subtitle', 'Schedules created by department admins')
 
 @section('main_content')
 
@@ -11,8 +11,8 @@
     <div class="col-6 col-md-3">
         <div class="sima-stat sima-stat--green">
             <div class="sima-stat__icon sima-stat__icon--green"><i class="fas fa-calendar-alt"></i></div>
-            <div class="sima-stat__label">Total Jadwal</div>
-            <div class="sima-stat__value">{{ $jadwalList->total() }}</div>
+            <div class="sima-stat__label">Total Schedules</div>
+            <div class="sima-stat__value">{{ $jadwalList->count() }}</div>
         </div>
     </div>
 </div>
@@ -24,40 +24,35 @@
         <form method="GET" action="{{ route('kln.jadwal.lecturers') }}"
               style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <select name="hari" class="sima-input" style="width:140px;" onchange="this.form.submit()">
-                <option value="">Semua Hari</option>
-                @foreach(['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'] as $h)
+                <option value="">All Days</option>
+                @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $h)
                     <option value="{{ $h }}" {{ request('hari') === $h ? 'selected' : '' }}>{{ $h }}</option>
                 @endforeach
             </select>
-            <input type="text" name="search" value="{{ request('search') }}" class="sima-input" style="width:160px;"
-                   placeholder="Cari matakuliah / dosen...">
-            <button type="submit" class="sima-btn sima-btn--outline"><i class="fas fa-search"></i></button>
-            @if(request('hari') || request('search'))
+            @if(request('hari'))
             <a href="{{ route('kln.jadwal.lecturers') }}" class="sima-btn sima-btn--outline"><i class="fas fa-times"></i></a>
             @endif
         </form>
     </div>
 
     <div class="table-responsive">
-        <table class="sima-table">
+        <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Matakuliah</th>
-                    <th>Kelas</th>
-                    <th>Dosen</th>
-                    <th>Hari</th>
-                    <th>Jam</th>
-                    <th>Ruangan</th>
-                    <th>Sesi</th>
-                    <th>Tahun Ajar</th>
-                    <th>Aksi</th>
+                    <th>Course</th>
+                    <th>Class</th>
+                    <th>Lecturer</th>
+                    <th>Day</th>
+                    <th>Time</th>
+                    <th>Room</th>
+                    <th>Sessions</th>
+                    <th>Academic Year</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($jadwalList as $i => $j)
+                @forelse($jadwalList as $j)
                 <tr>
-                    <td>{{ $jadwalList->firstItem() + $loop->index }}</td>
                     <td>
                         <div class="fw-600">{{ $j->namaMk ?? '-' }}</div>
                         <code style="font-size:11px;color:var(--c-text-3);">{{ $j->kodeMk }}</code>
@@ -84,17 +79,12 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="10" class="text-center text-muted py-4">Belum ada jadwal dari jurusan.</td>
+                    <td colspan="9" class="text-center text-muted py-4">No schedules from departments yet.</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    @if($jadwalList->hasPages())
-    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
-        {{ $jadwalList->links('vendor.pagination.sima') }}
-    </div>
-    @endif
 </div>
 
 @endsection

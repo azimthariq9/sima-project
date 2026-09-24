@@ -112,7 +112,7 @@ class KlnController extends Controller
             });
         }
 
-        $requests = $query->paginate(10)->withQueryString();
+        $requests = $query->get();
 
         return view('kln.dokumen', compact('requests', 'total', 'pending', 'approved', 'rejected'));
     }
@@ -327,6 +327,7 @@ class KlnController extends Controller
                 'mahasiswa.nama',
                 'mahasiswa.npm as identifier',
                 'mahasiswa.tipeMahasiswa',
+                'mahasiswa.masaAktif',
                 'jurusan.namaJurusan',
                 'users.jurusan_id',
                 'users.status',
@@ -339,7 +340,7 @@ class KlnController extends Controller
                 END) as doc_expiry_level")
             )
             ->groupBy('mahasiswa.id', 'mahasiswa.nama', 'mahasiswa.npm',
-                      'mahasiswa.tipeMahasiswa', 'jurusan.namaJurusan',
+                      'mahasiswa.tipeMahasiswa', 'mahasiswa.masaAktif', 'jurusan.namaJurusan',
                       'users.jurusan_id', 'users.status')
             ->orderBy('mahasiswa.nama');
 
@@ -356,7 +357,7 @@ class KlnController extends Controller
             $mhsQuery->where('mahasiswa.tipeMahasiswa', $tipeMhs);
         }
 
-        $mahasiswaList = $mhsQuery->paginate(10, ['*'], 'page_m')->withQueryString();
+        $mahasiswaList = $mhsQuery->get();
 
         if ($dokStatus) {
             $caseExpr = 'MIN(CASE
@@ -368,13 +369,13 @@ class KlnController extends Controller
                 END)';
             if ($dokStatus === 'belum_ada') {
                 $mahasiswaList = $mhsQuery->havingRaw("{$caseExpr} IS NULL")
-                    ->paginate(10, ['*'], 'page_m')->withQueryString();
+                    ->get();
             } else {
                 $levelMap = ['expired' => 1, 'pending' => 2, 'warning' => 3, 'aman' => 4];
                 $level = $levelMap[$dokStatus] ?? null;
                 if ($level) {
                     $mahasiswaList = $mhsQuery->havingRaw("{$caseExpr} = ?", [$level])
-                        ->paginate(10, ['*'], 'page_m')->withQueryString();
+                        ->get();
                 }
             }
         }
@@ -402,7 +403,7 @@ class KlnController extends Controller
             $dosQuery->where('users.jurusan_id', $jurusanD);
         }
 
-        $dosenList = $dosQuery->paginate(10, ['*'], 'page_d')->withQueryString();
+        $dosenList = $dosQuery->get();
 
         $jurusan = DB::table('jurusan')->orderBy('namaJurusan')->get();
 
@@ -595,6 +596,20 @@ class KlnController extends Controller
         $jurusan = DB::table('jurusan')->orderBy('namaJurusan')->get();
         return view('kln.users.index', compact('jurusan'));
     }
+
+    public function createUserPage()
+    {
+        $jurusan = DB::table('jurusan')->orderBy('namaJurusan')->get();
+        return view('kln.users.create', compact('jurusan'));
+    }
+
+    public function editUserPage($id)
+    {
+        $user   = User::with(['mahasiswa', 'dosen'])->findOrFail($id);
+        $jurusan = DB::table('jurusan')->orderBy('namaJurusan')->get();
+        return view('kln.users.edit', compact('user', 'jurusan'));
+    }
+
     /*
     |--------------------------------------------------------------------------
     | GET USERS DATA
@@ -701,6 +716,7 @@ class KlnController extends Controller
                     'nama'            => $mhs['nama'] ?? null,
                     'npm'             => $npm,
                     'tipeMahasiswa'   => $mhs['tipeMahasiswa'] ?? null,
+                    'masaAktif'       => $mhs['masaAktif'] ?? null,
                     'created_at'      => now(),
                     'updated_at'      => now(),
                 ]);
@@ -828,6 +844,7 @@ class KlnController extends Controller
             if (isset($mhs['nama']) && $mhs['nama'])            $mhsUpdate['nama']          = $mhs['nama'];
             if (isset($mhs['npm'])  && $mhs['npm'])             $mhsUpdate['npm']           = $mhs['npm'];
             if (array_key_exists('tipeMahasiswa', $mhs))        $mhsUpdate['tipeMahasiswa'] = $mhs['tipeMahasiswa'] ?: null;
+            if (array_key_exists('masaAktif', $mhs))            $mhsUpdate['masaAktif']     = $mhs['masaAktif'] ?: null;
             if (!empty($mhsUpdate)) {
                 DB::table('mahasiswa')->where('user_id', $id)->update($mhsUpdate);
             }
@@ -912,7 +929,7 @@ class KlnController extends Controller
             ->where('sumber', 'kln')
             ->selectRaw("announcement.*, (SELECT COUNT(*) FROM announcement_files WHERE announcement_files.announcement_id = announcement.id) as file_count")
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->get();
 
         return view('kln.announcement', compact(
             'announcements', 'totalAll', 'totalActive', 'totalDraft', 'totalPenting'
@@ -1101,7 +1118,7 @@ class KlnController extends Controller
             });
         }
 
-        // hitung stats dari full data (tanpa paginate)
+        // hitung stats dari full data
         $allRows = $query->get()->map(function ($row) {
             $berlangsung = $row->hadir + $row->absen + $row->izin;
             $row->pct    = $berlangsung > 0 ? round($row->hadir / $berlangsung * 100, 1) : null;
@@ -1113,13 +1130,8 @@ class KlnController extends Controller
             'noData'  => $allRows->filter(fn ($r) => $r->pct === null)->count(),
         ];
 
-        // paginate untuk display
-        $attendanceList = $query->paginate(10)->withQueryString();
-        $attendanceList->through(function ($row) {
-            $berlangsung = $row->hadir + $row->absen + $row->izin;
-            $row->pct    = $berlangsung > 0 ? round($row->hadir / $berlangsung * 100, 1) : null;
-            return $row;
-        });
+        // Return all data for DataTables client-side pagination
+        $attendanceList = $allRows;
 
         return view('kln.attendance', compact('attendanceList', 'stats', 'search'));
     }
@@ -1281,7 +1293,7 @@ class KlnController extends Controller
                 DB::raw('(SELECT COUNT(*) FROM notification_mahasiswa WHERE notification_mahasiswa.notification_id = notification.id AND is_read = true) as total_dibaca')
             )
             ->orderBy('notification.created_at', 'desc')
-            ->paginate(10);
+            ->get();
 
         return view('kln.broadcast', compact(
             'mahasiswaList', 'mahasiswaKelasMap', 'jurusanList', 'kelasList', 'riwayat'
@@ -1337,7 +1349,7 @@ class KlnController extends Controller
                 'jurusan.namaJurusan'
             )
             ->orderBy('dokumen.tglKdlwrs')
-            ->paginate(10, ['*'], 'page_exp')->withQueryString();
+            ->get();
 
         // Dokumen hampir kadaluwarsa (≤ 30 hari ke depan)
         $nearExpiredDokumen = DB::table('dokumen')
@@ -1358,10 +1370,10 @@ class KlnController extends Controller
                 'jurusan.namaJurusan'
             )
             ->orderBy('dokumen.tglKdlwrs')
-            ->paginate(10, ['*'], 'page_near')->withQueryString();
+            ->get();
 
-        $nearExpiredDokumen->through(function ($row) {
-            $row->sisa_hari = now()->diffInDays(\Carbon\Carbon::parse($row->tglKdlwrs), false);
+        $nearExpiredDokumen = $nearExpiredDokumen->map(function ($row) {
+            $row->sisa_hari = today()->diffInDays(\Carbon\Carbon::parse($row->tglKdlwrs), false);
             return $row;
         });
 
@@ -1380,7 +1392,7 @@ class KlnController extends Controller
                 'jurusan.namaJurusan'
             )
             ->orderBy('mahasiswa.nama')
-            ->paginate(10, ['*'], 'page_inact')->withQueryString();
+            ->get();
 
         // Request dokumen pending
         $pendingRequests = DB::table('reqDokumen')
@@ -1398,13 +1410,13 @@ class KlnController extends Controller
                 'jurusan.namaJurusan'
             )
             ->orderBy('reqDokumen.created_at')
-            ->paginate(10, ['*'], 'page_req')->withQueryString();
+            ->get();
 
         $stats = [
-            'expired'     => $expiredDokumen->total(),
-            'nearExpired' => $nearExpiredDokumen->total(),
-            'inactive'    => $inactiveMahasiswa->total(),
-            'pending'     => $pendingRequests->total(),
+            'expired'     => $expiredDokumen->count(),
+            'nearExpired' => $nearExpiredDokumen->count(),
+            'inactive'    => $inactiveMahasiswa->count(),
+            'pending'     => $pendingRequests->count(),
         ];
 
         return view('kln.notifikasi', compact(
@@ -1473,6 +1485,16 @@ class KlnController extends Controller
             ->get();
 
         return view('kln.jadwal.kln', compact('jadwalList', 'kelas'));
+    }
+
+    public function createJadwalPage()
+    {
+        $kelas = DB::table('kelas')
+            ->select('id', 'kodeKelas', 'tahunAjar')
+            ->orderBy('kodeKelas')
+            ->get();
+
+        return view('kln.jadwal.create', compact('kelas'));
     }
 
     /*
@@ -1653,12 +1675,576 @@ class KlnController extends Controller
             });
         }
 
-        return $query->paginate(10)->withQueryString();
+        return $query->get();
     }
 
     private function emptyPaginator()
     {
-        return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
+        return collect([]);
+    }
+
+    /*
+    |==========================================================================
+    | PROFILE PHOTO SERVE
+    |==========================================================================
+    */
+
+    public function serveProfilFoto(int $id)
+    {
+        $mahasiswa = DB::table('mahasiswa')->where('id', $id)->first();
+        abort_unless($mahasiswa && $mahasiswa->fotoProfil, 404);
+
+        $storage = \Illuminate\Support\Facades\Storage::disk('local');
+        abort_unless($storage->exists($mahasiswa->fotoProfil), 404);
+
+        return $storage->response($mahasiswa->fotoProfil);
+    }
+
+    /*
+    |==========================================================================
+    | MULTI-STEP MAHASISWA WIZARD — CREATE
+    |==========================================================================
+    */
+
+    public function createMahasiswaWizard()
+    {
+        $jurusan = DB::table('jurusan')->orderBy('namaJurusan')->get();
+        $tipeMhs = DB::table('tipe_mahasiswa')->where('is_active', true)->orderBy('nama')->get();
+        $tipeDok = DB::table('tipe_dokumen')->where('is_active', true)->orderBy('kategori')->orderBy('nama')->get();
+        return view('kln.users.create-mahasiswa', compact('jurusan', 'tipeMhs', 'tipeDok'));
+    }
+
+    public function storeMahasiswaStep1(Request $request)
+    {
+        $request->validate([
+            'email'           => 'required|email|unique:users,email',
+            'password'        => 'nullable|string|min:6',
+            'status'          => 'required|in:active,inactive,pending',
+            'jurusan_id'      => 'required|exists:jurusan,id',
+            'nama'            => 'required|string|max:255',
+            'tahunMasuk'      => 'nullable|string|max:30',
+            'noWa'            => 'nullable|string|max:20',
+            'noDarurat'       => 'nullable|string|max:20',
+            'tglLahir'        => 'nullable|date',
+            'warNeg'          => 'nullable|string|max:100',
+            'alamatAsal'      => 'nullable|string|max:500',
+            'alamatIndo'      => 'nullable|string|max:500',
+            'tipeMahasiswa'   => 'nullable|string|max:100',
+            'isOnline'        => 'boolean',
+            'fotoProfil'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $hasPassword = $request->filled('password');
+            $userId = DB::table('users')->insertGetId([
+                'email'           => $request->email,
+                'password'        => $hasPassword ? bcrypt($request->password) : null,
+                'is_has_password' => $hasPassword,
+                'role'            => 'mahasiswa',
+                'status'          => $request->status,
+                'jurusan_id'      => $request->jurusan_id,
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ]);
+
+            // Auto-generate NPM if empty
+            $npm = $request->input('npm');
+            if (!$npm) {
+                $today  = now()->format('dmY');
+                $prefix = $request->jurusan_id . $today;
+                $count  = DB::table('mahasiswa')->where('npm', 'like', $prefix . '%')->count();
+                $npm    = $prefix . str_pad($count + 1, 2, '0', STR_PAD_LEFT);
+            }
+
+            // Store profile photo
+            $fotoPath = null;
+            if ($request->hasFile('fotoProfil')) {
+                $fotoPath = $request->file('fotoProfil')->store('profil/' . $userId, 'local');
+            }
+
+            $mhsId = DB::table('mahasiswa')->insertGetId([
+                'user_id'       => $userId,
+                'nama'          => $request->nama,
+                'npm'           => $npm,
+                'noWa'          => $request->noWa,
+                'noDarurat'     => $request->noDarurat,
+                'tglLahir'      => $request->tglLahir,
+                'warNeg'        => $request->warNeg,
+                'alamatAsal'    => $request->alamatAsal,
+                'alamatIndo'    => $request->alamatIndo,
+                'tipeMahasiswa' => $request->tipeMahasiswa,
+                'isOnline'      => $request->boolean('isOnline'),
+                'tahunMasuk'    => $request->tahunMasuk,
+                'fotoProfil'    => $fotoPath,
+                'created_at'    => now(),
+                'updated_at'    => now(),
+            ]);
+
+            DB::commit();
+
+            ActivityLog::record("Created mahasiswa user: {$request->email}", 'users', $userId);
+
+            return response()->json([
+                'success' => true,
+                'user_id' => $userId,
+                'mhs_id'  => $mhsId,
+                'npm'     => $npm,
+                'flash'   => ['type' => 'success', 'message' => 'Biodata saved.'],
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function storeMahasiswaStep2(Request $request)
+    {
+        $request->validate([
+            'user_id'  => 'required|exists:users,id',
+            'docs'     => 'nullable|array',
+            'docs.*.tipeDkmn'  => 'required|string',
+            'docs.*.noDkmn'    => 'nullable|string|max:100',
+            'docs.*.tglTerbit' => 'nullable|date',
+            'docs.*.tglKdlwrs' => 'nullable|date',
+            'docs.*.penerbit'  => 'nullable|string|max:50',
+            'docs.*.file'      => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        $mahasiswa = DB::table('mahasiswa')->where('user_id', $request->user_id)->first();
+        if (!$mahasiswa) {
+            return response()->json(['success' => false, 'message' => 'Mahasiswa not found.'], 404);
+        }
+
+        try {
+            if ($request->has('docs') && is_array($request->docs)) {
+                foreach ($request->docs as $doc) {
+                    if (empty($doc['tipeDkmn'])) continue;
+
+                    $dokumenId = DB::table('dokumen')->insertGetId([
+                        'mahasiswa_id' => $mahasiswa->id,
+                        'tipeDkmn'     => $doc['tipeDkmn'],
+                        'namaDkmn'     => str_replace('_', ' ', $doc['tipeDkmn']),
+                        'penerbit'     => $doc['penerbit'] ?? null,
+                        'noDkmn'       => $doc['noDkmn'] ?? null,
+                        'tglTerbit'    => $doc['tglTerbit'] ?? null,
+                        'tglKdlwrs'    => $doc['tglKdlwrs'] ?? null,
+                        'status'       => 'pending',
+                        'created_at'   => now(),
+                        'updated_at'   => now(),
+                    ]);
+
+                    // Handle file upload if present
+                    if (isset($doc['file']) && $doc['file'] instanceof \Illuminate\Http\UploadedFile) {
+                        $path = $doc['file']->store('dokumen', 'local');
+                        DB::table('fileDetail')->insert([
+                            'dokumen_id' => $dokumenId,
+                            'path'       => $path,
+                            'mimeType'   => $doc['file']->getClientMimeType(),
+                            'fileSize'   => $doc['file']->getSize(),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'flash'   => ['type' => 'success', 'message' => 'External documents saved.'],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function storeMahasiswaStep3(Request $request)
+    {
+        $request->validate([
+            'user_id'  => 'required|exists:users,id',
+            'docs'     => 'nullable|array',
+            'docs.*.tipeDkmn'  => 'required|string',
+            'docs.*.noDkmn'    => 'nullable|string|max:100',
+            'docs.*.tglTerbit' => 'nullable|date',
+            'docs.*.tglKdlwrs' => 'nullable|date',
+            'docs.*.penerbit'  => 'nullable|string|max:50',
+            'docs.*.file'      => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        $mahasiswa = DB::table('mahasiswa')->where('user_id', $request->user_id)->first();
+        if (!$mahasiswa) {
+            return response()->json(['success' => false, 'message' => 'Mahasiswa not found.'], 404);
+        }
+
+        try {
+            if ($request->has('docs') && is_array($request->docs)) {
+                foreach ($request->docs as $doc) {
+                    if (empty($doc['tipeDkmn'])) continue;
+
+                    $dokumenId = DB::table('dokumen')->insertGetId([
+                        'mahasiswa_id' => $mahasiswa->id,
+                        'tipeDkmn'     => $doc['tipeDkmn'],
+                        'namaDkmn'     => str_replace('_', ' ', $doc['tipeDkmn']),
+                        'penerbit'     => $doc['penerbit'] ?? 'UNIVERSITAS',
+                        'noDkmn'       => $doc['noDkmn'] ?? null,
+                        'tglTerbit'    => $doc['tglTerbit'] ?? null,
+                        'tglKdlwrs'    => $doc['tglKdlwrs'] ?? null,
+                        'status'       => 'pending',
+                        'created_at'   => now(),
+                        'updated_at'   => now(),
+                    ]);
+
+                    if (isset($doc['file']) && $doc['file'] instanceof \Illuminate\Http\UploadedFile) {
+                        $path = $doc['file']->store('dokumen', 'local');
+                        DB::table('fileDetail')->insert([
+                            'dokumen_id' => $dokumenId,
+                            'path'       => $path,
+                            'mimeType'   => $doc['file']->getClientMimeType(),
+                            'fileSize'   => $doc['file']->getSize(),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'flash'   => ['type' => 'success', 'message' => 'Internal documents saved.'],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getMahasiswaChecker(int $id)
+    {
+        $user = DB::table('users')->where('id', $id)->first();
+        if (!$user) return response()->json(['success' => false], 404);
+
+        $mhs = DB::table('mahasiswa')->where('user_id', $id)->first();
+        $docs = DB::table('dokumen')
+            ->where('mahasiswa_id', $mhs->id ?? 0)
+            ->whereNull('deleted_at')
+            ->pluck('tipeDkmn')
+            ->toArray();
+
+        $checks = [
+            ['field' => 'Name',           'filled' => !empty($mhs->nama)],
+            ['field' => 'Email',          'filled' => !empty($user->email)],
+            ['field' => 'NPM',            'filled' => !empty($mhs->npm)],
+            ['field' => 'WA Number',      'filled' => !empty($mhs->noWa)],
+            ['field' => 'Emergency Number','filled' => !empty($mhs->noDarurat)],
+            ['field' => 'Birth Date',     'filled' => !empty($mhs->tglLahir)],
+            ['field' => 'Country',        'filled' => !empty($mhs->warNeg)],
+            ['field' => 'Home Address',   'filled' => !empty($mhs->alamatAsal)],
+            ['field' => 'Indonesia Address','filled' => !empty($mhs->alamatIndo)],
+            ['field' => 'Jurusan',        'filled' => !empty($user->jurusan_id)],
+            ['field' => 'LOA',            'filled' => in_array('LOA', $docs)],
+            ['field' => 'VISA',           'filled' => in_array('VISA', $docs)],
+            ['field' => 'Stay Permit',    'filled' => in_array('Stay_Permit', $docs)],
+            ['field' => 'KRS/FRS',        'filled' => in_array('KRS', $docs) || in_array('FRS', $docs)],
+            ['field' => 'Daftar Nilai',   'filled' => in_array('Daftar_Nilai', $docs)],
+            ['field' => 'Jadwal',         'filled' => in_array('Jadwal', $docs)],
+            ['field' => 'Absensi',        'filled' => in_array('Absensi', $docs)],
+        ];
+
+        $filled = collect($checks)->where('filled', true)->count();
+        $total  = count($checks);
+
+        return response()->json([
+            'success' => true,
+            'checks'  => $checks,
+            'filled'  => $filled,
+            'total'   => $total,
+            'percent' => $total > 0 ? round(($filled / $total) * 100) : 0,
+        ]);
+    }
+
+    /*
+    |==========================================================================
+    | MULTI-STEP MAHASISWA WIZARD — EDIT
+    |==========================================================================
+    */
+
+    public function editMahasiswaWizard(int $id)
+    {
+        $user = DB::table('users')->where('id', $id)->first();
+        abort_unless($user && $user->role === 'mahasiswa', 404);
+
+        $mhs = DB::table('mahasiswa')->where('user_id', $id)->first();
+        $dokumen = DB::table('dokumen')
+            ->where('mahasiswa_id', $mhs->id ?? 0)
+            ->whereNull('deleted_at')
+            ->get();
+        $jurusan = DB::table('jurusan')->orderBy('namaJurusan')->get();
+        $tipeMhs = DB::table('tipe_mahasiswa')->where('is_active', true)->orderBy('nama')->get();
+        $tipeDok = DB::table('tipe_dokumen')->where('is_active', true)->orderBy('kategori')->orderBy('nama')->get();
+
+        return view('kln.users.edit-mahasiswa', compact('user', 'mhs', 'dokumen', 'jurusan', 'tipeMhs', 'tipeDok'));
+    }
+
+    public function updateMahasiswaStep1(Request $request, int $id)
+    {
+        $user = DB::table('users')->where('id', $id)->first();
+        if (!$user || $user->role !== 'mahasiswa') {
+            return response()->json(['success' => false, 'message' => 'Not found.'], 404);
+        }
+
+        $request->validate([
+            'email'           => 'required|email|unique:users,email,' . $id,
+            'status'          => 'required|in:active,inactive,pending',
+            'jurusan_id'      => 'required|exists:jurusan,id',
+            'nama'            => 'required|string|max:255',
+            'tahunMasuk'      => 'nullable|string|max:30',
+            'noWa'            => 'nullable|string|max:20',
+            'noDarurat'       => 'nullable|string|max:20',
+            'tglLahir'        => 'nullable|date',
+            'warNeg'          => 'nullable|string|max:100',
+            'alamatAsal'      => 'nullable|string|max:500',
+            'alamatIndo'      => 'nullable|string|max:500',
+            'tipeMahasiswa'   => 'nullable|string|max:100',
+            'isOnline'        => 'boolean',
+            'fotoProfil'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        try {
+            DB::table('users')->where('id', $id)->update([
+                'email'      => $request->email,
+                'status'     => $request->status,
+                'jurusan_id' => $request->jurusan_id,
+                'updated_at' => now(),
+            ]);
+
+            $mhsUpdate = [
+                'nama'          => $request->nama,
+                'noWa'          => $request->noWa,
+                'noDarurat'     => $request->noDarurat,
+                'tglLahir'      => $request->tglLahir,
+                'warNeg'        => $request->warNeg,
+                'alamatAsal'    => $request->alamatAsal,
+                'alamatIndo'    => $request->alamatIndo,
+                'tipeMahasiswa' => $request->tipeMahasiswa,
+                'isOnline'      => $request->boolean('isOnline'),
+                'tahunMasuk'    => $request->tahunMasuk,
+                'updated_at'    => now(),
+            ];
+
+            // Handle profile photo
+            if ($request->hasFile('fotoProfil')) {
+                $mhs = DB::table('mahasiswa')->where('user_id', $id)->first();
+                if ($mhs && $mhs->fotoProfil) {
+                    $storage = \Illuminate\Support\Facades\Storage::disk('local');
+                    if ($storage->exists($mhs->fotoProfil)) {
+                        $storage->delete($mhs->fotoProfil);
+                    }
+                }
+                $mhsUpdate['fotoProfil'] = $request->file('fotoProfil')->store('profil/' . $id, 'local');
+            }
+
+            DB::table('mahasiswa')->where('user_id', $id)->update($mhsUpdate);
+
+            return response()->json([
+                'success' => true,
+                'flash'   => ['type' => 'success', 'message' => 'Biodata updated.'],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function updateMahasiswaStep2(Request $request, int $id)
+    {
+        $mhs = DB::table('mahasiswa')->where('user_id', $id)->first();
+        if (!$mhs) return response()->json(['success' => false, 'message' => 'Not found.'], 404);
+
+        $request->validate([
+            'docs'     => 'nullable|array',
+            'docs.*.id'         => 'nullable|integer',
+            'docs.*.tipeDkmn'   => 'required|string',
+            'docs.*.noDkmn'     => 'nullable|string|max:100',
+            'docs.*.tglTerbit'  => 'nullable|date',
+            'docs.*.tglKdlwrs'  => 'nullable|date',
+            'docs.*.penerbit'   => 'nullable|string|max:50',
+            'docs.*.file'       => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        try {
+            if ($request->has('docs') && is_array($request->docs)) {
+                foreach ($request->docs as $doc) {
+                    if (empty($doc['tipeDkmn'])) continue;
+
+                    $existing = null;
+                    if (!empty($doc['id'])) {
+                        $existing = DB::table('dokumen')
+                            ->where('id', $doc['id'])
+                            ->where('mahasiswa_id', $mhs->id)
+                            ->whereNull('deleted_at')
+                            ->first();
+                    }
+
+                    if (!$existing) {
+                        $existing = DB::table('dokumen')
+                            ->where('mahasiswa_id', $mhs->id)
+                            ->where('tipeDkmn', $doc['tipeDkmn'])
+                            ->whereNull('deleted_at')
+                            ->first();
+                    }
+
+                    if ($existing) {
+                        DB::table('dokumen')->where('id', $existing->id)->update([
+                            'noDkmn'    => $doc['noDkmn'] ?? $existing->noDkmn,
+                            'tglTerbit' => $doc['tglTerbit'] ?? $existing->tglTerbit,
+                            'tglKdlwrs' => $doc['tglKdlwrs'] ?? $existing->tglKdlwrs,
+                            'penerbit'  => $doc['penerbit'] ?? $existing->penerbit,
+                            'updated_at' => now(),
+                        ]);
+
+                        if (isset($doc['file']) && $doc['file'] instanceof \Illuminate\Http\UploadedFile) {
+                            $path = $doc['file']->store('dokumen', 'local');
+                            DB::table('fileDetail')->where('dokumen_id', $existing->id)->delete();
+                            DB::table('fileDetail')->insert([
+                                'dokumen_id' => $existing->id,
+                                'path'       => $path,
+                                'mimeType'   => $doc['file']->getClientMimeType(),
+                                'fileSize'   => $doc['file']->getSize(),
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                        }
+                    } else {
+                        $dokumenId = DB::table('dokumen')->insertGetId([
+                            'mahasiswa_id' => $mhs->id,
+                            'tipeDkmn'     => $doc['tipeDkmn'],
+                            'namaDkmn'     => str_replace('_', ' ', $doc['tipeDkmn']),
+                            'penerbit'     => $doc['penerbit'] ?? null,
+                            'noDkmn'       => $doc['noDkmn'] ?? null,
+                            'tglTerbit'    => $doc['tglTerbit'] ?? null,
+                            'tglKdlwrs'    => $doc['tglKdlwrs'] ?? null,
+                            'status'       => 'pending',
+                            'created_at'   => now(),
+                            'updated_at'   => now(),
+                        ]);
+
+                        if (isset($doc['file']) && $doc['file'] instanceof \Illuminate\Http\UploadedFile) {
+                            $path = $doc['file']->store('dokumen', 'local');
+                            DB::table('fileDetail')->insert([
+                                'dokumen_id' => $dokumenId,
+                                'path'       => $path,
+                                'mimeType'   => $doc['file']->getClientMimeType(),
+                                'fileSize'   => $doc['file']->getSize(),
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'flash'   => ['type' => 'success', 'message' => 'External documents updated.'],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function updateMahasiswaStep3(Request $request, int $id)
+    {
+        $mhs = DB::table('mahasiswa')->where('user_id', $id)->first();
+        if (!$mhs) return response()->json(['success' => false, 'message' => 'Not found.'], 404);
+
+        $request->validate([
+            'docs'     => 'nullable|array',
+            'docs.*.id'         => 'nullable|integer',
+            'docs.*.tipeDkmn'   => 'required|string',
+            'docs.*.noDkmn'     => 'nullable|string|max:100',
+            'docs.*.tglTerbit'  => 'nullable|date',
+            'docs.*.tglKdlwrs'  => 'nullable|date',
+            'docs.*.penerbit'   => 'nullable|string|max:50',
+            'docs.*.file'       => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        try {
+            if ($request->has('docs') && is_array($request->docs)) {
+                foreach ($request->docs as $doc) {
+                    if (empty($doc['tipeDkmn'])) continue;
+
+                    $existing = null;
+                    if (!empty($doc['id'])) {
+                        $existing = DB::table('dokumen')
+                            ->where('id', $doc['id'])
+                            ->where('mahasiswa_id', $mhs->id)
+                            ->whereNull('deleted_at')
+                            ->first();
+                    }
+
+                    if (!$existing) {
+                        $existing = DB::table('dokumen')
+                            ->where('mahasiswa_id', $mhs->id)
+                            ->where('tipeDkmn', $doc['tipeDkmn'])
+                            ->whereNull('deleted_at')
+                            ->first();
+                    }
+
+                    if ($existing) {
+                        DB::table('dokumen')->where('id', $existing->id)->update([
+                            'noDkmn'    => $doc['noDkmn'] ?? $existing->noDkmn,
+                            'tglTerbit' => $doc['tglTerbit'] ?? $existing->tglTerbit,
+                            'tglKdlwrs' => $doc['tglKdlwrs'] ?? $existing->tglKdlwrs,
+                            'penerbit'  => $doc['penerbit'] ?? $existing->penerbit,
+                            'updated_at' => now(),
+                        ]);
+
+                        if (isset($doc['file']) && $doc['file'] instanceof \Illuminate\Http\UploadedFile) {
+                            $path = $doc['file']->store('dokumen', 'local');
+                            DB::table('fileDetail')->where('dokumen_id', $existing->id)->delete();
+                            DB::table('fileDetail')->insert([
+                                'dokumen_id' => $existing->id,
+                                'path'       => $path,
+                                'mimeType'   => $doc['file']->getClientMimeType(),
+                                'fileSize'   => $doc['file']->getSize(),
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                        }
+                    } else {
+                        $dokumenId = DB::table('dokumen')->insertGetId([
+                            'mahasiswa_id' => $mhs->id,
+                            'tipeDkmn'     => $doc['tipeDkmn'],
+                            'namaDkmn'     => str_replace('_', ' ', $doc['tipeDkmn']),
+                            'penerbit'     => $doc['penerbit'] ?? 'UNIVERSITAS',
+                            'noDkmn'       => $doc['noDkmn'] ?? null,
+                            'tglTerbit'    => $doc['tglTerbit'] ?? null,
+                            'tglKdlwrs'    => $doc['tglKdlwrs'] ?? null,
+                            'status'       => 'pending',
+                            'created_at'   => now(),
+                            'updated_at'   => now(),
+                        ]);
+
+                        if (isset($doc['file']) && $doc['file'] instanceof \Illuminate\Http\UploadedFile) {
+                            $path = $doc['file']->store('dokumen', 'local');
+                            DB::table('fileDetail')->insert([
+                                'dokumen_id' => $dokumenId,
+                                'path'       => $path,
+                                'mimeType'   => $doc['file']->getClientMimeType(),
+                                'fileSize'   => $doc['file']->getSize(),
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'flash'   => ['type' => 'success', 'message' => 'Internal documents updated.'],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
 }

@@ -1,8 +1,8 @@
 @extends('layouts.sima')
 
-@section('page_title',    'Daftar Kehadiran')
+@section('page_title',    'Attendance List')
 @section('page_section',  'KEHADIRAN')
-@section('page_subtitle', 'Rekap kehadiran mahasiswa asing per matakuliah')
+@section('page_subtitle', 'Attendance summary for foreign students per course')
 
 @section('main_content')
 
@@ -11,21 +11,21 @@
     <div class="col-6 col-md-4">
         <div class="sima-stat sima-stat--blue">
             <div class="sima-stat__icon sima-stat__icon--blue"><i class="fas fa-users"></i></div>
-            <div class="sima-stat__label">Total Mahasiswa</div>
+            <div class="sima-stat__label">Total Students</div>
             <div class="sima-stat__value">{{ $stats['total'] }}</div>
         </div>
     </div>
     <div class="col-6 col-md-4">
         <div class="sima-stat sima-stat--red">
             <div class="sima-stat__icon sima-stat__icon--red"><i class="fas fa-exclamation-triangle"></i></div>
-            <div class="sima-stat__label">Kehadiran &lt; 75%</div>
+            <div class="sima-stat__label">Attendance &lt; 75%</div>
             <div class="sima-stat__value">{{ $stats['below75'] }}</div>
         </div>
     </div>
     <div class="col-6 col-md-4">
         <div class="sima-stat sima-stat--amber">
             <div class="sima-stat__icon sima-stat__icon--amber"><i class="fas fa-clock"></i></div>
-            <div class="sima-stat__label">Belum Ada Data</div>
+            <div class="sima-stat__label">No Data Yet</div>
             <div class="sima-stat__value">{{ $stats['noData'] }}</div>
         </div>
     </div>
@@ -34,41 +34,25 @@
 {{-- ── TABLE CARD ───────────────────────────────────── --}}
 <div class="sima-card">
     <div class="sima-card__header">
-        <h5 class="sima-card__title">Rekap Kehadiran Mahasiswa</h5>
-        <div style="display:flex;gap:8px;align-items:center;">
-            <form method="GET" action="{{ route('kln.attendance') }}"
-                  style="display:flex;gap:6px;align-items:center;">
-                <input type="text" name="q" class="sima-input" style="width:200px;"
-                       value="{{ $search }}" placeholder="Cari nama / NPM...">
-                <button type="submit" class="sima-btn sima-btn--outline">
-                    <i class="fas fa-search"></i>
-                </button>
-                @if($search)
-                <a href="{{ route('kln.attendance') }}" class="sima-btn sima-btn--outline">
-                    <i class="fas fa-times"></i>
-                </a>
-                @endif
-            </form>
-        </div>
+        <h5 class="sima-card__title">Student Attendance Recap</h5>
     </div>
 
     <div class="table-responsive">
-        <table class="sima-table" id="attTable">
+        <table class="sima-table" data-datatable>
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Mahasiswa</th>
-                    <th style="text-align:center;">Matakuliah</th>
-                    <th style="text-align:center;">Hadir</th>
-                    <th style="text-align:center;">Absen</th>
-                    <th style="text-align:center;">Izin</th>
-                    <th style="text-align:center;">Belum</th>
-                    <th style="text-align:center;">% Kehadiran</th>
+                    <th>Student</th>
+                    <th style="text-align:center;">Course</th>
+                    <th style="text-align:center;">Present</th>
+                    <th style="text-align:center;">Absent</th>
+                    <th style="text-align:center;">Excused</th>
+                    <th style="text-align:center;">Pending</th>
+                    <th style="text-align:center;">% Attendance</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($attendanceList as $i => $row)
+                @forelse($attendanceList as $row)
                 @php
                     if ($row->pct === null) {
                         $pctBadge = 'sima-badge--amber';
@@ -85,7 +69,6 @@
                     }
                 @endphp
                 <tr>
-                    <td>{{ $attendanceList->firstItem() + $loop->index }}</td>
                     <td>
                         <div class="fw-600">{{ $row->nama }}</div>
                         <code style="font-size:11px;color:var(--c-text-3);">{{ $row->npm }}</code>
@@ -133,12 +116,12 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="9" class="text-center text-muted py-5">
+                    <td colspan="8" class="text-center text-muted py-5">
                         <i class="fas fa-users fa-2x d-block mb-2" style="opacity:.3;"></i>
                         @if($search)
-                            Tidak ada mahasiswa yang cocok dengan "{{ $search }}".
+                            No matching students.
                         @else
-                            Belum ada data mahasiswa.
+                            No student data yet.
                         @endif
                     </td>
                 </tr>
@@ -146,11 +129,6 @@
             </tbody>
         </table>
     </div>
-    @if($attendanceList->hasPages())
-    <div style="padding:14px 20px;border-top:1px solid var(--c-border);">
-        {{ $attendanceList->links('vendor.pagination.sima') }}
-    </div>
-    @endif
 </div>
 
 @endsection
