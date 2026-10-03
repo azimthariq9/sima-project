@@ -17,7 +17,8 @@ class JurusanController extends Controller
 
     private function jurusanId(): int
     {
-        return Auth::user()->jurusan_id;
+        abort_unless(Auth::user()->jurusan_id, 403, 'Akun belum terhubung dengan jurusan.');
+        return (int) Auth::user()->jurusan_id;
     }
 
     private function unreadNotif(): int
@@ -392,7 +393,7 @@ class JurusanController extends Controller
 
         $file = DB::table('fileDetail')
             ->where('dokumen_id', $id)
-            ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->first();
 
         abort_if(!$file, 404, 'File tidak tersedia.');

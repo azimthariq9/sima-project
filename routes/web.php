@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AcademicDocumentController;
+use App\Http\Controllers\KlnDocumentRequestController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -83,7 +85,7 @@ Route::middleware(['auth', 'check.role:MAHASISWA'])
             Route::get('request',             [MahasiswaRequestController::class, 'index'])->name('request.index');
             Route::post('request',            [MahasiswaRequestController::class, 'store'])->name('request.store');
             Route::get('request/create',      [MahasiswaController::class, 'createRequest'])->name('request.create');
-            Route::post('request/quick',      [MahasiswaController::class, 'storeRequest'])->name('request.quick');
+            Route::post('request/quick',      [MahasiswaRequestController::class, 'quick'])->name('request.quick');
             Route::get('request/{id}/file',   [MahasiswaRequestController::class, 'downloadFile'])->name('request.file');
 
             Route::prefix('dokumen')->name('dokumen.')->group(function () {
@@ -138,9 +140,14 @@ Route::middleware(['auth', 'check.role:JURUSAN'])
         // Dokumen
         Route::prefix('dokumen')->name('dokumen.')->group(function () {
             Route::get('/',              [JurusanController::class, 'dokumen'])->name('index');
+            Route::get('create', [AcademicDocumentController::class, 'create'])->name('create');
+            Route::post('/', [AcademicDocumentController::class, 'store'])->name('store');
+            Route::get('{id}/edit', [AcademicDocumentController::class, 'edit'])->name('edit');
+            Route::patch('{id}', [AcademicDocumentController::class, 'update'])->name('update');
+            Route::delete('{id}', [AcademicDocumentController::class, 'destroy'])->name('destroy');
             Route::get('{id}',           [JurusanController::class, 'showDokumen'])->name('show');
             Route::get('{id}/file',      [JurusanController::class, 'serveDokumen'])->name('file');
-            Route::post('{id}/upload',   [JurusanController::class, 'uploadDokumen'])->name('upload');
+            Route::post('{id}/upload', [AcademicDocumentController::class, 'update'])->name('upload');
             Route::patch('{id}/status',  [JurusanController::class, 'updateStatusDokumen'])->name('status');
         });
 
@@ -331,15 +338,15 @@ Route::middleware(['auth', 'check.role:KLN'])
 
         // Dokumen
         Route::prefix('dokumen')->name('dokumen.')->group(function () {
-            Route::get('page',            [KlnController::class, 'dokumen'])->name('page');
+            Route::get('page',            [KlnDocumentRequestController::class, 'index'])->name('page');
             Route::get('/',               [DokumenController::class, 'index'])->name('index');
             Route::post('/',              [DokumenController::class, 'store'])->name('store');
-            Route::get('{id}',            [KlnController::class, 'show'])->name('show');
-            Route::post('{id}/upload',    [KlnController::class, 'uploadFile'])->name('upload');
-            Route::post('{id}/reject',    [KlnController::class, 'rejectDokumen'])->name('reject');
-            Route::get('{id}/file',       [KlnController::class, 'downloadFile'])->name('file');
+            Route::get('{id}',            [KlnDocumentRequestController::class, 'show'])->name('show');
+            Route::post('{id}/upload',    [KlnDocumentRequestController::class, 'upload'])->name('upload');
+            Route::post('{id}/reject',    [KlnDocumentRequestController::class, 'reject'])->name('reject');
+            Route::get('{id}/file',       [KlnDocumentRequestController::class, 'download'])->name('file');
             Route::get('{id}/download',   [DokumenController::class, 'download'])->name('download');
-            Route::delete('{id}',         [KlnController::class, 'destroy'])->name('destroy');
+            Route::delete('{id}',         [KlnDocumentRequestController::class, 'destroy'])->name('destroy');
         });
 
         // Profile photo

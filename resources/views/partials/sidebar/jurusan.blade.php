@@ -27,6 +27,10 @@
         <span>Dashboard</span>
     </a>
 
+    <a href="{{ route('jurusan.dokumen.index') }}" class="sima-nav__item {{ request()->routeIs('jurusan.dokumen.*') ? 'active' : '' }}" data-title="Dokumen Akademik">
+        <i class="fas fa-file-arrow-up sima-nav__icon"></i><span>Dokumen Akademik</span>
+    </a>
+
     {{-- DOSEN --}}
     <a href="{{ route('jurusan.dosen.page') }}"
        class="sima-nav__item {{ request()->routeIs('jurusan.dosen.*') ? 'active' : '' }}"

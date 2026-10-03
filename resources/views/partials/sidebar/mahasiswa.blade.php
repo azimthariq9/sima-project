@@ -63,10 +63,14 @@
     <div class="sima-nav__group-label" style="margin-top:8px">Documents</div>
 
     <a href="{{ route('mahasiswa.dokumen.index') }}"
-       class="sima-nav__item {{ request()->routeIs('mahasiswa.dokumen.*') || request()->routeIs('mahasiswa.request.*') ? 'active' : '' }}"
+       class="sima-nav__item {{ request()->routeIs('mahasiswa.dokumen.*') ? 'active' : '' }}"
        data-title="Documents & Requests">
         <i class="fas fa-folder-open sima-nav__icon"></i>
         <span>Documents &amp; Requests</span>
+    </a>
+
+    <a href="{{ route('mahasiswa.request.index') }}" class="sima-nav__item {{ request()->routeIs('mahasiswa.request.*') ? 'active' : '' }}" data-title="Request ke KLN">
+        <i class="fas fa-paper-plane sima-nav__icon"></i><span>Request ke KLN</span>
     </a>
 
     {{-- Group: Informasi --}}

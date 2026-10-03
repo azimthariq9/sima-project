@@ -668,6 +668,7 @@ class MahasiswaController extends Controller
             ->whereNull('deleted_at')
             ->first();
         abort_if(!$dok, 404);
+        abort_if($dok->penerbit === 'UNIVERSITAS' && in_array($dok->tipeDkmn, array_keys(AcademicDocumentController::TYPES)), 403, 'Dokumen akademik hanya dapat diubah oleh Jurusan.');
         return view('mahasiswa.dokumen.edit', compact('dok'));
     }
 
@@ -734,7 +735,7 @@ class MahasiswaController extends Controller
 
         $file = DB::table('fileDetail')
             ->where('dokumen_id', $id)
-            ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->first();
 
         abort_if(!$file, 404, 'File tidak tersedia.');
@@ -771,6 +772,7 @@ class MahasiswaController extends Controller
             ->first();
 
         abort_if(!$dok, 403);
+        abort_if($dok->penerbit === 'UNIVERSITAS' && in_array($dok->tipeDkmn, array_keys(AcademicDocumentController::TYPES)), 403, 'Dokumen akademik hanya dapat diubah oleh Jurusan.');
 
         // Jika status approved → reset ke pending (butuh verifikasi ulang KLN)
         $newStatus = $dok->status === 'approved' ? 'pending' : $dok->status;
@@ -820,6 +822,7 @@ class MahasiswaController extends Controller
             ->first();
 
         abort_if(!$dok, 403);
+        abort_if($dok->penerbit === 'UNIVERSITAS' && in_array($dok->tipeDkmn, array_keys(AcademicDocumentController::TYPES)), 403, 'Dokumen akademik hanya dapat diubah oleh Jurusan.');
 
         // Soft delete — tidak boleh hapus dokumen yang sudah approved
         if ($dok->status === 'approved') {
@@ -850,34 +853,13 @@ class MahasiswaController extends Controller
                 'date'   => \Carbon\Carbon::parse($r->created_at)->format('d M Y'),
             ]);
 
-        return redirect()->route('mahasiswa.dokumen.index')->with('success', 'Dokumen berhasil dikirim.');
+        return view('mahasiswa.request.create', compact('recentRequests'));
     }
 
     // BUG FIX: Route mahasiswa.request.quick (bukan duplikat mahasiswa.request.store)
     public function storeRequest(Request $request)
     {
-        $request->validate([
-            'jenis_dokumen' => 'required|string|max:100',
-            'req_bagian'    => 'required|string|in:kln,jurusan,bipa,gunadarma',
-            'deskripsi'     => 'nullable|string|max:1000',
-        ]);
-
-        $mahasiswa = $this->getMahasiswa();
-
-        DB::table('request_dokumen')->insert([
-            'mahasiswa_id'     => $mahasiswa->id,
-            'jenis_dokumen'    => $request->jenis_dokumen,
-            'req_bagian'       => $request->req_bagian,
-            'deskripsi'        => $request->deskripsi,
-            'status'           => 'pending',
-            'tanggal_pengajuan'=> now(),
-            'created_at'       => now(),
-            'updated_at'       => now(),
-        ]);
-
-        return redirect()
-            ->route('mahasiswa.request.index')
-            ->with('success', 'Permintaan dokumen berhasil dikirim.');
+        return app(MahasiswaRequestController::class)->quick($request, app(\App\Services\DocumentNotification::class));
     }
 
 

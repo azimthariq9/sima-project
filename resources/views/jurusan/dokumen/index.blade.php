@@ -2,7 +2,7 @@
 
 @section('page_title',    'Student Documents')
 @section('page_section',  'DEPARTMENT ADMIN')
-@section('page_subtitle', 'Important documents uploaded by students')
+@section('page_subtitle', 'KRS/FRS, daftar nilai, kehadiran, dan dokumen mahasiswa')
 
 @section('main_content')
 
@@ -17,8 +17,9 @@
     <div class="sima-card__header">
         <div>
             <h5 class="sima-card__title">Student Documents</h5>
-            <div class="sima-card__subtitle">Important documents uploaded by students in your department</div>
+            <div class="sima-card__subtitle">KRS/FRS, daftar nilai, kehadiran, dan dokumen mahasiswa in your department</div>
         </div>
+        <a href="{{ route('jurusan.dokumen.create') }}" class="sima-btn sima-btn--sm"><i class="fas fa-upload"></i> Upload Dokumen Akademik</a>
     </div>
 
     {{-- Filter bar --}}
@@ -88,6 +89,13 @@
                                    style="font-size:11px;padding:4px 10px" title="Download">
                                     <i class="fas fa-download"></i>
                                 </a>
+                                @if($dok->penerbit === 'UNIVERSITAS' && array_key_exists($dok->tipeDkmn, \App\Http\Controllers\AcademicDocumentController::TYPES))
+                                <a href="{{ route('jurusan.dokumen.edit', $dok->id) }}" class="sima-btn sima-btn--sm sima-btn--outline" title="Edit / ganti file"><i class="fas fa-pen"></i></a>
+                                <form method="POST" action="{{ route('jurusan.dokumen.destroy', $dok->id) }}" onsubmit="return confirm('Arsipkan dokumen ini? Mahasiswa tidak dapat mengunduh dokumen yang diarsipkan.')">
+                                    @csrf @method('DELETE')
+                                    <button class="sima-btn sima-btn--sm sima-btn--outline" title="Arsipkan"><i class="fas fa-box-archive"></i></button>
+                                </form>
+                                @endif
                                 @if($dok->status === 'pending')
                                 <form method="POST" action="{{ route('jurusan.dokumen.status', $dok->id) }}" style="display:inline">
                                     @csrf

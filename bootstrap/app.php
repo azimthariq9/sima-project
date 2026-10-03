@@ -20,9 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'profile.completed' => EnsureProfileCompleted::class,
         ]);
 
-        $middleware->validateCsrfTokens(except: [
-            '*',
-        ]);
+        // Web form mutations use Laravel's default CSRF protection.
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {

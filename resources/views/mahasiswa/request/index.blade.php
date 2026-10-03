@@ -74,6 +74,7 @@ $statusMap = [
                         <td>
                             <button class="sima-btn sima-btn--sm sima-btn--outline btn-detail"
                                     data-id="{{ $req->id }}"
+                                    data-file-url="{{ route('mahasiswa.request.file', $req->id) }}"
                                     data-code="{{ $code }}"
                                     data-nama="{{ $nama }}"
                                     data-tgl="{{ $tgl }}"
@@ -188,8 +189,8 @@ document.querySelectorAll('.btn-detail').forEach(btn => {
         }
 
         const fileBox = document.getElementById('dm-file-box');
-        if (d.hasFile === '1') {
-            document.getElementById('dm-file-link').href = `/mahasiswa/request/${d.id}/file`;
+        if (d.hasFile === '1' && d.status === 'approved') {
+            document.getElementById('dm-file-link').href = d.fileUrl;
             fileBox.style.display = 'block';
         } else {
             fileBox.style.display = 'none';

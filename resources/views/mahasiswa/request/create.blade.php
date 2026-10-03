@@ -58,7 +58,7 @@
                         Purpose / Description <span style="color:var(--c-red)">*</span>
                     </label>
 
-                    <textarea name="message"
+                    <textarea name="message" maxlength="255"
                             class="sima-input"
                             rows="3"
                             placeholder="Explain the purpose of this document…"
@@ -100,14 +100,10 @@
             </div>
             <div class="sima-card__body" style="padding:0">
                 @php
-                $requests = $recentRequests ?? [
-                    ['code'=>'REQ-003','name'=>'Active Status Letter','status'=>'approved','date'=>'20 Feb 2026'],
-                    ['code'=>'REQ-002','name'=>'KITAS Extension','status'=>'pending','date'=>'18 Feb 2026'],
-                    ['code'=>'REQ-001','name'=>'Health Insurance','status'=>'approved','date'=>'10 Jan 2026'],
-                ];
+                $requests = $recentRequests ?? [];
                 $rstatus = ['approved'=>['label'=>'Approved','cls'=>'green'],'pending'=>['label'=>'Pending','cls'=>'blue'],'rejected'=>['label'=>'Rejected','cls'=>'red'],'processing'=>['label'=>'Processing','cls'=>'amber']];
                 @endphp
-                @foreach($requests as $req)
+                @forelse($requests as $req)
                 @php $r=is_array($req)?$req:$req->toArray();$rs=$rstatus[$r['status']]??$rstatus['pending']; @endphp
                 <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--c-border-soft)">
                     <div style="flex:1;min-width:0">
@@ -116,7 +112,9 @@
                     </div>
                     <span class="sima-badge sima-badge--{{ $rs['cls'] }}">{{ $rs['label'] }}</span>
                 </div>
-                @endforeach
+                @empty
+                <div style="padding:16px">Belum ada request.</div>
+                @endforelse
                 <div style="padding:12px 16px">
                     <a href="{{ route('mahasiswa.request.index') }}" class="sima-btn sima-btn--outline sima-btn--sm sima-btn--full">
                         <i class="fas fa-list"></i> View All Requests

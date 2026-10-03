@@ -1,0 +1,43 @@
+SIMA — UPDATE DOKUMEN JURUSAN & REQUEST MAHASISWA KE KLN
+
+PEMASANGAN PADA PROYEK LAMA
+1. Cadangkan folder SIMA lama dan database.
+2. Salin/replace isi folder sima ini ke folder proyek lama.
+   Pertahankan .env dan storage/app milik proyek lama apabila isinya sudah
+   berubah sejak ZIP awal dikirim. Jangan hapus folder proyek lama terlebih dahulu.
+3. Klik UPDATE_SIMA.bat (Windows), atau jalankan sh UPDATE_SIMA.sh (Linux).
+4. Jalankan aplikasi dengan cara yang biasa digunakan.
+
+Tidak ada migrasi baru, reset database, perubahan akun, atau seeder wajib.
+Update memakai tabel yang sudah ada pada proyek asli. Aset public/build dan
+vendor disertakan. Tidak perlu npm run dev untuk menggunakan aset hasil build.
+Node_modules dan riwayat Git tidak disertakan. Untuk pengembangan frontend,
+jalankan npm ci sebelum npm run dev.
+
+FITUR
+- Jurusan > Dokumen Akademik > Upload Dokumen Akademik.
+  Pilih mahasiswa dalam jurusan sendiri, KRS/FRS/Daftar Nilai/Kehadiran,
+  judul/periode, tanggal terbit, akhir periode berlaku/semester, dan file.
+  Nomor dokumen otomatis jika dikosongkan. File langsung berstatus approved.
+  Tersedia edit, ganti file, arsip, dan unduh.
+- Mahasiswa > Documents & Requests: melihat dan mengunduh dokumen jurusan.
+  Dokumen resmi Jurusan tidak dapat diedit/dihapus mahasiswa.
+- Mahasiswa > Request ke KLN: kirim request, lihat riwayat/status,
+  baca alasan penolakan, ajukan ulang, dan unduh hasil yang disetujui.
+- KLN > Request Documents: detail permintaan, upload & approve,
+  ganti file hasil, atau tolak dengan alasan. Mahasiswa menerima notifikasi.
+- Jenis berkas: PDF/JPG/JPEG/PNG/XLS/XLSX/CSV, maksimal 10 MB.
+  Batas server PHP/web server juga perlu mengizinkan ukuran tersebut.
+- Akun Jurusan harus memiliki jurusan_id; mahasiswa juga harus terhubung
+  ke jurusan melalui users.jurusan_id seperti pada struktur proyek asli.
+
+VERIFIKASI
+8 pengujian integrasi, 108 assertions lulus; PHP lint dan build Vite lulus.
+Pengujian memakai SQLite terisolasi dari database pengguna, menjalankan
+migrasi asli selain satu migrasi log lama yang khusus PostgreSQL.
+Koneksi ke database PostgreSQL pengguna tidak diuji di lingkungan ini.
+Tes fitur: php vendor/bin/pest tests/Integration/DocumentWorkflowTest.php
+
+Perbaikan pendukung: halaman request/create yang sebelumnya redirect,
+endpoint request/quick yang memakai tabel berbeda, nama class provider
+agar aplikasi dapat boot, manifest Vite, dan proteksi CSRF formulir web.

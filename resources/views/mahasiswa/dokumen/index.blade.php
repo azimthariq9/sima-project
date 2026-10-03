@@ -195,7 +195,7 @@
                         <div style="margin-bottom:16px">
                             <label class="sima-label">Purpose / Description <span
                                     style="color:var(--c-red)">*</span></label>
-                            <textarea name="message" class="sima-input" rows="3" placeholder="Explain the purpose of this document…" required
+                            <textarea name="message" maxlength="255" class="sima-input" rows="3" placeholder="Explain the purpose of this document…" required
                                 style="resize:vertical">{{ old('message') }}</textarea>
                         </div>
                         <button type="submit" class="sima-btn">

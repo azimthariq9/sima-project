@@ -76,8 +76,8 @@
             <tbody id="tableBody">
                 @forelse($requests as $req)
                 @php
-                    $statusVal = $req->status?->value ?? (is_string($req->status) ? $req->status : 'pending');
-                    $tipeVal   = $req->tipeDkmn?->value ?? (is_string($req->tipeDkmn) ? $req->tipeDkmn : '-');
+                    $statusVal = $req->status ?? 'pending';
+                    $tipeVal = $req->tipeDkmn ?? '-';
                     $badgeClass = match($statusVal) {
                         'approved' => 'sima-badge--green',
                         'rejected' => 'sima-badge--red',
@@ -86,8 +86,8 @@
                 @endphp
                 <tr id="row-{{ $req->id }}">
                     <td>
-                        <div style="font-weight:600;color:var(--c-text-1)">{{ $req->mahasiswa?->nama ?? '-' }}</div>
-                        <div style="font-size:12px;color:var(--c-text-3)">{{ $req->mahasiswa?->npm ?? '' }}</div>
+                        <div style="font-weight:600;color:var(--c-text-1)">{{ $req->nama_mahasiswa ?? '-' }}</div>
+                        <div style="font-size:12px;color:var(--c-text-3)">{{ $req->npm ?? '' }}</div>
                     </td>
                     <td>{{ str_replace('_', ' ', $tipeVal) }}</td>
                     <td style="max-width:200px;color:var(--c-text-2);font-size:13px">
@@ -183,14 +183,14 @@
                 @csrf
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
                     <label id="uploadLabel" style="font-size:12px;font-weight:600;color:var(--c-text-2)">
-                        Upload Document (PDF)
+                        Upload Document (PDF / JPG / PNG / XLS / XLSX / CSV, max. 10 MB)
                     </label>
                     <button type="button" id="btnBatalGanti" onclick="batalGanti()"
                             style="display:none;font-size:12px;color:var(--c-text-3);background:none;border:none;cursor:pointer;">
                         <i class="fas fa-arrow-left"></i> Cancel
                     </button>
                 </div>
-                <input type="file" name="file" accept="application/pdf,image/*" class="sima-input" style="margin-bottom:12px">
+                <input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.xls,.xlsx,.csv" required class="sima-input" style="margin-bottom:12px">
                 <div style="display:flex;gap:8px;">
                     <button type="submit" id="uploadBtn" class="sima-btn sima-btn--full" style="justify-content:center">
                         <i class="fas fa-upload"></i> Upload & Approve
@@ -234,12 +234,15 @@
 @push('page_js')
 <script>
 let currentId = null;
+const requestBaseUrl = @json(url('/kln/dokumen'));
 
 /* ── DETAIL MODAL ────────────────────────── */
 function showDetail(id) {
     currentId = id;
-    fetch('/kln/dokumen/' + id)
-        .then(res => res.json())
+    document.getElementById('uploadForm').reset();
+    resetUploadForm();
+    fetch(requestBaseUrl + '/' + id, { headers: { 'Accept': 'application/json' } })
+        .then(res => { if (!res.ok) throw new Error('Request tidak ditemukan'); return res.json(); })
         .then(data => {
             const statusColor = { approved: 'var(--c-green)', rejected: 'var(--c-red)', pending: 'var(--c-amber)' };
             const badgeColor  = statusColor[data.status] ?? 'var(--c-text-3)';
@@ -295,7 +298,7 @@ function showDetail(id) {
                 const fileSizeKb = data.file.fileSize ? (data.file.fileSize / 1024).toFixed(1) + ' KB' : '';
                 document.getElementById('fileName').textContent  = fileName;
                 document.getElementById('fileSize').textContent  = fileSizeKb;
-                document.getElementById('fileDownload').href     = '/kln/dokumen/' + data.id + '/file';
+                document.getElementById('fileDownload').href     = requestBaseUrl + '/' + data.id + '/file';
                 fileInfo.style.display   = 'block';
                 uploadForm.style.display = 'none';
                 document.getElementById('modalSubtitle').textContent = 'Document already uploaded.';
@@ -337,7 +340,7 @@ function batalGanti() {
 
 function resetUploadForm() {
     document.getElementById('uploadForm').reset();
-    document.getElementById('uploadLabel').textContent  = 'Upload Document (PDF)';
+    document.getElementById('uploadLabel').textContent  = 'Upload Document (PDF / JPG / PNG / XLS / XLSX / CSV, max. 10 MB)';
     document.getElementById('uploadBtn').innerHTML      = '<i class="fas fa-upload"></i> Upload & Approve';
     document.getElementById('btnBatalGanti').style.display = 'none';
 }
@@ -372,10 +375,11 @@ function submitReject() {
     btn.disabled   = true;
     btn.innerHTML  = '<i class="fas fa-spinner fa-spin me-1"></i> Processing...';
 
-    fetch('/kln/dokumen/' + currentId + '/reject', {
+    fetch(requestBaseUrl + '/' + currentId + '/reject', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
         },
         body: JSON.stringify({ keterangan: reason }),
@@ -383,6 +387,8 @@ function submitReject() {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
+            window.location.reload();
+            return;
             // Update badge di tabel
             const badge = document.getElementById('badge-' + currentId);
             if (badge) { badge.className = 'sima-badge sima-badge--red'; badge.textContent = 'Rejected'; }
@@ -417,14 +423,16 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
 
-    fetch('/kln/dokumen/' + currentId + '/upload', {
+    fetch(requestBaseUrl + '/' + currentId + '/upload', {
         method: 'POST',
-        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
         body: formData
     })
     .then(res => res.json())
     .then(data => {
         if (data.success) {
+            window.location.reload();
+            return;
             // Update badge di tabel
             const badge = document.getElementById('badge-' + currentId);
             if (badge) { badge.className = 'sima-badge sima-badge--green'; badge.textContent = 'Approved'; }
@@ -437,7 +445,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
                 const fileSizeKb = data.file.fileSize ? (data.file.fileSize / 1024).toFixed(1) + ' KB' : '';
                 document.getElementById('fileName').textContent = fileName;
                 document.getElementById('fileSize').textContent = fileSizeKb;
-                document.getElementById('fileDownload').href    = '/kln/dokumen/' + currentId + '/file';
+                document.getElementById('fileDownload').href    = requestBaseUrl + '/' + currentId + '/file';
                 document.getElementById('fileInfo').style.display   = 'block';
                 document.getElementById('uploadForm').style.display = 'none';
                 resetUploadForm();
@@ -458,13 +466,15 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
 /* ── DELETE ──────────────────────────────── */
 function deleteReq(id) {
     if (!confirm('Are you sure you want to delete this request?')) return;
-    fetch('/kln/dokumen/' + id, {
+    fetch(requestBaseUrl + '/' + id, {
         method: 'DELETE',
-        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
     })
     .then(res => res.json())
     .then(data => {
         if (data.success) {
+            window.location.reload();
+            return;
             document.getElementById('row-' + id)?.remove();
         } else {
             alert(data.message ?? 'Failed to delete');
